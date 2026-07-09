@@ -1,0 +1,229 @@
+/* 글로벌 다크 스타일 테마 설정 */
+body {
+    background-color: #141414;
+    color: #e0e0e0;
+    font-family: 'Malgun Gothic', sans-serif;
+    margin: 0;
+    padding: 0 0 50px 0;
+}
+
+/* 글로벌 헤더 및 메뉴 바 스타일 */
+.top-title-header {
+    background-color: #111111;
+    padding: 20px 30px;
+    display: flex;
+    align-items: baseline;
+}
+.top-title-header h1 {
+    color: #cd9b33;
+    font-size: 26px;
+    margin: 0;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+.top-title-header .author-text {
+    color: #777777;
+    font-size: 13px;
+    margin-left: 12px;
+    font-weight: bold;
+}
+
+.global-nav-bar {
+    background-color: #2b1a1a;
+    border-bottom: 2px solid #cd9b33;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 30px;
+}
+.nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; }
+.nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; }
+.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
+.nav-menu-item.active a { color: #ffcc00; }
+
+/* 덱 빌더 메인 컨테이너 레이아웃 */
+.deck-main-container {
+    max-width: 1300px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+/* 부대 전체 카드 외곽 프레임 */
+.deck-card {
+    background-color: #1c1c1c;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+}
+
+/* 부대 타이틀 텍스트 */
+.deck-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #feca57;
+    margin-bottom: 12px;
+}
+
+/* 인연 전법 보드 영역 스타일 */
+.bond-box {
+    background-color: rgba(205, 155, 51, 0.05);
+    border: 1px solid rgba(205, 155, 51, 0.3);
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #dddddd;
+}
+.bond-highlight {
+    color: #ff9f43;
+    font-weight: bold;
+}
+
+/* 무장 3인 슬롯 레이아웃 플렉스 그리드 */
+.officers-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+/* 무장 개별 상세 정보 카드 (오리지널 블루 딥 톤 구현) */
+.officer-slot {
+    flex: 1;
+    min-width: 280px;
+    background-color: #14213d;
+    border: 1px solid #24355a;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+}
+
+/* 무장 상단 라인 배치 요소 (아바타 서클 스타일 완전 삭제 정렬 완료) */
+.officer-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* 포지션 인디케이터 배지 */
+.position-badge {
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+.position-badge.front { background-color: #b82d2d; }
+.position-badge.back { background-color: #2270b5; }
+
+/* 무장 선택 드롭다운용 래퍼 컨테이너 스타일 */
+.officer-select-container {
+    width: 90%;
+    max-width: 200px;
+}
+
+/* 무장 선택 고유 오리지널 드롭다운 인프라 */
+.officer-dropdown {
+    width: 100%;
+    background-color: #0b132b;
+    color: #ffffff;
+    border: 1px solid #44587a;
+    border-radius: 4px;
+    padding: 5px 24px 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+.officer-dropdown:hover {
+    border-color: #ff9f43;
+}
+
+/* 역할군 명세서 라벨 테두리 */
+.officer-role-label {
+    font-size: 11px;
+    color: #aaaaaa;
+    background-color: #0b132b;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 12px;
+    border: 1px solid #1a2744;
+}
+
+/* 추천 전법 탑재 상태 바 인프라 스타일 */
+.tactic-status-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.tactic-row {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+}
+.tactic-row.owned {
+    background-color: rgba(34, 153, 68, 0.15);
+    border: 1px solid #229944;
+    color: #229944;
+}
+.tactic-row.missing {
+    background-color: rgba(217, 119, 6, 0.15);
+    border: 1px solid #d97706;
+    color: #f3a63b;
+}
+
+/* 최하단 부대 특성 병종 및 진형 요약 스탯 바 */
+.deck-footer-bar {
+    background-color: #0f0f0f;
+    border: 1px solid #222222;
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* 글로벌 브라운/골드 테마에 최적화된 드롭다운 셀렉터 디자인 */
+.formation-select {
+    background-color: #111111;
+    color: #ff9f43; 
+    border: 1px solid #cd9b33; 
+    border-radius: 4px;
+    padding: 3px 24px 3px 8px; 
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    font-family: 'Malgun Gothic', sans-serif;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cd9b33' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+.formation-select:hover { background-color: #1a1a1a; border-color: #ffffff; }
+.formation-select option { background-color: #111111; color: #ffffff; }
+
+.footer-left { display: flex; align-items: center; }
+.footer-right { color: #888888; font-size: 12px; font-weight: bold; }

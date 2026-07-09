@@ -1,0 +1,160 @@
+/* 글로벌 레이아웃 및 전체 다크톤 정렬 */
+body {
+    background-color: #141414;
+    color: #e0e0e0;
+    font-family: 'Malgun Gothic', sans-serif;
+    margin: 0;
+    padding: 0 0 40px 0;
+}
+
+/* 상단 메인 헤더 타이틀 */
+.top-title-header {
+    background-color: #111111;
+    padding: 20px 30px;
+    display: flex;
+    align-items: baseline;
+}
+.top-title-header h1 {
+    color: #cd9b33;
+    font-size: 26px;
+    margin: 0;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+.top-title-header .version-text {
+    color: #ffffff;
+    font-size: 24px;
+    margin-left: 5px;
+}
+.top-title-header .author-text {
+    color: #777777;
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+/* 글로벌 브라운 메뉴 바 */
+.global-nav-bar {
+    background-color: #2b1a1a;
+    border-bottom: 2px solid #cd9b33;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 30px;
+}
+.nav-menu-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-menu-item a {
+    display: block;
+    color: #bbbbbb;
+    text-decoration: none;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    transition: all 0.15s ease-in-out;
+}
+.nav-menu-item a:hover {
+    color: #ffffff;
+}
+.nav-menu-item.active {
+    background-color: #1c1111;
+    border-bottom: 3px solid #cd9b33;
+    margin-bottom: -2px;
+}
+.nav-menu-item.active a {
+    color: #ffcc00;
+}
+
+/* 기록 저장 버튼 */
+#save-btn {
+    background-color: #b82d2d;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+#save-btn:hover {
+    background-color: #962222;
+}
+
+/* 메인 프레임 분할 */
+.container {
+    display: flex;
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.section-box {
+    flex: 1;
+    background-color: #1c1c1c;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+    padding: 25px;
+    border-radius: 6px;
+    border: 1px solid #2d2d2d;
+}
+.section-box h2 {
+    margin-top: 0;
+    font-size: 18px;
+    border-left: 4px solid #cd9b33;
+    padding-left: 10px;
+}
+
+/* 진영별 서브 타이틀 */
+.group-title {
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 18px;
+    margin-bottom: 8px;
+}
+.group-title.wei { color: #54a0ff; }
+.group-title.shu { color: #1dd1a1; }
+.group-title.wu { color: #ff6b6b; }
+.group-title.qun { color: #feca57; }
+
+/* 바둑판 배열 그리드 */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+/* 카드 버튼 스타일 */
+.card-btn {
+    background-color: #262626;
+    color: #666666;
+    border: 1px solid #383838;
+    padding: 10px 2px;
+    text-align: center;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0.5;
+    filter: grayscale(100%);
+    transition: all 0.15s ease-in-out;
+}
+.card-btn:hover {
+    opacity: 0.8;
+}
+.card-btn.owned {
+    opacity: 1;
+    filter: grayscale(0%);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* 보유 활성화 고유 배경색 */
+.card-btn.owned.wei { background-color: #2270b5; }
+.card-btn.owned.shu { background-color: #229944; }
+.card-btn.owned.wu { background-color: #b82d2d; }
+.card-btn.owned.qun { background-color: #c99414; color: #111111; }
+.card-btn.owned.tactic { background-color: #7b2cb0; }
