@@ -56,7 +56,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 순으로 정렬된 71종 선택형 전법 리스트 마스터 풀
+// 가나다 순으로 정렬된 71종 선택형 전법 리스터 마스터 풀
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
@@ -78,7 +78,7 @@ const bondRules = [
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
     { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
     { name: "호위경주", req: 2, heroes: ["조조", "제)조조", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기습 8% 증가, 해제 불가." },
+    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
     { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
     { name: "군신상기", req: 2, heroes: ["조조", "제)조조", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 핵심 로직 가공: 2개 부대에서 총 5개 부대로 마스터 배열 볼륨 확장 조립
+// 종결급 마스터 추천 조합 프리셋 정의 (총 5개 군단 세트)
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [1군]", formation: "추형진",
@@ -142,13 +142,13 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
-// 핵심 로직 추가: 구형 2부대 저장소를 가진 유저를 위해 신규 3개 부대를 실시간 자동 증식 병합하는 안전망 구축
+// 실시간 동적 복원 및 동기화 병합 레이어
 function loadDeckTextData() {
     const savedText = localStorage.getItem('samguk_deck_text');
     if (savedText) {
         dynamicPresetDecks = JSON.parse(savedText);
         
-        // 데이터 밀림 보정: 로컬 스토리지 데이터 분량이 5개 미만이면 부족한 프리셋을 배열 뒤에 안전하게 Append
+        // 하위 호환성 방어: 세이브 파일 내 부대 분량이 5개 미만인 경우 신규 조합 강제 보충
         if (dynamicPresetDecks.length < defaultPresetDecks.length) {
             for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
                 dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
@@ -173,6 +173,37 @@ function loadDeckTextData() {
     } else {
         dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     }
+}
+
+// 핵심 알고리즘 레이어: 무장(60점 만점) 및 전법(40점 만점) 정량 연산 지표 도출 함수
+function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
+    let heroMatchCount = 0;
+    let tacticMatchCount = 0;
+    const totalTacticSlots = 9; // 3개 슬롯 * 무장 3명
+
+    deck.officers.forEach(off => {
+        const hName = off.name.trim();
+        // 1. 무장 매칭 검증
+        if (ownedHeroes.includes(hName)) {
+            heroMatchCount += 1;
+        }
+        // 2. 고유 전법 매칭 검증
+        const inherentTactic = officerUniqueTacticMap[hName];
+        if (inherentTactic && ownedTactics.includes(inherentTactic.trim())) {
+            tacticMatchCount += 1;
+        }
+        // 3. 가변 선택 전법 매칭 검증
+        off.chosenTactics.forEach(tac => {
+            if (ownedTactics.includes(tac.trim())) {
+                tacticMatchCount += 1;
+            }
+        });
+    });
+
+    const finalHeroScore = heroMatchCount * 20;
+    const finalTacticScore = (tacticMatchCount / totalTacticSlots) * 40;
+
+    return Math.round(finalHeroScore + finalTacticScore);
 }
 
 function saveEditedText(deckIdx, propertyName, element) {
@@ -203,34 +234,29 @@ function changeTactic(deckIdx, officerIdx, slotIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
-function calculateActivatedBond(officers) {
-    const currentOfficerNames = officers.map(o => o.name.trim());
-    let matchedBonds = [];
-
-    bondRules.forEach(rule => {
-        const uniqueMatches = [...new Set(currentOfficerNames.filter(name => rule.heroes.includes(name)))];
-        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
-        
-        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
-            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
-        }
-    });
-
-    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
-}
-
+// 종합 돔(DOM) 렌더링 프레임워크 엔진
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
     container.innerHTML = '';
 
+    // 인벤토리 로컬 캐시 추출 및 배열 표준화 파싱
     const savedData = localStorage.getItem('samguk_hobby_data');
+    let ownedHeroes = [];
     let ownedTactics = [];
 
     if (savedData) {
         const parsed = JSON.parse(savedData);
-        ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name) : [];
+        ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+        ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
     }
+
+    // 핵심 추천 기능 연동: 매 라운드 드로잉 시점 직전에 최고 점수 기준 내림차순 역피라미드 소팅 강제 집행
+    dynamicPresetDecks.sort((a, b) => {
+        const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
+        const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
+        return scoreB - scoreA;
+    });
 
     const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
 
@@ -238,6 +264,8 @@ function renderDeckBuilder() {
         const deckCard = document.createElement('div');
         deckCard.className = 'deck-card';
 
+        // 현재 조합 기준 실시간 점수 환산 데이터 취득
+        const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
         const computedBondText = calculateActivatedBond(deck.officers);
         const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
 
@@ -311,8 +339,11 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
+        // 타이틀 우측 골드 오렌지 색상의 동적 점수 배지 연동 출력 처리
         deckCard.innerHTML = `
-            <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">${deck.title}</div>
+            <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">
+                ${deck.title} <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold;">[추천도: ${currentComputedScore}점]</span>
+            </div>
             <div class="bond-box">
                 <span class="bond-highlight">부대 인연 효과 :</span> 
                 <span style="display:inline-block; outline:none;">${computedBondText}</span>
