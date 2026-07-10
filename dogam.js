@@ -1,4 +1,4 @@
-// 삼국지 왕전 장수 도감 마스터 데이터베이스 (속성 및 식별자 동기화 완료)
+// 삼국지 왕전 장수 도감 마스터 데이터베이스 (속성 스펙 최종 고도화 통합본)
 const heroDogamData = [
     // 위나라 (13명)
     { 
@@ -67,13 +67,17 @@ const heroDogamData = [
         stats: { martial: 592, tactical: 408, command: 562, speed: 641 }
     },
 
-    // 촉나라 (14명)
+    // 촉나라 (14명 - 요청하신 5인 스탯 커플링 연동 완료)
     { 
         id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', 
         skillDesc: '1턴 준비 후 적군 전체에 치명적인 무용 피해를 가하고 무장 해제를 겁니다.',
         stats: { martial: 658, tactical: 503, command: 628, speed: 558 }
     },
-    { id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', skillDesc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.' },
+    { 
+        id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', 
+        skillDesc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.',
+        stats: { martial: 556, tactical: 622, command: 574, speed: 475 }
+    },
     { 
         id: 'h_madae', name: '마대', group: 'shu', role: '능동 (35%)', location: '전열', skill: '습참', 
         skillDesc: '적군 단체에 피해를 입히고 가하는 피해량을 일정 비율 차단합니다.',
@@ -84,8 +88,16 @@ const heroDogamData = [
         skillDesc: '자신의 일반 공격 피해를 주위 적들에게 확산 전이시킵니다.',
         stats: { martial: 646, tactical: 414, command: 539, speed: 564 }
     },
-    { id: 'h_seoseo', name: '서서', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '절절학문', skillDesc: '아군이 능동 전법을 발동할 때마다 아군 전체의 공격력을 증폭합니다.' },
-    { id: 'h_samaga', name: '사마가', group: 'shu', role: '추격 (35%)', location: '전열', skill: '만왕', skillDesc: '일반 공격 후 대상을 변칙적인 공황 및 약화 상태로 빠뜨립니다.' },
+    { 
+        id: 'h_seoseo', name: '서서', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '절절학문', 
+        skillDesc: '아군이 능동 전법을 발동할 때마다 아군 전체의 공격력을 증폭합니다.',
+        stats: { martial: 545, tactical: 598, command: 503, speed: 570 }
+    },
+    { 
+        id: 'h_samaga', name: '사마가', group: 'shu', role: '추격 (35%)', location: '전열', skill: '만왕', 
+        skillDesc: '일반 공격 후 대상을 변칙적인 공황 및 약화 상태로 빠뜨립니다.',
+        stats: { martial: 556, tactical: 372, command: 461, speed: 487 }
+    },
     { 
         id: 'h_wuyeon', name: '위연', group: 'shu', role: '패시브 (70%)', location: '전열', skill: '실병제위', 
         skillDesc: '준비 턴이 필요한 능동 전법의 대기 시간을 확률적으로 즉시 삭제합니다.',
@@ -96,7 +108,11 @@ const heroDogamData = [
         skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.',
         stats: { martial: 509, tactical: 568, command: 652, speed: 368 }
     },
-    { id: 'h_yubi_sp', name: '제)유비', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.' },
+    { 
+        id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', 
+        skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.',
+        stats: { martial: 509, tactical: 568, command: 652, speed: 368 } // 규격 명칭 통일화 반영
+    },
     { 
         id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', 
         skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.',
@@ -113,7 +129,11 @@ const heroDogamData = [
         skillDesc: '자신의 전법 크리티컬(회심) 확률을 상시 임계점 이상으로 유지합니다.',
         stats: { martial: 622, tactical: 503, command: 521, speed: 481 }
     },
-    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.' },
+    { 
+        id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', 
+        skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.',
+        stats: { martial: 432, tactical: 628, command: 521, speed: 522 }
+    },
 
     // 오나라 (15명)
     { 
@@ -257,7 +277,6 @@ const heroDogamData = [
 
 let activeGroupFilter = 'all';
 
-// 도감 인프라 초기화 시그널 제어 벨트
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHeroDogamEngine);
 } else {
@@ -269,12 +288,10 @@ function initHeroDogamEngine() {
     renderHeroDogam();
 }
 
-// 핵심 로직 변경: 구조용 거대 div 차단 및 오직 인터랙션 리프 노드 탭만 정밀 포획하는 제어망 수립
 function bindTabButtonsDefensively() {
     const TARGET_ELEMENTS = document.querySelectorAll('button, .tab-btn, .filter-btn, li');
     TARGET_ELEMENTS.forEach(btn => {
         const text = btn.innerText.trim();
-        // 구조 붕괴 방어선: 하위 노드가 주입된 거대 구조 컨테이너 태그는 필터에서 강제 제외
         if (btn.children.length > 0 && !btn.classList.contains('tab-btn')) return;
 
         if (text.includes('전체')) btn.onclick = () => filterGroup(btn, 'all');
@@ -285,7 +302,6 @@ function bindTabButtonsDefensively() {
     });
 }
 
-// 다형성(Polymorphic) 라우터 연산: 인라인 문자열 호출과 버튼 객체 바인딩을 실시간 분기 판독 처리
 function filterGroup(target, group) {
     if (typeof target === 'string') {
         activeGroupFilter = target;
@@ -314,14 +330,12 @@ function getGroupNameKorean(group) {
     return '전체';
 }
 
-// 핵심 로직 변경 2단계: 컨테이너 부재 시 상단 필터 바 바로 아래에 강제 공간 개설(Auto-Injection)하는 추적 로직
 function getDogamContainerDefensively() {
     let targetContainer = document.getElementById('hero-list') || 
                           document.getElementById('hero-container') || 
                           document.getElementById('dogam-list');
     if (targetContainer) return targetContainer;
 
-    // 리스크 스나이핑: 명시적 ID가 없을 경우 상단 탭 컴포넌트 바로 밑 영역을 확보하여 가시화 성립
     const checkTabNode = Array.from(document.querySelectorAll('button, .tab-btn, li')).find(el => el.innerText.trim().includes('전체'));
     if (checkTabNode && checkTabNode.parentElement) {
         const parentLayout = checkTabNode.parentElement;
@@ -332,7 +346,7 @@ function getDogamContainerDefensively() {
         
         targetContainer = document.createElement('div');
         targetContainer.id = 'dynamic-hero-list';
-        targetContainer.className = 'deck-main-container'; // 가변 규격 css 프레임 상속
+        targetContainer.className = 'deck-main-container';
         targetContainer.style.marginTop = '30px';
         targetContainer.style.minHeight = 'auto';
         targetContainer.style.display = 'block';
