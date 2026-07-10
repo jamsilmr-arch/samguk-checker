@@ -11,12 +11,14 @@
         <span class="author-text">by JHP</span>
     </header>
 
+    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 (배너 종료 직후 정위치 결선) -->
+    <script src="navbar.js"></script>
+
     <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px;">
         <button id="sort-default-btn" class="control-sort-btn active" onclick="toggleSortMode('default')">부대 순서 고정 (1군~5군)</button>
         <button id="sort-score-btn" class="control-sort-btn" onclick="toggleSortMode('score')">추천도 높은 순 정렬</button>
     </div>
-<!-- 반드시 타이틀 배너 태그가 끝나는 바로 밑 라인에 배치되어야 레이아웃이 깨지지 않습니다 -->
-<script src="navbar.js"></script>
+
     <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
     <script src="deck.js"></script>
