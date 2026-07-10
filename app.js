@@ -63,7 +63,7 @@ const heroList = [
     { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false }
 ];
 
-// 초기 전법 데이터 세팅 (신규 반영 총 71종 가나다 사전식 정렬 구조 완료)
+// 초기 전법 데이터 세팅 (신규 지휘 전법 '안영찰채' 자모음 연돈 매칭 정렬)
 const tacticList = [
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false },
@@ -75,7 +75,7 @@ const tacticList = [
     { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false },
     { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false },
     { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false },
-    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false },
+    { id: 't_geum창', name: '금창신', group: 'tactic', isOwned: false },
     { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false },
     { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false },
     { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false },
@@ -97,6 +97,7 @@ const tacticList = [
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false },
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false },
+    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false }, // 신규 이식
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false },
     { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false },
     { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false },
@@ -132,7 +133,7 @@ const tacticList = [
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false },
     { id: 't_honsu', name: '혼수모어', group: 'tactic', isOwned: false },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false },
-    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false }, // 신규 연동 이식
+    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false },
     { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false },
     { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false },
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false }
@@ -192,6 +193,7 @@ function toggleState(id, type) {
     }
 }
 
+// 보유 변경 정보 로컬 디스크 직렬화 격리 저장
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
