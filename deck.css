@@ -91,7 +91,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* 무장 개별 상세 정보 카드 (오리지널 블루 딥 톤 구현) */
+/* 무장 개별 상세 정보 카드 */
 .officer-slot {
     flex: 1;
     min-width: 280px;
@@ -102,7 +102,7 @@ body {
     text-align: center;
 }
 
-/* 무장 상단 라인 배치 요소 (아바타 서클 스타일 완전 삭제 정렬 완료) */
+/* 무장 상단 라인 배치 요소 */
 .officer-meta {
     display: flex;
     flex-direction: column;
@@ -147,9 +147,8 @@ body {
     background-repeat: no-repeat;
     background-position: right 10px center;
 }
-.officer-dropdown:hover {
-    border-color: #ff9f43;
-}
+.officer-dropdown:hover { border-color: #ff9f43; }
+.officer-dropdown option { background-color: #14213d; color: #ffffff; }
 
 /* 역할군 명세서 라벨 테두리 */
 .officer-role-label {
@@ -177,6 +176,7 @@ body {
     text-align: left;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .tactic-row.owned {
     background-color: rgba(34, 153, 68, 0.15);
@@ -187,6 +187,35 @@ body {
     background-color: rgba(217, 119, 6, 0.15);
     border: 1px solid #d97706;
     color: #f3a63b;
+}
+
+/* 핵심 레이아웃 추가: 다크 테마 일체형 전법 전용 드롭다운 스킨 스타일링 */
+.tactic-dropdown {
+    width: 65%;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    font-family: 'Malgun Gothic', sans-serif;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f3a63b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    .owned & { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23229944' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>"); }
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    padding-right: 15px;
+}
+.tactic-dropdown option {
+    background-color: #14213d;
+    color: #ffffff;
+}
+.tactic-status-text {
+    font-size: 11px;
+    font-weight: bold;
 }
 
 /* 최하단 부대 특성 병종 및 진형 요약 스탯 바 */
