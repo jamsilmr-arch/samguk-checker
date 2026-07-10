@@ -1,6 +1,6 @@
-// 삼국지 왕전 장수 도감 마스터 데이터베이스 (54인 전체 라인업 및 속성 스펙 통합본)
+// 삼국지 왕전 장수 도감 마스터 데이터베이스 (속성 및 식별자 동기화 완료)
 const heroDogamData = [
-    // 위나라 (13명 전체 속성 주입 완료)
+    // 위나라 (13명)
     { 
         id: 'h_gahu', name: '가후', group: 'wei', role: '능동 (65%)', location: '후열', skill: '경달권변', 
         skillDesc: '적군 단체에 혼란 효과를 부여하고 모략 피해를 가합니다.',
@@ -67,7 +67,7 @@ const heroDogamData = [
         stats: { martial: 592, tactical: 408, command: 562, speed: 641 }
     },
 
-    // 촉나라 (14명 중 8명 속성 주입 완료)
+    // 촉나라 (14명)
     { 
         id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', 
         skillDesc: '1턴 준비 후 적군 전체에 치명적인 무용 피해를 가하고 무장 해제를 겁니다.',
@@ -96,7 +96,7 @@ const heroDogamData = [
         skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.',
         stats: { martial: 509, tactical: 568, command: 652, speed: 368 }
     },
-    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.' },
+    { id: 'h_yubi_sp', name: '제)유비', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.' },
     { 
         id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', 
         skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.',
@@ -115,7 +115,7 @@ const heroDogamData = [
     },
     { id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.' },
 
-    // 오나라 (15명 전체 속성 주입 완료)
+    // 오나라 (15명)
     { 
         id: 'h_daegyo', name: '대교', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '정수유심', 
         skillDesc: '아군 전체가 받는 피해의 일부를 적 시전자에게 즉각 반사 유도합니다.',
@@ -192,7 +192,7 @@ const heroDogamData = [
         stats: { martial: 497, tactical: 491, command: 652, speed: 481 }
     },
 
-    // 군진영 (12명 확장 완료 및 속성 주입 완료)
+    // 군진영 (12명)
     { 
         id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
         skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.',
@@ -257,52 +257,96 @@ const heroDogamData = [
 
 let activeGroupFilter = 'all';
 
-window.onload = function() {
-    bindTabButtonsAutomatically();
-    renderHeroDogam();
-};
+// 도감 인프라 초기화 시그널 제어 벨트
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroDogamEngine);
+} else {
+    initHeroDogamEngine();
+}
 
-function bindTabButtonsAutomatically() {
-    const ALL_BUTTONS = document.querySelectorAll('button, div, li, span, .tab-btn, .filter-btn');
-    ALL_BUTTONS.forEach(btn => {
+function initHeroDogamEngine() {
+    bindTabButtonsDefensively();
+    renderHeroDogam();
+}
+
+// 핵심 로직 변경: 구조용 거대 div 차단 및 오직 인터랙션 리프 노드 탭만 정밀 포획하는 제어망 수립
+function bindTabButtonsDefensively() {
+    const TARGET_ELEMENTS = document.querySelectorAll('button, .tab-btn, .filter-btn, li');
+    TARGET_ELEMENTS.forEach(btn => {
         const text = btn.innerText.trim();
-        if (text.includes('전체')) {
-            btn.onclick = () => filterGroup(btn, 'all');
-        } else if (text.includes('위나라')) {
-            btn.onclick = () => filterGroup(btn, 'wei');
-        } else if (text.includes('촉나라')) {
-            btn.onclick = () => filterGroup(btn, 'shu');
-        } else if (text.includes('오나라')) {
-            btn.onclick = () => filterGroup(btn, 'wu');
-        } else if (text.includes('군웅') || text === '군' || text.includes('군진영')) {
-            btn.onclick = () => filterGroup(btn, 'qun');
-        }
+        // 구조 붕괴 방어선: 하위 노드가 주입된 거대 구조 컨테이너 태그는 필터에서 강제 제외
+        if (btn.children.length > 0 && !btn.classList.contains('tab-btn')) return;
+
+        if (text.includes('전체')) btn.onclick = () => filterGroup(btn, 'all');
+        else if (text.includes('위나라')) btn.onclick = () => filterGroup(btn, 'wei');
+        else if (text.includes('촉나라')) btn.onclick = () => filterGroup(btn, 'shu');
+        else if (text.includes('오나라')) btn.onclick = () => filterGroup(btn, 'wu');
+        else if (text.includes('군웅') || text === '군' || text.includes('군진영')) btn.onclick = () => filterGroup(btn, 'qun');
     });
 }
 
-function filterGroup(element, group) {
-    activeGroupFilter = group;
-    if (element && element.parentElement) {
-        element.parentElement.querySelectorAll('*').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
+// 다형성(Polymorphic) 라우터 연산: 인라인 문자열 호출과 버튼 객체 바인딩을 실시간 분기 판독 처리
+function filterGroup(target, group) {
+    if (typeof target === 'string') {
+        activeGroupFilter = target;
+        const allDomNodes = document.querySelectorAll('button, .tab-btn, li');
+        allDomNodes.forEach(node => {
+            if (node.innerText.trim().includes(getGroupNameKorean(target))) {
+                if (node.parentElement) node.parentElement.querySelectorAll('*').forEach(el => el.classList.remove('active'));
+                node.classList.add('active');
+            }
+        });
+    } else {
+        activeGroupFilter = group;
+        if (target && target.parentElement) {
+            target.parentElement.querySelectorAll('*').forEach(el => el.classList.remove('active'));
+            target.classList.add('active');
+        }
     }
     renderHeroDogam();
 }
 
-function renderHeroDogam() {
-    let container = document.getElementById('hero-list') || 
-                    document.getElementById('hero-container') || 
-                    document.getElementById('dogam-list') ||
-                    document.querySelector('.deck-main-container') ||
-                    document.querySelector('main');
+function getGroupNameKorean(group) {
+    if (group === 'wei') return '위나라';
+    if (group === 'shu') return '촉나라';
+    if (group === 'wu') return '오나라';
+    if (group === 'qun') return '군웅';
+    return '전체';
+}
 
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'hero-list';
-        container.className = 'deck-main-container';
-        document.body.appendChild(container);
+// 핵심 로직 변경 2단계: 컨테이너 부재 시 상단 필터 바 바로 아래에 강제 공간 개설(Auto-Injection)하는 추적 로직
+function getDogamContainerDefensively() {
+    let targetContainer = document.getElementById('hero-list') || 
+                          document.getElementById('hero-container') || 
+                          document.getElementById('dogam-list');
+    if (targetContainer) return targetContainer;
+
+    // 리스크 스나이핑: 명시적 ID가 없을 경우 상단 탭 컴포넌트 바로 밑 영역을 확보하여 가시화 성립
+    const checkTabNode = Array.from(document.querySelectorAll('button, .tab-btn, li')).find(el => el.innerText.trim().includes('전체'));
+    if (checkTabNode && checkTabNode.parentElement) {
+        const parentLayout = checkTabNode.parentElement;
+        let nextSibling = parentLayout.nextElementSibling;
+        if (nextSibling && (nextSibling.id === 'dynamic-hero-list' || nextSibling.className.includes('container'))) {
+            return nextSibling;
+        }
+        
+        targetContainer = document.createElement('div');
+        targetContainer.id = 'dynamic-hero-list';
+        targetContainer.className = 'deck-main-container'; // 가변 규격 css 프레임 상속
+        targetContainer.style.marginTop = '30px';
+        targetContainer.style.minHeight = 'auto';
+        targetContainer.style.display = 'block';
+        parentLayout.after(targetContainer);
+        return targetContainer;
     }
-    
+
+    targetContainer = document.querySelector('main') || document.body;
+    return targetContainer;
+}
+
+function renderHeroDogam() {
+    const container = getDogamContainerDefensively();
+    if (!container) return;
     container.innerHTML = '';
 
     const groupColors = { wei: '#2270b5', shu: '#b82d2d', wu: '#2a9d8f', qun: '#cd9b33' };
