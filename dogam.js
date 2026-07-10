@@ -1,4 +1,4 @@
-// 삼국지 왕전 장수 도감 마스터 데이터베이스 (속성 스펙 최종 고도화 통합본)
+// 삼국지 왕전 장수 도감 마스터 데이터베이스 (속성 및 식별자 동기화 완료본)
 const heroDogamData = [
     // 위나라 (13명)
     { 
@@ -33,7 +33,7 @@ const heroDogamData = [
     },
     { 
         id: 'h_jeonguk', name: '정욱', group: 'wei', role: '추격 (50%)', location: '후열', skill: '십면매복', 
-        skillDesc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해를 입힙니다.',
+        skillDesc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해를 입립니다.',
         stats: { martial: 402, tactical: 592, command: 503, speed: 487 }
     },
     { 
@@ -67,7 +67,7 @@ const heroDogamData = [
         stats: { martial: 592, tactical: 408, command: 562, speed: 641 }
     },
 
-    // 촉나라 (14명 - 요청하신 5인 스탯 커플링 연동 완료)
+    // 촉나라 (14명)
     { 
         id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', 
         skillDesc: '1턴 준비 후 적군 전체에 치명적인 무용 피해를 가하고 무장 해제를 겁니다.',
@@ -111,14 +111,14 @@ const heroDogamData = [
     { 
         id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', 
         skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.',
-        stats: { martial: 509, tactical: 568, command: 652, speed: 368 } // 규격 명칭 통일화 반영
+        stats: { martial: 509, tactical: 568, command: 652, speed: 368 }
     },
     { 
         id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', 
         skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.',
         stats: { martial: 652, tactical: 414, command: 545, speed: 487 }
     },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.' },stats: { martial: 384, tactical: 675, command: 664, speed: 373 }
+    { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.' },
     { 
         id: 'h_joun', name: '조운', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '칠진칠출', 
         skillDesc: '자신에게 상시 영구 통찰 상태를 부여하고 모든 고유 스탯을 폭증시킵니다.',
@@ -277,6 +277,7 @@ const heroDogamData = [
 
 let activeGroupFilter = 'all';
 
+// 컴포넌트 안전 시그널 디스패처
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHeroDogamEngine);
 } else {
@@ -292,6 +293,7 @@ function bindTabButtonsDefensively() {
     const TARGET_ELEMENTS = document.querySelectorAll('button, .tab-btn, .filter-btn, li');
     TARGET_ELEMENTS.forEach(btn => {
         const text = btn.innerText.trim();
+        // 공통 상단 메뉴바 노드 우회 가드
         if (btn.children.length > 0 && !btn.classList.contains('tab-btn')) return;
 
         if (text.includes('전체')) btn.onclick = () => filterGroup(btn, 'all');
@@ -330,30 +332,44 @@ function getGroupNameKorean(group) {
     return '전체';
 }
 
+// 핵심 레이아웃 엔진: 트랩 컨테이너 우회 및 강제 노출 그리드 인젝터
 function getDogamContainerDefensively() {
     let targetContainer = document.getElementById('hero-list') || 
                           document.getElementById('hero-container') || 
                           document.getElementById('dogam-list');
-    if (targetContainer) return targetContainer;
+    
+    // 숨겨진 레거시 ID 상속 시 인라인 스타일 강제 해제 개정
+    if (targetContainer) {
+        targetContainer.style.display = 'flex';
+        targetContainer.style.flexWrap = 'wrap';
+        targetContainer.style.gap = '15px';
+        return targetContainer;
+    }
 
     const checkTabNode = Array.from(document.querySelectorAll('button, .tab-btn, li')).find(el => el.innerText.trim().includes('전체'));
     if (checkTabNode && checkTabNode.parentElement) {
         const parentLayout = checkTabNode.parentElement;
         let nextSibling = parentLayout.nextElementSibling;
+        
         if (nextSibling && (nextSibling.id === 'dynamic-hero-list' || nextSibling.className.includes('container'))) {
+            nextSibling.style.display = 'flex';
+            nextSibling.style.flexWrap = 'wrap';
+            nextSibling.style.gap = '15px';
             return nextSibling;
         }
         
         targetContainer = document.createElement('div');
         targetContainer.id = 'dynamic-hero-list';
-        targetContainer.className = 'deck-main-container';
-        targetContainer.style.marginTop = '30px';
-        targetContainer.style.minHeight = 'auto';
-        targetContainer.style.display = 'block';
+        targetContainer.style.marginTop = '25px';
+        targetContainer.style.display = 'flex';
+        targetContainer.style.flexWrap = 'wrap';
+        targetContainer.style.gap = '15px';
+        targetContainer.style.width = '100%';
         parentLayout.after(targetContainer);
         return targetContainer;
     }
 
+    // 마크업 붕괴 시 예외 격리용 안전지대
     targetContainer = document.querySelector('main') || document.body;
     return targetContainer;
 }
@@ -370,37 +386,49 @@ function renderHeroDogam() {
         if (activeGroupFilter !== 'all' && data.group !== activeGroupFilter) return;
 
         const card = document.createElement('div');
+        
+        // 고대비 컴포넌트 마감: 다크 모드 폰트 컬러 실종 방지용 하드코딩 브릿지 스타일 주입
         card.className = 'dogam-card';
+        card.style.backgroundColor = '#1c1c1c';
+        card.style.color = '#ffffff';
+        card.style.border = '1px solid #2d2d2d';
+        card.style.borderRadius = '6px';
+        card.style.padding = '20px';
+        card.style.width = '280px';
+        card.style.boxSizing = 'border-box';
         card.style.borderTop = `6px solid ${groupColors[data.group] || '#444'}`;
 
         let statsHtml = '';
         if (data.stats) {
             statsHtml = `
-                <div class="stats-panel-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background-color: #0f1322; border: 1px solid #1a2744; border-radius: 4px; padding: 10px; margin: 12px 0; text-align: left; font-size: 11px;">
+                <div class="stats-panel-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background-color: #0f1322; border: 1px solid #1a2744; border-radius: 4px; padding: 10px; margin: 12px 0; text-align: left; font-size: 11px;">
                     <div><span style="color: #ff9f43; font-weight: bold; margin-right: 5px;">⚔️ 무용:</span><span style="color: #ffffff; font-weight: bold;">${data.stats.martial}</span></div>
                     <div><span style="color: #38bdf8; font-weight: bold; margin-right: 5px;">🔮 모략:</span><span style="color: #ffffff; font-weight: bold;">${data.stats.tactical}</span></div>
                     <div><span style="color: #2ec4b6; font-weight: bold; margin-right: 5px;">🛡️ 통솔:</span><span style="color: #ffffff; font-weight: bold;">${data.stats.command}</span></div>
                     <div><span style="color: #a855f7; font-weight: bold; margin-right: 5px;">⚡ 속도:</span><span style="color: #ffffff; font-weight: bold;">${data.stats.speed}</span></div>
                 </div>
             `;
+        } else {
+            // 스탯 미보유 장수 예외 박멸용 빈칸 규격 유지 브릿지
+            statsHtml = `<div style="margin: 12px 0; font-size: 11px; color: #777; text-align: left; font-style: italic;">기본 무장 속성 미등록 상태</div>`;
         }
 
         card.innerHTML = `
-            <div class="card-header">
-                <div class="card-title">${data.name}</div>
-                <div class="card-group" style="color: ${groupColors[data.group]}">${groupNames[data.group]}</div>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #2d2d2d; padding-bottom: 8px;">
+                <div class="card-title" style="font-size: 16px; font-weight: bold; color: #feca57;">${data.name}</div>
+                <div class="card-group" style="color: ${groupColors[data.group]}; font-size: 12px; font-weight: bold;">${groupNames[data.group]}</div>
             </div>
             <div class="card-body">
-                <div class="profile-info">
-                    <div><span class="label-orange">역할:</span>${data.role}</div>
-                    <div><span class="label-orange">배치:</span>${data.location}</div>
+                <div class="profile-info" style="display: flex; gap: 15px; font-size: 12px; color: #bbb; margin-bottom: 8px; text-align: left;">
+                    <div><span style="color: #ff9f43; font-weight: bold; margin-right: 4px;">역할:</span>${data.role}</div>
+                    <div><span style="color: #ff9f43; font-weight: bold; margin-right: 4px;">배치:</span>${data.location}</div>
                 </div>
                 
                 ${statsHtml}
 
-                <div class="skill-box">
-                    <div class="skill-name">고유 전법: ${data.skill}</div>
-                    <div>${data.skillDesc}</div>
+                <div class="skill-box" style="background-color: #141414; border: 1px solid #2a2a2a; border-radius: 4px; padding: 10px; font-size: 11px; text-align: left; line-height: 1.5;">
+                    <div class="skill-name" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">고유 전법: ${data.skill}</div>
+                    <div style="color: #ddd;">${data.skillDesc}</div>
                 </div>
             </div>
         `;
