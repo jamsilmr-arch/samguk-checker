@@ -20,11 +20,11 @@ const formationPositions = {
     "안행진": ["back", "front", "front"]
 };
 
-// 54명 무장별 고유 역할 데이터 테이블
+// 54명 무장별 고유 역할 데이터 테이블 (조조(제왕) 명칭 통일 반영)
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
     "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
-    "장료": "패시브 (100%)", "사마의": "능동 (60%)", "하후연": "능동 (50%)", "제)조조": "지휘 (100%)", 
+    "장료": "패시브 (100%)", "사마의": "능동 (60%)", "하후연": "능동 (50%)", "조조(제왕)": "지휘 (100%)", 
     "가후": "능동 (65%)", "유비": "지휘 (100%)", "마대": "능동 (35%)", "관우": "능동 (50%)", 
     "위연": "패시브 (70%)", "장비": "패시브 (50%)", "사마가": "추격 (35%)", "황충": "패시브 (100%)", 
     "황월영": "지휘 (100%)", "제갈량": "지휘 (100%)", "제)유비": "지휘 (100%)", "조운": "패시브 (100%)", 
@@ -38,11 +38,11 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 무장별 고유 전법 1:1 매핑 데이터베이스
+// 무장별 고유 전법 1:1 매핑 데이터베이스 (조조(제왕) 명칭 통일 반영)
 const officerUniqueTacticMap = {
     "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
     "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
-    "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "제)조조": "군령여산", 
+    "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "조조(제왕)": "군령여산", 
     "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
     "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
     "황월영": "묘산천기", "제갈량": "초선차전", "제)유비": "재주복주", "조운": "칠진칠출", 
@@ -61,11 +61,11 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 26종 공식 인연 효과 데이터 세트
+// 26종 공식 인연 효과 데이터 세트 (조조(제왕) 명칭 통일 반영)
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
-    { name: "가모정세", req: 2, heroes: ["조조", "제)조조", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
+    { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
     { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
     { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
     { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
@@ -77,10 +77,10 @@ const bondRules = [
     { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
     { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "제)조조", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
+    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
     { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
     { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "제)조조", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
+    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
     { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
     { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 종결 프리셋 마스터 데이터
+// 종결 프리셋 마스터 데이터 (조조(제왕) 명칭 통일 반영)
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [1군]", formation: "추형진",
@@ -105,7 +105,7 @@ const defaultPresetDecks = [
         title: "신속창 [2군]", formation: "기형진",
         officers: [
             { name: "장료", chosenTactics: ["사생취의", "만전제발"] },
-            { name: "제)조조", chosenTactics: ["교취호탈", "동장철벽"] },
+            { name: "조조(제왕)", chosenTactics: ["교취호탈", "동장철벽"] },
             { name: "악진", chosenTactics: ["교취호탈", "선등함진"] }
         ]
     },
@@ -169,6 +169,8 @@ function loadDeckTextData() {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
                     }
                     d.officers.forEach(off => {
+                        // 핵심 로직 추가: 유저 스토리지 내부에 과거 파편인 '제)조조' 발견 시 최신 '조조(제왕)'로 강제 정밀 변환
+                        if (off.name === "제)조조") off.name = "조조(제왕)";
                         if (!off.name) off.name = "조조";
                         if (!Array.isArray(off.chosenTactics) || off.chosenTactics.length < 2) {
                             off.chosenTactics = ["교취호탈", "병량촌단"];
@@ -181,7 +183,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("복구 체인 가동:", e);
+        console.error("로컬스토리지 구조 복구 체인 작동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -222,31 +224,26 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 핵심 알고리즘 추가: 현재 커스텀 명세서와 종결 기준선을 연산하여 유저 전용 맞춤 처방 텍스트 피드백 생성
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const idealDeck = defaultPresetDecks[deck.originIdx];
     if (!idealDeck) return [];
 
     let feedbackList = [];
     
-    // 1. 진형 불일치 검증 지침
     if (deck.formation !== idealDeck.formation) {
-        feedbackList.push(`진형 변경 필요: 현재 설 정된 [${deck.formation}]을(를) 매칭 종결 진형인 <strong>[${idealDeck.formation}]</strong>(으)로 변경하세요.`);
+        feedbackList.push(`진형 변경 필요: 현재 설정된 [${deck.formation}]을(를) 매칭 종결 진형인 <strong>[${idealDeck.formation}]</strong>(으)로 변경하세요.`);
     }
 
-    // 2. 3인 무장 및 전법 슬롯 역추적 매칭 검증
     deck.officers.forEach((off, offIdx) => {
         const idealOff = idealDeck.officers[offIdx];
         if (!idealOff) return;
 
-        // 무장 일치 비율 검증 피드백
         if (off.name !== idealOff.name) {
             feedbackList.push(`무장 복구 권고: 현재 배치된 [${off.name}]을(를) 종결 핵심 장수인 <strong>[${idealOff.name}]</strong>(으)로 교체하세요.`);
         }
         
-        // 자원 실시간 인벤토리 대조 경고
         if (!ownedHeroes.includes(off.name)) {
-            feedbackList.push(`장수 결핍 경고: 현재 장수 [${off.name}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
+            feedbackList.push(`장수 결핍 경고: 현재 장수 [${off.name}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수 로 우회 배치하세요.`);
         }
 
         const inherentTactic = officerUniqueTacticMap[off.name];
@@ -254,7 +251,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             feedbackList.push(`고유 전법 누락: 무장 [${off.name}]의 핵심 고유 전법 <strong>[${inherentTactic}]</strong>이 미보유 상태입니다.`);
         }
 
-        // 가변 드롭박스 전법 대조 피드백 (2번째 및 3번째 전법)
         off.chosenTactics.forEach((tac, tacIdx) => {
             const idealTac = idealOff.chosenTactics[tacIdx];
             if (tac !== idealTac) {
@@ -449,7 +445,6 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
-        // 핵심 변경 가이드라인: 실시간 동적 피드백 문자열 파싱 템플릿 제어 레이어 수립
         const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
         let feedbackHtml = '';
         
@@ -478,7 +473,6 @@ function renderDeckBuilder() {
                 ${officersHtml}
             </div>
             
-            <!-- 피드백 진단 판넬 전용 도킹 아키텍처 구역 -->
             <div class="feedback-container-box">
                 <div class="feedback-header-title">📋 100점 종결 부대 달성을 위한 AI 실시간 맞춤 처방전</div>
                 <div class="feedback-list-wrapper">${feedbackHtml}</div>
