@@ -45,7 +45,7 @@ const officerUniqueTacticMap = {
     "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "조조(제왕)": "군령여산", 
     "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
     "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
-    "황충": "적혈도", "황월영": "묘산천기", "제갈량": "초선차전", "유비(제왕)": "재주복주", "조운": "칠진칠출", 
+    "황월영": "묘산천기", "제갈량": "초선차전", "유비(제왕)": "재주복주", "조운": "칠진칠출", 
     "마초": "출수법", "서서": "절절학문", "강유": "담대여두", "손권": "웅거", 
     "손견": "강동맹호", "주유": "봉화연천", "대교": "정수유심", "황개": "요원지화", 
     "여몽": "백의도강", "육손": "지변규려", "소교": "화용욕모", "손상향": "효희", 
@@ -183,13 +183,13 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 밸런싱 가동:", e);
+        console.error("스토리지 구조 복구 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
 
-// 핵심 로직 변경: 모든 보유 조건 연산 대조 시 공백 특수문자를 제거 처리한 순수 문자열 매칭 처리 집행
+// 핵심 로직 개정: 무장 보유 시 고유 전법 가산 연산 동적 승인 (OR 결선)
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
@@ -197,7 +197,6 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     let tacticMatchCount = 0;
     const totalTacticSlots = 9;
 
-    // 보유 목록의 공백을 완전히 제거한 비교 전용 캐시 배열 구성
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
@@ -207,14 +206,16 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
         const cleanHName = hName.replace(/\s+/g, '');
         if (!cleanHName) return;
         
-        if (cleanOwnedHeroes.includes(cleanHName)) {
+        const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
+        if (isHeroOwned) {
             heroMatchCount += 1;
         }
         
         const inherentTactic = officerUniqueTacticMap[hName];
         if (inherentTactic) {
             const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
-            if (cleanOwnedTactics.includes(cleanInherent)) {
+            // 무장이 보유 중이거나, 전법 창에 체크되어 있다면 무조건 보유한 것으로 인정
+            if (isHeroOwned || cleanOwnedTactics.includes(cleanInherent)) {
                 tacticMatchCount += 1;
             }
         }
@@ -237,7 +238,7 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 핵심 로직 변경 2단계: 피드백 텍스트 생성기 내 고유 전법 검사 구역 공백 파쇄 필터 적용
+// 핵심 로직 개정 2단계: 처방전 텍스트 생성기 내 고유 전법 검사 구역 무장 보유 종속 필터 적용
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const idealDeck = defaultPresetDecks[deck?.originIdx];
     if (!idealDeck) return [];
@@ -265,19 +266,21 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             const cleanIdealHName = idealHName.replace(/\s+/g, '');
             if (!cleanHName || !cleanIdealHName) return;
 
+            const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
+
             if (cleanHName !== cleanIdealHName) {
                 feedbackList.push(`무장 복구 권고: 현재 배치된 [${hName}]을(를) 종결 핵심 장수인 <strong>[${idealHName}]</strong>(으)로 교체하세요.`);
             }
             
-            if (!cleanOwnedHeroes.includes(cleanHName)) {
+            if (!isHeroOwned) {
                 feedbackList.push(`장수 결핍 경고: 현재 장수 [${hName}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
             }
 
             const inherentTactic = officerUniqueTacticMap[hName];
             if (inherentTactic) {
                 const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
-                // 공백 세척 비교 기법 이식으로 오진 무력화
-                if (!cleanOwnedTactics.includes(cleanInherent)) {
+                // 장수도 없고 전법도 체크 안 된 '진짜 미보유' 상태일 때만 처방전 경고 출력
+                if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
                     feedbackList.push(`고유 전법 누락: 무장 [${hName}]의 핵심 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 미보유 상태입니다.`);
                 }
             }
@@ -394,7 +397,7 @@ function renderDeckBuilder() {
             }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("인벤토리 자원 수집 차단:", e);
+            console.error("인벤토리 자원 파싱 실패 수집 차단:", e);
         }
     }
 
@@ -425,17 +428,22 @@ function renderDeckBuilder() {
             deck.officers.forEach((off, offIdx) => {
                 let tacticRowsHtml = '';
                 const hName = (off?.name || "").toString().trim();
+                const cleanHName = hName.replace(/\s+/g, '');
+                const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
+                const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
+
+                const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
 
                 const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
-                // 버그 픽 결선선: 고유 전법 출력 상태 바 보유 체크 연산도 공백 세척 비교 기법 동기화
                 const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
-                const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
-                const isInherentOwned = cleanOwnedTactics.includes(cleanInherent);
+                
+                // UI 바인더 동기화 개정: 장수가 소정 보유 상태라면 무조건 전법을 보유중(true) 상태로 반환
+                const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
 
                 tacticRowsHtml += `
                     <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
                         <span>⭐ ${inherentTactic} (고유)</span>
-                        <span>보유중</span>
+                        <span>${isInherentOwned ? '보유중' : '미보유'}</span>
                     </div>
                 `;
 
