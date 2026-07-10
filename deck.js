@@ -56,7 +56,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 순으로 정렬된 71종 선택형 전법 리스트 마스터 풀
+// 가나다 순 정렬 71종 선택형 전법 풀
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 종결급 마스터 추천 조합 프리셋 정의 (총 5개 군단 세트)
+// 종결 프리셋 데이터
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [1군]", formation: "추형진",
@@ -142,58 +142,80 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
-// 실시간 동적 복원 및 동기화 병합 레이어
+// 핵심 로직 강화: 어떠한 구버전 쓰레기 캐시가 스토리지에 남아있어도 에러 없이 정밀 복구 처분하는 Try-Catch 벨트
 function loadDeckTextData() {
-    const savedText = localStorage.getItem('samguk_deck_text');
-    if (savedText) {
-        dynamicPresetDecks = JSON.parse(savedText);
-        
-        if (dynamicPresetDecks.length < defaultPresetDecks.length) {
-            for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
-                dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
-            }
-            localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-        }
-
-        dynamicPresetDecks.forEach((deck, idx) => {
-            if (!deck.formation) {
-                deck.formation = "추형진";
-            }
-            deck.officers.forEach(off => {
-                if (!off.chosenTactics) {
-                    if (off.recommendations && off.recommendations.length >= 3) {
-                        off.chosenTactics = [off.recommendations[1], off.recommendations[2]];
-                    } else {
-                        off.chosenTactics = ["교취호탈", "병량촌단"];
+    try {
+        const savedText = localStorage.getItem('samguk_deck_text');
+        if (savedText) {
+            const parsed = JSON.parse(savedText);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                dynamicPresetDecks = parsed;
+                
+                // 부족한 부대 자동 증식 병합
+                if (dynamicPresetDecks.length < defaultPresetDecks.length) {
+                    for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
+                        dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
                     }
                 }
-            });
-        });
-    } else {
-        dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
+
+                // 각 인덱스 구조체 결선 강제 검증 및 복구
+                dynamicPresetDecks.forEach((deck, idx) => {
+                    if (!deck || typeof deck !== 'object') {
+                        dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
+                    }
+                    const d = dynamicPresetDecks[idx];
+                    if (!d.title) d.title = defaultPresetDecks[idx]?.title || `부대 ${idx + 1}`;
+                    if (!d.formation) d.formation = defaultPresetDecks[idx]?.formation || "추형진";
+                    if (!Array.isArray(d.officers) || d.officers.length === 0) {
+                        d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
+                    }
+                    d.officers.forEach(off => {
+                        if (!off.name) off.name = "조조";
+                        if (!Array.isArray(off.chosenTactics) || off.chosenTactics.length < 2) {
+                            off.chosenTactics = ["교취호탈", "병량촌단"];
+                        }
+                    });
+                });
+
+                localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+                return;
+            }
+        }
+    } catch (e) {
+        console.error("로컬스토리지 구조 파손 감지, 마이그레이션 포맷 실행:", e);
     }
+    // 데이터 유실 혹은 파손 발생 시 마스터 오리지널 복사본 강제 정비 주입
+    dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
 }
 
-// 핵심 알고리즘 레이어: 무장(60점 만점) 및 전법(40점 만점) 정량 연산 지표 도출 함수
+// 런타임 지연 및 에러 원천 봉쇄용 안전 가속 스코어링 함수
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
+    if (!deck || !Array.isArray(deck.officers)) return 0;
+    
     let heroMatchCount = 0;
     let tacticMatchCount = 0;
-    const totalTacticSlots = 9; 
+    const totalTacticSlots = 9;
 
     deck.officers.forEach(off => {
+        if (!off || !off.name) return;
         const hName = off.name.trim();
+        
         if (ownedHeroes.includes(hName)) {
             heroMatchCount += 1;
         }
+        
         const inherentTactic = officerUniqueTacticMap[hName];
         if (inherentTactic && ownedTactics.includes(inherentTactic.trim())) {
             tacticMatchCount += 1;
         }
-        off.chosenTactics.forEach(tac => {
-            if (ownedTactics.includes(tac.trim())) {
-                tacticMatchCount += 1;
-            }
-        });
+        
+        if (Array.isArray(off.chosenTactics)) {
+            off.chosenTactics.forEach(tac => {
+                if (tac && ownedTactics.includes(tac.trim())) {
+                    tacticMatchCount += 1;
+                }
+            });
+        }
     });
 
     const finalHeroScore = heroMatchCount * 20;
@@ -230,7 +252,23 @@ function changeTactic(deckIdx, officerIdx, slotIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
-// 종합 돔(DOM) 렌더링 프레임워크 엔진
+function calculateActivatedBond(officers) {
+    if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.trim() : "");
+    let matchedBonds = [];
+
+    bondRules.forEach(rule => {
+        const uniqueMatches = [...new Set(currentOfficerNames.filter(name => rule.heroes.includes(name)))];
+        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
+        
+        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
+            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
+        }
+    });
+
+    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
+}
+
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -241,12 +279,16 @@ function renderDeckBuilder() {
     let ownedTactics = [];
 
     if (savedData) {
-        const parsed = JSON.parse(savedData);
-        ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
-        ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+        try {
+            const parsed = JSON.parse(savedData);
+            ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+            ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+        } catch (e) {
+            console.error("인벤토리 파싱 실패:", e);
+        }
     }
 
-    // 핵심 추천 기능 연동: 최고 점수 기준 내림차순 역피라미드 소팅 강제 집행
+    // 종결급 스코어 역피라미드 정렬 소팅 집행
     dynamicPresetDecks.sort((a, b) => {
         const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
         const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
