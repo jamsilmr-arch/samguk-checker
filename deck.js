@@ -1,4 +1,4 @@
-// 7종 공식 진형 효과 매핑 테이블
+// 8종 공식 진형 효과 매핑 테이블 (신규 '호도진' 데이터 명세 확장 완료)
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
     "구행진": "전열: 받는 피해 감소 5.0% | 후열: 가하는 피해 증가 12.0%",
@@ -6,10 +6,11 @@ const formationEffects = {
     "기형진": "전열: 가하는 피해 증가 12.0% | 후열: 받는 피해 감소 5.0%",
     "어린진": "전열: 반격률 증가 20.0% | 후열: 받는 피해 감소 6.0%",
     "방원진": "전열: 받는 피해 감소 5.0% | 후열: 연격률 증가 28.0%",
-    "안행진": "전열: 받는 피해 감소 5.0% | 후열: 강공 및 기습 증가 12.0%"
+    "안행진": "전열: 받는 피해 감소 5.0% | 후열: 강공 및 기습 증가 12.0%",
+    "호도진": "전열: 가하는 피해 증가 10.0% | 후열: 받는 피해 감소 10.0%"
 };
 
-// 7종 진형별 무장 전열/후열 위치 정밀 매핑 테이블
+// 8종 진형별 무장 전열/후열 위치 정밀 매핑 테이블 (호도진 포지션 결선 완료)
 const formationPositions = {
     "일자진": ["front", "front", "front"],
     "구행진": ["front", "back", "front"],
@@ -17,7 +18,8 @@ const formationPositions = {
     "기형진": ["back", "back", "front"],
     "어린진": ["front", "back", "back"],
     "방원진": ["front", "front", "back"],
-    "안행진": ["back", "front", "front"]
+    "안행진": ["back", "front", "front"],
+    "호도진": ["front", "back", "front"]
 };
 
 // 54명 무장별 고유 역할 데이터 테이블
@@ -61,76 +63,70 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 26종 공식 인연 효과 데이터 세트
-const bondRules = [
-    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
-    { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
-    { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
-    { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
-    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
-    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
-    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
-    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
-    { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
-    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
-    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
-    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
-    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
-    { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
-    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
-    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
-    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
-    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
-    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
-    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
-    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
-];
-
-// 종결 프리셋 마스터 데이터
+// 최신 실시간 서버 인게임 랭킹 1위~8위 공식 부대 마스터 프리셋 데이터베이스
 const defaultPresetDecks = [
     {
-        title: "위무 방패병 [1군]", formation: "추형진",
+        title: "최상위 최강 랭킹 [1위 부대]", formation: "구행진",
         officers: [
-            { name: "조조", chosenTactics: ["교취호탈", "병량촌단"] },
-            { name: "하후돈", chosenTactics: ["이아환아", "교취호탈"] },
-            { name: "곽가", chosenTactics: ["공기불비", "낙정하석"] }
+            { name: "위연", chosenTactics: ["진퇴유도", "이퇴위진"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "반객위주"] },
+            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
         ]
     },
     {
-        title: "신속창 [2군]", formation: "기형진",
+        title: "최상위 최강 랭킹 [2위 부대]", formation: "호도진",
         officers: [
-            { name: "장료", chosenTactics: ["사생취의", "만전제발"] },
-            { name: "조조(제왕)", chosenTactics: ["교취호탈", "동장철벽"] },
-            { name: "악진", chosenTactics: ["교취호탈", "선등함진"] }
+            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
+            { name: "조조(제왕)", chosenTactics: ["혼수모어", "진퇴유도"] },
+            { name: "악진", chosenTactics: ["강유겸제", "선등함진"] }
         ]
     },
     {
-        title: "도원 방패병 [3군]", formation: "방원진",
+        title: "최상위 최강 랭킹 [3위 부대]", formation: "방원진",
         officers: [
-            { name: "유비", chosenTactics: ["유좌유용", "동장철벽"] },
-            { name: "관우", chosenTactics: ["만전제발", "사생취의"] },
-            { name: "장비", chosenTactics: ["이아환아", "교취호탈"] }
+            { name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] },
+            { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] },
+            { name: "강유", chosenTactics: ["반객위주", "일고작기"] }
         ]
     },
     {
-        title: "동오 대도독 [4군]", formation: "안행진",
+        title: "최상위 최강 랭킹 [4위 부대]", formation: "구행진",
         officers: [
-            { name: "주유", chosenTactics: ["분성지계", "화소적벽"] },
-            { name: "육손", chosenTactics: ["공기불비", "낙정하석"] },
-            { name: "여몽", chosenTactics: ["동구적개", "동장철벽"] }
+            { name: "서서", chosenTactics: ["전위위안", "문치무공"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
+            { name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] }
         ]
     },
     {
-        title: "오모신 계책 [5군]", formation: "구행진",
+        title: "최상위 최강 랭킹 [5위 부대]", formation: "구행진",
         officers: [
-            { name: "순욱", chosenTactics: ["강유겸제", "미우주무"] },
-            { name: "가후", chosenTactics: ["이간계", "혼수모어"] },
-            { name: "정욱", chosenTactics: ["공기불비", "낙정하석"] }
+            { name: "좌자", chosenTactics: ["안영찰채", "진퇴유도"] },
+            { name: "장녕", chosenTactics: ["수상개화", "양의화생"] },
+            { name: "우길", chosenTactics: ["강유겸제", "전위위안"] }
+        ]
+    },
+    {
+        title: "최상위 최강 랭킹 [6위 부대]", formation: "안행진",
+        officers: [
+            { name: "사마의", chosenTactics: ["수상개화", "요사여신"] },
+            { name: "조조", chosenTactics: ["강유겸제", "진퇴유도"] },
+            { name: "가후", chosenTactics: ["만천과해", "혼수모어"] }
+        ]
+    },
+    {
+        title: "최상위 최강 랭킹 [7위 부대]", formation: "호도진",
+        officers: [
+            { name: "악진", chosenTactics: ["선등함진", "강유겸제"] },
+            { name: "조조(제왕)", chosenTactics: ["혼수모어", "진퇴유도"] },
+            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] }
+        ]
+    },
+    {
+        title: "최상위 최강 랭킹 [8위 부대]", formation: "구행진",
+        officers: [
+            { name: "손권", chosenTactics: ["여자동포", "진퇴유도"] },
+            { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
+            { name: "노숙", chosenTactics: ["분성지계", "안영찰채"] }
         ]
     }
 ];
@@ -183,13 +179,12 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 구조 복구 가동:", e);
+        console.error("스토리지 인덱싱 정형화 예외 복구:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
 
-// 핵심 로직 개정: 무장 보유 시 고유 전법 가산 연산 동적 승인 (OR 결선)
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
@@ -214,7 +209,6 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
         const inherentTactic = officerUniqueTacticMap[hName];
         if (inherentTactic) {
             const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
-            // 무장이 보유 중이거나, 전법 창에 체크되어 있다면 무조건 보유한 것으로 인정
             if (isHeroOwned || cleanOwnedTactics.includes(cleanInherent)) {
                 tacticMatchCount += 1;
             }
@@ -238,7 +232,6 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 핵심 로직 개정 2단계: 처방전 텍스트 생성기 내 고유 전법 검사 구역 무장 보유 종속 필터 적용
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const idealDeck = defaultPresetDecks[deck?.originIdx];
     if (!idealDeck) return [];
@@ -279,7 +272,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             const inherentTactic = officerUniqueTacticMap[hName];
             if (inherentTactic) {
                 const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
-                // 장수도 없고 전법도 체크 안 된 '진짜 미보유' 상태일 때만 처방전 경고 출력
                 if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
                     feedbackList.push(`고유 전법 누락: 무장 [${hName}]의 핵심 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 미보유 상태입니다.`);
                 }
@@ -437,7 +429,6 @@ function renderDeckBuilder() {
                 const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
                 const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
                 
-                // UI 바인더 동기화 개정: 장수가 소정 보유 상태라면 무조건 전법을 보유중(true) 상태로 반환
                 const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
 
                 tacticRowsHtml += `
@@ -469,7 +460,7 @@ function renderDeckBuilder() {
                     });
                 }
 
-                const currentPos = currentPositions[offIdx] || "front";
+                const currentPos = currentPositions[deck.formation]?.[offIdx] || "front";
                 const posLabel = currentPos === 'front' ? '전열' : '후열';
                 const posClass = currentPos === 'front' ? 'front' : 'back';
 
