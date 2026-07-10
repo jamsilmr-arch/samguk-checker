@@ -20,14 +20,14 @@ const formationPositions = {
     "안행진": ["back", "front", "front"]
 };
 
-// 54명 무장별 고유 역할 데이터 테이블 (조조(제왕) 명칭 통일 반영)
+// 54명 무장별 고유 역할 데이터 테이블 (유비(제왕) 표준 명칭 완벽 동기화 개정)
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
     "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
     "장료": "패시브 (100%)", "사마의": "능동 (60%)", "하후연": "능동 (50%)", "조조(제왕)": "지휘 (100%)", 
     "가후": "능동 (65%)", "유비": "지휘 (100%)", "마대": "능동 (35%)", "관우": "능동 (50%)", 
     "위연": "패시브 (70%)", "장비": "패시브 (50%)", "사마가": "추격 (35%)", "황충": "패시브 (100%)", 
-    "황월영": "지휘 (100%)", "제갈량": "지휘 (100%)", "제)유비": "지휘 (100%)", "조운": "패시브 (100%)", 
+    "황월영": "지휘 (100%)", "제갈량": "지휘 (100%)", "유비(제왕)": "지휘 (100%)", "조운": "패시브 (100%)", 
     "마초": "패시브 (100%)", "서서": "지휘 (100%)", "강유": "추격 (50%)", "손권": "지휘 (100%)", 
     "손견": "지휘 (100%)", "주유": "패시브 (80%)", "대교": "지휘 (100%)", "황개": "능동 (50%)", 
     "여몽": "지휘 (100%)", "육손": "추격 (50%)", "소교": "능동 (70%)", "손상향": "능동 (50%)", 
@@ -38,14 +38,14 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 무장별 고유 전법 1:1 매핑 데이터베이스 (조조(제왕) 명칭 통일 반영)
+// 무장별 고유 전법 1:1 매핑 데이터베이스 (유비(제왕) 표준 명칭 완벽 동기화 개정)
 const officerUniqueTacticMap = {
     "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
     "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
     "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "조조(제왕)": "군령여산", 
     "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
     "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
-    "황월영": "묘산천기", "제갈량": "초선차전", "제)유비": "재주복주", "조운": "칠진칠출", 
+    "황월영": "묘산천기", "제갈량": "초선차전", "유비(제왕)": "재주복주", "조운": "칠진칠출", 
     "마초": "출수법", "서서": "절절학문", "강유": "담대여두", "손권": "웅거", 
     "손견": "강동맹호", "주유": "봉화연천", "대교": "정수유심", "황개": "요원지화", 
     "여몽": "백의도강", "육손": "지변규려", "소교": "화용욕모", "손상향": "효희", 
@@ -61,7 +61,7 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 26종 공식 인연 효과 데이터 세트 (조조(제왕) 명칭 통일 반영)
+// 26종 공식 인연 효과 데이터 세트 (유비(제왕) 명칭 통일 수정 완료)
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -70,9 +70,9 @@ const bondRules = [
     { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
     { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
     { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "제)유비", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
+    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
     { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
-    { name: "도원결의", req: 3, heroes: ["유비", "제)유비", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
+    { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
     { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
     { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 종결 프리셋 마스터 데이터 (조조(제왕) 명칭 통일 반영)
+// 종결 프리셋 마스터 데이터
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [1군]", formation: "추형진",
@@ -169,8 +169,8 @@ function loadDeckTextData() {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
                     }
                     d.officers.forEach(off => {
-                        // 핵심 로직 추가: 유저 스토리지 내부에 과거 파편인 '제)조조' 발견 시 최신 '조조(제왕)'로 강제 정밀 변환
                         if (off.name === "제)조조") off.name = "조조(제왕)";
+                        if (off.name === "제)유비") off.name = "유비(제왕)";
                         if (!off.name) off.name = "조조";
                         if (!Array.isArray(off.chosenTactics) || off.chosenTactics.length < 2) {
                             off.chosenTactics = ["교취호탈", "병량촌단"];
@@ -230,7 +230,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     let feedbackList = [];
     
-    if (deck.formation !== idealDeck.formation) {
+    if (deck.formation.trim() !== idealDeck.formation.trim()) {
         feedbackList.push(`진형 변경 필요: 현재 설정된 [${deck.formation}]을(를) 매칭 종결 진형인 <strong>[${idealDeck.formation}]</strong>(으)로 변경하세요.`);
     }
 
@@ -238,26 +238,31 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         const idealOff = idealDeck.officers[offIdx];
         if (!idealOff) return;
 
-        if (off.name !== idealOff.name) {
-            feedbackList.push(`무장 복구 권고: 현재 배치된 [${off.name}]을(를) 종결 핵심 장수인 <strong>[${idealOff.name}]</strong>(으)로 교체하세요.`);
+        const hName = off.name.trim();
+        const idealHName = idealOff.name.trim();
+
+        if (hName !== idealHName) {
+            feedbackList.push(`무장 복구 권고: 현재 배치된 [${hName}]을(를) 종결 핵심 장수인 <strong>[${idealHName}]</strong>(으)로 교체하세요.`);
         }
         
-        if (!ownedHeroes.includes(off.name)) {
-            feedbackList.push(`장수 결핍 경고: 현재 장수 [${off.name}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수 로 우회 배치하세요.`);
+        if (!ownedHeroes.includes(hName)) {
+            feedbackList.push(`장수 결핍 경고: 현재 장수 [${hName}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
         }
 
-        const inherentTactic = officerUniqueTacticMap[off.name];
-        if (inherentTactic && !ownedTactics.includes(inherentTactic)) {
-            feedbackList.push(`고유 전법 누락: 무장 [${off.name}]의 핵심 고유 전법 <strong>[${inherentTactic}]</strong>이 미보유 상태입니다.`);
+        const inherentTactic = officerUniqueTacticMap[hName];
+        if (inherentTactic && !ownedTactics.includes(inherentTactic.trim())) {
+            feedbackList.push(`고유 전법 누락: 무장 [${hName}]의 핵심 고유 전법 <strong>[${inherentTactic.trim()}]</strong>이 미보유 상태입니다.`);
         }
 
         off.chosenTactics.forEach((tac, tacIdx) => {
-            const idealTac = idealOff.chosenTactics[tacIdx];
-            if (tac !== idealTac) {
-                feedbackList.push(`전법 오장착 픽스: [${off.name}]의 ${tacIdx + 2}번째 칸 전법 [${tac}] 대신 졸업 전법인 <strong>[${idealTac}]</strong>을(를) 탑재하세요.`);
+            const idealTac = idealOff.chosenTactics[tacIdx].trim();
+            const cleanTac = tac.trim();
+
+            if (cleanTac !== idealTac) {
+                feedbackList.push(`전법 오장착 픽스: [${hName}]의 ${tacIdx + 2}번째 칸 전법 [${cleanTac}] 대신 졸업 전법인 <strong>[${idealTac}]</strong>을(를) 탑재하세요.`);
             }
-            if (!ownedTactics.includes(tac)) {
-                feedbackList.push(`전법 자원 부족: [${off.name}]의 ${tacIdx + 2}번째 칸 전법 <strong>[${tac}]</strong>은(는) 현재 미보유 중입니다. 보유 전법 드롭다운에서 다른 전법을 선별하세요.`);
+            if (!ownedTactics.includes(cleanTac)) {
+                feedbackList.push(`전법 자원 부족: [${hName}]의 ${tacIdx + 2}번째 칸 전법 <strong>[${cleanTac}]</strong>은(는) 현재 미보유 중입니다. 보유 전법 드롭다운에서 다른 전법을 선별하세요.`);
             }
         });
     });
@@ -317,23 +322,6 @@ function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
-function calculateActivatedBond(officers) {
-    if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
-    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.trim() : "");
-    let matchedBonds = [];
-
-    bondRules.forEach(rule => {
-        const uniqueMatches = [...new Set(currentOfficerNames.filter(name => rule.heroes.includes(name)))];
-        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
-        
-        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
-            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
-        }
-    });
-
-    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
-}
-
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -343,13 +331,19 @@ function renderDeckBuilder() {
     let ownedHeroes = [];
     let ownedTactics = [];
 
+    // 핵심 교정 레이아웃: 로컬스토리지 파싱 진입 시 구형 명칭 파편 강제 치환 및 트림 표준화 벨트 가동
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
-            ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+            ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => {
+                let name = x.name.trim();
+                if (name === "제)조조") name = "조조(제왕)";
+                if (name === "제)유비") name = "유비(제왕)";
+                return name;
+            }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
         } catch (e) {
-            console.error("인벤토리 로드 유실:", e);
+            console.error("인벤토리 로드 오류:", e);
         }
     }
 
@@ -380,7 +374,7 @@ function renderDeckBuilder() {
             let tacticRowsHtml = '';
 
             const inherentTactic = officerUniqueTacticMap[off.name] || "효웅";
-            const isInherentOwned = ownedTactics.includes(inherentTactic);
+            const isInherentOwned = ownedTactics.includes(inherentTactic.trim());
             tacticRowsHtml += `
                 <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
                     <span>⭐ ${inherentTactic} (고유)</span>
@@ -389,7 +383,7 @@ function renderDeckBuilder() {
             `;
 
             off.chosenTactics.forEach((tacticName, slotIdx) => {
-                const isOwned = ownedTactics.includes(tacticName);
+                const isOwned = ownedTactics.includes(tacticName.trim());
                 
                 let optionsHtml = '';
                 allTacticsList.forEach(tName => {
