@@ -12,8 +12,11 @@
         <span class="author-text">by JHP</span>
     </header>
 
+    <!-- 핵심 액션: 중앙 제어식 공통 메뉴바 자바스크립트 엔진 정상 도킹 연동 -->
+    <script src="navbar.js"></script>
+
     <!-- 시스템 가이드 메인 레이아웃 (사이드바 + 콘텐츠) -->
-    <main class="guide-main-container">
+    <main class="guide-main-container" style="margin-top: 25px;">
         <aside class="guide-sidebar">
             <button class="guide-tab-btn active" onclick="switchGuideTab('equip', this)">장비 시스템</button>
             <button class="guide-tab-btn" onclick="switchGuideTab('hawk', this)">매 시스템</button>
@@ -22,7 +25,7 @@
         </aside>
         
         <section class="guide-content-area" id="guide-content-box">
-            <!-- 자바스크립트가 데이터를 동적으로 주입하는 구역 -->
+            <!-- guide.js 엔진이 실시간 동적 데이터를 주입하는 연산 공간 -->
         </section>
     </main>
 
