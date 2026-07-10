@@ -118,7 +118,7 @@ const heroDogamData = [
         skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.',
         stats: { martial: 652, tactical: 414, command: 545, speed: 487 }
     },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.' },
+    { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.' },stats: { martial: 384, tactical: 675, command: 664, speed: 373 }
     { 
         id: 'h_joun', name: '조운', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '칠진칠출', 
         skillDesc: '자신에게 상시 영구 통찰 상태를 부여하고 모든 고유 스탯을 폭증시킵니다.',
