@@ -63,11 +63,11 @@ const heroList = [
     { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false }
 ];
 
-// 초기 전법 데이터 세팅 (신규 5종 반영 총 70종 가나다 사전식 정렬 구조 완료)
+// 초기 전법 데이터 세팅 (신규 반영 총 71종 가나다 사전식 정렬 구조 완료)
 const tacticList = [
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false },
-    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false },
     { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false },
     { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false },
     { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false },
@@ -79,9 +79,9 @@ const tacticList = [
     { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false },
     { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false },
     { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false },
-    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false },
     { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false },
-    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false },
     { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false },
     { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false },
     { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false },
@@ -99,7 +99,7 @@ const tacticList = [
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false },
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false },
     { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false },
-    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false },
     { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false },
     { id: 't_yosa', name: '요사여신', group: 'tactic', isOwned: false },
     { id: 't_yongmaeng', name: '용맹무쌍', group: 'tactic', isOwned: false },
@@ -127,23 +127,22 @@ const tacticList = [
     { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false },
     { id: 't_chukho', name: '축호과간', group: 'tactic', isOwned: false },
     { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false },
-    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false },
     { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false },
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false },
     { id: 't_honsu', name: '혼수모어', group: 'tactic', isOwned: false },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false },
+    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false }, // 신규 연동 이식
     { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false },
     { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false },
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false }
 ];
 
-// 브라우저 돔(DOM) 로딩 완료 후 비즈니스 로직 구동 개시
 window.onload = function() {
-    loadSavedData();  // 1. 로컬 저장소 캐시 상태 조회 및 마이그레이션
-    renderButtons();  // 2. 구획별 타겟 바둑판 버튼 동적 조립
+    loadSavedData();
+    renderButtons();
 };
 
-// 화면 UI 컴포넌트 자동 조립 렌더링 엔진
 function renderButtons() {
     const containers = {
         wei: document.getElementById('hero-container-wei'),
@@ -153,14 +152,12 @@ function renderButtons() {
     };
     const tacticContainer = document.getElementById('tactic-container');
 
-    // 리렌더링 시 기존 마크업 중복 누적 적층 현상 원천 차단
     Object.values(containers).forEach(c => { if (c) c.innerHTML = ''; });
     if (tacticContainer) tacticContainer.innerHTML = '';
 
-    // 장수 구획 버튼 생성 및 도킹
     heroList.forEach(hero => {
         const targetContainer = containers[hero.group];
-        if (!targetContainer) return; // 예외 처리: 타겟 돔 인프라 부재 시 탈락
+        if (!targetContainer) return;
 
         const btn = document.createElement('button');
         btn.id = hero.id;
@@ -171,7 +168,6 @@ function renderButtons() {
         targetContainer.appendChild(btn);
     });
 
-    // 전법 구획 버튼 생성 및 도킹 (70종 가나다순 주입)
     tacticList.forEach(tactic => {
         const btn = document.createElement('button');
         btn.id = tactic.id;
@@ -182,13 +178,12 @@ function renderButtons() {
     });
 }
 
-// 보유 체크 미보유 스위칭 제어 로직
 function toggleState(id, type) {
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
     
     if (target) {
-        target.isOwned = !target.isOwned; // 데이터 반전 연산
+        target.isOwned = !target.isOwned;
         const btn = document.getElementById(id);
         if (btn) {
             if (target.isOwned) btn.classList.add('owned');
@@ -197,14 +192,12 @@ function toggleState(id, type) {
     }
 }
 
-// 현 상태 압축 직렬화 보존 보관 로직
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
     alert('체크 현황이 저장되었습니다.');
 }
 
-// 로컬 스토리지 데이터 파싱 복원 로직
 function loadSavedData() {
     const saved = localStorage.getItem('samguk_hobby_data');
     if (!saved) return;
