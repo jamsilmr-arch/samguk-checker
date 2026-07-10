@@ -1,4 +1,4 @@
-// 8종 공식 진형 효과 매핑 테이블 (신규 '호도진' 데이터 명세 확장 완료)
+// 8종 공식 진형 효과 매핑 테이블 (호도진 수치 6.0% 정밀 보정 완료)
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
     "구행진": "전열: 받는 피해 감소 5.0% | 후열: 가하는 피해 증가 12.0%",
@@ -7,10 +7,10 @@ const formationEffects = {
     "어린진": "전열: 반격률 증가 20.0% | 후열: 받는 피해 감소 6.0%",
     "방원진": "전열: 받는 피해 감소 5.0% | 후열: 연격률 증가 28.0%",
     "안행진": "전열: 받는 피해 감소 5.0% | 후열: 강공 및 기습 증가 12.0%",
-    "호도진": "전열: 가하는 피해 증가 10.0% | 후열: 받는 피해 감소 10.0%"
+    "호도진": "전열: 가하는 피해 증가 10.0% | 후열: 받는 피해 감소 6.0%"
 };
 
-// 8종 진형별 무장 전열/후열 위치 정밀 매핑 테이블 (호도진 포지션 결선 완료)
+// 8종 진형별 무장 전열/후열 위치 정밀 매핑 테이블 (전열-후열-전열 구조 확정)
 const formationPositions = {
     "일자진": ["front", "front", "front"],
     "구행진": ["front", "back", "front"],
@@ -63,7 +63,7 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 최신 실시간 서버 인게임 랭킹 1위~8위 공식 부대 마스터 프리셋 데이터베이스
+// 최신 실시간 인게임 랭킹 1위~8위 마스터 프리셋 데이터베이스
 const defaultPresetDecks = [
     {
         title: "최상위 최강 랭킹 [1위 부대]", formation: "구행진",
@@ -179,7 +179,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 인덱싱 정형화 예외 복구:", e);
+        console.error("스토리지 구조 복구 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -389,7 +389,7 @@ function renderDeckBuilder() {
             }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("인벤토리 자원 파싱 실패 수집 차단:", e);
+            console.error("인벤토리 자원 수집 차단:", e);
         }
     }
 
@@ -413,7 +413,6 @@ function renderDeckBuilder() {
 
         const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
         const computedBondText = calculateActivatedBond(deck.officers);
-        const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
 
         let officersHtml = '';
         if (Array.isArray(deck.officers)) {
@@ -460,7 +459,8 @@ function renderDeckBuilder() {
                     });
                 }
 
-                const currentPos = currentPositions[deck.formation]?.[offIdx] || "front";
+                // 수정 결선선: 보정된 formationPositions 룩업 사전을 연동하여 1, 2, 3번 포지션 배지 텍스트 동적 분기 바인딩
+                const currentPos = formationPositions[deck.formation]?.[offIdx] || "front";
                 const posLabel = currentPos === 'front' ? '전열' : '후열';
                 const posClass = currentPos === 'front' ? 'front' : 'back';
 
