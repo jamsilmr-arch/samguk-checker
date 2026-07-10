@@ -78,7 +78,7 @@ const bondRules = [
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
     { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
     { name: "호위경주", req: 2, heroes: ["조조", "제)조조", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
+    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기습 8% 증가, 해제 불가." },
     { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
     { name: "군신상기", req: 2, heroes: ["조조", "제)조조", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
@@ -91,10 +91,10 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 오리지널 초기 프리셋 정보
+// 핵심 로직 가공: 2개 부대에서 총 5개 부대로 마스터 배열 볼륨 확장 조립
 const defaultPresetDecks = [
     {
-        title: "위무 방패병 [T0]", specialization: "방 득화", formation: "추형진",
+        title: "위무 방패병 [1군]", formation: "추형진",
         officers: [
             { name: "조조", chosenTactics: ["교취호탈", "병량촌단"] },
             { name: "하후돈", chosenTactics: ["이아환아", "교취호탈"] },
@@ -102,11 +102,35 @@ const defaultPresetDecks = [
         ]
     },
     {
-        title: "신속창·2 [T0]", specialization: "창 득화", formation: "기형진",
+        title: "신속창 [2군]", formation: "기형진",
         officers: [
             { name: "장료", chosenTactics: ["사생취의", "만전제발"] },
-            { name: "조조(제왕)", chosenTactics: ["교취호탈", "동장철벽"] },
+            { name: "제)조조", chosenTactics: ["교취호탈", "동장철벽"] },
             { name: "악진", chosenTactics: ["교취호탈", "선등함진"] }
+        ]
+    },
+    {
+        title: "도원 방패병 [3군]", formation: "방원진",
+        officers: [
+            { name: "유비", chosenTactics: ["유좌유용", "동장철벽"] },
+            { name: "관우", chosenTactics: ["만전제발", "사생취의"] },
+            { name: "장비", chosenTactics: ["이아환아", "교취호탈"] }
+        ]
+    },
+    {
+        title: "동오 대도독 [4군]", formation: "안행진",
+        officers: [
+            { name: "주유", chosenTactics: ["분성지계", "화소적벽"] },
+            { name: "육손", chosenTactics: ["공기불비", "낙정하석"] },
+            { name: "여몽", chosenTactics: ["동구적개", "동장철벽"] }
+        ]
+    },
+    {
+        title: "오모신 계책 [5군]", formation: "구행진",
+        officers: [
+            { name: "순욱", chosenTactics: ["강유겸제", "미우주무"] },
+            { name: "가후", chosenTactics: ["이간계", "혼수모어"] },
+            { name: "정욱", chosenTactics: ["공기불비", "낙정하석"] }
         ]
     }
 ];
@@ -118,13 +142,22 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
+// 핵심 로직 추가: 구형 2부대 저장소를 가진 유저를 위해 신규 3개 부대를 실시간 자동 증식 병합하는 안전망 구축
 function loadDeckTextData() {
     const savedText = localStorage.getItem('samguk_deck_text');
     if (savedText) {
         dynamicPresetDecks = JSON.parse(savedText);
+        
+        // 데이터 밀림 보정: 로컬 스토리지 데이터 분량이 5개 미만이면 부족한 프리셋을 배열 뒤에 안전하게 Append
+        if (dynamicPresetDecks.length < defaultPresetDecks.length) {
+            for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
+                dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
+            }
+            localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+        }
+
         dynamicPresetDecks.forEach((deck, idx) => {
             if (!deck.formation) {
-                deck.specialization = "방 득화";
                 deck.formation = "추형진";
             }
             deck.officers.forEach(off => {
@@ -278,7 +311,6 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
-        // 핵심 변경 레이아웃: footer-left 내부의 specialization 스팬 태그 및 수직 구분 바(|) 하드코딩 영역을 완전히 소거
         deckCard.innerHTML = `
             <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">${deck.title}</div>
             <div class="bond-box">
