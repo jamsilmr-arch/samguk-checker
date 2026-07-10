@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>삼국지 왕전 - 덱 구성</title>
-    <!-- CSS 결선 경로 강제 지정 (html 파일과 같은 폴더에 있어야 합니다) -->
     <link rel="stylesheet" href="deck.css">
 </head>
 <body>
-    <!-- 글로벌 상단 타이틀 헤더 -->
     <header class="top-title-header">
         <h1>삼국지 왕전</h1>
         <span class="author-text">by JHP</span>
     </header>
 
-    <!-- 4버튼 내비게이션 바 -->
     <nav class="global-nav-bar">
         <ul class="nav-menu-list">
             <li class="nav-menu-item"><a href="index.html">나의 장수/전법</a></li>
@@ -23,10 +20,12 @@
         </ul>
     </nav>
 
-    <!-- 덱 리스트 배치 메인 컨테이너 -->
-    <main class="deck-main-container" id="deck-container">
-        <!-- 자바스크립트 엔지니어링에 의해 3열 배치 카드가 동적 주입됩니다 -->
-    </main>
+    <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px;">
+        <button id="sort-default-btn" class="control-sort-btn active" onclick="toggleSortMode('default')">부대 순서 고정 (1군~5군)</button>
+        <button id="sort-score-btn" class="control-sort-btn" onclick="toggleSortMode('score')">추천도 높은 순 정렬</button>
+    </div>
+
+    <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
     <script src="deck.js"></script>
 </body>
