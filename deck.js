@@ -93,10 +93,18 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 핵심 수정: 최신 1~20위 랭커 메타 데이터 분석을 통합한 10대 마스터 프리셋 (처방전 등대 역할)
-const defaultPresetDecks = [
+// 핵심 신규 알고리즘: AI 처방전의 기준점이 될 10대 최상위 랭커 메타 데이터베이스 격리 신설
+const rankerMetaDecks = [
     {
-        title: "랭커 메타 [1군]", formation: "호도진",
+        title: "랭킹 1위 메타 (위연·마초·서서)", formation: "구행진",
+        officers: [
+            { name: "위연", chosenTactics: ["진퇴유도", "이퇴위진"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "반객위주"] },
+            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
+        ]
+    },
+    {
+        title: "랭킹 2위 메타 (장료·조조(제왕)·악진)", formation: "호도진",
         officers: [
             { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
             { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] },
@@ -104,55 +112,7 @@ const defaultPresetDecks = [
         ]
     },
     {
-        title: "랭커 메타 [2군]", formation: "구행진",
-        officers: [
-            { name: "좌자", chosenTactics: ["강유겸제", "여자동포"] },
-            { name: "장녕", chosenTactics: ["양의화생", "수상개화"] },
-            { name: "우길", chosenTactics: ["진퇴유도", "안영찰채"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [3군]", formation: "구행진",
-        officers: [
-            { name: "위연", chosenTactics: ["횡징폭렴", "진퇴유도"] },
-            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
-            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [4군]", formation: "방원진",
-        officers: [
-            { name: "원소", chosenTactics: ["이퇴위진", "견진연봉"] },
-            { name: "동탁", chosenTactics: ["혼수모어", "진퇴유도"] },
-            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [5군]", formation: "구행진",
-        officers: [
-            { name: "손권", chosenTactics: ["강유겸제", "진퇴유도"] },
-            { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
-            { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [6군]", formation: "추형진",
-        officers: [
-            { name: "사마의", chosenTactics: ["요사여신", "반객위주"] },
-            { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] },
-            { name: "가후", chosenTactics: ["여자동포", "안영찰채"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [7군]", formation: "방원진",
-        officers: [
-            { name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] },
-            { name: "원소", chosenTactics: ["견진연봉", "문치무공"] },
-            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
-        ]
-    },
-    {
-        title: "랭커 메타 [8군]", formation: "방원진",
+        title: "랭킹 3위 메타 (황충·제갈량·강유)", formation: "방원진",
         officers: [
             { name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] },
             { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] },
@@ -160,7 +120,23 @@ const defaultPresetDecks = [
         ]
     },
     {
-        title: "랭커 메타 [9군]", formation: "안행진",
+        title: "랭킹 4위 메타 (서서·마초·위연)", formation: "구행진",
+        officers: [
+            { name: "서서", chosenTactics: ["전위위안", "문치무공"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
+            { name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] }
+        ]
+    },
+    {
+        title: "랭킹 5위 메타 (좌자·장녕·우길)", formation: "구행진",
+        officers: [
+            { name: "좌자", chosenTactics: ["안영찰채", "진퇴유도"] },
+            { name: "장녕", chosenTactics: ["수상개화", "양의화생"] },
+            { name: "우길", chosenTactics: ["강유겸제", "전위위안"] }
+        ]
+    },
+    {
+        title: "랭킹 6위 메타 (사마의·조조·가후)", formation: "안행진",
         officers: [
             { name: "사마의", chosenTactics: ["수상개화", "요사여신"] },
             { name: "조조", chosenTactics: ["강유겸제", "진퇴유도"] },
@@ -168,14 +144,45 @@ const defaultPresetDecks = [
         ]
     },
     {
-        title: "랭커 메타 [10군]", formation: "구행진",
+        title: "랭킹 7위 메타 (악진·조조(제왕)·장료)", formation: "호도진",
+        officers: [
+            { name: "악진", chosenTactics: ["선등함진", "강유겸제"] },
+            { name: "조조(제왕)", chosenTactics: ["혼수모어", "진퇴유도"] },
+            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] }
+        ]
+    },
+    {
+        title: "랭킹 8위 메타 (손권·육항·노숙)", formation: "구행진",
         officers: [
             { name: "손권", chosenTactics: ["여자동포", "진퇴유도"] },
             { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
             { name: "노숙", chosenTactics: ["분성지계", "안영찰채"] }
         ]
+    },
+    {
+        title: "랭킹 9위 메타 (동탁·원소·여포)", formation: "방원진",
+        officers: [
+            { name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] },
+            { name: "원소", chosenTactics: ["견진연봉", "위위구조"] },
+            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
+        ]
+    },
+    {
+        title: "랭킹 10위 메타 (원소·동탁·여포)", formation: "방원진",
+        officers: [
+            { name: "원소", chosenTactics: ["이퇴위진", "견진연봉"] },
+            { name: "동탁", chosenTactics: ["혼수모어", "진퇴유도"] },
+            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
+        ]
     }
 ];
+
+// 화면에 표기될 UI 전용 기본 5개 슬롯 (초기화 시 탑 5 랭커덱을 샘플로 지원)
+const defaultPresetDecks = rankerMetaDecks.slice(0, 5).map((d, i) => {
+    let copy = JSON.parse(JSON.stringify(d));
+    copy.title = `${i + 1}군`;
+    return copy;
+});
 
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
@@ -193,9 +200,14 @@ function loadDeckTextData() {
             if (Array.isArray(parsed) && parsed.length > 0) {
                 dynamicPresetDecks = parsed;
                 
-                // 엔진 갱신: 마스터 군단 수가 10개로 증가함에 따라 모자란 슬롯을 즉시 자동 개설 (데이터 붕괴 차단)
-                if (dynamicPresetDecks.length < defaultPresetDecks.length) {
-                    for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
+                // 엔진 보정: 6~10군 삭제 명령에 따라 배열 길이를 5개로 강력하게 다이어트 스플라이스 처리
+                if (dynamicPresetDecks.length > 5) {
+                    dynamicPresetDecks.splice(5);
+                    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+                }
+
+                if (dynamicPresetDecks.length < 5) {
+                    for (let i = dynamicPresetDecks.length; i < 5; i++) {
                         dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
                     }
                 }
@@ -206,7 +218,7 @@ function loadDeckTextData() {
                     }
                     const d = dynamicPresetDecks[idx];
                     d.originIdx = (d.originIdx !== undefined) ? d.originIdx : idx;
-                    if (!d.title) d.title = defaultPresetDecks[idx]?.title || `랭커 메타 [${idx + 1}군]`;
+                    if (!d.title) d.title = defaultPresetDecks[idx]?.title || `${idx + 1}군`;
                     if (!d.formation) d.formation = defaultPresetDecks[idx]?.formation || "추형진";
                     if (!Array.isArray(d.officers) || d.officers.length === 0) {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
@@ -226,7 +238,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 파편화 복구 가동:", e);
+        console.error("스토리지 복구 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -279,12 +291,42 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
+// 지능형 AI 피드백 알고리즘: 유저의 덱과 가장 닮은 랭커 메타를 찾아내어 동적으로 타겟을 락온(Lock-On)
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
-    const idealDeck = defaultPresetDecks[deck?.originIdx];
-    if (!idealDeck) return [];
+    let bestMatchDeck = rankerMetaDecks[0];
+    let maxMatchScore = -1;
 
+    const currentCleanNames = [];
+    if (Array.isArray(deck?.officers)) {
+        deck.officers.forEach(o => currentCleanNames.push((o?.name || "").toString().trim().replace(/\s+/g, '')));
+    }
+
+    // 10종의 랭커 덱을 순회하며 일치율 타점 연산 가동
+    rankerMetaDecks.forEach(metaDeck => {
+        let matchScore = 0;
+        metaDeck.officers.forEach((metaOff, idx) => {
+            const metaName = metaOff.name.replace(/\s+/g, '');
+            if (currentCleanNames.includes(metaName)) {
+                matchScore += 1; // 이름 일치 시 1점
+            }
+            if (currentCleanNames[idx] === metaName) {
+                matchScore += 0.5; // 위치까지 일치하면 가산점 부여
+            }
+        });
+        
+        if (matchScore > maxMatchScore) {
+            maxMatchScore = matchScore;
+            bestMatchDeck = metaDeck;
+        }
+    });
+
+    // 최종 타겟으로 선정된 최적의 랭커 메타덱
+    const idealDeck = bestMatchDeck;
     let feedbackList = [];
     
+    // AI 락온 결과 텍스트 헤더 추가
+    feedbackList.push(`💡 <strong>[목표 지향: ${idealDeck.title}]</strong> 기반으로 최적화 분석을 수행했습니다.`);
+
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
@@ -460,7 +502,6 @@ function renderDeckBuilder() {
 
         const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
         const computedBondText = calculateActivatedBond(deck.officers);
-        const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
 
         let officersHtml = '';
         if (Array.isArray(deck.officers)) {
@@ -507,7 +548,7 @@ function renderDeckBuilder() {
                     });
                 }
 
-                const currentPos = currentPositions[offIdx] || "front";
+                const currentPos = formationPositions[deck.formation]?.[offIdx] || "front";
                 const posLabel = currentPos === 'front' ? '전열' : '후열';
                 const posClass = currentPos === 'front' ? 'front' : 'back';
 
@@ -549,16 +590,16 @@ function renderDeckBuilder() {
         const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
         let feedbackHtml = '';
         
-        if (currentComputedScore === 100 && feedbackArr.length === 0) {
-            feedbackHtml = `<div class="feedback-item success">★ 축하합니다! 종결 무장 및 졸업 전법 연산 스펙이 100% 일치하는 무결성 군단입니다.</div>`;
-        } else if (currentComputedScore === 100 && feedbackArr.length > 0) {
+        if (currentComputedScore === 100 && feedbackArr.length === 1) { // Only header exists
+            feedbackHtml = `<div class="feedback-item success">★ 축하합니다! <strong>${feedbackArr[0].split('[목표 지향: ')[1].split(']')[0]}</strong>과 연산 스펙이 100% 일치하는 무결성 군단입니다.</div>`;
+        } else if (currentComputedScore === 100 && feedbackArr.length > 1) {
             feedbackHtml = `<div class="feedback-item success">✓ 현재 보유 자원으로 구성을 완비하여 추천도 100점을 확보했습니다.</div>`;
             feedbackArr.forEach(fb => { feedbackHtml += `<div class="feedback-item info">${fb}</div>`; });
         } else {
-            feedbackArr.forEach(fb => { feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; });
-            if (feedbackArr.length === 0) {
-                feedbackHtml += `<div class="feedback-item warning">알림: 현재 구성된 장수/전법의 매칭 자원 중 미보유 자원이 섞여 감정되었습니다. 나의 장수 탭을 확인하세요.</div>`;
-            }
+            feedbackArr.forEach((fb, index) => { 
+                if (index === 0) feedbackHtml += `<div class="feedback-item info">${fb}</div>`; // Header
+                else feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; // Warnings
+            });
         }
 
         deckCard.innerHTML = `
