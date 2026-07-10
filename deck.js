@@ -9,6 +9,17 @@ const formationEffects = {
     "안행진": "전열: 받는 피해 감소 5.0% | 후열: 강공 및 기습 증가 12.0%"
 };
 
+// 핵심 로직 추가: 요청하신 진형별 무장 전열/후열 위치 정밀 매핑 테이블
+const formationPositions = {
+    "일자진": ["front", "front", "front"],
+    "구행진": ["front", "back", "front"],
+    "추형진": ["back", "front", "back"],
+    "기형진": ["back", "back", "front"],
+    "어린진": ["front", "back", "back"],
+    "방원진": ["front", "front", "back"],
+    "안행진": ["back", "front", "front"]
+};
+
 // 54명 무장별 고유 역할 자동 맵핑 데이터 테이블 (스프레드시트 스펙 동기화)
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
@@ -27,7 +38,7 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 실물 스크린샷 기반 정밀 가공 완료본 (총 24종 인연 밸런싱)
+// 26종 공식 인연 효과 자동 검증용 데이터 세트
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -44,7 +55,7 @@ const bondRules = [
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
     { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
     { name: "호위경주", req: 2, heroes: ["조조", "제)조조", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기습 8% 증가, 해제 불가." },
+    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
     { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
     { name: "군신상기", req: 2, heroes: ["조조", "제)조조", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
@@ -62,17 +73,17 @@ const defaultPresetDecks = [
     {
         title: "위무 방패병 [T0]", specialization: "방 득화", formation: "추형진",
         officers: [
-            { name: "조조", pos: "back", recommendations: ["휴양생식", "교취호탈", "병량촌단"] },
-            { name: "하후돈", pos: "front", recommendations: ["독구격퇴", "이아환아", "전불가퇴", "교취호탈"] },
-            { name: "곽가", pos: "back", recommendations: ["요사여신", "공기불비", "낙정하석"] }
+            { name: "조조", recommendations: ["휴양생식", "교취호탈", "병량촌단"] },
+            { name: "하후돈", recommendations: ["독구격퇴", "이아환아", "전불가퇴", "교취호탈"] },
+            { name: "곽가", recommendations: ["요사여신", "공기불비", "낙정하석"] }
         ]
     },
     {
         title: "신속창·2 [T0]", specialization: "창 득화", formation: "기형진",
         officers: [
-            { name: "장료", pos: "front", recommendations: ["만전제발", "사생취의", "강다"] },
-            { name: "조조(제왕)", pos: "back", recommendations: ["형초풍패", "교취호탈", "병량촌단", "동장철벽"] },
-            { name: "악진", pos: "front", recommendations: ["기문둔갑", "교취호탈", "병량촌단", "선등함진"] }
+            { name: "장료", recommendations: ["만전제발", "사생취의", "강다"] },
+            { name: "조조(제왕)", recommendations: ["형초풍패", "교취호탈", "병량촌단", "동장철벽"] },
+            { name: "악진", recommendations: ["기문둔갑", "교취호탈", "병량촌단", "선등함진"] }
         ]
     }
 ];
@@ -164,6 +175,9 @@ function renderDeckBuilder() {
 
         const computedBondText = calculateActivatedBond(deck.officers);
 
+        // 핵심 로직 변경: 현재 부대의 진형명에 대응하는 포지션 배열을 실시간 추출 (매핑 실패 시 안전 폴백 작동)
+        const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
+
         let officersHtml = '';
         deck.officers.forEach((off, offIdx) => {
             let tacticRowsHtml = '';
@@ -176,8 +190,10 @@ function renderDeckBuilder() {
                 }
             });
 
-            const posLabel = off.pos === 'front' ? '전열' : '후열';
-            const posClass = off.pos === 'front' ? 'front' : 'back';
+            // 핵심 로직 변경: 기존의 고정 배치 정보를 버리고, 진형 조건 테이블에서 도출된 인덱스 위치를 강제 동기화
+            const currentPos = currentPositions[offIdx] || "front";
+            const posLabel = currentPos === 'front' ? '전열' : '후열';
+            const posClass = currentPos === 'front' ? 'front' : 'back';
 
             let officerOptionsHtml = '';
             sortedHeroNames.forEach(hName => {
