@@ -56,7 +56,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 순 정렬형 전법 리스트 마스터 풀 (신규 '안영찰채' 정렬 동기화 완료, 총 72종)
+// 가나다 순 정렬 72종 선택형 전법 풀
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
@@ -181,7 +181,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬스토리지 구조 복제 복구 실행:", e);
+        console.error("복구 체인 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -220,6 +220,53 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     const finalTacticScore = (tacticMatchCount / totalTacticSlots) * 40;
 
     return Math.round(finalHeroScore + finalTacticScore);
+}
+
+// 핵심 알고리즘 추가: 현재 커스텀 명세서와 종결 기준선을 연산하여 유저 전용 맞춤 처방 텍스트 피드백 생성
+function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
+    const idealDeck = defaultPresetDecks[deck.originIdx];
+    if (!idealDeck) return [];
+
+    let feedbackList = [];
+    
+    // 1. 진형 불일치 검증 지침
+    if (deck.formation !== idealDeck.formation) {
+        feedbackList.push(`진형 변경 필요: 현재 설 정된 [${deck.formation}]을(를) 매칭 종결 진형인 <strong>[${idealDeck.formation}]</strong>(으)로 변경하세요.`);
+    }
+
+    // 2. 3인 무장 및 전법 슬롯 역추적 매칭 검증
+    deck.officers.forEach((off, offIdx) => {
+        const idealOff = idealDeck.officers[offIdx];
+        if (!idealOff) return;
+
+        // 무장 일치 비율 검증 피드백
+        if (off.name !== idealOff.name) {
+            feedbackList.push(`무장 복구 권고: 현재 배치된 [${off.name}]을(를) 종결 핵심 장수인 <strong>[${idealOff.name}]</strong>(으)로 교체하세요.`);
+        }
+        
+        // 자원 실시간 인벤토리 대조 경고
+        if (!ownedHeroes.includes(off.name)) {
+            feedbackList.push(`장수 결핍 경고: 현재 장수 [${off.name}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
+        }
+
+        const inherentTactic = officerUniqueTacticMap[off.name];
+        if (inherentTactic && !ownedTactics.includes(inherentTactic)) {
+            feedbackList.push(`고유 전법 누락: 무장 [${off.name}]의 핵심 고유 전법 <strong>[${inherentTactic}]</strong>이 미보유 상태입니다.`);
+        }
+
+        // 가변 드롭박스 전법 대조 피드백 (2번째 및 3번째 전법)
+        off.chosenTactics.forEach((tac, tacIdx) => {
+            const idealTac = idealOff.chosenTactics[tacIdx];
+            if (tac !== idealTac) {
+                feedbackList.push(`전법 오장착 픽스: [${off.name}]의 ${tacIdx + 2}번째 칸 전법 [${tac}] 대신 졸업 전법인 <strong>[${idealTac}]</strong>을(를) 탑재하세요.`);
+            }
+            if (!ownedTactics.includes(tac)) {
+                feedbackList.push(`전법 자원 부족: [${off.name}]의 ${tacIdx + 2}번째 칸 전법 <strong>[${tac}]</strong>은(는) 현재 미보유 중입니다. 보유 전법 드롭다운에서 다른 전법을 선별하세요.`);
+            }
+        });
+    });
+
+    return feedbackList;
 }
 
 function toggleSortMode(mode) {
@@ -306,7 +353,7 @@ function renderDeckBuilder() {
             ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
         } catch (e) {
-            console.error("인벤토리 로드 미싱:", e);
+            console.error("인벤토리 로드 유실:", e);
         }
     }
 
@@ -402,6 +449,22 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
+        // 핵심 변경 가이드라인: 실시간 동적 피드백 문자열 파싱 템플릿 제어 레이어 수립
+        const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
+        let feedbackHtml = '';
+        
+        if (currentComputedScore === 100 && feedbackArr.length === 0) {
+            feedbackHtml = `<div class="feedback-item success">★ 축하합니다! 종결 무장 및 졸업 전법 연산 스펙이 100% 일치하는 무결성 군단입니다.</div>`;
+        } else if (currentComputedScore === 100 && feedbackArr.length > 0) {
+            feedbackHtml = `<div class="feedback-item success">✓ 현재 보유 자원으로 구성을 완비하여 추천도 100점을 확보했습니다.</div>`;
+            feedbackArr.forEach(fb => { feedbackHtml += `<div class="feedback-item info">${fb}</div>`; });
+        } else {
+            feedbackArr.forEach(fb => { feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; });
+            if (feedbackArr.length === 0) {
+                feedbackHtml += `<div class="feedback-item warning">알림: 현재 구성된 장수/전법의 매칭 자원 중 미보유 자원이 섞여 감정되었습니다. 나의 장수 탭을 확인하세요.</div>`;
+            }
+        }
+
         deckCard.innerHTML = `
             <div class="deck-title">
                 <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
@@ -414,6 +477,13 @@ function renderDeckBuilder() {
             <div class="officers-row">
                 ${officersHtml}
             </div>
+            
+            <!-- 피드백 진단 판넬 전용 도킹 아키텍처 구역 -->
+            <div class="feedback-container-box">
+                <div class="feedback-header-title">📋 100점 종결 부대 달성을 위한 AI 실시간 맞춤 처방전</div>
+                <div class="feedback-list-wrapper">${feedbackHtml}</div>
+            </div>
+
             <div class="deck-footer-bar">
                 <div class="footer-left">
                     <select class="formation-select" onchange="changeFormation(${deck.originIdx}, this)">
