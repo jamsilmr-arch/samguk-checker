@@ -20,7 +20,7 @@ const formationPositions = {
     "안행진": ["back", "front", "front"]
 };
 
-// 54명 무장별 고유 역할 자동 맵핑 데이터 테이블
+// 54명 무장별 고유 역할 데이터 테이블
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
     "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 종결 프리셋 데이터
+// 종결 프리셋 마스터 데이터
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [1군]", formation: "추형진",
@@ -136,13 +136,14 @@ const defaultPresetDecks = [
 ];
 
 let dynamicPresetDecks = [];
+// 핵심 로직 제어 프로퍼티: 현재 정렬 상태를 기억하는 전역 토글 플래그 변수
+let currentSortMode = 'default'; 
 
 window.onload = function() {
     loadDeckTextData();
     renderDeckBuilder();
 };
 
-// 로컬 스토리지 안전 복구 체인
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -162,6 +163,8 @@ function loadDeckTextData() {
                         dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
                     }
                     const d = dynamicPresetDecks[idx];
+                    // 고유 인덱스 매핑: 정렬 시 원본의 주소를 잃지 않도록 핵심 고유 번호 박제
+                    d.originIdx = (d.originIdx !== undefined) ? d.originIdx : idx;
                     if (!d.title) d.title = defaultPresetDecks[idx]?.title || `부대 ${idx + 1}`;
                     if (!d.formation) d.formation = defaultPresetDecks[idx]?.formation || "추형진";
                     if (!Array.isArray(d.officers) || d.officers.length === 0) {
@@ -180,9 +183,11 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬스토리지 구조 복구 가동:", e);
+        console.error("로컬스토리지 복구 체인 작동:", e);
     }
+    // 최초 실행 시 고유 일련번호 할당 가공
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
+    dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
 
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
@@ -220,40 +225,59 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 핵심 버그 픽 로직: 추천도 배지 중복 생성 및 텍스트 혼입 원천 격리 가공 함수
-function saveEditedText(deckIdx, propertyName, element) {
-    let textValue = element.innerText.trim();
+// 수동 소팅 모드 체인저 스위치 인터페이스 함수
+function toggleSortMode(mode) {
+    currentSortMode = mode;
     
-    // 정규식을 활용하여 시스템용 추천도 점수 문자열 패턴([추천도: X점]) 유무를 판별하고 순수 부대 명칭만 완전 분리
+    // 버튼 시각적 활성화 동기화 스와핑
+    document.querySelectorAll('.control-sort-btn').forEach(btn => btn.classList.remove('active'));
+    if (mode === 'default') document.getElementById('sort-default-btn').classList.add('active');
+    else document.getElementById('sort-score-btn').classList.add('active');
+    
+    renderDeckBuilder();
+}
+
+// 원본 배열 주소를 직접 타격하여 수정본 세이브 백업
+function saveEditedText(originIdx, propertyName, element) {
+    let textValue = element.innerText.trim();
     textValue = textValue.replace(/\s*\[추천도:\s*\d+점\]/g, "").trim();
 
-    if (textValue.length === 0) {
-        textValue = defaultPresetDecks[deckIdx][propertyName];
+    // 일련번호(originIdx) 검증을 거쳐 매칭되는 진짜 객체 탐색
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (targetDeck) {
+        if (textValue.length === 0) {
+            textValue = defaultPresetDecks[originIdx] ? defaultPresetDecks[originIdx][propertyName] : "부대 명칭";
+        }
+        targetDeck[propertyName] = textValue;
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
-    
-    // 추천도 노이즈가 제거된 청정 텍스트 명칭만 타격해 로컬스토리지 백업
-    dynamicPresetDecks[deckIdx][propertyName] = textValue;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-    
-    // 버그 픽 동기화: 세이브 즉시 렌더러를 재가동하여 강제 문자열 리프레시 동기화
     renderDeckBuilder();
 }
 
-function changeFormation(deckIdx, selectElement) {
-    dynamicPresetDecks[deckIdx].formation = selectElement.value;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+function changeFormation(originIdx, selectElement) {
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (targetDeck) {
+        targetDeck.formation = selectElement.value;
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    }
     renderDeckBuilder();
 }
 
-function changeOfficer(deckIdx, officerIdx, selectElement) {
-    dynamicPresetDecks[deckIdx].officers[officerIdx].name = selectElement.value;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+function changeOfficer(originIdx, officerIdx, selectElement) {
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (targetDeck) {
+        targetDeck.officers[officerIdx].name = selectElement.value;
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    }
     renderDeckBuilder(); 
 }
 
-function changeTactic(deckIdx, officerIdx, slotIdx, selectElement) {
-    dynamicPresetDecks[deckIdx].officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (targetDeck) {
+        targetDeck.officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    }
     renderDeckBuilder(); 
 }
 
@@ -289,19 +313,28 @@ function renderDeckBuilder() {
             ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
         } catch (e) {
-            console.error("인벤토리 파싱 오류:", e);
+            console.error("인벤토리 조회 실패:", e);
         }
     }
 
-    dynamicPresetDecks.sort((a, b) => {
-        const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
-        const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
-        return scoreB - scoreA;
-    });
+    // 복사본 배열 분리 추출 (정적 모드와 스코어 모드 소팅 분기선)
+    let displayDecks = [...dynamicPresetDecks];
+    
+    if (currentSortMode === 'score') {
+        // 추천도 순 정렬 모드 활성화 시 내림차순 퀵 정렬
+        displayDecks.sort((a, b) => {
+            const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
+            const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
+            return scoreB - scoreA;
+        });
+    } else {
+        // 기본 모드: 일련번호(originIdx) 오름차순 고정 (1군 -> 5군 고정 아키텍처)
+        displayDecks.sort((a, b) => a.originIdx - b.originIdx);
+    }
 
     const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
 
-    dynamicPresetDecks.forEach((deck, deckIdx) => {
+    displayDecks.forEach((deck) => {
         const deckCard = document.createElement('div');
         deckCard.className = 'deck-card';
 
@@ -333,7 +366,7 @@ function renderDeckBuilder() {
                 
                 tacticRowsHtml += `
                     <div class="tactic-row ${isOwned ? 'owned' : 'missing'}" style="padding: 4px 12px;">
-                        <select class="tactic-dropdown" onchange="changeTactic(${deckIdx}, ${offIdx}, ${slotIdx}, this)">
+                        <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
                             ${optionsHtml}
                         </select>
                         <span class="tactic-status-text">${isOwned ? '장착 완료' : '미보유'}</span>
@@ -358,7 +391,7 @@ function renderDeckBuilder() {
                     <div class="officer-meta">
                         <span class="position-badge ${posClass}">${posLabel}</span>
                         <div class="officer-select-container">
-                            <select class="officer-dropdown" onchange="changeOfficer(${deckIdx}, ${offIdx}, this)">
+                            <select class="officer-dropdown" onchange="changeOfficer(${deck.originIdx}, ${offIdx}, this)">
                                 ${officerOptionsHtml}
                             </select>
                         </div>
@@ -379,10 +412,10 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
-        // 핵심 변경 가이드라인: [추천도: X점] 래퍼 스팬 공간을 contenteditable 속성의 부모 바깥으로 완전 격리 추출하여 원천 편집 거부 방어막 정렬
+        // 핵심 변경 가이드라인: 이벤트 핸들러 주입 시 물리 일련번호인 deck.originIdx를 완벽 밀착 결선하여 정렬 왜곡 방어
         deckCard.innerHTML = `
             <div class="deck-title">
-                <span contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
+                <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
                 <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
             </div>
             <div class="bond-box">
@@ -394,7 +427,7 @@ function renderDeckBuilder() {
             </div>
             <div class="deck-footer-bar">
                 <div class="footer-left">
-                    <select class="formation-select" onchange="changeFormation(${deckIdx}, this)">
+                    <select class="formation-select" onchange="changeFormation(${deck.originIdx}, this)">
                         ${formationOptionsHtml}
                     </select>
                 </div>
