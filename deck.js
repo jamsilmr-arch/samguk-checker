@@ -280,7 +280,6 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 핵심 알고리즘: 시스템 가이드 매핑 사전을 통해 덱별 최적의 육성 방향성을 역추적 안내
 const systemGuideInsights = {
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해) 스킬을 조합하세요.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
@@ -291,6 +290,7 @@ const systemGuideInsights = {
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
+// 핵심 보수 알고리즘: 슬롯별 1:1 대조를 폐기하고, 장수 본연의 식별자(ID)를 추적하여 독립 처방을 내림
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
@@ -323,7 +323,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     
     feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
     
-    // 시스템 가이드 심층 분석 인사이트 삽입
     if (systemGuideInsights[idealDeck.id]) {
         feedbackList.push(systemGuideInsights[idealDeck.id]);
     }
@@ -338,25 +337,58 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
     }
 
+    // 유저의 덱에 존재하지 않는 메타 핵심 장수들을 미리 대기열(Queue)로 추출
+    let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
+
     if (Array.isArray(deck?.officers)) {
         deck.officers.forEach((off, offIdx) => {
-            const idealOff = idealDeck?.officers?.[offIdx];
-            if (!idealOff) return;
-
             const hName = (off?.name || "").toString().trim();
-            const idealHName = (idealOff?.name || "").toString().trim();
             const cleanHName = hName.replace(/\s+/g, '');
-            const cleanIdealHName = idealHName.replace(/\s+/g, '');
-            if (!cleanHName || !cleanIdealHName) return;
+            if (!cleanHName) return;
 
             const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
-
-            if (cleanHName !== cleanIdealHName) {
-                feedbackList.push(`장수 교체: [${hName}] ➔ <strong>[${idealHName}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)`);
-            }
-            
             if (!isHeroOwned) {
-                feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. 장수 도감 탭을 갱신하거나 우회 장수를 채용하세요.`);
+                feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
+            }
+
+            // 슬롯 상관없이 유저가 세팅한 장수가 메타덱의 어느 위치에 속하는 녀석인지 역추적
+            const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
+
+            if (metaOfficerIndex !== -1) {
+                // 해당 장수가 메타의 일원일 경우: 1. 포지션 판별
+                const metaOff = idealDeck.officers[metaOfficerIndex];
+
+                if (metaOfficerIndex !== offIdx) {
+                    feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수의 최적 포지션은 <strong>${metaOfficerIndex + 1}번 슬롯</strong>입니다. 자리 배치를 조정하세요.`);
+                }
+
+                // 2. 전법은 엉뚱한 장수가 아닌 '본인'의 종결 전법과 대조하여 튜닝
+                if (Array.isArray(off?.chosenTactics)) {
+                    off.chosenTactics.forEach((tac, tacIdx) => {
+                        const idealTac = (metaOff.chosenTactics?.[tacIdx] || "").toString().trim();
+                        const cleanTac = (tac || "").toString().trim();
+
+                        const cleanIdealTac = idealTac.replace(/\s+/g, '');
+                        const cleanUserTac = cleanTac.replace(/\s+/g, '');
+                        if (!cleanUserTac || !cleanIdealTac) return;
+
+                        if (cleanUserTac !== cleanIdealTac) {
+                            feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${cleanTac}] ➔ <strong>[${idealTac}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
+                        }
+                        if (!cleanOwnedTactics.includes(cleanUserTac)) {
+                            feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${cleanTac}]</strong>이 미보유 상태입니다.`);
+                        }
+                    });
+                }
+            } else {
+                // 해당 장수가 메타의 일원이 아닐 경우: 미리 뽑아둔 부족한 코어 장수 대기열에서 꺼내와서 교체 제안
+                if (trulyMissingMetaOfficers.length > 0) {
+                    const replaceWith = trulyMissingMetaOfficers.shift();
+                    feedbackList.push(`장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)`);
+                    feedbackList.push(`전법 세팅: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 권장합니다.`);
+                } else {
+                    feedbackList.push(`장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.`);
+                }
             }
 
             const inherentTactic = officerUniqueTacticMap[hName];
@@ -365,24 +397,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
                     feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 비활성화 상태입니다.`);
                 }
-            }
-
-            if (Array.isArray(off?.chosenTactics)) {
-                off.chosenTactics.forEach((tac, tacIdx) => {
-                    const idealTac = (idealOff?.chosenTactics?.[tacIdx] || "").toString().trim();
-                    const cleanTac = (tac || "").toString().trim();
-                    
-                    const cleanIdealTac = idealTac.replace(/\s+/g, '');
-                    const cleanUserTac = cleanTac.replace(/\s+/g, '');
-                    if (!cleanUserTac || !cleanIdealTac) return;
-
-                    if (cleanUserTac !== cleanIdealTac) {
-                        feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${cleanTac}] ➔ <strong>[${idealTac}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
-                    }
-                    if (!cleanOwnedTactics.includes(cleanUserTac)) {
-                        feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${cleanTac}]</strong>이 인벤토리에 없습니다. 대체 전법을 탑재하세요.`);
-                    }
-                });
             }
         });
     }
@@ -591,7 +605,6 @@ function renderDeckBuilder() {
         const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
         let feedbackHtml = '';
         
-        // 피드백 UI 렌더링 (시스템 인사이트는 특별한 색상 배지로 분리 표기)
         if (currentComputedScore === 100 && feedbackArr.length === 2) { 
             feedbackHtml = `<div class="feedback-item success">★ 축하합니다! ${feedbackArr[0].split(']')[0]}] 과 완벽히 일치하는 무결성 최적화 군단입니다.</div>
                             <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1]}</div>`;
