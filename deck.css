@@ -245,6 +245,50 @@ body {
     font-weight: bold;
 }
 
+/* 신규 수동 피드백 판넬 통합 인프라 스펙 */
+.feedback-container-box {
+    background-color: #0b132b;
+    border: 1px solid #1c2d42;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.feedback-header-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #8da2bb;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #1c2d42;
+    padding-bottom: 6px;
+}
+.feedback-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.feedback-item {
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+.feedback-item.success {
+    background-color: rgba(34, 153, 68, 0.12);
+    color: #2ec4b6;
+    border: 1px solid rgba(34, 153, 68, 0.25);
+}
+.feedback-item.info {
+    background-color: rgba(34, 112, 181, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(34, 112, 181, 0.25);
+}
+.feedback-item.warning {
+    background-color: rgba(217, 119, 6, 0.12);
+    color: #ff9f43;
+    border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
 /* 최하단 부대 특성 진형 요약 스탯 바 */
 .deck-footer-bar {
     background-color: #0f0f0f;
