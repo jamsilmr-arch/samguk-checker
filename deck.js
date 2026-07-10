@@ -56,9 +56,9 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 순 정렬 71종 선택형 전법 풀
+// 가나다 순 정렬형 전법 리스트 마스터 풀 (신규 '안영찰채' 정렬 동기화 완료, 총 72종)
 const allTacticsList = [
-    "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
+    "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
 // 26종 공식 인연 효과 데이터 세트
@@ -136,7 +136,6 @@ const defaultPresetDecks = [
 ];
 
 let dynamicPresetDecks = [];
-// 핵심 로직 제어 프로퍼티: 현재 정렬 상태를 기억하는 전역 토글 플래그 변수
 let currentSortMode = 'default'; 
 
 window.onload = function() {
@@ -163,7 +162,6 @@ function loadDeckTextData() {
                         dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
                     }
                     const d = dynamicPresetDecks[idx];
-                    // 고유 인덱스 매핑: 정렬 시 원본의 주소를 잃지 않도록 핵심 고유 번호 박제
                     d.originIdx = (d.originIdx !== undefined) ? d.originIdx : idx;
                     if (!d.title) d.title = defaultPresetDecks[idx]?.title || `부대 ${idx + 1}`;
                     if (!d.formation) d.formation = defaultPresetDecks[idx]?.formation || "추형진";
@@ -183,9 +181,8 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬스토리지 복구 체인 작동:", e);
+        console.error("로컬스토리지 구조 복제 복구 실행:", e);
     }
-    // 최초 실행 시 고유 일련번호 할당 가공
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
@@ -225,11 +222,9 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 수동 소팅 모드 체인저 스위치 인터페이스 함수
 function toggleSortMode(mode) {
     currentSortMode = mode;
     
-    // 버튼 시각적 활성화 동기화 스와핑
     document.querySelectorAll('.control-sort-btn').forEach(btn => btn.classList.remove('active'));
     if (mode === 'default') document.getElementById('sort-default-btn').classList.add('active');
     else document.getElementById('sort-score-btn').classList.add('active');
@@ -237,12 +232,10 @@ function toggleSortMode(mode) {
     renderDeckBuilder();
 }
 
-// 원본 배열 주소를 직접 타격하여 수정본 세이브 백업
 function saveEditedText(originIdx, propertyName, element) {
     let textValue = element.innerText.trim();
     textValue = textValue.replace(/\s*\[추천도:\s*\d+점\]/g, "").trim();
 
-    // 일련번호(originIdx) 검증을 거쳐 매칭되는 진짜 객체 탐색
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
         if (textValue.length === 0) {
@@ -313,22 +306,19 @@ function renderDeckBuilder() {
             ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
         } catch (e) {
-            console.error("인벤토리 조회 실패:", e);
+            console.error("인벤토리 로드 미싱:", e);
         }
     }
 
-    // 복사본 배열 분리 추출 (정적 모드와 스코어 모드 소팅 분기선)
     let displayDecks = [...dynamicPresetDecks];
     
     if (currentSortMode === 'score') {
-        // 추천도 순 정렬 모드 활성화 시 내림차순 퀵 정렬
         displayDecks.sort((a, b) => {
             const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
             const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
             return scoreB - scoreA;
         });
     } else {
-        // 기본 모드: 일련번호(originIdx) 오름차순 고정 (1군 -> 5군 고정 아키텍처)
         displayDecks.sort((a, b) => a.originIdx - b.originIdx);
     }
 
@@ -412,7 +402,6 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
-        // 핵심 변경 가이드라인: 이벤트 핸들러 주입 시 물리 일련번호인 deck.originIdx를 완벽 밀착 결선하여 정렬 왜곡 방어
         deckCard.innerHTML = `
             <div class="deck-title">
                 <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
