@@ -142,7 +142,7 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
-// 핵심 로직 강화: 어떠한 구버전 쓰레기 캐시가 스토리지에 남아있어도 에러 없이 정밀 복구 처분하는 Try-Catch 벨트
+// 로컬 스토리지 안전 복구 체인
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -151,14 +151,12 @@ function loadDeckTextData() {
             if (Array.isArray(parsed) && parsed.length > 0) {
                 dynamicPresetDecks = parsed;
                 
-                // 부족한 부대 자동 증식 병합
                 if (dynamicPresetDecks.length < defaultPresetDecks.length) {
                     for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
                         dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
                     }
                 }
 
-                // 각 인덱스 구조체 결선 강제 검증 및 복구
                 dynamicPresetDecks.forEach((deck, idx) => {
                     if (!deck || typeof deck !== 'object') {
                         dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
@@ -182,13 +180,11 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬스토리지 구조 파손 감지, 마이그레이션 포맷 실행:", e);
+        console.error("로컬스토리지 구조 복구 가동:", e);
     }
-    // 데이터 유실 혹은 파손 발생 시 마스터 오리지널 복사본 강제 정비 주입
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
 }
 
-// 런타임 지연 및 에러 원천 봉쇄용 안전 가속 스코어링 함수
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
@@ -224,14 +220,23 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
+// 핵심 버그 픽 로직: 추천도 배지 중복 생성 및 텍스트 혼입 원천 격리 가공 함수
 function saveEditedText(deckIdx, propertyName, element) {
     let textValue = element.innerText.trim();
+    
+    // 정규식을 활용하여 시스템용 추천도 점수 문자열 패턴([추천도: X점]) 유무를 판별하고 순수 부대 명칭만 완전 분리
+    textValue = textValue.replace(/\s*\[추천도:\s*\d+점\]/g, "").trim();
+
     if (textValue.length === 0) {
         textValue = defaultPresetDecks[deckIdx][propertyName];
-        element.innerText = textValue;
     }
+    
+    // 추천도 노이즈가 제거된 청정 텍스트 명칭만 타격해 로컬스토리지 백업
     dynamicPresetDecks[deckIdx][propertyName] = textValue;
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    
+    // 버그 픽 동기화: 세이브 즉시 렌더러를 재가동하여 강제 문자열 리프레시 동기화
+    renderDeckBuilder();
 }
 
 function changeFormation(deckIdx, selectElement) {
@@ -284,11 +289,10 @@ function renderDeckBuilder() {
             ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => x.name.trim()) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
         } catch (e) {
-            console.error("인벤토리 파싱 실패:", e);
+            console.error("인벤토리 파싱 오류:", e);
         }
     }
 
-    // 종결급 스코어 역피라미드 정렬 소팅 집행
     dynamicPresetDecks.sort((a, b) => {
         const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
         const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
@@ -375,9 +379,11 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
+        // 핵심 변경 가이드라인: [추천도: X점] 래퍼 스팬 공간을 contenteditable 속성의 부모 바깥으로 완전 격리 추출하여 원천 편집 거부 방어막 정렬
         deckCard.innerHTML = `
-            <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">
-                ${deck.title} <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold;">[추천도: ${currentComputedScore}점]</span>
+            <div class="deck-title">
+                <span contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
+                <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
             </div>
             <div class="bond-box">
                 <span class="bond-highlight">부대 인연 효과 :</span> 
