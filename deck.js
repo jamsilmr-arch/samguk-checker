@@ -38,7 +38,7 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 핵심 로직 추가: 무장별 고유 전법 1:1 매핑 데이터베이스 (첫 번째 칸 강제 고정용)
+// 무장별 고유 전법 1:1 매핑 데이터베이스
 const officerUniqueTacticMap = {
     "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
     "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
@@ -56,7 +56,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 사전식 순서로 정렬된 71종 선택형 전법 리스트 마스터 풀
+// 가나다 순으로 정렬된 71종 선택형 전법 리스트 마스터 풀
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
@@ -91,7 +91,7 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 초기 프리셋 데이터 결선 구조
+// 오리지널 초기 프리셋 정보
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [T0]", specialization: "방 득화", formation: "추형진",
@@ -118,7 +118,6 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
-// 기존 스키마 구조 마이그레이션 및 파싱 안전화
 function loadDeckTextData() {
     const savedText = localStorage.getItem('samguk_deck_text');
     if (savedText) {
@@ -128,7 +127,6 @@ function loadDeckTextData() {
                 deck.specialization = "방 득화";
                 deck.formation = "추형진";
             }
-            // 하위 호환 가이드: 구형 recommendations 배열이 감지되면 2칸 선택형 구조로 긴급 자동 이관
             deck.officers.forEach(off => {
                 if (!off.chosenTactics) {
                     if (off.recommendations && off.recommendations.length >= 3) {
@@ -166,11 +164,10 @@ function changeOfficer(deckIdx, officerIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
-// 핵심 로직 추가: 드롭다운 선택 변경 시 개별 슬롯의 전법 고유 문자열 교체 후 백업
 function changeTactic(deckIdx, officerIdx, slotIdx, selectElement) {
     dynamicPresetDecks[deckIdx].officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-    renderDeckBuilder(); // 소유주 바인딩 스킨 색상 실시간 반영 목적의 강제 트리거
+    renderDeckBuilder(); 
 }
 
 function calculateActivatedBond(officers) {
@@ -215,7 +212,6 @@ function renderDeckBuilder() {
         deck.officers.forEach((off, offIdx) => {
             let tacticRowsHtml = '';
 
-            // 핵심 로직 변경 1단계: 첫 번째 칸은 무장 데이터 베이스와 교차 결선하여 고유 전법으로 영구 고정
             const inherentTactic = officerUniqueTacticMap[off.name] || "효웅";
             const isInherentOwned = ownedTactics.includes(inherentTactic);
             tacticRowsHtml += `
@@ -225,7 +221,6 @@ function renderDeckBuilder() {
                 </div>
             `;
 
-            // 핵심 로직 변경 2단계: 나머지 2칸 영역은 전체 71종 마스터 풀이 주입된 선택형 드롭박스로 가공
             off.chosenTactics.forEach((tacticName, slotIdx) => {
                 const isOwned = ownedTactics.includes(tacticName);
                 
@@ -283,6 +278,7 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
+        // 핵심 변경 레이아웃: footer-left 내부의 specialization 스팬 태그 및 수직 구분 바(|) 하드코딩 영역을 완전히 소거
         deckCard.innerHTML = `
             <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">${deck.title}</div>
             <div class="bond-box">
@@ -294,8 +290,6 @@ function renderDeckBuilder() {
             </div>
             <div class="deck-footer-bar">
                 <div class="footer-left">
-                    <span contenteditable="true" onblur="saveEditedText(${deckIdx}, 'specialization', this)">${deck.specialization}</span>
-                    <span style="color:#444; margin:0 8px;">|</span>
                     <select class="formation-select" onchange="changeFormation(${deckIdx}, this)">
                         ${formationOptionsHtml}
                     </select>
