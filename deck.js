@@ -20,7 +20,7 @@ const formationPositions = {
     "안행진": ["back", "front", "front"]
 };
 
-// 54명 무장별 고유 역할 데이터 테이블 (유비(제왕) 표준 명칭 완벽 동기화 개정)
+// 54명 무장별 고유 역할 데이터 테이블
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
     "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
@@ -38,7 +38,7 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 무장별 고유 전법 1:1 매핑 데이터베이스 (유비(제왕) 표준 명칭 완벽 동기화 개정)
+// 무장별 고유 전법 1:1 매핑 데이터베이스
 const officerUniqueTacticMap = {
     "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
     "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
@@ -61,7 +61,7 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 26종 공식 인연 효과 데이터 세트 (유비(제왕) 명칭 통일 수정 완료)
+// 26종 공식 인연 효과 데이터 세트
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -183,7 +183,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬스토리지 구조 복구 체인 작동:", e);
+        console.error("스토리지 구조 감지 예외 복구:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -198,20 +198,21 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
 
     deck.officers.forEach(off => {
         if (!off || !off.name) return;
-        const hName = off.name.trim();
+        const hName = (off.name || "").toString().trim();
+        if (!hName) return;
         
         if (ownedHeroes.includes(hName)) {
             heroMatchCount += 1;
         }
         
         const inherentTactic = officerUniqueTacticMap[hName];
-        if (inherentTactic && ownedTactics.includes(inherentTactic.trim())) {
+        if (inherentTactic && ownedTactics.includes(inherentTactic.toString().trim())) {
             tacticMatchCount += 1;
         }
         
         if (Array.isArray(off.chosenTactics)) {
             off.chosenTactics.forEach(tac => {
-                if (tac && ownedTactics.includes(tac.trim())) {
+                if (tac && ownedTactics.includes(tac.toString().trim())) {
                     tacticMatchCount += 1;
                 }
             });
@@ -224,48 +225,58 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
+// 핵심 리스크 통제: 데이터 무결성을 보장하기 위해 널 가드(Null Guard) 처리를 마감한 피드백 연산자
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
-    const idealDeck = defaultPresetDecks[deck.originIdx];
+    const idealDeck = defaultPresetDecks[deck?.originIdx];
     if (!idealDeck) return [];
 
     let feedbackList = [];
     
-    if (deck.formation.trim() !== idealDeck.formation.trim()) {
-        feedbackList.push(`진형 변경 필요: 현재 설정된 [${deck.formation}]을(를) 매칭 종결 진형인 <strong>[${idealDeck.formation}]</strong>(으)로 변경하세요.`);
+    const currentFormation = (deck?.formation || "").toString().trim();
+    const idealFormation = (idealDeck?.formation || "").toString().trim();
+
+    if (currentFormation !== idealFormation) {
+        feedbackList.push(`진형 변경 필요: 현재 설정된 [${currentFormation}]을(를) 매칭 종결 진형인 <strong>[${idealFormation}]</strong>(으)로 변경하세요.`);
     }
 
-    deck.officers.forEach((off, offIdx) => {
-        const idealOff = idealDeck.officers[offIdx];
-        if (!idealOff) return;
+    if (Array.isArray(deck?.officers)) {
+        deck.officers.forEach((off, offIdx) => {
+            const idealOff = idealDeck?.officers?.[offIdx];
+            if (!idealOff) return;
 
-        const hName = off.name.trim();
-        const idealHName = idealOff.name.trim();
+            const hName = (off?.name || "").toString().trim();
+            const idealHName = (idealOff?.name || "").toString().trim();
+            if (!hName || !idealHName) return;
 
-        if (hName !== idealHName) {
-            feedbackList.push(`무장 복구 권고: 현재 배치된 [${hName}]을(를) 종결 핵심 장수인 <strong>[${idealHName}]</strong>(으)로 교체하세요.`);
-        }
-        
-        if (!ownedHeroes.includes(hName)) {
-            feedbackList.push(`장수 결핍 경고: 현재 장수 [${hName}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
-        }
-
-        const inherentTactic = officerUniqueTacticMap[hName];
-        if (inherentTactic && !ownedTactics.includes(inherentTactic.trim())) {
-            feedbackList.push(`고유 전법 누락: 무장 [${hName}]의 핵심 고유 전법 <strong>[${inherentTactic.trim()}]</strong>이 미보유 상태입니다.`);
-        }
-
-        off.chosenTactics.forEach((tac, tacIdx) => {
-            const idealTac = idealOff.chosenTactics[tacIdx].trim();
-            const cleanTac = tac.trim();
-
-            if (cleanTac !== idealTac) {
-                feedbackList.push(`전법 오장착 픽스: [${hName}]의 ${tacIdx + 2}번째 칸 전법 [${cleanTac}] 대신 졸업 전법인 <strong>[${idealTac}]</strong>을(를) 탑재하세요.`);
+            if (hName !== idealHName) {
+                feedbackList.push(`무장 복구 권고: 현재 배치된 [${hName}]을(를) 종결 핵심 장수인 <strong>[${idealHName}]</strong>(으)로 교체하세요.`);
             }
-            if (!ownedTactics.includes(cleanTac)) {
-                feedbackList.push(`전법 자원 부족: [${hName}]의 ${tacIdx + 2}번째 칸 전법 <strong>[${cleanTac}]</strong>은(는) 현재 미보유 중입니다. 보유 전법 드롭다운에서 다른 전법을 선별하세요.`);
+            
+            if (!ownedHeroes.includes(hName)) {
+                feedbackList.push(`장수 결핍 경고: 현재 장수 [${hName}]은(는) 미보유 상태입니다. 나의 장수 탭에서 체크하거나 보유 장수로 우회 배치하세요.`);
+            }
+
+            const inherentTactic = officerUniqueTacticMap[hName];
+            if (inherentTactic && !ownedTactics.includes(inherentTactic.toString().trim())) {
+                feedbackList.push(`고유 전법 누락: 무장 [${hName}]의 핵심 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 미보유 상태입니다.`);
+            }
+
+            if (Array.isArray(off?.chosenTactics)) {
+                off.chosenTactics.forEach((tac, tacIdx) => {
+                    const idealTac = (idealOff?.chosenTactics?.[tacIdx] || "").toString().trim();
+                    const cleanTac = (tac || "").toString().trim();
+                    if (!cleanTac || !idealTac) return;
+
+                    if (cleanTac !== idealTac) {
+                        feedbackList.push(`전법 오장착 픽스: [${hName}]의 ${tacIdx + 2}번째 칸 전법 [${cleanTac}] 대신 졸업 전법인 <strong>[${idealTac}]</strong>을(를) 탑재하세요.`);
+                    }
+                    if (!ownedTactics.includes(cleanTac)) {
+                        feedbackList.push(`전법 자원 부족: [${hName}]의 ${tacIdx + 2}번째 칸 전법 <strong>[${cleanTac}]</strong>은(는) 현재 미보유 중입니다. 보유 전법 드롭다운에서 다른 전법을 선별하세요.`);
+                    }
+                });
             }
         });
-    });
+    }
 
     return feedbackList;
 }
@@ -322,6 +333,23 @@ function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
+function calculateActivatedBond(officers) {
+    if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "");
+    let matchedBonds = [];
+
+    bondRules.forEach(rule => {
+        const uniqueMatches = [...new Set(currentOfficerNames.filter(name => rule.heroes.includes(name)))];
+        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
+        
+        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
+            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
+        }
+    });
+
+    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
+}
+
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -331,19 +359,18 @@ function renderDeckBuilder() {
     let ownedHeroes = [];
     let ownedTactics = [];
 
-    // 핵심 교정 레이아웃: 로컬스토리지 파싱 진입 시 구형 명칭 파편 강제 치환 및 트림 표준화 벨트 가동
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
             ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => {
-                let name = x.name.trim();
+                let name = (x.name || "").toString().trim();
                 if (name === "제)조조") name = "조조(제왕)";
                 if (name === "제)유비") name = "유비(제왕)";
                 return name;
             }) : [];
-            ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
+            ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("인벤토리 로드 오류:", e);
+            console.error("인벤토리 직렬화 로드 오류 방어:", e);
         }
     }
 
@@ -356,7 +383,7 @@ function renderDeckBuilder() {
             return scoreB - scoreA;
         });
     } else {
-        displayDecks.sort((a, b) => a.originIdx - b.originIdx);
+        displayDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
     }
 
     const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -370,66 +397,72 @@ function renderDeckBuilder() {
         const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
 
         let officersHtml = '';
-        deck.officers.forEach((off, offIdx) => {
-            let tacticRowsHtml = '';
+        if (Array.isArray(deck.officers)) {
+            deck.officers.forEach((off, offIdx) => {
+                let tacticRowsHtml = '';
+                const hName = (off?.name || "").toString().trim();
 
-            const inherentTactic = officerUniqueTacticMap[off.name] || "효웅";
-            const isInherentOwned = ownedTactics.includes(inherentTactic.trim());
-            tacticRowsHtml += `
-                <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
-                    <span>⭐ ${inherentTactic} (고유)</span>
-                    <span>보유중</span>
-                </div>
-            `;
-
-            off.chosenTactics.forEach((tacticName, slotIdx) => {
-                const isOwned = ownedTactics.includes(tacticName.trim());
-                
-                let optionsHtml = '';
-                allTacticsList.forEach(tName => {
-                    const isSelected = tacticName === tName ? 'selected' : '';
-                    optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
-                });
-                
+                const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
+                const isInherentOwned = ownedTactics.includes(inherentTactic.trim());
                 tacticRowsHtml += `
-                    <div class="tactic-row ${isOwned ? 'owned' : 'missing'}" style="padding: 4px 12px;">
-                        <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
-                            ${optionsHtml}
-                        </select>
-                        <span class="tactic-status-text">${isOwned ? '장착 완료' : '미보유'}</span>
+                    <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
+                        <span>⭐ ${inherentTactic} (고유)</span>
+                        <span>보유중</span>
+                    </div>
+                `;
+
+                if (Array.isArray(off?.chosenTactics)) {
+                    off.chosenTactics.forEach((tacticName, slotIdx) => {
+                        const cleanTac = (tacticName || "").toString().trim();
+                        const isOwned = ownedTactics.includes(cleanTac);
+                        
+                        let optionsHtml = '';
+                        allTacticsList.forEach(tName => {
+                            const isSelected = cleanTac === tName ? 'selected' : '';
+                            optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
+                        });
+                        
+                        tacticRowsHtml += `
+                            <div class="tactic-row ${isOwned ? 'owned' : 'missing'}" style="padding: 4px 12px;">
+                                <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
+                                    ${optionsHtml}
+                                </select>
+                                <span class="tactic-status-text">${isOwned ? '장착 완료' : '미보유'}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                const currentPos = currentPositions[offIdx] || "front";
+                const posLabel = currentPos === 'front' ? '전열' : '후열';
+                const posClass = currentPos === 'front' ? 'front' : 'back';
+
+                let officerOptionsHtml = '';
+                sortedHeroNames.forEach(hKey => {
+                    const isSelected = hName === hKey ? 'selected' : '';
+                    officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
+                });
+
+                const currentComputedRole = officerRoleMap[hName] || "보조, 버퍼";
+
+                officersHtml += `
+                    <div class="officer-slot">
+                        <div class="officer-meta">
+                            <span class="position-badge ${posClass}">${posLabel}</span>
+                            <div class="officer-select-container">
+                                <select class="officer-dropdown" onchange="changeOfficer(${deck.originIdx}, ${offIdx}, this)">
+                                    ${officerOptionsHtml}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="officer-role-label">${currentComputedRole}</div>
+                        <div class="tactic-status-box">
+                            ${tacticRowsHtml}
+                        </div>
                     </div>
                 `;
             });
-
-            const currentPos = currentPositions[offIdx] || "front";
-            const posLabel = currentPos === 'front' ? '전열' : '후열';
-            const posClass = currentPos === 'front' ? 'front' : 'back';
-
-            let officerOptionsHtml = '';
-            sortedHeroNames.forEach(hName => {
-                const isSelected = off.name === hName ? 'selected' : '';
-                officerOptionsHtml += `<option value="${hName}" ${isSelected}>${hName}</option>`;
-            });
-
-            const currentComputedRole = officerRoleMap[off.name] || "보조, 버퍼";
-
-            officersHtml += `
-                <div class="officer-slot">
-                    <div class="officer-meta">
-                        <span class="position-badge ${posClass}">${posLabel}</span>
-                        <div class="officer-select-container">
-                            <select class="officer-dropdown" onchange="changeOfficer(${deck.originIdx}, ${offIdx}, this)">
-                                ${officerOptionsHtml}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="officer-role-label">${currentComputedRole}</div>
-                    <div class="tactic-status-box">
-                        ${tacticRowsHtml}
-                    </div>
-                </div>
-            `;
-        });
+        }
 
         let formationOptionsHtml = '';
         Object.keys(formationEffects).forEach(fName => {
