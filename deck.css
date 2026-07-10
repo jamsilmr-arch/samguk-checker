@@ -40,6 +40,29 @@ body {
 .nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
 .nav-menu-item.active a { color: #ffcc00; }
 
+/* 신규 수동 정렬 인터페이스 전용 버튼 스킨 */
+.control-sort-btn {
+    background-color: #262626;
+    color: #aaaaaa;
+    border: 1px solid #444444;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    transition: all 0.15s ease-in-out;
+}
+.control-sort-btn:hover {
+    background-color: #333333;
+    color: #ffffff;
+    border-color: #666666;
+}
+.control-sort-btn.active {
+    background-color: #ffffff;
+    color: #121212;
+    border-color: #ffffff;
+}
+
 /* 덱 빌더 메인 컨테이너 레이아웃 */
 .deck-main-container {
     max-width: 1300px;
@@ -210,8 +233,6 @@ body {
     background-position: right 2px center;
     padding-right: 15px;
 }
-
-/* 표준 CSS 문법 복원: 자식 결선 분리 처리로 렌더링 크래시 완전 차단 */
 .tactic-row.owned .tactic-dropdown {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23229944' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
 }
