@@ -1,4 +1,4 @@
-// 초기 무장 데이터 세팅 (총 48명 진영별 정렬 체계)
+// 초기 무장 데이터 세팅 (총 48명 진영별 정렬 체계 - 조조(제왕) 무결성 유지)
 const heroList = [
     // 위나라 (13명)
     { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false },
@@ -63,7 +63,7 @@ const heroList = [
     { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false }
 ];
 
-// 초기 전법 데이터 세팅 (신규 지휘 전법 '안영찰채' 자모음 연돈 매칭 정렬)
+// 초기 전법 데이터 세팅 (총 72종 가나다 사전식 구조 완료)
 const tacticList = [
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false },
@@ -75,7 +75,7 @@ const tacticList = [
     { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false },
     { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false },
     { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false },
-    { id: 't_geum창', name: '금창신', group: 'tactic', isOwned: false },
+    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false },
     { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false },
     { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false },
     { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false },
@@ -97,7 +97,7 @@ const tacticList = [
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false },
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false },
-    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false }, // 신규 이식
+    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false },
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false },
     { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false },
     { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false },
@@ -193,7 +193,6 @@ function toggleState(id, type) {
     }
 }
 
-// 보유 변경 정보 로컬 디스크 직렬화 격리 저장
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
