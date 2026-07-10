@@ -65,6 +65,8 @@ body {
     font-weight: bold;
     color: #feca57;
     margin-bottom: 12px;
+    display: flex;
+    align-items: center;
 }
 
 /* 인연 전법 보드 영역 스타일 */
@@ -189,7 +191,7 @@ body {
     color: #f3a63b;
 }
 
-/* 핵심 레이아웃 추가: 다크 테마 일체형 전법 전용 드롭다운 스킨 스타일링 */
+/* 다크 테마 일체형 전법 전용 드롭다운 스킨 스타일링 */
 .tactic-dropdown {
     width: 65%;
     background: transparent;
@@ -204,7 +206,6 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f3a63b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-    .owned & { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23229944' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>"); }
     background-repeat: no-repeat;
     background-position: right 2px center;
     padding-right: 15px;
