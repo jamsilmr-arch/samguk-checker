@@ -56,7 +56,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-// 가나다 순으로 정렬된 71종 선택형 전법 리스터 마스터 풀
+// 가나다 순으로 정렬된 71종 선택형 전법 리스트 마스터 풀
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
@@ -148,7 +148,6 @@ function loadDeckTextData() {
     if (savedText) {
         dynamicPresetDecks = JSON.parse(savedText);
         
-        // 하위 호환성 방어: 세이브 파일 내 부대 분량이 5개 미만인 경우 신규 조합 강제 보충
         if (dynamicPresetDecks.length < defaultPresetDecks.length) {
             for (let i = dynamicPresetDecks.length; i < defaultPresetDecks.length; i++) {
                 dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[i])));
@@ -179,20 +178,17 @@ function loadDeckTextData() {
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     let heroMatchCount = 0;
     let tacticMatchCount = 0;
-    const totalTacticSlots = 9; // 3개 슬롯 * 무장 3명
+    const totalTacticSlots = 9; 
 
     deck.officers.forEach(off => {
         const hName = off.name.trim();
-        // 1. 무장 매칭 검증
         if (ownedHeroes.includes(hName)) {
             heroMatchCount += 1;
         }
-        // 2. 고유 전법 매칭 검증
         const inherentTactic = officerUniqueTacticMap[hName];
         if (inherentTactic && ownedTactics.includes(inherentTactic.trim())) {
             tacticMatchCount += 1;
         }
-        // 3. 가변 선택 전법 매칭 검증
         off.chosenTactics.forEach(tac => {
             if (ownedTactics.includes(tac.trim())) {
                 tacticMatchCount += 1;
@@ -240,7 +236,6 @@ function renderDeckBuilder() {
     if (!container) return;
     container.innerHTML = '';
 
-    // 인벤토리 로컬 캐시 추출 및 배열 표준화 파싱
     const savedData = localStorage.getItem('samguk_hobby_data');
     let ownedHeroes = [];
     let ownedTactics = [];
@@ -251,7 +246,7 @@ function renderDeckBuilder() {
         ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => x.name.trim()) : [];
     }
 
-    // 핵심 추천 기능 연동: 매 라운드 드로잉 시점 직전에 최고 점수 기준 내림차순 역피라미드 소팅 강제 집행
+    // 핵심 추천 기능 연동: 최고 점수 기준 내림차순 역피라미드 소팅 강제 집행
     dynamicPresetDecks.sort((a, b) => {
         const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
         const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
@@ -264,7 +259,6 @@ function renderDeckBuilder() {
         const deckCard = document.createElement('div');
         deckCard.className = 'deck-card';
 
-        // 현재 조합 기준 실시간 점수 환산 데이터 취득
         const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
         const computedBondText = calculateActivatedBond(deck.officers);
         const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
@@ -339,7 +333,6 @@ function renderDeckBuilder() {
 
         const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
 
-        // 타이틀 우측 골드 오렌지 색상의 동적 점수 배지 연동 출력 처리
         deckCard.innerHTML = `
             <div class="deck-title" contenteditable="true" onblur="saveEditedText(${deckIdx}, 'title', this)">
                 ${deck.title} <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold;">[추천도: ${currentComputedScore}점]</span>
