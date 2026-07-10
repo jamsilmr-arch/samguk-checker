@@ -1,0 +1,145 @@
+/* 글로벌 다크 스타일 테마 설정 */
+body {
+    background-color: #141414;
+    color: #e0e0e0;
+    font-family: 'Malgun Gothic', sans-serif;
+    margin: 0;
+    padding: 0 0 50px 0;
+}
+
+.top-title-header {
+    background-color: #111111;
+    padding: 20px 30px;
+    display: flex;
+    align-items: baseline;
+}
+.top-title-header h1 {
+    color: #cd9b33;
+    font-size: 26px;
+    margin: 0;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+.top-title-header .author-text { color: #777777; font-size: 13px; margin-left: 12px; font-weight: bold; }
+
+.global-nav-bar {
+    background-color: #2b1a1a;
+    border-bottom: 2px solid #cd9b33;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 30px;
+    overflow-x: auto;
+}
+.nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; }
+.nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
+.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
+.nav-menu-item.active a { color: #ffcc00; }
+
+/* 가이드 전용 레이아웃 분할 구조 */
+.guide-main-container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+/* 좌측 사이드바 탭 */
+.guide-sidebar {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 20px;
+}
+.guide-tab-btn {
+    background-color: #1c1c1c;
+    color: #aaaaaa;
+    border: 1px solid #333333;
+    padding: 14px 20px;
+    text-align: left;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.guide-tab-btn:hover { background-color: #2a2a2a; color: #ffffff; }
+.guide-tab-btn.active { background-color: #2270b5; color: #ffffff; border-color: #38bdf8; box-shadow: 0 0 10px rgba(34,112,181,0.5); }
+
+/* 우측 메인 콘텐츠 뷰어 */
+.guide-content-area {
+    flex: 1;
+    background-color: #1c1c1c;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 30px;
+    min-height: 600px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.guide-section-title {
+    color: #feca57;
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333333;
+}
+
+/* 데이터 블록 카드 스타일 */
+.info-card {
+    background-color: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.info-card h3 {
+    color: #38bdf8;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+.info-card p, .info-card li {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #dddddd;
+}
+.info-card ul { margin: 0; padding-left: 20px; }
+
+/* 데이터 테이블 스타일 (속성 및 상태용) */
+.data-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 30px;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2a2a2a;
+}
+.data-table th {
+    background-color: #0f1322;
+    color: #cd9b33;
+    font-weight: bold;
+    border-bottom: 2px solid #cd9b33;
+}
+.data-table tr:hover { background-color: #222222; }
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.badge-attr { background-color: #1f2937; color: #a855f7; border: 1px solid #a855f7; }
+.badge-buff { background-color: rgba(34, 153, 68, 0.2); color: #2ec4b6; border: 1px solid #2ec4b6; }
+.badge-debuff { background-color: rgba(217, 119, 6, 0.2); color: #ff9f43; border: 1px solid #ff9f43; }
+.badge-control { background-color: rgba(184, 45, 45, 0.2); color: #f87171; border: 1px solid #f87171; }
