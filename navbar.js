@@ -1,10 +1,32 @@
 (function() {
-    // 구조 무관형 글로벌 내비게이션 바 동적 도킹 인젝션 엔진
+    // 1. 글로벌 네비게이션 전용 핵심 CSS 디자인 스타일 동적 자동 주입 (타 CSS 파일 수정 불필요)
+    if (!document.getElementById('dynamic-navbar-styles')) {
+        const styleTag = document.createElement('style');
+        styleTag.id = 'dynamic-navbar-styles';
+        styleTag.textContent = `
+            .global-nav-bar {
+                background-color: #2b1a1a;
+                border-bottom: 2px solid #cd9b33;
+                display: flex;
+                justify-content: flex-end;
+                padding: 0 30px;
+                overflow-x: auto;
+                position: relative;
+                z-index: 9999;
+            }
+            .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; }
+            .nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
+            .nav-menu-item:hover a { color: #ffffff; }
+            .nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
+            .nav-menu-item.active a { color: #ffcc00; }
+        `;
+        document.head.appendChild(styleTag);
+    }
+
+    // 2. 글로벌 네비게이션 바 DOM 생성 및 도킹 엔진
     function injectGlobalNavbarEngine() {
-        // 이중 주입 및 렌더링 중복 충돌 차단 방어선
         if (document.getElementById('dynamic-global-nav-bar')) return;
 
-        // 마스터 메뉴 데이터 세트
         const globalMenuItems = [
             { name: "나의 장수/전법", url: "index.html" },
             { name: "덱 구성", url: "deck.html" },
@@ -13,20 +35,16 @@
             { name: "시스템 가이드", url: "guide.html" }
         ];
 
-        // 브라우저 런타임 현재 파일 명칭 정밀 추출 파서
         const locationPath = window.location.pathname;
         let currentFile = locationPath.split('/').pop().split('?')[0].split('#')[0];
         
         if (!currentFile || currentFile === "") {
-            currentFile = "index.html"; // 루트 경로 진입 시 기본값 매핑
+            currentFile = "index.html";
         }
         
-        // 내비게이션 DOM 노드 동적 생성 및 레이아웃 순위 고정
         const navContainer = document.createElement('nav');
         navContainer.id = 'dynamic-global-nav-bar';
         navContainer.className = 'global-nav-bar';
-        navContainer.style.position = 'relative';
-        navContainer.style.zIndex = '9999'; 
 
         const menuUl = document.createElement('ul');
         menuUl.className = 'nav-menu-list';
@@ -48,25 +66,15 @@
         });
         navContainer.appendChild(menuUl);
 
-        // [3중 폴백 가드 필터]: 페이지 구조 분석 및 자동 위치 판독 도킹 실행
-        const standardTarget = document.querySelector('.top-title-header') || 
-                               document.querySelector('header') || 
-                               document.querySelector('.header') || 
-                               document.querySelector('.top-bar');
-
+        // 상단 타이틀 배너 바로 아래에 안정적으로 고정 배치
+        const standardTarget = document.querySelector('.top-title-header') || document.querySelector('header');
         if (standardTarget) {
-            // 1단계: 정식 규격 헤더나 클래스 배너 뒤에 주입
             standardTarget.after(navContainer);
-        } else if (document.body && document.body.firstElementChild) {
-            // 2단계: 클래스명이 없는 일반 div 타이틀 배너인 경우 그 바로 밑에 노드 삽입
-            document.body.firstElementChild.after(navContainer);
-        } else if (document.body) {
-            // 3단계: 최악의 경우 body 최상단에 강제 우선 주입
+        } else {
             document.body.prepend(navContainer);
         }
     }
 
-    // 돔 파싱 주기 방어선
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
     } else {
