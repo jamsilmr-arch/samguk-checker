@@ -9,7 +9,7 @@ const formationEffects = {
     "안행진": "전열: 받는 피해 감소 5.0% | 후열: 강공 및 기습 증가 12.0%"
 };
 
-// 핵심 로직 추가: 요청하신 진형별 무장 전열/후열 위치 정밀 매핑 테이블
+// 7종 진형별 무장 전열/후열 위치 정밀 매핑 테이블
 const formationPositions = {
     "일자진": ["front", "front", "front"],
     "구행진": ["front", "back", "front"],
@@ -20,7 +20,7 @@ const formationPositions = {
     "안행진": ["back", "front", "front"]
 };
 
-// 54명 무장별 고유 역할 자동 맵핑 데이터 테이블 (스프레드시트 스펙 동기화)
+// 54명 무장별 고유 역할 자동 맵핑 데이터 테이블
 const officerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
     "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
@@ -38,7 +38,30 @@ const officerRoleMap = {
     "화타": "능동 (50%)", "장녕": "능동 (50%)"
 };
 
-// 26종 공식 인연 효과 자동 검증용 데이터 세트
+// 핵심 로직 추가: 무장별 고유 전법 1:1 매핑 데이터베이스 (첫 번째 칸 강제 고정용)
+const officerUniqueTacticMap = {
+    "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
+    "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
+    "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "제)조조": "군령여산", 
+    "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
+    "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
+    "황월영": "묘산천기", "제갈량": "초선차전", "제)유비": "재주복주", "조운": "칠진칠출", 
+    "마초": "출수법", "서서": "절절학문", "강유": "담대여두", "손권": "웅거", 
+    "손견": "강동맹호", "주유": "봉화연천", "대교": "정수유심", "황개": "요원지화", 
+    "여몽": "백의도강", "육손": "지변규려", "소교": "화용욕모", "손상향": "효희", 
+    "육항": "청백충근", "손책": "강동패주", "제)손권": "겸권상계", "주태": "청라산개", 
+    "정보": "칠척사모", "노숙": "탑상책", "동탁": "전권난정", "좌자": "화겁생기", 
+    "여포": "천하무쌍", "우길": "태평경", "초선": "폐월", "안량": "효장", 
+    "장각": "황천당립", "원소": "사소도", "장보": "요풍사기", "채문희": "비분시", 
+    "화타": "청낭제세", "장녕": "천의난위"
+};
+
+// 가나다 사전식 순서로 정렬된 71종 선택형 전법 리스트 마스터 풀
+const allTacticsList = [
+    "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
+];
+
+// 26종 공식 인연 효과 데이터 세트
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -68,22 +91,22 @@ const bondRules = [
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
 
-// 오리지널 초기 프리셋 정보
+// 초기 프리셋 데이터 결선 구조
 const defaultPresetDecks = [
     {
         title: "위무 방패병 [T0]", specialization: "방 득화", formation: "추형진",
         officers: [
-            { name: "조조", recommendations: ["휴양생식", "교취호탈", "병량촌단"] },
-            { name: "하후돈", recommendations: ["독구격퇴", "이아환아", "전불가퇴", "교취호탈"] },
-            { name: "곽가", recommendations: ["요사여신", "공기불비", "낙정하석"] }
+            { name: "조조", chosenTactics: ["교취호탈", "병량촌단"] },
+            { name: "하후돈", chosenTactics: ["이아환아", "교취호탈"] },
+            { name: "곽가", chosenTactics: ["공기불비", "낙정하석"] }
         ]
     },
     {
         title: "신속창·2 [T0]", specialization: "창 득화", formation: "기형진",
         officers: [
-            { name: "장료", recommendations: ["만전제발", "사생취의", "강다"] },
-            { name: "조조(제왕)", recommendations: ["형초풍패", "교취호탈", "병량촌단", "동장철벽"] },
-            { name: "악진", recommendations: ["기문둔갑", "교취호탈", "병량촌단", "선등함진"] }
+            { name: "장료", chosenTactics: ["사생취의", "만전제발"] },
+            { name: "조조(제왕)", chosenTactics: ["교취호탈", "동장철벽"] },
+            { name: "악진", chosenTactics: ["교취호탈", "선등함진"] }
         ]
     }
 ];
@@ -95,21 +118,26 @@ window.onload = function() {
     renderDeckBuilder();
 };
 
+// 기존 스키마 구조 마이그레이션 및 파싱 안전화
 function loadDeckTextData() {
     const savedText = localStorage.getItem('samguk_deck_text');
     if (savedText) {
         dynamicPresetDecks = JSON.parse(savedText);
         dynamicPresetDecks.forEach((deck, idx) => {
             if (!deck.formation) {
-                if (deck.footerLeft && deck.footerLeft.includes('|')) {
-                    const parts = deck.footerLeft.split('|');
-                    deck.specialization = parts[0].trim();
-                    deck.formation = parts[1].trim();
-                } else {
-                    deck.specialization = deck.footerLeft || (idx === 0 ? "방 득화" : "창 득화");
-                    deck.formation = idx === 0 ? "추형진" : "기형진";
-                }
+                deck.specialization = "방 득화";
+                deck.formation = "추형진";
             }
+            // 하위 호환 가이드: 구형 recommendations 배열이 감지되면 2칸 선택형 구조로 긴급 자동 이관
+            deck.officers.forEach(off => {
+                if (!off.chosenTactics) {
+                    if (off.recommendations && off.recommendations.length >= 3) {
+                        off.chosenTactics = [off.recommendations[1], off.recommendations[2]];
+                    } else {
+                        off.chosenTactics = ["교취호탈", "병량촌단"];
+                    }
+                }
+            });
         });
     } else {
         dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
@@ -136,6 +164,13 @@ function changeOfficer(deckIdx, officerIdx, selectElement) {
     dynamicPresetDecks[deckIdx].officers[officerIdx].name = selectElement.value;
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder(); 
+}
+
+// 핵심 로직 추가: 드롭다운 선택 변경 시 개별 슬롯의 전법 고유 문자열 교체 후 백업
+function changeTactic(deckIdx, officerIdx, slotIdx, selectElement) {
+    dynamicPresetDecks[deckIdx].officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    renderDeckBuilder(); // 소유주 바인딩 스킨 색상 실시간 반영 목적의 강제 트리거
 }
 
 function calculateActivatedBond(officers) {
@@ -174,23 +209,42 @@ function renderDeckBuilder() {
         deckCard.className = 'deck-card';
 
         const computedBondText = calculateActivatedBond(deck.officers);
-
-        // 핵심 로직 변경: 현재 부대의 진형명에 대응하는 포지션 배열을 실시간 추출 (매핑 실패 시 안전 폴백 작동)
         const currentPositions = formationPositions[deck.formation] || ["front", "front", "front"];
 
         let officersHtml = '';
         deck.officers.forEach((off, offIdx) => {
             let tacticRowsHtml = '';
-            off.recommendations.forEach(recTactic => {
-                const isOwned = ownedTactics.includes(recTactic);
-                if (isOwned) {
-                    tacticRowsHtml += `<div class="tactic-row owned"><span>✓ ${recTactic}</span><span>장착 완료</span></div>`;
-                } else {
-                    tacticRowsHtml += `<div class="tactic-row missing"><span>${recTactic}</span><span>미보유</span></div>`;
-                }
+
+            // 핵심 로직 변경 1단계: 첫 번째 칸은 무장 데이터 베이스와 교차 결선하여 고유 전법으로 영구 고정
+            const inherentTactic = officerUniqueTacticMap[off.name] || "효웅";
+            const isInherentOwned = ownedTactics.includes(inherentTactic);
+            tacticRowsHtml += `
+                <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
+                    <span>⭐ ${inherentTactic} (고유)</span>
+                    <span>보유중</span>
+                </div>
+            `;
+
+            // 핵심 로직 변경 2단계: 나머지 2칸 영역은 전체 71종 마스터 풀이 주입된 선택형 드롭박스로 가공
+            off.chosenTactics.forEach((tacticName, slotIdx) => {
+                const isOwned = ownedTactics.includes(tacticName);
+                
+                let optionsHtml = '';
+                allTacticsList.forEach(tName => {
+                    const isSelected = tacticName === tName ? 'selected' : '';
+                    optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
+                });
+                
+                tacticRowsHtml += `
+                    <div class="tactic-row ${isOwned ? 'owned' : 'missing'}" style="padding: 4px 12px;">
+                        <select class="tactic-dropdown" onchange="changeTactic(${deckIdx}, ${offIdx}, ${slotIdx}, this)">
+                            ${optionsHtml}
+                        </select>
+                        <span class="tactic-status-text">${isOwned ? '장착 완료' : '미보유'}</span>
+                    </div>
+                `;
             });
 
-            // 핵심 로직 변경: 기존의 고정 배치 정보를 버리고, 진형 조건 테이블에서 도출된 인덱스 위치를 강제 동기화
             const currentPos = currentPositions[offIdx] || "front";
             const posLabel = currentPos === 'front' ? '전열' : '후열';
             const posClass = currentPos === 'front' ? 'front' : 'back';
