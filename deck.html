@@ -18,9 +18,10 @@
         <button id="sort-score-btn" class="control-sort-btn" onclick="toggleSortMode('score')">추천도 높은 순 정렬</button>
     </div>
 
+    <!-- 렌더링 컨테이너 -->
     <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
-    <!-- 단일 통합 무결성 마스터 파일 로드 -->
-    <script src="deck.js"></script>
+    <!-- 물리적 캐시 파괴 및 하위 호환성을 보장하는 신규 코어 엔진 로드 -->
+    <script src="deck_core.js"></script>
 </body>
 </html>
