@@ -286,7 +286,7 @@ function renderDeckBuilder() {
                 if (index === 0) {
                     feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
                 } else if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
                 } else {
                     feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                 }
