@@ -744,3 +744,81 @@ if (document.readyState === 'loading') {
 } else {
     initDeckCoreEngine();
 }
+// ==========================================================================
+// 4. 영구 자원 백업(Export) 및 복구(Import) 코어 엔진 구역
+// ==========================================================================
+
+// 현재 로컬 스토리지에 저장된 모든 삼국지 왕전 데이터를 파일로 추출 다운로드
+function exportData() {
+    try {
+        var hobbyData = localStorage.getItem('samguk_hobby_data');
+        var deckData = localStorage.getItem('samguk_deck_text');
+        
+        var backupObject = {
+            samguk_hobby_data: hobbyData ? JSON.parse(hobbyData) : null,
+            samguk_deck_text: deckData ? JSON.parse(deckData) : null
+        };
+        
+        var jsonString = JSON.stringify(backupObject, null, 2);
+        var blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+        
+        var downloadAnchor = document.createElement('a');
+        downloadAnchor.href = URL.createObjectURL(blob);
+        downloadAnchor.download = "samguk_wangjeon_database_backup.json";
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+        
+        console.log("[백업 시스템] 로컬 데이터 추출 및 파일 저장 완료");
+    } catch (err) {
+        alert("백업 파일 생성 중 오류가 발생했습니다: " + err.message);
+    }
+}
+
+// 복구 버튼 클릭 시 숨겨진 파일 선택창을 대신 클릭해주는 프록시 함수
+function triggerImport() {
+    var fileInput = document.getElementById('import-file-input');
+    if (fileInput) {
+        fileInput.click();
+    }
+}
+
+// 업로드된 json 백업 파일을 읽어 로컬 스토리지를 물리적으로 복구 동기화
+function importData(input) {
+    var file = input.files[0];
+    if (!file) return;
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var importedDatabase = JSON.parse(e.target.result);
+            
+            // 데이터 유효성 정밀 검증 검수선 가동
+            if (!importedDatabase.samguk_hobby_data && !importedDatabase.samguk_deck_text) {
+                alert("올바른 삼국지 왕전 백업 파일이 아닙니다.");
+                return;
+            }
+            
+            if (importedDatabase.samguk_hobby_data) {
+                localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
+            }
+            if (importedDatabase.samguk_deck_text) {
+                localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
+            }
+            
+            alert("🎉 데이터 복구가 성공적으로 완료되었습니다! 보유 현황과 군단 데이터를 동기화하기 위해 페이지를 재시작합니다.");
+            location.reload();
+            
+        } catch (err) {
+            alert("파일 읽기 중 구문 에러가 발생했습니다. 파손된 파일이거나 형식이 잘못되었습니다.");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file, "utf-8");
+}
+
+// HTML 인라인 온클릭 핸들러 가동을 위한 최상위 전역 객체 바인딩 브릿지 개설
+window.exportData = exportData;
+window.triggerImport = triggerImport;
+window.importData = importData;
