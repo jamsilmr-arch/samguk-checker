@@ -1,7 +1,6 @@
 // ==========================================================================
-// LAYER 1: 마스터 정적 데이터베이스 구역 (무장, 전법, 인연, 메타 아키타입)
+// 1. 마스터 정적 데이터베이스 구역
 // ==========================================================================
-
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
     "구행진": "전열: 받는 피해 감소 5.0% | 후열: 가하는 피해 증가 12.0%",
@@ -170,9 +169,8 @@ let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// LAYER 2: 알고리즘 연산 엔진 구역 (스왑 오탐지 방어 및 전후열 검증)
+// 2. 엔진 로직 구역
 // ==========================================================================
-
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
@@ -274,10 +272,10 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     if (Array.isArray(deck?.officers)) {
         deck.officers.forEach((off, offIdx) => {
-            const hName = (off?.name || "").toString().trim();
+            if (!off) return;
+            const hName = (off.name || "").toString().trim();
             const cleanHName = hName.replace(/\s+/g, '');
             
-            // 초기화(빈 슬롯) 가동 시 동적 대체 처방 유도 시스템 작동
             if (!cleanHName) {
                 if (trulyMissingMetaOfficers.length > 0) {
                     const replaceWith = trulyMissingMetaOfficers.shift();
@@ -293,8 +291,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
             if (metaOfficerIndex !== -1) {
                 const metaOff = idealDeck.officers[metaOfficerIndex];
-
-                // 단순 배치 순서 스왑은 패스하고, 전후열 배치가 역전된 실제 오류 환경만 스크리닝 필터링
                 const currentUserRow = formationPositions[deck.formation]?.[offIdx];
                 const idealRow = formationPositions[idealDeck.formation]?.[metaOfficerIndex];
 
@@ -304,11 +300,10 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                     feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
                 }
 
-                // 전법 장착 칸이 서로 스왑되어도 처방전 노이즈를 억제하는 비순차 검증 알고리즘
                 const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
                 let unmatchedMetaTactics = [...metaOff.chosenTactics];
 
-                if (Array.isArray(off?.chosenTactics)) {
+                if (Array.isArray(off.chosenTactics)) {
                     off.chosenTactics.forEach(tac => {
                         if (!tac) return;
                         const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
@@ -377,13 +372,8 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 3: UI 렌더러 및 글로벌 브릿지 제어 구역 (초기화 버튼 추가 기능 통합)
+// 3. UI 렌더링 및 메인 루프 구역 (DOM 타이밍 방어 적용)
 // ==========================================================================
-
-window.onload = function() {
-    loadDeckTextData();
-    renderDeckBuilder();
-};
 
 function loadDeckTextData() {
     try {
@@ -415,7 +405,12 @@ function loadDeckTextData() {
                     if (!Array.isArray(d.officers) || d.officers.length === 0) {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
                     }
-                    d.officers.forEach(off => {
+                    
+                    d.officers.forEach((off, oIdx) => {
+                        if (!off || typeof off !== 'object') {
+                            off = { name: "", chosenTactics: ["", ""] };
+                            d.officers[oIdx] = off;
+                        }
                         if (off.name === "제)조조") off.name = "조조(제왕)";
                         if (off.name === "제)유비") off.name = "유비(제왕)";
                         if (off.name === undefined || off.name === null) off.name = "";
@@ -430,19 +425,21 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("로컬 스토리지 파싱 예외 스킵:", e);
+        console.error("스토리지 파싱 에러 방어 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
 
-// 개별 군단 무장 및 전법 데이터를 청소용 공백화 세척 처리하는 초기화 밸브 함수
 function resetDeck(originIdx) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
+        targetDeck.formation = "추형진"; 
         targetDeck.officers.forEach(off => {
-            off.name = ""; 
-            off.chosenTactics = ["", ""]; 
+            if (off) {
+                off.name = ""; 
+                off.chosenTactics = ["", ""]; 
+            }
         });
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
@@ -483,7 +480,7 @@ function changeFormation(originIdx, selectElement) {
 
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
-    if (targetDeck) {
+    if (targetDeck && targetDeck.officers[officerIdx]) {
         targetDeck.officers[officerIdx].name = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
@@ -492,7 +489,7 @@ function changeOfficer(originIdx, officerIdx, selectElement) {
 
 function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
-    if (targetDeck) {
+    if (targetDeck && targetDeck.officers[officerIdx]) {
         targetDeck.officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
@@ -519,7 +516,7 @@ function renderDeckBuilder() {
             }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("자원 데이터 로드 가드 처리 실패:", e);
+            console.error("데이터 동기화 실패 우회:", e);
         }
     }
 
@@ -547,14 +544,15 @@ function renderDeckBuilder() {
         let officersHtml = '';
         if (Array.isArray(deck.officers)) {
             deck.officers.forEach((off, offIdx) => {
+                if (!off) return;
                 let tacticRowsHtml = '';
-                const hName = (off?.name || "").toString().trim();
+                const hName = (off.name || "").toString().trim();
                 const cleanHName = hName.replace(/\s+/g, '');
                 const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
                 const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
                 const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
-                
+
                 if (cleanHName) {
                     const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
                     const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
@@ -575,7 +573,7 @@ function renderDeckBuilder() {
                     `;
                 }
 
-                if (Array.isArray(off?.chosenTactics)) {
+                if (Array.isArray(off.chosenTactics)) {
                     off.chosenTactics.forEach((tacticName, slotIdx) => {
                         const cleanTac = (tacticName || "").toString().trim();
                         const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
@@ -698,9 +696,23 @@ function renderDeckBuilder() {
     });
 }
 
+// 스코프 격리 대비 안전 결선 처리
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
 window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
+
+// 핵심 조치: 렌더링 타이밍 수동 초기화 함수
+function initDeckEngine() {
+    loadDeckTextData();
+    renderDeckBuilder();
+}
+
+// 확실한 DOM 로딩 타이밍 보장을 위한 하이브리드 이벤트 리스너 탑재
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDeckEngine);
+} else {
+    initDeckEngine();
+}
