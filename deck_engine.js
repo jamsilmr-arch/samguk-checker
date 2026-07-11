@@ -1,6 +1,4 @@
-import { officerUniqueTacticMap, analyzedMetaArchetypes, systemGuideInsights, bondRules, formationPositions } from './deck_data.js';
-
-export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
+function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
     let heroMatchCount = 0;
@@ -11,7 +9,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
     deck.officers.forEach(off => {
-        if (!off || !off.name) return;
+        if (!off || !off.name) return; 
         const hName = off.name.toString().trim();
         const cleanHName = hName.replace(/\s+/g, '');
         if (!cleanHName) return;
@@ -47,7 +45,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
+function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
 
@@ -101,7 +99,7 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     if (Array.isArray(deck?.officers)) {
         deck.officers.forEach((off, offIdx) => {
-            if (!off) return;
+            if (!off) return; 
             const hName = (off.name || "").toString().trim();
             const cleanHName = hName.replace(/\s+/g, '');
             
@@ -182,7 +180,7 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
-export function calculateActivatedBond(officers) {
+function calculateActivatedBond(officers) {
     if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
     if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
