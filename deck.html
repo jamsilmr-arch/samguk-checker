@@ -13,15 +13,21 @@
 
     <script src="navbar.js"></script>
 
-    <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px;">
+    <!-- 백업 및 복구 액션 버튼 컨트롤러 레이어 결선 -->
+    <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px; flex-wrap: wrap;">
         <button id="sort-default-btn" class="control-sort-btn active" onclick="toggleSortMode('default')">부대 순서 고정 (1군~5군)</button>
         <button id="sort-score-btn" class="control-sort-btn" onclick="toggleSortMode('score')">추천도 높은 순 정렬</button>
+        
+        <!-- 신설 버튼: 초록색 백업 및 파란색 복구 인터페이스 -->
+        <button id="export-btn" class="control-sort-btn" onclick="exportData()" style="background-color: #28a745; color: white; border-color: #28a745;">데이터 영구 백업 (내보내기)</button>
+        <button id="import-btn" class="control-sort-btn" onclick="triggerImport()" style="background-color: #17a2b8; color: white; border-color: #17a2b8;">데이터 즉시 복구 (가져오기)</button>
+        
+        <!-- 숨겨진 파일 업로드 입력창 -->
+        <input type="file" id="import-file-input" style="display: none;" onchange="importData(this)">
     </div>
 
-    <!-- 렌더링 컨테이너 -->
     <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
-    <!-- 물리적 캐시 파괴 및 하위 호환성을 보장하는 신규 코어 엔진 로드 -->
     <script src="deck_core.js"></script>
 </body>
 </html>
