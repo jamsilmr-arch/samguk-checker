@@ -1,6 +1,3 @@
-import { formationEffects, formationPositions, officerRoleMap, officerUniqueTacticMap, allTacticsList, defaultPresetDecks } from './deck_data.js';
-import { calculateDeckScore, generateDeckFeedback, calculateActivatedBond } from './deck_engine.js';
-
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
@@ -68,7 +65,7 @@ function loadDeckTextData() {
 function resetDeck(originIdx) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
-        targetDeck.formation = "추형진"; // 기본 진형 회귀 보강
+        targetDeck.formation = "추형진"; 
         targetDeck.officers.forEach(off => {
             if (off) {
                 off.name = ""; 
@@ -112,7 +109,6 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
-// 교정 완료: 기존의 d.originIdx === officerIdx 버그를 originIdx 변수로 완벽 매핑 수정
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers[officerIdx]) {
@@ -245,7 +241,7 @@ function renderDeckBuilder() {
                 const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
                 officersHtml += `
-                    <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1)' : ''}">
+                    <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
                         <div class="officer-meta">
                             <span class="position-badge ${posClass}">${posLabel}</span>
                             <div class="officer-select-container">
@@ -290,7 +286,7 @@ function renderDeckBuilder() {
                 if (index === 0) {
                     feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
                 } else if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
                 } else {
                     feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                 }
