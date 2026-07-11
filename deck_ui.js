@@ -9,6 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
     renderDeckBuilder();
 });
 
+// 초기 세이브 복구 밸브 개정 (빈값 세팅 히스토리 완전 보존)[cite: 6]
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -42,9 +43,10 @@ function loadDeckTextData() {
                     d.officers.forEach(off => {
                         if (off.name === "제)조조") off.name = "조조(제왕)";
                         if (off.name === "제)유비") off.name = "유비(제왕)";
-                        if (!off.name) off.name = "조조";
-                        if (!Array.isArray(off.chosenTactics) || off.chosenTactics.length < 2) {
-                            off.chosenTactics = ["교취호탈", "병량촌단"];
+                        // 주의: 사용자가 수동 초기화 처리한 경우 강제 복구 오버라이드를 완전 방지함[cite: 6]
+                        if (off.name === undefined || off.name === null) off.name = "";
+                        if (!Array.isArray(off.chosenTactics)) {
+                            off.chosenTactics = ["", ""];
                         }
                     });
                 });
@@ -54,10 +56,23 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 복구 가동 실패:", e);
+        console.error("스토리지 파싱 롤백 스킵:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
+}
+
+// 중요 신설 함수: 군단 무장 및 전법 완전 공백 초기화 기능[cite: 6]
+function resetDeck(originIdx) {
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (targetDeck) {
+        targetDeck.officers.forEach(off => {
+            off.name = ""; // 공백 할당[cite: 6]
+            off.chosenTactics = ["", ""]; // 공백 할당[cite: 6]
+        });
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    }
+    renderDeckBuilder(); // 실시간 인터페이스 즉시 드로잉[cite: 6]
 }
 
 function toggleSortMode(mode) {
@@ -130,7 +145,7 @@ function renderDeckBuilder() {
             }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("인벤토리 자원 수집 차단 방어:", e);
+            console.error("인벤토리 자원 수집 실패 로그:", e);
         }
     }
 
@@ -165,34 +180,48 @@ function renderDeckBuilder() {
                 const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
                 const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
-                const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
-                const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
-                const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
 
-                tacticRowsHtml += `
-                    <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
-                        <span>⭐ ${inherentTactic} (고유)</span>
-                        <span>${isInherentOwned ? '보유중' : '미보유'}</span>
-                    </div>
-                `;
+                // 장수가 배치되어 있을 때만 고유 전법을 렌더링하도록 조건부 처리 명세 보완[cite: 6]
+                if (cleanHName) {
+                    const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
+                    const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
+                    const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
+
+                    tacticRowsHtml += `
+                        <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
+                            <span>⭐ ${inherentTactic} (고유)</span>
+                            <span>${isInherentOwned ? '보유중' : '미보유'}</span>
+                        </div>
+                    `;
+                } else {
+                    tacticRowsHtml += `
+                        <div class="tactic-row missing" style="border-left: 3px solid #555; background-color: rgba(255,255,255,0.02);">
+                            <span style="color: #666;">⭐ 고유 전법 (미배치)</span>
+                            <span style="color: #666;">-</span>
+                        </div>
+                    `;
+                }
 
                 if (Array.isArray(off?.chosenTactics)) {
                     off.chosenTactics.forEach((tacticName, slotIdx) => {
                         const cleanTac = (tacticName || "").toString().trim();
                         const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
                         
-                        let optionsHtml = '';
+                        // 초기화 상태 지원을 위해 '선택 안함' 공백 옵션 추가[cite: 6]
+                        let optionsHtml = `<option value="" ${cleanTac === "" ? 'selected' : ''}>선택 안함</option>`;
                         allTacticsList.forEach(tName => {
                             const isSelected = cleanTac === tName ? 'selected' : '';
                             optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
                         });
                         
                         tacticRowsHtml += `
-                            <div class="tactic-row ${isOwned ? 'owned' : 'missing'}" style="padding: 4px 12px;">
+                            <div class="tactic-row ${cleanTac === "" ? 'missing' : (isOwned ? 'owned' : 'missing')}" style="padding: 4px 12px;">
                                 <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
                                     ${optionsHtml}
                                 </select>
-                                <span class="tactic-status-text">${isOwned ? '장착 완료' : '미보유'}</span>
+                                <span class="tactic-status-text" style="${cleanTac === "" ? 'color:#666;' : ''}">
+                                    ${cleanTac === "" ? '슬롯 비어있음' : (isOwned ? '장착 완료' : '미보유')}
+                                </span>
                             </div>
                         `;
                     });
@@ -202,16 +231,17 @@ function renderDeckBuilder() {
                 const posLabel = currentPos === 'front' ? '전열' : '후열';
                 const posClass = currentPos === 'front' ? 'front' : 'back';
 
-                let officerOptionsHtml = '';
+                // 초기화 상태 지원을 위해 무장 선택 리스트에 '선택 안함' 공백 옵션 추가[cite: 6]
+                let officerOptionsHtml = `<option value="" ${cleanHName === "" ? 'selected' : ''}>선택 안함</option>`;
                 sortedHeroNames.forEach(hKey => {
                     const isSelected = hName === hKey ? 'selected' : '';
                     officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
                 });
 
-                const currentComputedRole = officerRoleMap[hName] || "보조, 버퍼";
+                const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
                 officersHtml += `
-                    <div class="officer-slot">
+                    <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
                         <div class="officer-meta">
                             <span class="position-badge ${posClass}">${posLabel}</span>
                             <div class="officer-select-container">
@@ -220,7 +250,7 @@ function renderDeckBuilder() {
                                 </select>
                             </div>
                         </div>
-                        <div class="officer-role-label">${currentComputedRole}</div>
+                        <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
                         <div class="tactic-status-box">
                             ${tacticRowsHtml}
                         </div>
@@ -256,7 +286,7 @@ function renderDeckBuilder() {
                 if (index === 0) {
                     feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
                 } else if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
                 } else {
                     feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                 }
@@ -264,9 +294,13 @@ function renderDeckBuilder() {
         }
 
         deckCard.innerHTML = `
-            <div class="deck-title">
-                <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
-                <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
+            <div class="deck-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
+                    <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
+                </div>
+                <!-- 붉은색 테마의 독립 스펙 초기화 액션 버튼 기하학적 매핑[cite: 6] -->
+                <button class="reset-deck-btn" onclick="resetDeck(${deck.originIdx})" style="background-color: #c82333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;">부대 초기화</button>
             </div>
             <div class="bond-box">
                 <span class="bond-highlight">부대 인연 효과 :</span> 
@@ -294,9 +328,10 @@ function renderDeckBuilder() {
     });
 }
 
-// 모듈 환경 격리 방지용 전역 인터페이스 위임 결선[cite: 6]
+// 전역 브릿지 위임 마감 결선[cite: 6]
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
 window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
+window.resetDeck = resetDeck; // 초기화 핸들러 등록[cite: 6]
