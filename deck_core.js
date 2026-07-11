@@ -342,6 +342,8 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 }
             }
 
+            // [오류 수정 핵심 조치]: 누락되었던 isHeroOwned 변수 재선언
+            const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
             const inherentTactic = officerUniqueTacticMap[hName];
             if (inherentTactic) {
                 const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
@@ -378,8 +380,9 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// 3. UI 렌더링 및 메인 루프 
+// 3. UI 렌더링 및 메인 루프
 // ==========================================================================
+
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -508,7 +511,6 @@ function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
     
-    // 시각적 방어선: 에러 발생 시 백화되지 않고 화면에 원인 직접 출력
     try {
         container.style.display = 'block'; 
         container.innerHTML = '';
@@ -711,7 +713,6 @@ function renderDeckBuilder() {
             container.appendChild(deckCard);
         });
     } catch(e) {
-        // [디버깅 시스템] 런타임 붕괴 시 원인을 검은 화면에 빨간색으로 강제 출력
         container.style.display = 'block';
         container.innerHTML = `
             <div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;">
@@ -725,7 +726,6 @@ function renderDeckBuilder() {
     }
 }
 
-// 이벤트 인터페이스 글로벌 바인딩 (인라인 호출 대응)
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
@@ -733,7 +733,6 @@ window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
 
-// 물리적인 DOM 렌더링 락 방지 부팅 프로세스
 function initDeckCoreEngine() {
     console.log("[시스템 분석] 코어 엔진 기동 및 렌더링 파이프라인 개방");
     loadDeckTextData();
