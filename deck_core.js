@@ -1,5 +1,7 @@
+console.log("[시스템 분석] deck_core.js 엔진 기동 승인 완료");
+
 // ==========================================================================
-// 1. 마스터 정적 데이터베이스 구역
+// 1. 정적 데이터베이스 
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -169,10 +171,10 @@ let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// 2. 엔진 로직 구역
+// 2. 엔진 로직 구역 
 // ==========================================================================
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
-    if (!deck || !Array.isArray(deck.officers)) return 0;
+    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
     
     let heroMatchCount = 0;
     let tacticMatchCount = 0;
@@ -200,7 +202,7 @@ function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
             }
         }
         
-        if (Array.isArray(off.chosenTactics)) {
+        if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
             off.chosenTactics.forEach(tac => {
                 if (tac) {
                     const cleanTac = tac.toString().trim().replace(/\s+/g, '');
@@ -223,7 +225,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let maxMatchScore = -1;
 
     const currentCleanNames = [];
-    if (Array.isArray(deck?.officers)) {
+    if (deck && deck.officers && Array.isArray(deck.officers)) {
         deck.officers.forEach(o => {
             if (o && o.name) {
                 currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
@@ -261,8 +263,8 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
-    const currentFormation = (deck?.formation || "").toString().trim();
-    const idealFormation = (idealDeck?.formation || "").toString().trim();
+    const currentFormation = (deck && deck.formation ? deck.formation : "").toString().trim();
+    const idealFormation = (idealDeck && idealDeck.formation ? idealDeck.formation : "").toString().trim();
 
     if (currentFormation.replace(/\s+/g, '') !== idealFormation.replace(/\s+/g, '')) {
         feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
@@ -270,7 +272,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
 
-    if (Array.isArray(deck?.officers)) {
+    if (deck && deck.officers && Array.isArray(deck.officers)) {
         deck.officers.forEach((off, offIdx) => {
             if (!off) return;
             const hName = (off.name || "").toString().trim();
@@ -291,10 +293,10 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
             if (metaOfficerIndex !== -1) {
                 const metaOff = idealDeck.officers[metaOfficerIndex];
-                const currentUserRow = formationPositions[deck.formation]?.[offIdx];
-                const idealRow = formationPositions[idealDeck.formation]?.[metaOfficerIndex];
+                const currentUserRow = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
+                const idealRow = (formationPositions[idealDeck.formation] && formationPositions[idealDeck.formation][metaOfficerIndex]) ? formationPositions[idealDeck.formation][metaOfficerIndex] : "front";
 
-                if (currentUserRow && idealRow && currentUserRow !== idealRow) {
+                if (currentUserRow !== idealRow) {
                     const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                     const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
                     feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
@@ -303,7 +305,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
                 let unmatchedMetaTactics = [...metaOff.chosenTactics];
 
-                if (Array.isArray(off.chosenTactics)) {
+                if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
                     off.chosenTactics.forEach(tac => {
                         if (!tac) return;
                         const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
@@ -354,13 +356,17 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 }
 
 function calculateActivatedBond(officers) {
-    if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
     if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
     let matchedBonds = [];
 
     bondRules.forEach(rule => {
-        const uniqueMatches = [...new Set(currentOfficerNames.filter(name => rule.heroes.includes(name)))];
+        const uniqueMatches = [];
+        currentOfficerNames.forEach(name => {
+            if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
+        });
+        
         const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
         
         if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
@@ -372,7 +378,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// 3. UI 렌더링 및 메인 루프 구역 (DOM 타이밍 방어 적용)
+// 3. UI 렌더링 및 메인 루프 (DOM 로딩 지연 대응 완료)
 // ==========================================================================
 
 function loadDeckTextData() {
@@ -380,7 +386,7 @@ function loadDeckTextData() {
         const savedText = localStorage.getItem('samguk_deck_text');
         if (savedText) {
             const parsed = JSON.parse(savedText);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (parsed && Array.isArray(parsed) && parsed.length > 0) {
                 dynamicPresetDecks = parsed;
                 
                 if (dynamicPresetDecks.length > 5) {
@@ -396,14 +402,15 @@ function loadDeckTextData() {
 
                 dynamicPresetDecks.forEach((deck, idx) => {
                     if (!deck || typeof deck !== 'object') {
-                        dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
+                        dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] ? defaultPresetDecks[idx] : defaultPresetDecks[0]));
                     }
                     const d = dynamicPresetDecks[idx];
                     d.originIdx = (d.originIdx !== undefined) ? d.originIdx : idx;
-                    if (!d.title) d.title = defaultPresetDecks[idx]?.title || `${idx + 1}군`;
-                    if (!d.formation) d.formation = defaultPresetDecks[idx]?.formation || "추형진";
-                    if (!Array.isArray(d.officers) || d.officers.length === 0) {
-                        d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
+                    if (!d.title) d.title = (defaultPresetDecks[idx] ? defaultPresetDecks[idx].title : `${idx + 1}군`);
+                    if (!d.formation) d.formation = (defaultPresetDecks[idx] ? defaultPresetDecks[idx].formation : "추형진");
+                    
+                    if (!d.officers || !Array.isArray(d.officers) || d.officers.length === 0) {
+                        d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx] ? defaultPresetDecks[idx].officers : defaultPresetDecks[0].officers));
                     }
                     
                     d.officers.forEach((off, oIdx) => {
@@ -414,7 +421,7 @@ function loadDeckTextData() {
                         if (off.name === "제)조조") off.name = "조조(제왕)";
                         if (off.name === "제)유비") off.name = "유비(제왕)";
                         if (off.name === undefined || off.name === null) off.name = "";
-                        if (!Array.isArray(off.chosenTactics)) {
+                        if (!off.chosenTactics || !Array.isArray(off.chosenTactics)) {
                             off.chosenTactics = ["", ""];
                         }
                     });
@@ -425,7 +432,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 파싱 에러 방어 가동:", e);
+        console.error("스토리지 클리닝 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -435,12 +442,14 @@ function resetDeck(originIdx) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
         targetDeck.formation = "추형진"; 
-        targetDeck.officers.forEach(off => {
-            if (off) {
-                off.name = ""; 
-                off.chosenTactics = ["", ""]; 
-            }
-        });
+        if (targetDeck.officers && Array.isArray(targetDeck.officers)) {
+            targetDeck.officers.forEach(off => {
+                if (off) {
+                    off.name = ""; 
+                    off.chosenTactics = ["", ""]; 
+                }
+            });
+        }
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
     renderDeckBuilder(); 
@@ -480,7 +489,7 @@ function changeFormation(originIdx, selectElement) {
 
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
-    if (targetDeck && targetDeck.officers[officerIdx]) {
+    if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
         targetDeck.officers[officerIdx].name = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
@@ -489,7 +498,7 @@ function changeOfficer(originIdx, officerIdx, selectElement) {
 
 function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
-    if (targetDeck && targetDeck.officers[officerIdx]) {
+    if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx] && targetDeck.officers[officerIdx].chosenTactics) {
         targetDeck.officers[officerIdx].chosenTactics[slotIdx] = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
@@ -499,6 +508,9 @@ function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
+    
+    // 시각적 디버깅 보증선: 컨테이너 렌더링 강제 오픈
+    container.style.display = 'block'; 
     container.innerHTML = '';
 
     const savedData = localStorage.getItem('samguk_hobby_data');
@@ -508,19 +520,26 @@ function renderDeckBuilder() {
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
-            ownedHeroes = parsed.heroes ? parsed.heroes.filter(x => x.isOwned).map(x => {
-                let name = (x.name || "").toString().trim();
-                if (name === "제)조조") name = "조조(제왕)";
-                if (name === "제)유비") name = "유비(제왕)";
-                return name;
-            }) : [];
-            ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
+            if (parsed && parsed.heroes) {
+                ownedHeroes = parsed.heroes.filter(x => x.isOwned).map(x => {
+                    let name = (x.name || "").toString().trim();
+                    if (name === "제)조조") name = "조조(제왕)";
+                    if (name === "제)유비") name = "유비(제왕)";
+                    return name;
+                });
+            }
+            if (parsed && parsed.tactics) {
+                ownedTactics = parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim());
+            }
         } catch (e) {
             console.error("데이터 동기화 실패 우회:", e);
         }
     }
 
-    let displayDecks = [...dynamicPresetDecks];
+    let displayDecks = [];
+    for (let i = 0; i < dynamicPresetDecks.length; i++) {
+        displayDecks.push(dynamicPresetDecks[i]);
+    }
     
     if (currentSortMode === 'score') {
         displayDecks.sort((a, b) => {
@@ -535,6 +554,7 @@ function renderDeckBuilder() {
     const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
 
     displayDecks.forEach((deck) => {
+        if (!deck) return;
         const deckCard = document.createElement('div');
         deckCard.className = 'deck-card';
 
@@ -542,7 +562,7 @@ function renderDeckBuilder() {
         const computedBondText = calculateActivatedBond(deck.officers);
 
         let officersHtml = '';
-        if (Array.isArray(deck.officers)) {
+        if (deck.officers && Array.isArray(deck.officers)) {
             deck.officers.forEach((off, offIdx) => {
                 if (!off) return;
                 let tacticRowsHtml = '';
@@ -573,7 +593,7 @@ function renderDeckBuilder() {
                     `;
                 }
 
-                if (Array.isArray(off.chosenTactics)) {
+                if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
                     off.chosenTactics.forEach((tacticName, slotIdx) => {
                         const cleanTac = (tacticName || "").toString().trim();
                         const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
@@ -597,7 +617,7 @@ function renderDeckBuilder() {
                     });
                 }
 
-                const currentPos = formationPositions[deck.formation]?.[offIdx] || "front";
+                const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
                 const posLabel = currentPos === 'front' ? '전열' : '후열';
                 const posClass = currentPos === 'front' ? 'front' : 'back';
 
@@ -655,7 +675,7 @@ function renderDeckBuilder() {
                 if (index === 0) {
                     feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
                 } else if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
                 } else {
                     feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                 }
@@ -694,9 +714,11 @@ function renderDeckBuilder() {
         `;
         container.appendChild(deckCard);
     });
+    
+    console.log("[시스템 분석] UI 렌더링 정상 완료");
 }
 
-// 스코프 격리 대비 안전 결선 처리
+// 이벤트 인터페이스 글로벌 바인딩 (인라인 호출 대응)
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
@@ -704,15 +726,15 @@ window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
 
-// 핵심 조치: 렌더링 타이밍 수동 초기화 함수
-function initDeckEngine() {
+// 물리적인 DOM 렌더링 락 방지 부팅 프로세스
+function initDeckCoreEngine() {
+    console.log("[시스템 분석] 코어 엔진 기동 및 로컬 스토리지 파싱 시작");
     loadDeckTextData();
     renderDeckBuilder();
 }
 
-// 확실한 DOM 로딩 타이밍 보장을 위한 하이브리드 이벤트 리스너 탑재
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDeckEngine);
+    document.addEventListener('DOMContentLoaded', initDeckCoreEngine);
 } else {
-    initDeckEngine();
+    initDeckCoreEngine();
 }
