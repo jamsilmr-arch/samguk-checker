@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 장비 권장 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 3대 장비 마스터피스 엔진 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 메타 아키타입)
@@ -63,61 +63,144 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 신설 하부 시스템: 시스템 가이드 기준 무장별 최고 존엄 전용 장비 및 세련 속성 추출용 메타 데이터 사전
+// 요구사항 반영: 전 무장당 투구, 갑옷, 장신구 3종 및 하위 속성 1, 2 데이터 마스터 사전 구축
 const officerEquipmentMap = {
-    "마초": { name: "삭풍참도 (무기)", attr1: "무용 (공격력)", attr2: "연격률 증가" },
-    "위연": { name: "호분갑 (갑옷)", attr1: "무용 (공격력)", attr2: "피해 감소" },
-    "서서": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
-    "장료": { name: "백옥잠 (투구)", attr1: "무용 (공격력)", attr2: "속도 수치 증가" },
-    "조조(제왕)": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "속도 수치 증가" },
-    "조조": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "피해 감소" },
-    "악진": { name: "쌍호뉴 (장신구)", attr1: "무용 (공격력)", attr2: "속도 수치 증가" },
-    "동탁": { name: "결운갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "피해 감소 어품 상한선" },
-    "원소": { name: "진현관 (투구)", attr1: "통솔 (방어력)", attr2: "피해 감소" },
-    "여포": { name: "방천화극 (무기)", attr1: "무용 (공격력)", attr2: "연격률 증가" },
-    "제갈량": { name: "명재복 (갑옷)", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
-    "황충": { name: "박산로 (장신구)", attr1: "무용 (공격력)", attr2: "장공 (원거리 증폭)" },
-    "강유": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
-    "좌자": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "회피 확률 증가" },
-    "장녕": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
-    "우길": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
-    "사마의": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
-    "하후돈": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "반격률 증가" },
-    "가후": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "치유 효과 받음 (최대 11.07%)" },
-    "손권": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "통찰 (제어 면역)" },
-    "손권(제왕)": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "통찰 (제어 면역)" },
-    "육항": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
-    "노숙": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+    "마초": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "연격률 증가" }
+    },
+    "위연": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "통솔 수치 보정" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "폭발력 증폭" }
+    },
+    "서서": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" }
+    },
+    "장료": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 극대화" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "물리 파갑 증가" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "속도 수치 증가" }
+    },
+    "조조(제왕)": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "통솔 (방어)", attr2: "피해 감소 상한" },
+        accessory: { name: "쌍호뉴", attr1: "통솔 (방어)", attr2: "속도 수치 증가" }
+    },
+    "조조": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 보정" },
+        armor: { name: "세린갑", attr1: "통솔 (방어)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "통솔 (방어)", attr2: "치유 효과 받음" }
+    },
+    "악진": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "속도 수치 증가" }
+    },
+    "동탁": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "피해 감소" },
+        armor: { name: "결운갑", attr1: "통솔 (방어)", attr2: "피해 감소 어품 상한" },
+        accessory: { name: "쌍호뉴", attr1: "통솔 (방어)", attr2: "배반 (물리흡혈)" }
+    },
+    "원소": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "통솔 (방어)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "통솔 (방어)", attr2: "배반 활성화" }
+    },
+    "여포": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "연격률 증가" }
+    },
+    "제갈량": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "겁전 제어 효율" }
+    },
+    "황충": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "무용 (공격)", attr2: "장공 (거리 증폭)" }
+    },
+    "강유": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+    },
+    "좌자": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 보정" },
+        armor: { name: "명재복", attr1: "통솔 (방어)", attr2: "회피 확률 증가" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "치유 효과 상승" }
+    },
+    "장녕": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" }
+    },
+    "우길": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" }
+    },
+    "사마의": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "통솔 수치 보정" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소 상한" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" }
+    },
+    "하후돈": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "피해 감소" },
+        armor: { name: "세린갑", attr1: "통솔 (방어)", attr2: "반격률 증가" },
+        accessory: { name: "쌍호뉴", attr1: "통솔 (방어)", attr2: "치유 효과 받음" }
+    },
+    "가후": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "치유 효과 받음" }
+    },
+    "손권": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "통솔 (방어)", attr2: "통찰 (제어 면역)" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+    },
+    "손권(제왕)": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "통솔 (방어)", attr2: "통찰 (제어 면역)" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+    },
+    "육항": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "치유 효과 상승" }
+    },
+    "노숙": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+    },
+    "유비(제왕)": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "피해 감소" }
+    },
+    "유비": {
+        helmet: { name: "진현관", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+        armor: { name: "명재복", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
+        accessory: { name: "박산로", attr1: "모략 (지력)", attr2: "피해 감소" }
+    },
+    "관우": {
+        helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
+        armor: { name: "세린갑", attr1: "무용 (공격)", attr2: "물리 파갑 증가" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "장공 대폭 상승" }
+    },
+    "장비": {
+        helmet: { name: "진현관", attr1: "통솔 (방어)", attr2: "피해 감소" },
+        armor: { name: "결운갑", attr1: "통솔 (방어)", attr2: "피해 감소 어품 상한" },
+        accessory: { name: "쌍호뉴", attr1: "무용 (공격)", attr2: "반격률 증가" }
+    }
 };
-
-const bondRules = [
-    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
-    { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
-    { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
-    { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
-    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
-    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
-    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
-    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
-    { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
-    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
-    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
-    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
-    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
-    { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
-    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
-    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
-    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
-    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
-    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
-    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
-    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
-];
 
 const analyzedMetaArchetypes = [
     {
@@ -464,7 +547,6 @@ function saveEditedText(originIdx, propertyName, element) {
     renderDeckBuilder();
 }
 
-// 돔 주입 제어 필터가 정상 가동되도록 수정
 function changeFormation(originIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
@@ -595,16 +677,30 @@ function renderDeckBuilder() {
 
                     const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
-                    // [추천 장비 추출 로직]: 장수가 배치되었을 때, 사전 데이터베이스에서 장비 명칭 및 속성 1, 2종을 정밀 바인딩
+                    // [요구사항 구현 부]: 선형 가독성 구조의 투구, 갑옷, 장신구 3대 명품 추천 레이아웃 제어구역
                     let equipmentHtml = '';
                     if (cleanHName) {
-                        const eqData = officerEquipmentMap[hName] || { name: "명재복 (갑옷)", attr1: "통솔/모략/무용 (기본 스탯)", attr2: "피해 감소" };
+                        const eqData = officerEquipmentMap[hName] || {
+                            helmet: { name: "진현관", attr1: "통솔/모략/무용 (택1)", attr2: "속도 수치 보정" },
+                            armor: { name: "명재복", attr1: "통솔/모략/무용 (택1)", attr2: "피해 감소" },
+                            accessory: { name: "박산로", attr1: "통솔/모략/무용 (택1)", attr2: "치유 효과 상승" }
+                        };
                         equipmentHtml = `
-                            <div class="equipment-recommendation-box" style="margin-top: 8px; padding: 6px 10px; background: rgba(255,255,255,0.02); border: 1px dashed #555; border-radius: 4px; font-size: 11px; text-align: left;">
-                                <div style="color: #ff9f43; font-weight: bold; margin-bottom: 3px;">🛠️ 시스템 권장 장비</div>
-                                <div style="color:#ddd; margin-bottom:1px;">• 장비명: <span style="font-weight:bold; color:#fff;">${eqData.name}</span></div>
-                                <div style="color:#ddd; margin-bottom:1px;">• 속성 1: <span style="color:#28a745; font-weight:bold;">${eqData.attr1}</span></div>
-                                <div style="color:#ddd;">• 속성 2: <span style="color:#17a2b8; font-weight:bold;">${eqData.attr2}</span></div>
+                            <div class="equipment-recommendation-box" style="margin-top: 8px; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px dashed #555; border-radius: 4px; font-size: 11px; text-align: left; line-height: 1.5;">
+                                <div style="color: #ff9f43; font-weight: bold; margin-bottom: 6px;">🛠️ 시스템 권장 장비 세트</div>
+                                
+                                <div style="margin-bottom: 5px; border-bottom: 1px rgba(255,255,255,0.05) solid; padding-bottom: 4px;">
+                                    <span style="color: #fff; font-weight: bold;">🪖 [투구]: ${eqData.helmet.name}</span><br>
+                                    <span style="color: #888;">속성: </span><span style="color: #28a745; font-weight: bold;">${eqData.helmet.attr1}</span> / <span style="color: #17a2b8; font-weight: bold;">${eqData.helmet.attr2}</span>
+                                </div>
+                                <div style="margin-bottom: 5px; border-bottom: 1px rgba(255,255,255,0.05) solid; padding-bottom: 4px;">
+                                    <span style="color: #fff; font-weight: bold;">🛡️ [갑옷]: ${eqData.armor.name}</span><br>
+                                    <span style="color: #888;">속성: </span><span style="color: #28a745; font-weight: bold;">${eqData.armor.attr1}</span> / <span style="color: #17a2b8; font-weight: bold;">${eqData.armor.attr2}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #fff; font-weight: bold;">📿 [장신구]: ${eqData.accessory.name}</span><br>
+                                    <span style="color: #888;">속성: </span><span style="color: #28a745; font-weight: bold;">${eqData.accessory.attr1}</span> / <span style="color: #17a2b8; font-weight: bold;">${eqData.accessory.attr2}</span>
+                                </div>
                             </div>
                         `;
                     }
@@ -621,7 +717,7 @@ function renderDeckBuilder() {
                             </div>
                             <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
                             
-                            <!-- 장비 정보 컴포넌트 돔(DOM) 동적 주입 -->
+                            <!-- 개조된 3대 장비 컴포넌트 유기적 드로잉 파이프라인 연동 -->
                             ${equipmentHtml}
                             
                             <div class="tactic-status-box" style="margin-top:8px;">
