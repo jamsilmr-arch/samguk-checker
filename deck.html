@@ -11,7 +11,6 @@
         <span class="author-text">by JHP</span>
     </header>
 
-    <!-- 공통 네비게이션 바 엔진 -->
     <script src="navbar.js"></script>
 
     <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px;">
@@ -21,7 +20,9 @@
 
     <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
-    <!-- 3개 분리 구조 가동을 위한 진입점 UI 모듈 바인딩 -->
-    <script type="module" src="deck_ui.js"></script>
+    <!-- 핵심 조치: 모듈 보안을 우회하는 데이터->엔진->UI 직렬 로딩 파이프라인 구축 -->
+    <script src="deck_data.js"></script>
+    <script src="deck_engine.js"></script>
+    <script src="deck_ui.js"></script>
 </body>
 </html>
