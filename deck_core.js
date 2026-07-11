@@ -1,7 +1,7 @@
 console.log("[시스템 분석] deck_core.js 엔진 기동 승인 완료");
 
 // ==========================================================================
-// 1. 정적 데이터베이스 구역
+// LAYER 1: 마스터 정적 데이터베이스 구역 (무장, 전법, 인연, 메타 아키타입)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -171,7 +171,7 @@ let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// 2. 엔진 로직 구역
+// LAYER 2: 엔진 로직 구역 (스왑 오탐지 방어 및 무용 처방 가선 적용)
 // ==========================================================================
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -342,7 +342,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 }
             }
 
-            // [오류 수정 핵심 조치]: 누락되었던 isHeroOwned 변수 재선언
+            // [오류 수정 확정 조치]: isHeroOwned 변수 정상 범위 선언 바인딩 완료
             const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
             const inherentTactic = officerUniqueTacticMap[hName];
             if (inherentTactic) {
@@ -380,9 +380,8 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// 3. UI 렌더링 및 메인 루프
+// LAYER 3: UI 렌더링 및 메인 제어 루프 구역 (자가 치유 데이터 보정식)
 // ==========================================================================
-
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -434,7 +433,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 클리닝 가동:", e);
+        console.error("스토리지 복구 가동 에러 차단:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -673,7 +672,7 @@ function renderDeckBuilder() {
                     if (index === 0) {
                         feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
                     } else if (fb.includes('시스템 가이드 연동')) {
-                        feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
+                        feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
                     } else {
                         feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                     }
@@ -722,33 +721,13 @@ function renderDeckBuilder() {
                 <button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 재시작</button>
             </div>
         `;
-        console.error("렌더링 크래시:", e);
+        console.error("렌더링 크래시 리포트 수집:", e);
     }
 }
 
-window.toggleSortMode = toggleSortMode;
-window.saveEditedText = saveEditedText;
-window.changeFormation = changeFormation;
-window.changeOfficer = changeOfficer;
-window.changeTactic = changeTactic;
-window.resetDeck = resetDeck;
-
-function initDeckCoreEngine() {
-    console.log("[시스템 분석] 코어 엔진 기동 및 렌더링 파이프라인 개방");
-    loadDeckTextData();
-    renderDeckBuilder();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDeckCoreEngine);
-} else {
-    initDeckCoreEngine();
-}
 // ==========================================================================
-// 4. 영구 자원 백업(Export) 및 복구(Import) 코어 엔진 구역
+// LAYER 4: 영구 자원 백업(Export) 및 복구(Import) 파일 제어 구역
 // ==========================================================================
-
-// 현재 로컬 스토리지에 저장된 모든 삼국지 왕전 데이터를 파일로 추출 다운로드
 function exportData() {
     try {
         var hobbyData = localStorage.getItem('samguk_hobby_data');
@@ -770,13 +749,12 @@ function exportData() {
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
         
-        console.log("[백업 시스템] 로컬 데이터 추출 및 파일 저장 완료");
+        console.log("[백업 시스템] 로컬 데이터 블록 파일 마이그레이션 다운로드 성공");
     } catch (err) {
-        alert("백업 파일 생성 중 오류가 발생했습니다: " + err.message);
+        alert("백업 파일 생성 실패: " + err.message);
     }
 }
 
-// 복구 버튼 클릭 시 숨겨진 파일 선택창을 대신 클릭해주는 프록시 함수
 function triggerImport() {
     var fileInput = document.getElementById('import-file-input');
     if (fileInput) {
@@ -784,7 +762,6 @@ function triggerImport() {
     }
 }
 
-// 업로드된 json 백업 파일을 읽어 로컬 스토리지를 물리적으로 복구 동기화
 function importData(input) {
     var file = input.files[0];
     if (!file) return;
@@ -794,9 +771,8 @@ function importData(input) {
         try {
             var importedDatabase = JSON.parse(e.target.result);
             
-            // 데이터 유효성 정밀 검증 검수선 가동
             if (!importedDatabase.samguk_hobby_data && !importedDatabase.samguk_deck_text) {
-                alert("올바른 삼국지 왕전 백업 파일이 아닙니다.");
+                alert("삼국지 왕전의 유효한 데이터 백업 규격이 확인되지 않습니다.");
                 return;
             }
             
@@ -807,18 +783,36 @@ function importData(input) {
                 localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
             }
             
-            alert("🎉 데이터 복구가 성공적으로 완료되었습니다! 보유 현황과 군단 데이터를 동기화하기 위해 페이지를 재시작합니다.");
+            alert("데이터 베이스 인프라 복구 완료. 동기화 스냅샷 적용을 위해 시스템을 리로드합니다.");
             location.reload();
             
         } catch (err) {
-            alert("파일 읽기 중 구문 에러가 발생했습니다. 파손된 파일이거나 형식이 잘못되었습니다.");
+            alert("파일 스트림 해석 오류: 구조가 파손된 JSON 파일입니다.");
             console.error(err);
         }
     };
     reader.readAsText(file, "utf-8");
 }
 
-// HTML 인라인 온클릭 핸들러 가동을 위한 최상위 전역 객체 바인딩 브릿지 개설
+// 온클릭 바인딩 전역 노출 인터페이스 확보
+window.toggleSortMode = toggleSortMode;
+window.saveEditedText = saveEditedText;
+window.changeFormation = changeFormation;
+window.changeOfficer = changeOfficer;
+window.changeTactic = changeTactic;
+window.resetDeck = resetDeck;
 window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
+
+function initDeckCoreEngine() {
+    console.log("[시스템 분석] 코어 엔진 기동 및 렌더링 파이프라인 개방");
+    loadDeckTextData();
+    renderDeckBuilder();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDeckCoreEngine);
+} else {
+    initDeckCoreEngine();
+}
