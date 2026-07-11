@@ -1,4 +1,4 @@
-import { officerUniqueTacticMap, analyzedMetaArchetypes, systemGuideInsights, bondRules } from './deck_data.js';
+import { officerUniqueTacticMap, analyzedMetaArchetypes, systemGuideInsights, bondRules, formationPositions } from './deck_data.js';
 
 // 보유 현황 가중치 평가 점수 연산 함수[cite: 6]
 export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
@@ -48,7 +48,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 순서 변경 추천 비활성화형 지능형 AI 처방전 도출 알고리즘[cite: 6]
+// 무장 및 전법 순서 변경 노이즈 필터링이 반영된 AI 처방전 도출 알고리즘[cite: 6]
 export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
@@ -113,31 +113,36 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             if (metaOfficerIndex !== -1) {
                 const metaOff = idealDeck.officers[metaOfficerIndex];
 
-                // [수정 핵심 반영]: 무장 배치 교정(순서 변경) 추천 조건절을 영구 완전 소거하여 노이즈 제거[cite: 6]
+                // [수정 핵심 반영]: 단순 순서 스왑은 패스하고 전열/후열 열 배치가 꼬인 경우만 저격 체크[cite: 6]
+                const currentUserRow = formationPositions[deck.formation]?.[offIdx];
+                const idealRow = formationPositions[idealDeck.formation]?.[metaOfficerIndex];
 
-                // [수정 핵심 반영]: 전법 스왑 인지형 순서 무관 풀 검증 알고리즘 가동[cite: 6]
+                if (currentUserRow && idealRow && currentUserRow !== idealRow) {
+                    const idealRowKo = idealRow === 'front' ? '전열' : '후열';
+                    const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
+                    feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
+                }
+
+                // 전법 순서 무관 풀 검증 레이어[cite: 6]
                 const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
                 let unmatchedMetaTactics = [...metaOff.chosenTactics];
 
                 if (Array.isArray(off?.chosenTactics)) {
-                    // 1차 패스: 유저가 착용한 전법이 메타 풀에 있으면 대기열에서 즉시 원소 소거[cite: 6]
                     off.chosenTactics.forEach(tac => {
                         if (!tac) return;
                         const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
                         const idx = unmatchedMetaTactics.findIndex(mt => mt.toString().trim().replace(/\s+/g, '') === cleanUserTac);
                         if (idx !== -1) {
-                            unmatchedMetaTactics.splice(idx, 1); // 일치 원소 제거[cite: 6]
+                            unmatchedMetaTactics.splice(idx, 1);
                         }
                     });
 
-                    // 2차 패스: 메타 전법 세트 풀에 존재하지 않는 실질적 오장착 자원만 필터링하여 피드백 주입[cite: 6]
                     off.chosenTactics.forEach((tac, tacIdx) => {
                         if (!tac) return;
                         const cleanTac = tacticName => tacticName.toString().trim();
                         const currentCleanTac = cleanTac(tac);
                         const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
 
-                        // 순서만 바뀐 경우는 metaTacsClean에 포함되므로 본 조건문을 패스하여 처방 생트랩 방어[cite: 6]
                         if (!metaTacsClean.includes(cleanUserTac)) {
                             if (unmatchedMetaTactics.length > 0) {
                                 const replaceWith = unmatchedMetaTactics.shift();
