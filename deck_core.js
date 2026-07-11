@@ -160,7 +160,7 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 const systemGuideInsights = {
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해) 스킬을 조합하세요.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
-    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구와 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
+    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구 and 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
     "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 증가) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
     "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해) 매를 훈련시켜 탑재하세요.",
     "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
@@ -171,7 +171,7 @@ let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// LAYER 2: 엔진 로직 구역 (스왑 오탐지 방어 및 무용 처방 가선 적용)
+// LAYER 2: 엔진 로직 구역
 // ==========================================================================
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -233,6 +233,11 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         });
     }
 
+    // [핵심 보정 지점]: 무장이 아무도 없는 완전 공백(선택 안함) 상태일 경우, 빈 피드백 배열을 즉시 반환하여 노이즈 원천 소거
+    if (currentCleanNames.length === 0) {
+        return [];
+    }
+
     analyzedMetaArchetypes.forEach(metaDeck => {
         let matchScore = 0;
         metaDeck.officers.forEach((metaOff, idx) => {
@@ -289,6 +294,11 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 return;
             }
 
+            const isHeroOwned = cleanOwnedHeroes.includes(cleanHName); 
+            if (!isHeroOwned) {
+                feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
+            }
+
             const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
 
             if (metaOfficerIndex !== -1) {
@@ -342,8 +352,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                 }
             }
 
-            // [오류 수정 확정 조치]: isHeroOwned 변수 정상 범위 선언 바인딩 완료
-            const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
             const inherentTactic = officerUniqueTacticMap[hName];
             if (inherentTactic) {
                 const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
@@ -380,7 +388,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 3: UI 렌더링 및 메인 제어 루프 구역 (자가 치유 데이터 보정식)
+// LAYER 3: UI 렌더링 및 메인 루프
 // ==========================================================================
 function loadDeckTextData() {
     try {
@@ -433,7 +441,7 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 복구 가동 에러 차단:", e);
+        console.error("스토리지 클리닝 가동:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
@@ -655,7 +663,10 @@ function renderDeckBuilder() {
             const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
             let feedbackHtml = '';
             
-            if (currentComputedScore === 100 && feedbackArr.length === 2) { 
+            // [핵심 교정 지점]: 피드백 배열이 비어있다면 완전히 공란 처리하도록 마감 분기 개정
+            if (feedbackArr.length === 0) {
+                feedbackHtml = ''; 
+            } else if (currentComputedScore === 100 && feedbackArr.length === 2) { 
                 feedbackHtml = `<div class="feedback-item success">★ 축하합니다! ${feedbackArr[0].split(']')[0]}] 과 완벽히 일치하는 무결성 최적화 군단입니다.</div>
                                 <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1]}</div>`;
             } else if (currentComputedScore === 100 && feedbackArr.length > 2) {
