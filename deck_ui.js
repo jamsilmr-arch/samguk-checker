@@ -4,12 +4,13 @@ import { calculateDeckScore, generateDeckFeedback, calculateActivatedBond } from
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
-// ES6 모듈 로드 시점 뷰어 돔 바인딩
+// 브라우저가 화면 구조(DOM)를 모두 해석하면 덱 빌더 가동
 window.addEventListener('DOMContentLoaded', () => {
     loadDeckTextData();
     renderDeckBuilder();
 });
 
+// 로컬스토리지 저장 데이터 불러오기 및 기본 5개 군단 배열 보정
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -55,12 +56,13 @@ function loadDeckTextData() {
             }
         }
     } catch (e) {
-        console.error("스토리지 복구 가동:", e);
+        console.error("스토리지 복구 가동 실패:", e);
     }
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => { d.originIdx = idx; });
 }
 
+// 고정 정렬 vs 추천도 정렬 스위칭 토글 함수
 function toggleSortMode(mode) {
     currentSortMode = mode;
     document.querySelectorAll('.control-sort-btn').forEach(btn => btn.classList.remove('active'));
@@ -69,6 +71,7 @@ function toggleSortMode(mode) {
     renderDeckBuilder();
 }
 
+// 부대 커스텀 명칭 실시간 로컬스토리지 세이브
 function saveEditedText(originIdx, propertyName, element) {
     let textValue = element.innerText.trim();
     textValue = textValue.replace(/\s*\[추천도:\s*\d+점\]/g, "").trim();
@@ -84,6 +87,7 @@ function saveEditedText(originIdx, propertyName, element) {
     renderDeckBuilder();
 }
 
+// 선택한 진형 동적 반영 및 동기화
 function changeFormation(originIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
@@ -93,6 +97,7 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
+// 무장 선택 드롭다운 체인지 이벤트 핸들러
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
@@ -102,6 +107,7 @@ function changeOfficer(originIdx, officerIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
+// 전법 선택 드롭다운 체인지 이벤트 핸들러
 function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
@@ -111,6 +117,7 @@ function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
+// 메인 부대 빌더 화면 렌더링 코어 인터페이스
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -131,7 +138,7 @@ function renderDeckBuilder() {
             }) : [];
             ownedTactics = parsed.tactics ? parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim()) : [];
         } catch (e) {
-            console.error("인벤토리 자원 수집 차단:", e);
+            console.error("인벤토리 보유 자원 데이터 파싱 에러:", e);
         }
     }
 
@@ -243,12 +250,13 @@ function renderDeckBuilder() {
         const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
         let feedbackHtml = '';
         
+        // 피드백 데이터 빌드 시각화 팩토리
         if (currentComputedScore === 100 && feedbackArr.length === 2) { 
             feedbackHtml = `<div class="feedback-item success">★ 축하합니다! ${feedbackArr[0].split(']')[0]}] 과 완벽히 일치하는 무결성 최적화 군단입니다.</div>
                             <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1]}</div>`;
         } else if (currentComputedScore === 100 && feedbackArr.length > 2) {
             feedbackHtml = `<div class="feedback-item success">✓ 현재 덱 방향성으로 100점 점수를 달성했습니다. 아래의 분석을 참고하여 통계적 고점을 추가 확보할 수 있습니다.</div>`;
-            feedbackArr.forEach((fb, index) => {
+            feedbackArr.forEach((fb) => {
                 if (fb.includes('시스템 가이드 연동')) {
                     feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
                 } else {
@@ -298,7 +306,7 @@ function renderDeckBuilder() {
     });
 }
 
-// 핵심 리팩토링 포인트: ES6 모듈 격리 스코프 환경에서 HTML 인라인 태그 핸들러를 수용하기 위한 전역 브릿지 매핑 결선
+// 중요 마감선: type="module" 스코프 차단막을 우회해 HTML 태그 인라인 이벤트를 정상 가동시키는 전역 맵핑 바인딩
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
