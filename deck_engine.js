@@ -11,7 +11,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
     deck.officers.forEach(off => {
-        if (!off || !off.name) return; // 훼손 객체 가드
+        if (!off || !off.name) return;
         const hName = off.name.toString().trim();
         const cleanHName = hName.replace(/\s+/g, '');
         if (!cleanHName) return;
@@ -101,7 +101,7 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     if (Array.isArray(deck?.officers)) {
         deck.officers.forEach((off, offIdx) => {
-            if (!off) return; // 런타임 Null 크래시 방어막
+            if (!off) return;
             const hName = (off.name || "").toString().trim();
             const cleanHName = hName.replace(/\s+/g, '');
             
