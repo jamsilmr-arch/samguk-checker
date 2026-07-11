@@ -1,5 +1,5 @@
 (function() {
-    // 1. 글로벌 네비게이션 전용 핵심 CSS 디자인 스타일 동적 자동 주입 (타 CSS 파일 수정 불필요)
+    // 글로벌 네비게이션 스타일 동적 주입 및 스크롤바 강제 소거
     if (!document.getElementById('dynamic-navbar-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'dynamic-navbar-styles';
@@ -10,7 +10,7 @@
                 display: flex;
                 justify-content: flex-end;
                 padding: 0 30px;
-                overflow-x: auto;
+                overflow: hidden; /* 스크롤바 및 스크롤 기능 흔적 기능 완전 차단 */
                 position: relative;
                 z-index: 9999;
             }
@@ -23,7 +23,6 @@
         document.head.appendChild(styleTag);
     }
 
-    // 2. 글로벌 네비게이션 바 DOM 생성 및 도킹 엔진
     function injectGlobalNavbarEngine() {
         if (document.getElementById('dynamic-global-nav-bar')) return;
 
@@ -66,7 +65,6 @@
         });
         navContainer.appendChild(menuUl);
 
-        // 상단 타이틀 배너 바로 아래에 안정적으로 고정 배치
         const standardTarget = document.querySelector('.top-title-header') || document.querySelector('header');
         if (standardTarget) {
             standardTarget.after(navContainer);
