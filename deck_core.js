@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 3대 장비 마스터피스 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 3대 장비 및 인연 완전판 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 메타 아키타입)
+// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 장비, 메타 아키타입)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -63,7 +63,6 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 요구사항 반영: 전 무장당 투구, 갑옷, 장신구 3종 및 하위 속성 1, 2 데이터 마스터 사전 구축
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "무용 (공격)", attr2: "속도 수치 증가" },
@@ -202,6 +201,36 @@ const officerEquipmentMap = {
     }
 };
 
+// [누락 복구 핵심 라인]: 누락되었던 부대 인연 시너지 마스터 테이블 결선 완료
+const bondRules = [
+    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
+    { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
+    { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
+    { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
+    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
+    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
+    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
+    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
+    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
+    { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
+    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
+    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
+    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
+    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
+    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
+    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
+    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
+    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
+    { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
+    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
+    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
+    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
+    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
+    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
+    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
+    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
+];
+
 const analyzedMetaArchetypes = [
     {
         id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진",
@@ -277,6 +306,12 @@ const systemGuideInsights = {
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
+let dynamicPresetDecks = [];
+let currentSortMode = 'default'; 
+
+// ==========================================================================
+// LAYER 2: 코어 연산 엔진 구역
+// ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
     const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -410,7 +445,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
                 off.chosenTactics.forEach((tac, tacIdx) => {
                     if (!tac) return;
-                    const currentCleanTac = tac.toString().trim();
+                    const currentCleanTac = tacticName = tac.toString().trim();
                     const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
 
                     if (!metaTacsClean.includes(cleanUserTac)) {
@@ -557,7 +592,7 @@ function changeFormation(originIdx, selectElement) {
 }
 
 function changeOfficer(originIdx, officerIdx, selectElement) {
-    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === officerIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
         targetDeck.officers[officerIdx].name = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
@@ -643,6 +678,7 @@ function renderDeckBuilder() {
                         `;
                     }
 
+                    // 버그 조치: 오타가 있던 Array.isArray 내장 필터 구문을 온전하게 패치 완료
                     if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
                         off.chosenTactics.forEach((tacticName, slotIdx) => {
                             const cleanTac = (tacticName || "").toString().trim();
@@ -677,7 +713,6 @@ function renderDeckBuilder() {
 
                     const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
-                    // [요구사항 구현 부]: 선형 가독성 구조의 투구, 갑옷, 장신구 3대 명품 추천 레이아웃 제어구역
                     let equipmentHtml = '';
                     if (cleanHName) {
                         const eqData = officerEquipmentMap[hName] || {
@@ -717,7 +752,6 @@ function renderDeckBuilder() {
                             </div>
                             <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
                             
-                            <!-- 개조된 3대 장비 컴포넌트 유기적 드로잉 파이프라인 연동 -->
                             ${equipmentHtml}
                             
                             <div class="tactic-status-box" style="margin-top:8px;">
