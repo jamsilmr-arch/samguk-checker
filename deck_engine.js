@@ -48,7 +48,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
-// 식별자(Identity Tracking) 기반 무결성 AI 처방전 도출 알고리즘[cite: 6]
+// 순서 변경 추천 비활성화형 지능형 AI 처방전 도출 알고리즘[cite: 6]
 export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
@@ -113,24 +113,40 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             if (metaOfficerIndex !== -1) {
                 const metaOff = idealDeck.officers[metaOfficerIndex];
 
-                if (metaOfficerIndex !== offIdx) {
-                    feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수의 최적 포지션은 <strong>${metaOfficerIndex + 1}번 슬롯</strong>입니다. 자리 배치를 조정하세요.`);
-                }
+                // [수정 핵심 반영]: 무장 배치 교정(순서 변경) 추천 조건절을 영구 완전 소거하여 노이즈 제거[cite: 6]
+
+                // [수정 핵심 반영]: 전법 스왑 인지형 순서 무관 풀 검증 알고리즘 가동[cite: 6]
+                const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
+                let unmatchedMetaTactics = [...metaOff.chosenTactics];
 
                 if (Array.isArray(off?.chosenTactics)) {
-                    off.chosenTactics.forEach((tac, tacIdx) => {
-                        const idealTac = (metaOff.chosenTactics?.[tacIdx] || "").toString().trim();
-                        const cleanTac = (tac || "").toString().trim();
-
-                        const cleanIdealTac = idealTac.replace(/\s+/g, '');
-                        const cleanUserTac = cleanTac.replace(/\s+/g, '');
-                        if (!cleanUserTac || !cleanIdealTac) return;
-
-                        if (cleanUserTac !== cleanIdealTac) {
-                            feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${cleanTac}] ➔ <strong>[${idealTac}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
+                    // 1차 패스: 유저가 착용한 전법이 메타 풀에 있으면 대기열에서 즉시 원소 소거[cite: 6]
+                    off.chosenTactics.forEach(tac => {
+                        if (!tac) return;
+                        const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
+                        const idx = unmatchedMetaTactics.findIndex(mt => mt.toString().trim().replace(/\s+/g, '') === cleanUserTac);
+                        if (idx !== -1) {
+                            unmatchedMetaTactics.splice(idx, 1); // 일치 원소 제거[cite: 6]
                         }
+                    });
+
+                    // 2차 패스: 메타 전법 세트 풀에 존재하지 않는 실질적 오장착 자원만 필터링하여 피드백 주입[cite: 6]
+                    off.chosenTactics.forEach((tac, tacIdx) => {
+                        if (!tac) return;
+                        const cleanTac = tacticName => tacticName.toString().trim();
+                        const currentCleanTac = cleanTac(tac);
+                        const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
+
+                        // 순서만 바뀐 경우는 metaTacsClean에 포함되므로 본 조건문을 패스하여 처방 생트랩 방어[cite: 6]
+                        if (!metaTacsClean.includes(cleanUserTac)) {
+                            if (unmatchedMetaTactics.length > 0) {
+                                const replaceWith = unmatchedMetaTactics.shift();
+                                feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
+                            }
+                        }
+
                         if (!cleanOwnedTactics.includes(cleanUserTac)) {
-                            feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${cleanTac}]</strong>이 미보유 상태입니다.`);
+                            feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
                         }
                     });
                 }
@@ -157,7 +173,7 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
-// 26종 인연 매칭 활성화 판독 함수[cite: 6]
+// 26종 공식 인연 효과 데이터 세트 판독기[cite: 6]
 export function calculateActivatedBond(officers) {
     if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "");
