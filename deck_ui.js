@@ -9,7 +9,6 @@ window.addEventListener('DOMContentLoaded', () => {
     renderDeckBuilder();
 });
 
-// 자가 치유형 데이터 복구 파이프라인 (Null 참조 오염 원천 청소)
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -41,7 +40,6 @@ function loadDeckTextData() {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
                     }
                     
-                    // 핵심 안전장치: 내부에 축적되었던 훼손된 Null 객체 무조건 초기화 필터[cite: 6]
                     d.officers.forEach((off, oIdx) => {
                         if (!off || typeof off !== 'object') {
                             off = { name: "", chosenTactics: ["", ""] };
@@ -113,8 +111,9 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
+// 핵심 조치 교정: 식별 매칭 타겟을 officerIdx에서 originIdx로 정상 수정 완료[cite: 9]
 function changeOfficer(originIdx, officerIdx, selectElement) {
-    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === officerIdx);
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers[officerIdx]) {
         targetDeck.officers[officerIdx].name = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
@@ -122,6 +121,7 @@ function changeOfficer(originIdx, officerIdx, selectElement) {
     renderDeckBuilder(); 
 }
 
+// 핵심 조치 교정: 식별 매칭 타겟을 officerIdx에서 originIdx로 정상 수정 완료[cite: 9]
 function changeTactic(originIdx, officerIdx, slotIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers[officerIdx]) {
