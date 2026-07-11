@@ -1,5 +1,6 @@
 import { officerUniqueTacticMap, analyzedMetaArchetypes, systemGuideInsights, bondRules, formationPositions } from './deck_data.js';
 
+// 보유 현황 가중치 평가 점수 연산 함수 (빈값 가드 탑재)
 export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !Array.isArray(deck.officers)) return 0;
     
@@ -11,7 +12,7 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
 
     deck.officers.forEach(off => {
-        if (!off || !off.name) return;
+        if (!off || !off.name) return; // 빈값 무장 슬롯 안전 패스
         const hName = off.name.toString().trim();
         const cleanHName = hName.replace(/\s+/g, '');
         if (!cleanHName) return;
@@ -47,13 +48,18 @@ export function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     return Math.round(finalHeroScore + finalTacticScore);
 }
 
+// 빈 슬롯 발생 시 실시간 가변 처방 유도 알고리즘
 export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
 
     const currentCleanNames = [];
     if (Array.isArray(deck?.officers)) {
-        deck.officers.forEach(o => currentCleanNames.push((o?.name || "").toString().trim().replace(/\s+/g, '')));
+        deck.officers.forEach(o => {
+            if (o && o.name) {
+                currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
+            }
+        });
     }
 
     analyzedMetaArchetypes.forEach(metaDeck => {
@@ -99,19 +105,23 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         deck.officers.forEach((off, offIdx) => {
             const hName = (off?.name || "").toString().trim();
             const cleanHName = hName.replace(/\s+/g, '');
-            if (!cleanHName) return;
-
-            const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
-            if (!isHeroOwned) {
-                feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
+            
+            // 핵심 분기점: 초기화 버튼 가동으로 무장이 비어있을 때 메타 무장 상속 가이드 출력[cite: 6]
+            if (!cleanHName) {
+                if (trulyMissingMetaOfficers.length > 0) {
+                    const replaceWith = trulyMissingMetaOfficers.shift();
+                    feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${replaceWith.name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)`);
+                    feedbackList.push(`전법 권장: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 지시합니다.`);
+                } else {
+                    feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ 타겟 메타에 부합하는 임의의 서포터 장수를 배치하세요.`);
+                }
+                return;
             }
 
             const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
 
             if (metaOfficerIndex !== -1) {
                 const metaOff = idealDeck.officers[metaOfficerIndex];
-
-                // [교정 완료]: 같은 열 배치를 유지하면 스왑 경고문이 출력되지 않도록 정밀 조건문 튠
                 const currentUserRow = formationPositions[deck.formation]?.[offIdx];
                 const idealRow = formationPositions[idealDeck.formation]?.[metaOfficerIndex];
 
@@ -121,7 +131,6 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                     feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
                 }
 
-                // [교정 완료]: 장착된 전법의 순서가 스왑되어도 처방전 노이즈를 억제하는 집합론 파서 연산 작동
                 const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
                 let unmatchedMetaTactics = [...metaOff.chosenTactics];
 
@@ -177,7 +186,8 @@ export function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
 export function calculateActivatedBond(officers) {
     if (!Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
-    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "");
+    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
+    if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
     let matchedBonds = [];
 
     bondRules.forEach(rule => {
