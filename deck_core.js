@@ -1,7 +1,7 @@
 console.log("[시스템 분석] deck_core.js 엔진 기동 승인 완료");
 
 // ==========================================================================
-// 1. 정적 데이터베이스 
+// 1. 정적 데이터베이스 구역
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -171,7 +171,7 @@ let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// 2. 엔진 로직 구역 
+// 2. 엔진 로직 구역
 // ==========================================================================
 function calculateDeckScore(deck, ownedHeroes, ownedTactics) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -378,9 +378,8 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// 3. UI 렌더링 및 메인 루프 (DOM 로딩 지연 대응 완료)
+// 3. UI 렌더링 및 메인 루프 
 // ==========================================================================
-
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -509,19 +508,19 @@ function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
     
-    // 시각적 디버깅 보증선: 컨테이너 렌더링 강제 오픈
-    container.style.display = 'block'; 
-    container.innerHTML = '';
+    // 시각적 방어선: 에러 발생 시 백화되지 않고 화면에 원인 직접 출력
+    try {
+        container.style.display = 'block'; 
+        container.innerHTML = '';
 
-    const savedData = localStorage.getItem('samguk_hobby_data');
-    let ownedHeroes = [];
-    let ownedTactics = [];
+        const savedData = localStorage.getItem('samguk_hobby_data');
+        let ownedHeroes = [];
+        let ownedTactics = [];
 
-    if (savedData) {
-        try {
+        if (savedData) {
             const parsed = JSON.parse(savedData);
             if (parsed && parsed.heroes) {
-                ownedHeroes = parsed.heroes.filter(x => x.isOwned).map(x => {
+                ownedHeroes = parsed.heroes.filter(x => x && x.isOwned).map(x => {
                     let name = (x.name || "").toString().trim();
                     if (name === "제)조조") name = "조조(제왕)";
                     if (name === "제)유비") name = "유비(제왕)";
@@ -529,193 +528,201 @@ function renderDeckBuilder() {
                 });
             }
             if (parsed && parsed.tactics) {
-                ownedTactics = parsed.tactics.filter(x => x.isOwned).map(x => (x.name || "").toString().trim());
+                ownedTactics = parsed.tactics.filter(x => x && x.isOwned).map(x => (x.name || "").toString().trim());
             }
-        } catch (e) {
-            console.error("데이터 동기화 실패 우회:", e);
-        }
-    }
-
-    let displayDecks = [];
-    for (let i = 0; i < dynamicPresetDecks.length; i++) {
-        displayDecks.push(dynamicPresetDecks[i]);
-    }
-    
-    if (currentSortMode === 'score') {
-        displayDecks.sort((a, b) => {
-            const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
-            const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
-            return scoreB - scoreA;
-        });
-    } else {
-        displayDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
-    }
-
-    const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
-
-    displayDecks.forEach((deck) => {
-        if (!deck) return;
-        const deckCard = document.createElement('div');
-        deckCard.className = 'deck-card';
-
-        const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
-        const computedBondText = calculateActivatedBond(deck.officers);
-
-        let officersHtml = '';
-        if (deck.officers && Array.isArray(deck.officers)) {
-            deck.officers.forEach((off, offIdx) => {
-                if (!off) return;
-                let tacticRowsHtml = '';
-                const hName = (off.name || "").toString().trim();
-                const cleanHName = hName.replace(/\s+/g, '');
-                const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
-                const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
-
-                const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
-
-                if (cleanHName) {
-                    const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
-                    const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
-                    const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
-
-                    tacticRowsHtml += `
-                        <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
-                            <span>⭐ ${inherentTactic} (고유)</span>
-                            <span>${isInherentOwned ? '보유중' : '미보유'}</span>
-                        </div>
-                    `;
-                } else {
-                    tacticRowsHtml += `
-                        <div class="tactic-row missing" style="border-left: 3px solid #555; background-color: rgba(255,255,255,0.02);">
-                            <span style="color: #666;">⭐ 고유 전법 (미배치)</span>
-                            <span style="color: #666;">-</span>
-                        </div>
-                    `;
-                }
-
-                if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
-                    off.chosenTactics.forEach((tacticName, slotIdx) => {
-                        const cleanTac = (tacticName || "").toString().trim();
-                        const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
-                        
-                        let optionsHtml = `<option value="" ${cleanTac === "" ? 'selected' : ''}>선택 안함</option>`;
-                        allTacticsList.forEach(tName => {
-                            const isSelected = cleanTac === tName ? 'selected' : '';
-                            optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
-                        });
-                        
-                        tacticRowsHtml += `
-                            <div class="tactic-row ${cleanTac === "" ? 'missing' : (isOwned ? 'owned' : 'missing')}" style="padding: 4px 12px;">
-                                <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
-                                    ${optionsHtml}
-                                </select>
-                                <span class="tactic-status-text" style="${cleanTac === "" ? 'color:#666;' : ''}">
-                                    ${cleanTac === "" ? '슬롯 비어있음' : (isOwned ? '장착 완료' : '미보유')}
-                                </span>
-                            </div>
-                        `;
-                    });
-                }
-
-                const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
-                const posLabel = currentPos === 'front' ? '전열' : '후열';
-                const posClass = currentPos === 'front' ? 'front' : 'back';
-
-                let officerOptionsHtml = `<option value="" ${cleanHName === "" ? 'selected' : ''}>선택 안함</option>`;
-                sortedHeroNames.forEach(hKey => {
-                    const isSelected = hName === hKey ? 'selected' : '';
-                    officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
-                });
-
-                const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
-
-                officersHtml += `
-                    <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
-                        <div class="officer-meta">
-                            <span class="position-badge ${posClass}">${posLabel}</span>
-                            <div class="officer-select-container">
-                                <select class="officer-dropdown" onchange="changeOfficer(${deck.originIdx}, ${offIdx}, this)">
-                                    ${officerOptionsHtml}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
-                        <div class="tactic-status-box">
-                            ${tacticRowsHtml}
-                        </div>
-                    </div>
-                `;
-            });
         }
 
-        let formationOptionsHtml = '';
-        Object.keys(formationEffects).forEach(fName => {
-            const isSelected = deck.formation === fName ? 'selected' : '';
-            formationOptionsHtml += `<option value="${fName}" ${isSelected}>${fName}</option>`;
-        });
-
-        const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
-        const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
-        let feedbackHtml = '';
+        let displayDecks = [];
+        for (let i = 0; i < dynamicPresetDecks.length; i++) {
+            displayDecks.push(dynamicPresetDecks[i]);
+        }
         
-        if (currentComputedScore === 100 && feedbackArr.length === 2) { 
-            feedbackHtml = `<div class="feedback-item success">★ 축하합니다! ${feedbackArr[0].split(']')[0]}] 과 완벽히 일치하는 무결성 최적화 군단입니다.</div>
-                            <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1]}</div>`;
-        } else if (currentComputedScore === 100 && feedbackArr.length > 2) {
-            feedbackHtml = `<div class="feedback-item success">✓ 현재 덱 방향성으로 100점 점수를 달성했습니다. 아래의 분석을 참고하여 통계적 고점을 추가 확보할 수 있습니다.</div>`;
-            feedbackArr.forEach((fb) => {
-                if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
-                } else {
-                    feedbackHtml += `<div class="feedback-item info">${fb}</div>`;
-                }
+        if (currentSortMode === 'score') {
+            displayDecks.sort((a, b) => {
+                const scoreA = calculateDeckScore(a, ownedHeroes, ownedTactics);
+                const scoreB = calculateDeckScore(b, ownedHeroes, ownedTactics);
+                return scoreB - scoreA;
             });
         } else {
-            feedbackArr.forEach((fb, index) => { 
-                if (index === 0) {
-                    feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
-                } else if (fb.includes('시스템 가이드 연동')) {
-                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
-                } else {
-                    feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
-                }
-            });
+            displayDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
         }
 
-        deckCard.innerHTML = `
-            <div class="deck-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div>
-                    <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
-                    <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
-                </div>
-                <button class="reset-deck-btn" onclick="resetDeck(${deck.originIdx})" style="background-color: #c82333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;">부대 초기화</button>
-            </div>
-            <div class="bond-box">
-                <span class="bond-highlight">부대 인연 효과 :</span> 
-                <span style="display:inline-block; outline:none;">${computedBondText}</span>
-            </div>
-            <div class="officers-row">
-                ${officersHtml}
-            </div>
-            
-            <div class="feedback-container-box">
-                <div class="feedback-header-title">📋 AI 메타 역추적 기반 실시간 맞춤 처방전</div>
-                <div class="feedback-list-wrapper">${feedbackHtml}</div>
-            </div>
+        const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
 
-            <div class="deck-footer-bar">
-                <div class="footer-left">
-                    <select class="formation-select" onchange="changeFormation(${deck.originIdx}, this)">
-                        ${formationOptionsHtml}
-                    </select>
+        displayDecks.forEach((deck) => {
+            if (!deck) return;
+            const deckCard = document.createElement('div');
+            deckCard.className = 'deck-card';
+
+            const currentComputedScore = calculateDeckScore(deck, ownedHeroes, ownedTactics);
+            const computedBondText = calculateActivatedBond(deck.officers);
+
+            let officersHtml = '';
+            if (deck.officers && Array.isArray(deck.officers)) {
+                deck.officers.forEach((off, offIdx) => {
+                    if (!off) return;
+                    let tacticRowsHtml = '';
+                    const hName = (off.name || "").toString().trim();
+                    const cleanHName = hName.replace(/\s+/g, '');
+                    const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
+                    const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
+
+                    const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
+
+                    if (cleanHName) {
+                        const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
+                        const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
+                        const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
+
+                        tacticRowsHtml += `
+                            <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
+                                <span>⭐ ${inherentTactic} (고유)</span>
+                                <span>${isInherentOwned ? '보유중' : '미보유'}</span>
+                            </div>
+                        `;
+                    } else {
+                        tacticRowsHtml += `
+                            <div class="tactic-row missing" style="border-left: 3px solid #555; background-color: rgba(255,255,255,0.02);">
+                                <span style="color: #666;">⭐ 고유 전법 (미배치)</span>
+                                <span style="color: #666;">-</span>
+                            </div>
+                        `;
+                    }
+
+                    if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
+                        off.chosenTactics.forEach((tacticName, slotIdx) => {
+                            const cleanTac = (tacticName || "").toString().trim();
+                            const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
+                            
+                            let optionsHtml = `<option value="" ${cleanTac === "" ? 'selected' : ''}>선택 안함</option>`;
+                            allTacticsList.forEach(tName => {
+                                const isSelected = cleanTac === tName ? 'selected' : '';
+                                optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
+                            });
+                            
+                            tacticRowsHtml += `
+                                <div class="tactic-row ${cleanTac === "" ? 'missing' : (isOwned ? 'owned' : 'missing')}" style="padding: 4px 12px;">
+                                    <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
+                                        ${optionsHtml}
+                                    </select>
+                                    <span class="tactic-status-text" style="${cleanTac === "" ? 'color:#666;' : ''}">
+                                        ${cleanTac === "" ? '슬롯 비어있음' : (isOwned ? '장착 완료' : '미보유')}
+                                    </span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
+                    const posLabel = currentPos === 'front' ? '전열' : '후열';
+                    const posClass = currentPos === 'front' ? 'front' : 'back';
+
+                    let officerOptionsHtml = `<option value="" ${cleanHName === "" ? 'selected' : ''}>선택 안함</option>`;
+                    sortedHeroNames.forEach(hKey => {
+                        const isSelected = hName === hKey ? 'selected' : '';
+                        officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
+                    });
+
+                    const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
+
+                    officersHtml += `
+                        <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
+                            <div class="officer-meta">
+                                <span class="position-badge ${posClass}">${posLabel}</span>
+                                <div class="officer-select-container">
+                                    <select class="officer-dropdown" onchange="changeOfficer(${deck.originIdx}, ${offIdx}, this)">
+                                        ${officerOptionsHtml}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
+                            <div class="tactic-status-box">
+                                ${tacticRowsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            let formationOptionsHtml = '';
+            Object.keys(formationEffects).forEach(fName => {
+                const isSelected = deck.formation === fName ? 'selected' : '';
+                formationOptionsHtml += `<option value="${fName}" ${isSelected}>${fName}</option>`;
+            });
+
+            const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
+            const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
+            let feedbackHtml = '';
+            
+            if (currentComputedScore === 100 && feedbackArr.length === 2) { 
+                feedbackHtml = `<div class="feedback-item success">★ 축하합니다! ${feedbackArr[0].split(']')[0]}] 과 완벽히 일치하는 무결성 최적화 군단입니다.</div>
+                                <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1]}</div>`;
+            } else if (currentComputedScore === 100 && feedbackArr.length > 2) {
+                feedbackHtml = `<div class="feedback-item success">✓ 현재 덱 방향성으로 100점 점수를 달성했습니다. 아래의 분석을 참고하여 통계적 고점을 추가 확보할 수 있습니다.</div>`;
+                feedbackArr.forEach((fb) => {
+                    if (fb.includes('시스템 가이드 연동')) {
+                        feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
+                    } else {
+                        feedbackHtml += `<div class="feedback-item info">${fb}</div>`;
+                    }
+                });
+            } else {
+                feedbackArr.forEach((fb, index) => { 
+                    if (index === 0) {
+                        feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
+                    } else if (fb.includes('시스템 가이드 연동')) {
+                        feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7; margin-bottom:15px;">${fb}</div>`;
+                    } else {
+                        feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
+                    }
+                });
+            }
+
+            deckCard.innerHTML = `
+                <div class="deck-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                        <span contenteditable="true" onblur="saveEditedText(${deck.originIdx}, 'title', this)" style="outline: none;">${deck.title}</span> 
+                        <span style="color: #ff9f43; font-size: 13px; margin-left: 12px; font-weight: bold; user-select: none;">[추천도: ${currentComputedScore}점]</span>
+                    </div>
+                    <button class="reset-deck-btn" onclick="resetDeck(${deck.originIdx})" style="background-color: #c82333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;">부대 초기화</button>
                 </div>
-                <div class="footer-right">${currentEffectText}</div>
+                <div class="bond-box">
+                    <span class="bond-highlight">부대 인연 효과 :</span> 
+                    <span style="display:inline-block; outline:none;">${computedBondText}</span>
+                </div>
+                <div class="officers-row">
+                    ${officersHtml}
+                </div>
+                
+                <div class="feedback-container-box">
+                    <div class="feedback-header-title">📋 AI 메타 역추적 기반 실시간 맞춤 처방전</div>
+                    <div class="feedback-list-wrapper">${feedbackHtml}</div>
+                </div>
+
+                <div class="deck-footer-bar">
+                    <div class="footer-left">
+                        <select class="formation-select" onchange="changeFormation(${deck.originIdx}, this)">
+                            ${formationOptionsHtml}
+                        </select>
+                    </div>
+                    <div class="footer-right">${currentEffectText}</div>
+                </div>
+            `;
+            container.appendChild(deckCard);
+        });
+    } catch(e) {
+        // [디버깅 시스템] 런타임 붕괴 시 원인을 검은 화면에 빨간색으로 강제 출력
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;">
+                <h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3>
+                <p>원인: ${e.message}</p>
+                <p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p>
+                <button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 재시작</button>
             </div>
         `;
-        container.appendChild(deckCard);
-    });
-    
-    console.log("[시스템 분석] UI 렌더링 정상 완료");
+        console.error("렌더링 크래시:", e);
+    }
 }
 
 // 이벤트 인터페이스 글로벌 바인딩 (인라인 호출 대응)
@@ -728,7 +735,7 @@ window.resetDeck = resetDeck;
 
 // 물리적인 DOM 렌더링 락 방지 부팅 프로세스
 function initDeckCoreEngine() {
-    console.log("[시스템 분석] 코어 엔진 기동 및 로컬 스토리지 파싱 시작");
+    console.log("[시스템 분석] 코어 엔진 기동 및 렌더링 파이프라인 개방");
     loadDeckTextData();
     renderDeckBuilder();
 }
