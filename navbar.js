@@ -1,5 +1,5 @@
 (function() {
-    // 글로벌 네비게이션 스타일 동적 주입 및 스크롤바 강제 소거
+    // 글로벌 네비게이션 스타일 동적 주입 및 스크롤바 완전 제거
     if (!document.getElementById('dynamic-navbar-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'dynamic-navbar-styles';
@@ -10,7 +10,7 @@
                 display: flex;
                 justify-content: flex-end;
                 padding: 0 30px;
-                overflow: hidden; /* 스크롤바 및 스크롤 기능 흔적 기능 완전 차단 */
+                overflow: hidden; /* 스크롤바 및 오버플로우 인디케이터 완전 박멸 */
                 position: relative;
                 z-index: 9999;
             }
