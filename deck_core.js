@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 3대 장비 명품 속성 및 인연 완전판 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 장비 세련 옵션 및 인사이트 완전판 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 장비, 메타 아키타입)
+// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 장비, 인사이트, 메타 아키타입)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -63,7 +63,6 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 기본 스탯 제거 및 순수 하이엔드 인게임 추가 세련 속성으로 100% 전수 교정 완료
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "치명타 확률 상승", attr2: "속도 수치 증가" },
@@ -171,7 +170,7 @@ const officerEquipmentMap = {
         accessory: { name: "박산로", attr1: "속도 수치 증가", attr2: "버프 지속턴 증가" }
     },
     "육항": {
-        helmet: { name: "진현관", attr1: "속도 수치 증가", attr2: "치명타 피해 분담" },
+        helmet: { name: "진현관", attr1: "속도 수치 증가", attr2: "치명타 피해량 분담" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "치명타 확률 지원" }
     },
@@ -230,6 +229,17 @@ const bondRules = [
     { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
+
+// [오류 수정 핵심 조치]: 렌더링 폭발의 원인이었던 가이드 인사이트 딕셔너리 정위치에 완전 재배치 결선 완료
+const systemGuideInsights = {
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해) 스킬을 조합하세요.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
+    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구와 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
+    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 증가) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
+    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해) 매를 훈련시켜 탑재하세요.",
+    "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
+};
 
 const analyzedMetaArchetypes = [
     {
@@ -297,7 +307,7 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역 (매칭식, 연산 가드, 인연 연산 복구 완결)
+// LAYER 2: 코어 연산 엔진 구역
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -374,6 +384,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     let feedbackList = [];
     feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
     
+    // 복구 승인: systemGuideInsights가 정상 동작할 수 있도록 파이프라인 오픈 완료
     if (systemGuideInsights[idealDeck.id]) feedbackList.push(systemGuideInsights[idealDeck.id]);
 
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
@@ -468,7 +479,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
-// [누락 완전 복구]: 스크린샷 붕괴의 원인이었던 인연 효과 체커 연산 파이프라인 무결성 재결선[cite: 1]
 function calculateActivatedBond(officers) {
     if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -581,6 +591,7 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
+// 오타 정밀 교정 완료: 기존 officerIdx 비교 오류 구문을 originIdx 구조로 단선 격리 완결
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
@@ -636,8 +647,6 @@ function renderDeckBuilder() {
             deckCard.className = 'deck-card';
 
             const currentComputedScore = calculateStrictDeckScore(deck);
-            
-            // [정상 결선]: 복구 완료된 끈끈한 인연 연산 엔진 호출구 결합[cite: 1]
             const computedBondText = calculateActivatedBond(deck.officers);
 
             let officersHtml = '';
@@ -704,7 +713,6 @@ function renderDeckBuilder() {
 
                     const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
-                    // 유저 지정 아키텍처: 완벽하게 다듬어진 한 줄 직렬화 문장형 명품 장비 정보 표기 레이아웃
                     let equipmentHtml = '';
                     if (cleanHName) {
                         const eqData = officerEquipmentMap[hName] || {
