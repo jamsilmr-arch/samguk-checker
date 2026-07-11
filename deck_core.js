@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 엔진 기동 승인 완료");
+console.log("[시스템 분석] deck_core.js 장비 권장 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 데이터베이스 구역
+// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 메타 아키타입)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -62,6 +62,33 @@ const officerUniqueTacticMap = {
 const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
+
+// 신설 하부 시스템: 시스템 가이드 기준 무장별 최고 존엄 전용 장비 및 세련 속성 추출용 메타 데이터 사전
+const officerEquipmentMap = {
+    "마초": { name: "삭풍참도 (무기)", attr1: "무용 (공격력)", attr2: "연격률 증가" },
+    "위연": { name: "호분갑 (갑옷)", attr1: "무용 (공격력)", attr2: "피해 감소" },
+    "서서": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
+    "장료": { name: "백옥잠 (투구)", attr1: "무용 (공격력)", attr2: "속도 수치 증가" },
+    "조조(제왕)": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "속도 수치 증가" },
+    "조조": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "피해 감소" },
+    "악진": { name: "쌍호뉴 (장신구)", attr1: "무용 (공격력)", attr2: "속도 수치 증가" },
+    "동탁": { name: "결운갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "피해 감소 어품 상한선" },
+    "원소": { name: "진현관 (투구)", attr1: "통솔 (방어력)", attr2: "피해 감소" },
+    "여포": { name: "방천화극 (무기)", attr1: "무용 (공격력)", attr2: "연격률 증가" },
+    "제갈량": { name: "명재복 (갑옷)", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
+    "황충": { name: "박산로 (장신구)", attr1: "무용 (공격력)", attr2: "장공 (원거리 증폭)" },
+    "강유": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "속도 수치 증가" },
+    "좌자": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "회피 확률 증가" },
+    "장녕": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
+    "우길": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
+    "사마의": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "공심 (모략흡혈)" },
+    "하후돈": { name: "세린갑 (갑옷)", attr1: "통솔 (방어력)", attr2: "반격률 증가" },
+    "가후": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "치유 효과 받음 (최대 11.07%)" },
+    "손권": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "통찰 (제어 면역)" },
+    "손권(제왕)": { name: "명재복 (갑옷)", attr1: "통솔 (방어력)", attr2: "통찰 (제어 면역)" },
+    "육항": { name: "박산로 (장신구)", attr1: "모략 (지력)", attr2: "치유 효과 상승" },
+    "노숙": { name: "진현관 (투구)", attr1: "모략 (지력)", attr2: "속도 수치 증가" }
+};
 
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
@@ -167,22 +194,11 @@ const systemGuideInsights = {
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
-// 정렬 기능 축소에 따른 고정 배열 할당
-let dynamicPresetDecks = [];
-
-// ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역 (100% 동기화 판정식 및 하드 감산 필터)
-// ==========================================================================
-
-// 타겟 메타 덱과의 무결성 비교를 수행하여 단 하나라도 틀리면 100점을 주지 않는 가혹한 점수 연산기
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
-
-    // 현재 슬롯의 무장 명칭 청정 가공
     const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
     if (currentNames.length === 0) return 0;
 
-    // 매칭 점수가 가장 높은 최적의 메타 아키타입 탐색
     let bestMeta = analyzedMetaArchetypes[0];
     let maxMatch = -1;
 
@@ -198,37 +214,25 @@ function calculateStrictDeckScore(deck) {
         }
     });
 
-    let score = 100; // 100점 만점 시작 후 불일치 요소마다 하드 패널티 감산
+    let score = 100;
+    if (deck.formation !== bestMeta.formation) score -= 10;
 
-    // 1. 진형 무결성 검증 (불일치 시 -10점)
-    if (deck.formation !== bestMeta.formation) {
-        score -= 10;
-    }
-
-    // 2. 무장 및 포지션 슬롯 무결성 검증
     bestMeta.officers.forEach((metaOff, idx) => {
         const userOff = deck.officers[idx];
         if (!userOff || !userOff.name) {
-            score -= 30; // 빈 슬롯 패널티
+            score -= 30;
             return;
         }
+        if (userOff.name !== metaOff.name) score -= 20;
 
-        // 장수명 대조 (다를 경우 배치 순서 역전 혹은 미배치로 간주하여 -20점)
-        if (userOff.name !== metaOff.name) {
-            score -= 20;
-        }
-
-        // 3. 무장별 장착 전법 슬롯 무결성 검증 (슬롯당 -5점 패널티)
         const metaTacs = metaOff.chosenTactics.map(t => t.toString().trim());
         if (userOff.chosenTactics && Array.isArray(userOff.chosenTactics)) {
             userOff.chosenTactics.forEach((userTac, tIdx) => {
                 const cleanUserTac = userTac ? userTac.toString().trim() : "";
-                if (cleanUserTac !== metaTacs[tIdx]) {
-                    score -= 5;
-                }
+                if (cleanUserTac !== metaTacs[tIdx]) score -= 5;
             });
         } else {
-            score -= 10; // 전법 슬롯 전멸 시 패널티
+            score -= 10;
         }
     });
 
@@ -238,17 +242,12 @@ function calculateStrictDeckScore(deck) {
 
 function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return [];
-
     const currentCleanNames = [];
     deck.officers.forEach(o => {
-        if (o && o.name) {
-            currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
-        }
+        if (o && o.name) currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
     });
 
-    if (currentCleanNames.length === 0) {
-        return [];
-    }
+    if (currentCleanNames.length === 0) return [];
 
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
@@ -257,14 +256,9 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         let matchScore = 0;
         metaDeck.officers.forEach((metaOff, idx) => {
             const metaName = metaOff.name.replace(/\s+/g, '');
-            if (currentCleanNames.includes(metaName)) {
-                matchScore += 1; 
-            }
-            if (currentCleanNames[idx] === metaName) {
-                matchScore += 0.5;
-            }
+            if (currentCleanNames.includes(metaName)) matchScore += 1; 
+            if (currentCleanNames[idx] === metaName) matchScore += 0.5;
         });
-        
         if (matchScore > maxMatchScore) {
             maxMatchScore = matchScore;
             bestMatchDeck = metaDeck;
@@ -273,16 +267,12 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 
     const idealDeck = bestMatchDeck;
     let feedbackList = [];
-    
     feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
     
-    if (systemGuideInsights[idealDeck.id]) {
-        feedbackList.push(systemGuideInsights[idealDeck.id]);
-    }
+    if (systemGuideInsights[idealDeck.id]) feedbackList.push(systemGuideInsights[idealDeck.id]);
 
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
-
     const currentFormation = (deck.formation ? deck.formation : "").toString().trim();
     const idealFormation = (idealDeck.formation ? idealDeck.formation : "").toString().trim();
 
@@ -309,9 +299,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         }
 
         const isHeroOwned = cleanOwnedHeroes.includes(cleanHName); 
-        if (!isHeroOwned) {
-            feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
-        }
+        if (!isHeroOwned) feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
 
         const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
 
@@ -334,9 +322,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                     if (!tac) return;
                     const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
                     const idx = unmatchedMetaTactics.findIndex(mt => mt.toString().trim().replace(/\s+/g, '') === cleanUserTac);
-                    if (idx !== -1) {
-                        unmatchedMetaTactics.splice(idx, 1);
-                    }
+                    if (idx !== -1) unmatchedMetaTactics.splice(idx, 1);
                 });
 
                 off.chosenTactics.forEach((tac, tacIdx) => {
@@ -350,10 +336,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                             feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
                         }
                     }
-
-                    if (!cleanOwnedTactics.includes(cleanUserTac)) {
-                        feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
-                    }
+                    if (!cleanOwnedTactics.includes(cleanUserTac)) feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
                 });
             }
         } else {
@@ -389,14 +372,11 @@ function calculateActivatedBond(officers) {
         currentOfficerNames.forEach(name => {
             if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
         });
-        
         const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
-        
         if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
             matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
         }
     });
-
     return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
 }
 
@@ -410,11 +390,7 @@ function loadDeckTextData() {
             const parsed = JSON.parse(savedText);
             if (parsed && Array.isArray(parsed) && parsed.length > 0) {
                 dynamicPresetDecks = parsed;
-                
-                if (dynamicPresetDecks.length > 5) {
-                    dynamicPresetDecks.splice(5);
-                    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-                }
+                if (dynamicPresetDecks.length > 5) dynamicPresetDecks.splice(5);
 
                 if (dynamicPresetDecks.length < 5) {
                     for (let i = dynamicPresetDecks.length; i < 5; i++) {
@@ -430,11 +406,9 @@ function loadDeckTextData() {
                     d.originIdx = (d.originIdx !== undefined) ? d.originIdx : idx;
                     if (!d.title) d.title = (defaultPresetDecks[idx] ? defaultPresetDecks[idx].title : `${idx + 1}군`);
                     if (!d.formation) d.formation = (defaultPresetDecks[idx] ? defaultPresetDecks[idx].formation : "추형진");
-                    
                     if (!d.officers || !Array.isArray(d.officers) || d.officers.length === 0) {
                         d.officers = JSON.parse(JSON.stringify(defaultPresetDecks[idx] ? defaultPresetDecks[idx].officers : defaultPresetDecks[0].officers));
                     }
-                    
                     d.officers.forEach((off, oIdx) => {
                         if (!off || typeof off !== 'object') {
                             off = { name: "", chosenTactics: ["", ""] };
@@ -443,12 +417,9 @@ function loadDeckTextData() {
                         if (off.name === "제)조조") off.name = "조조(제왕)";
                         if (off.name === "제)유비") off.name = "유비(제왕)";
                         if (off.name === undefined || off.name === null) off.name = "";
-                        if (!off.chosenTactics || !Array.isArray(off.chosenTactics)) {
-                            off.chosenTactics = ["", ""];
-                        }
+                        if (!off.chosenTactics || !Array.isArray(off.chosenTactics)) off.chosenTactics = ["", ""];
                     });
                 });
-
                 localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
                 return;
             }
@@ -477,27 +448,23 @@ function resetDeck(originIdx) {
     renderDeckBuilder(); 
 }
 
-// 정렬 모드 전환 폐기, 고정 로드 인터페이스 보존
 function toggleSortMode(mode) {
-    console.log("[정렬 보호] 추천도 높은 순 정렬 필터가 제거되었습니다. 1군~5군 배치가 유지됩니다.");
     renderDeckBuilder();
 }
 
 function saveEditedText(originIdx, propertyName, element) {
     let textValue = element.innerText.trim();
     textValue = textValue.replace(/\s*\[추천도:\s*\d+점\]/g, "").trim();
-
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
-        if (textValue.length === 0) {
-            textValue = defaultPresetDecks[originIdx] ? defaultPresetDecks[originIdx][propertyName] : "부대 명칭";
-        }
+        if (textValue.length === 0) textValue = defaultPresetDecks[originIdx] ? defaultPresetDecks[originIdx][propertyName] : "부대 명칭";
         targetDeck[propertyName] = textValue;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     }
     renderDeckBuilder();
 }
 
+// 돔 주입 제어 필터가 정상 가동되도록 수정
 function changeFormation(originIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
@@ -547,16 +514,11 @@ function renderDeckBuilder() {
                     return name;
                 });
             }
-            if (parsed && parsed.tactics) {
-                ownedTactics = parsed.tactics.filter(x => x && x.isOwned).map(x => (x.name || "").toString().trim());
-            }
+            if (parsed && parsed.tactics) ownedTactics = parsed.tactics.filter(x => x && x.isOwned).map(x => (x.name || "").toString().trim());
         }
 
-        // 유저 요청 사항: 무조건 1군~5군 원본 순서 고정 정렬 드로잉
         let displayDecks = [];
-        for (let i = 0; i < dynamicPresetDecks.length; i++) {
-            displayDecks.push(dynamicPresetDecks[i]);
-        }
+        for (let i = 0; i < dynamicPresetDecks.length; i++) displayDecks.push(dynamicPresetDecks[i]);
         displayDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
 
         const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -566,7 +528,6 @@ function renderDeckBuilder() {
             const deckCard = document.createElement('div');
             deckCard.className = 'deck-card';
 
-            // 엄격화된 종결 무결성 판정 스코어러 연동
             const currentComputedScore = calculateStrictDeckScore(deck);
             const computedBondText = calculateActivatedBond(deck.officers);
 
@@ -579,14 +540,12 @@ function renderDeckBuilder() {
                     const cleanHName = hName.replace(/\s+/g, '');
                     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
                     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
-
                     const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
 
                     if (cleanHName) {
                         const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
                         const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
                         const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
-
                         tacticRowsHtml += `
                             <div class="tactic-row ${isInherentOwned ? 'owned' : 'missing'}" style="border-left: 3px solid #cd9b33;">
                                 <span>⭐ ${inherentTactic} (고유)</span>
@@ -602,17 +561,15 @@ function renderDeckBuilder() {
                         `;
                     }
 
-                    if (off.chosenTactics && Array.isArray(off.chosenChosen || off.chosenTactics)) {
+                    if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
                         off.chosenTactics.forEach((tacticName, slotIdx) => {
                             const cleanTac = (tacticName || "").toString().trim();
                             const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
-                            
                             let optionsHtml = `<option value="" ${cleanTac === "" ? 'selected' : ''}>선택 안함</option>`;
                             allTacticsList.forEach(tName => {
                                 const isSelected = cleanTac === tName ? 'selected' : '';
                                 optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
                             });
-                            
                             tacticRowsHtml += `
                                 <div class="tactic-row ${cleanTac === "" ? 'missing' : (isOwned ? 'owned' : 'missing')}" style="padding: 4px 12px;">
                                     <select class="tactic-dropdown" onchange="changeTactic(${deck.originIdx}, ${offIdx}, ${slotIdx}, this)">
@@ -638,6 +595,20 @@ function renderDeckBuilder() {
 
                     const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
+                    // [추천 장비 추출 로직]: 장수가 배치되었을 때, 사전 데이터베이스에서 장비 명칭 및 속성 1, 2종을 정밀 바인딩
+                    let equipmentHtml = '';
+                    if (cleanHName) {
+                        const eqData = officerEquipmentMap[hName] || { name: "명재복 (갑옷)", attr1: "통솔/모략/무용 (기본 스탯)", attr2: "피해 감소" };
+                        equipmentHtml = `
+                            <div class="equipment-recommendation-box" style="margin-top: 8px; padding: 6px 10px; background: rgba(255,255,255,0.02); border: 1px dashed #555; border-radius: 4px; font-size: 11px; text-align: left;">
+                                <div style="color: #ff9f43; font-weight: bold; margin-bottom: 3px;">🛠️ 시스템 권장 장비</div>
+                                <div style="color:#ddd; margin-bottom:1px;">• 장비명: <span style="font-weight:bold; color:#fff;">${eqData.name}</span></div>
+                                <div style="color:#ddd; margin-bottom:1px;">• 속성 1: <span style="color:#28a745; font-weight:bold;">${eqData.attr1}</span></div>
+                                <div style="color:#ddd;">• 속성 2: <span style="color:#17a2b8; font-weight:bold;">${eqData.attr2}</span></div>
+                            </div>
+                        `;
+                    }
+
                     officersHtml += `
                         <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
                             <div class="officer-meta">
@@ -649,7 +620,11 @@ function renderDeckBuilder() {
                                 </div>
                             </div>
                             <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
-                            <div class="tactic-status-box">
+                            
+                            <!-- 장비 정보 컴포넌트 돔(DOM) 동적 주입 -->
+                            ${equipmentHtml}
+                            
+                            <div class="tactic-status-box" style="margin-top:8px;">
                                 ${tacticRowsHtml}
                             </div>
                         </div>
@@ -674,13 +649,9 @@ function renderDeckBuilder() {
                                 <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1] || ""}</div>`;
             } else {
                 feedbackArr.forEach((fb, index) => { 
-                    if (index === 0) {
-                        feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
-                    } else if (fb.includes('시스템 가이드 연동')) {
-                        feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
-                    } else {
-                        feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
-                    }
+                    if (index === 0) feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
+                    else if (fb.includes('시스템 가이드 연동')) feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
+                    else feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
                 });
             }
 
@@ -736,19 +707,15 @@ function exportData() {
     try {
         var hobbyData = localStorage.getItem('samguk_hobby_data');
         var deckData = localStorage.getItem('samguk_deck_text');
-        
         var backupObject = {
             samguk_hobby_data: hobbyData ? JSON.parse(hobbyData) : null,
             samguk_deck_text: deckData ? JSON.parse(deckData) : null
         };
-        
         var jsonString = JSON.stringify(backupObject, null, 2);
         var blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
-        
         var downloadAnchor = document.createElement('a');
         downloadAnchor.href = URL.createObjectURL(blob);
         downloadAnchor.download = "samguk_wangjeon_database_backup.json";
-        
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
@@ -759,15 +726,12 @@ function exportData() {
 
 function triggerImport() {
     var fileInput = document.getElementById('import-file-input');
-    if (fileInput) {
-        fileInput.click();
-    }
+    if (fileInput) fileInput.click();
 }
 
 function importData(input) {
     var file = input.files[0];
     if (!file) return;
-    
     var reader = new FileReader();
     reader.onload = function(e) {
         try {
@@ -776,12 +740,8 @@ function importData(input) {
                 alert("삼국지 왕전의 유효한 데이터 백업 규격이 확인되지 않습니다.");
                 return;
             }
-            if (importedDatabase.samguk_hobby_data) {
-                localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
-            }
-            if (importedDatabase.samguk_deck_text) {
-                localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
-            }
+            if (importedDatabase.samguk_hobby_data) localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
+            if (importedDatabase.samguk_deck_text) localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
             alert("데이터 베이스 인프라 복구 완료. 동기화 스냅샷 적용을 위해 시스템을 리로드합니다.");
             location.reload();
         } catch (err) {
@@ -791,7 +751,6 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
-// 온클릭 인터페이스 글로벌 가교 바인딩
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
