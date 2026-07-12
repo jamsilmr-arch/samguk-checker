@@ -1,7 +1,7 @@
-console.log("[시스템 분석] dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동");
+console.log("[시스템 분석] dogam.js 헤더 레이아웃 교정 및 가독성 최적화 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 무장 마스터 데이터베이스 (원본 스탯 및 설명 데이터 완전 복구)
+// LAYER 1: 무장 마스터 데이터베이스 (원본 데이터 무결성 유지)
 // ==========================================================================
 const heroDogamData = [
     // 위나라 (13명)
@@ -109,7 +109,7 @@ const heroDogamData = [
     },
     { 
         id: 'h_yubi', name: '유비', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '인정', 
-        skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.',
+        skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고속성을 높입니다.',
         stats: { martial: 509, tactical: 568, command: 652, speed: 368 }
     },
     { 
@@ -222,19 +222,14 @@ const heroDogamData = [
 
     // 군진영 (12명)
     { 
-        id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
-        skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.',
-        stats: { martial: 372, tactical: 598, command: 509, speed: 558 }
-    },
-    { 
-        id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', 
-        skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.',
-        stats: { martial: 461, tactical: 598, command: 556, speed: 457 }
-    },
-    { 
         id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', 
         skillDesc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.',
         stats: { martial: 556, tactical: 491, command: 646, speed: 481 }
+    },
+    { 
+        id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', 
+        skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.',
+        stats: { martial: 598, tactical: 384, command: 515, speed: 534 }
     },
     { 
         id: 'h_yeopo', name: '여포', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '천하무쌍', 
@@ -242,9 +237,14 @@ const heroDogamData = [
         stats: { martial: 675, tactical: 378, command: 556, speed: 546 }
     },
     { 
-        id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', 
-        skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.',
-        stats: { martial: 372, tactical: 592, command: 556, speed: 433 }
+        id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', 
+        skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.',
+        stats: { martial: 443, tactical: 592, command: 527, speed: 516 }
+    },
+    { 
+        id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', 
+        skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.',
+        stats: { martial: 515, tactical: 521, command: 634, speed: 493 }
     },
     { 
         id: 'h_janggak', name: '장각', group: 'qun', role: '능동 (50%)', location: '후열', skill: '황천당립', 
@@ -252,9 +252,9 @@ const heroDogamData = [
         stats: { martial: 473, tactical: 610, command: 616, speed: 368 }
     },
     { 
-        id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', 
-        skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.',
-        stats: { martial: 372, tactical: 598, command: 432, speed: 362 }
+        id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', 
+        skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.',
+        stats: { martial: 461, tactical: 598, command: 556, speed: 457 }
     },
     { 
         id: 'h_jangbo', name: '장보', group: 'qun', role: '능동 (50%)', location: '후열', skill: '요풍사기', 
@@ -267,19 +267,19 @@ const heroDogamData = [
         stats: { martial: 437, tactical: 658, command: 497, speed: 403 }
     },
     { 
-        id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', 
-        skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.',
-        stats: { martial: 443, tactical: 592, command: 527, speed: 516 }
+        id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
+        skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.',
+        stats: { martial: 372, tactical: 598, command: 509, speed: 558 }
     },
     { 
-        id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', 
-        skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.',
-        stats: { martial: 598, tactical: 384, command: 515, speed: 534 }
+        id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', 
+        skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.',
+        stats: { martial: 372, tactical: 592, command: 556, speed: 433 }
     },
     { 
-        id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', 
-        skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.',
-        stats: { martial: 515, tactical: 521, command: 634, speed: 493 }
+        id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', 
+        skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.',
+        stats: { martial: 372, tactical: 598, command: 432, speed: 362 }
     }
 ];
 
@@ -400,7 +400,6 @@ function renderDogamUI() {
         container = document.createElement('div');
         container.id = 'samguk-dogam-wrapper';
         
-        // [해결 조치] 컨테이너에 강제 폭 확장 스타일(important) 주입
         container.style.setProperty('width', '100%', 'important');
         container.style.setProperty('flex', '1 1 100%', 'important');
         container.style.setProperty('align-self', 'stretch', 'important');
@@ -409,7 +408,6 @@ function renderDogamUI() {
         container.style.padding = '10px 0';
         
         if (nativeContainer) {
-            // [해결 조치] 상위 부모 요소의 Flex 압축 현상 타파
             nativeContainer.style.setProperty('width', '100%', 'important');
             nativeContainer.style.setProperty('flex', '1 1 100%', 'important');
             nativeContainer.style.setProperty('align-self', 'stretch', 'important');
@@ -431,7 +429,7 @@ function renderDogamUI() {
             <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">장수 도감 마스터 보드</h2>
             <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
         </div>
-        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
+        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
     `;
     
     bindFilterButtons();
@@ -500,10 +498,16 @@ function renderDogamGrid() {
             `;
         }
 
+        // [구조 수정] absolute로 고정되어 겹치던 미/보유 배지를 제거하고, 우측 Flex 서브 그룹 내부로 완전히 통합 이관
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
                 <div style="font-size: 18px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; letter-spacing: 1px;">${hero.name}</div>
-                <div style="font-size: 11px; font-weight: bold; color: ${groupColors[hero.faction]};">${getGroupNameKorean(hero.faction)}</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 11px; font-weight: bold; color: ${groupColors[hero.faction]};">${getGroupNameKorean(hero.faction)}</span>
+                    <div style="font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold; white-space: nowrap;">
+                        ${hero.isOwned ? '보유' : '미보유'}
+                    </div>
+                </div>
             </div>
             
             <div style="display: flex; gap: 12px; font-size: 11px; color: #bbb; margin-bottom: 4px;">
@@ -516,10 +520,6 @@ function renderDogamGrid() {
             <div style="background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 8px; font-size: 11px; line-height: 1.5; margin-top: auto;">
                 <div style="color: #38bdf8; font-weight: bold; margin-bottom: 3px;">고유: ${hero.skill}</div>
                 <div style="color: #ddd; word-break: keep-all;">${hero.skillDesc}</div>
-            </div>
-
-            <div style="position: absolute; top: 15px; right: 15px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
-                ${hero.isOwned ? '보유' : '미보유'}
             </div>
         `;
 
