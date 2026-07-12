@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 전투매 실시간 맵핑 및 오토 렌더링 엔진 기동");
+console.log("[시스템 분석] deck_core.js 실시간 반응성 및 객체 지향 AI 처방전 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 필수 코어 배열 (도감 및 가이드 이관 데이터 전면 삭제 상태 유지)
@@ -125,7 +125,6 @@ function getGlobalOfficerNames() {
     return ["조조", "유비", "손권", "사마의", "하후돈", "가후", "강유"].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 
-// [신규 자원]: 메타 덱 아키텍처에 1:1로 대응하는 최적화 전투매 매핑 딕셔너리
 const metaHawkRecommendationMap = {
     "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
     "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
@@ -147,7 +146,7 @@ const systemGuideInsights = {
 };
 
 // ==========================================================================
-// LAYER 3: 코어 연산 엔진 구역
+// LAYER 3: 코어 연산 엔진 구역 (객체 지향 피드백 고도화 완료)
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -195,14 +194,17 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
-function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
-    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return [];
+// [고도화 1]: 하드코딩 인덱스를 파쇄하고 객체(Object) 지향 형태로 데이터 무결성 캡슐화
+function generateStructuredFeedback(deck, ownedHeroes, ownedTactics) {
+    const feedbackResult = { insight: "", logs: [] };
+
+    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return feedbackResult;
     const currentCleanNames = [];
     deck.officers.forEach(o => {
         if (o && o.name) currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
     });
 
-    if (currentCleanNames.length === 0) return [];
+    if (currentCleanNames.length === 0) return feedbackResult;
 
     let bestMatchDeck = analyzedMetaArchetypes[0]; 
     let maxMatchScore = -1;
@@ -221,10 +223,10 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     });
 
     const idealDeck = bestMatchDeck;
-    let feedbackList = [];
-    feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
+    feedbackResult.logs.push({ type: 'info', text: `🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})` });
     
-    if (systemGuideInsights[idealDeck.id]) feedbackList.push(systemGuideInsights[idealDeck.id]);
+    // 메타 가이드 인사이트를 별도의 프로퍼티로 안전하게 격리
+    if (systemGuideInsights[idealDeck.id]) feedbackResult.insight = systemGuideInsights[idealDeck.id];
 
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
@@ -232,7 +234,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const idealFormation = (idealDeck.formation ? idealDeck.formation : "").toString().trim();
 
     if (currentFormation.replace(/\s+/g, '') !== idealFormation.replace(/\s+/g, '')) {
-        feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
+        feedbackResult.logs.push({ type: 'warning', text: `진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)` });
     }
 
     let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
@@ -245,16 +247,16 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
         if (!cleanHName) {
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
-                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${replaceWith.name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)`);
-                feedbackList.push(`전법 권장: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 지시합니다.`);
+                feedbackResult.logs.push({ type: 'warning', text: `장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${replaceWith.name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)` });
+                feedbackResult.logs.push({ type: 'info', text: `전법 권장: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 지시합니다.` });
             } else {
-                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ 타겟 메타에 부합하는 임의의 서포터 장수를 배치하세요.`);
+                feedbackResult.logs.push({ type: 'warning', text: `장수 배치: <strong>[빈 슬롯]</strong> ➔ 타겟 메타에 부합하는 임의의 서포터 장수를 배치하세요.` });
             }
             return;
         }
 
         const isHeroOwned = cleanOwnedHeroes.includes(cleanHName); 
-        if (!isHeroOwned) feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
+        if (!isHeroOwned) feedbackResult.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
 
         const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
 
@@ -266,7 +268,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             if (currentUserRow !== idealRow) {
                 const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                 const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
-                feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
+                feedbackResult.logs.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.` });
             }
 
             const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
@@ -290,39 +292,36 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                     if (!metaTacsClean.includes(cleanUserTac)) {
                         if (unmatchedMetaTactics.length > 0) {
                             const replaceWith = unmatchedMetaTactics.shift();
-                            feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
+                            feedbackResult.logs.push({ type: 'warning', text: `전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)` });
                         }
                     }
-                    if (!cleanOwnedTactics.includes(cleanUserTac)) feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
+                    if (!cleanOwnedTactics.includes(cleanUserTac)) feedbackResult.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.` });
                 });
             }
         } else {
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
-                feedbackList.push(`장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)`);
-                feedbackList.push(`전법 세팅: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 권장합니다.`);
+                feedbackResult.logs.push({ type: 'warning', text: `장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)` });
+                feedbackResult.logs.push({ type: 'info', text: `전법 세팅: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 권장합니다.` });
             } else {
-                feedbackList.push(`장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.`);
+                feedbackResult.logs.push({ type: 'warning', text: `장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.` });
             }
         }
 
         const officerDogamData = getOfficerDogamData(hName);
-        if (officerDogamData && officerDogamData.uniqueTactic) {
+        // [고도화 2]: API 단절 및 더미 데이터 오진 방어를 위한 Null Coalescing 안전망
+        if (officerDogamData && officerDogamData.uniqueTactic && officerDogamData.uniqueTactic !== "고유 전법 누락") {
             const cleanInherent = officerDogamData.uniqueTactic.toString().trim().replace(/\s+/g, '');
             if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
-                feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${officerDogamData.uniqueTactic}]</strong>이 비활성화 상태입니다.`);
+                feedbackResult.logs.push({ type: 'warning', text: `고유 전법 누락: [${hName}]의 고유 전법 <strong>[${officerDogamData.uniqueTactic}]</strong>이 비활성화 상태입니다.` });
             }
         }
     });
 
-    return feedbackList;
+    return feedbackResult;
 }
 
 function calculateActivatedBond(officers) {
-    // 하드코딩 배열 삭제. (인연 효과 연산은 시스템 코어 내 하드코딩 유지. 도감에 없는 데이터)
-    // 인연 규칙 데이터 (deck_core.js 내부에 보존되어 있는 LAYER 1의 bondRules를 참조)
-    // 원본 코드의 bondRules가 없으면 에러 발생. 위 LAYER 1 에 bondRules 추가 필요.
-    // 사용자가 제공한 이전 파일과 동일하게 동작하도록 내부에서 임시 정의.
     const internalBondRules = [
         { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
         { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -528,9 +527,8 @@ function renderDeckBuilder() {
             const currentComputedScore = calculateStrictDeckScore(deck);
             const computedBondText = calculateActivatedBond(deck.officers);
 
-            // [메타 덱 전투매 연산] 현재 분석된 메타 덱 아키타입 ID를 추출
             let matchScoreMax = -1;
-            let currentBestMetaId = "shu_combo"; // 안전망
+            let currentBestMetaId = "shu_combo"; 
             const currentCleanHeroNames = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "");
             
             analyzedMetaArchetypes.forEach(metaDeck => {
@@ -546,10 +544,7 @@ function renderDeckBuilder() {
                 }
             });
 
-            // 추출된 메타 ID를 기반으로 전투매 UI 데이터 파싱
             const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "추천 전투매 데이터 없음", skill: "해당 덱의 메타 분석 데이터가 누락되었습니다." };
-            
-            // 인연 효과와 무장 목록 사이에 삽입될 전투매 추천 HTML 스니펫
             const hawkHtml = `
                 <div class="hawk-recommend-box" style="margin-top: 10px; padding: 12px 15px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(20,20,20,0) 100%); border-left: 4px solid #38bdf8; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
                     <div style="font-size: 13px; font-weight: bold; color: #38bdf8; letter-spacing: -0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div>
@@ -662,20 +657,24 @@ function renderDeckBuilder() {
             });
 
             const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
-            const feedbackArr = generateDeckFeedback(deck, ownedHeroes, ownedTactics);
+            
+            // [고도화 반영]: 하드코딩 인덱스 탈피 및 객체화된 피드백 엔진 렌더링
+            const feedbackData = generateStructuredFeedback(deck, ownedHeroes, ownedTactics);
             let feedbackHtml = '';
             
-            if (feedbackArr.length === 0) {
-                feedbackHtml = ''; 
-            } else if (currentComputedScore === 100) { 
-                feedbackHtml = `<div class="feedback-item success">★ 축하합니다! 랭커 메타와 100% 일치하는 무결성 최적화 명품 군단입니다.</div>
-                                <div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackArr[1] || ""}</div>`;
+            if (currentComputedScore === 100) { 
+                feedbackHtml = `<div class="feedback-item success">★ 축하합니다! 랭커 메타와 100% 일치하는 무결성 최적화 명품 군단입니다.</div>`;
+                if (feedbackData.insight) {
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackData.insight}</div>`;
+                }
             } else {
-                feedbackArr.forEach((fb, index) => { 
-                    if (index === 0) feedbackHtml += `<div class="feedback-item info">${fb}</div>`; 
-                    else if (fb.includes('시스템 가이드 연동')) feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb}</div>`;
-                    else feedbackHtml += `<div class="feedback-item warning">${fb}</div>`; 
+                feedbackData.logs.forEach(log => {
+                    const cssClass = log.type === 'info' ? 'info' : (log.type === 'warning' ? 'warning' : 'success');
+                    feedbackHtml += `<div class="feedback-item ${cssClass}">${log.text}</div>`;
                 });
+                if (feedbackData.insight) {
+                    feedbackHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${feedbackData.insight}</div>`;
+                }
             }
 
             deckCard.innerHTML = `
@@ -775,7 +774,7 @@ function importData(input) {
 }
 
 // ==========================================================================
-// LAYER 5: 글로벌 윈도우 인터페이스 바인딩 구역
+// LAYER 5: 글로벌 윈도우 인터페이스 바인딩 및 동기화 프록시 구축
 // ==========================================================================
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
@@ -786,6 +785,27 @@ window.resetDeck = resetDeck;
 window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
+
+// [고도화 3]: 도감 조작 시 덱 렌더링이 즉각 동기화되도록 로컬 스토리지 프록시 가로채기 이식
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    const event = new CustomEvent('local-storage-update', { detail: { key: key } });
+    window.dispatchEvent(event);
+};
+
+window.addEventListener('local-storage-update', function(e) {
+    if (e.detail.key === 'samguk_hobby_data') {
+        if(document.getElementById('deck-container')) renderDeckBuilder();
+    }
+});
+
+// 크로스 탭 동기화 지원
+window.addEventListener('storage', function(e) {
+    if (e.key === 'samguk_hobby_data') {
+        if(document.getElementById('deck-container')) renderDeckBuilder();
+    }
+});
 
 function initDeckCoreEngine() {
     loadDeckTextData();
