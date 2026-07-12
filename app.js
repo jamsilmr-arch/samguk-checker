@@ -178,7 +178,7 @@ function renderButtons() {
         let innerHtml = `<span style="font-weight: bold; pointer-events: none; font-size: 13px;">${item.name}</span>`;
         
         if (item.isOwned) {
-            // 이모지 및 부가 텍스트 제거, 텍스트 중앙 정렬(text-align-last)로 오버플로우 원천 차단
+            // 이모지 제거, 0성부터 5성까지 간결한 텍스트 및 중앙 정렬 탑재 완료
             innerHtml += `
                 <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 80%; max-width: 60px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center;">
                     <option value="0" ${item.star === 0 ? 'selected' : ''}>0성</option>
