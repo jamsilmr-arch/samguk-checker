@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 초경량화 및 guide.js 동적 브릿지 연동 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js SSOT 도감 3중 분산 연동 및 초경량화 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 렌더링 및 연산 필수 정적 데이터베이스 구역 (가이드 이관 자원 제외)
+// LAYER 1: 필수 코어 배열 (도감 및 가이드 이관 데이터 전면 삭제 완료)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -24,44 +24,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"],
     "호도진": ["front", "back", "front"]
 };
-
-const officerRoleMap = {
-    "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
-    "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
-    "장료": "패시브 (100%)", "사마의": "능동 (60%)", "하후연": "능동 (50%)", "조조(제왕)": "지휘 (100%)", 
-    "가후": "능동 (65%)", "유비": "지휘 (100%)", "마대": "능동 (35%)", "관우": "능동 (50%)", 
-    "위연": "패시브 (70%)", "장비": "패시브 (50%)", "사마가": "추격 (35%)", "황충": "패시브 (100%)", 
-    "황월영": "지휘 (100%)", "제갈량": "지휘 (100%)", "유비(제왕)": "지휘 (100%)", "조운": "패시브 (100%)", 
-    "마초": "패시브 (100%)", "서서": "지휘 (100%)", "강유": "추격 (50%)", "손권": "지휘 (100%)", 
-    "손견": "지휘 (100%)", "주유": "패시브 (80%)", "대교": "지휘 (100%)", "황개": "능동 (50%)", 
-    "여몽": "지휘 (100%)", "육손": "추격 (50%)", "소교": "능동 (70%)", "손상향": "능동 (50%)", 
-    "육항": "능동 (60%)", "손책": "능동 (50%)", "제)손권": "지휘 (100%)", "주태": "지휘 (100%)", 
-    "정보": "지휘 (100%)", "노숙": "지휘 (100%)", "동탁": "지휘 (100%)", "좌자": "패시브 (100%)", 
-    "여포": "패시브 (100%)", "우길": "지휘 (70%)", "초선": "능동 (50%)", "안량": "능동 (50%)", 
-    "장각": "능동 (50%)", "원소": "지휘 (100%)", "장보": "능동 (50%)", "채문희": "능동 (70%)", 
-    "화타": "능동 (50%)", "장녕": "능동 (50%)"
-};
-
-const officerUniqueTacticMap = {
-    "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
-    "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
-    "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "조조(제왕)": "군령여산", 
-    "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
-    "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
-    "황월영": "묘산천기", "제갈량": "초선차전", "유비(제왕)": "재주복주", "조운": "칠진칠출", 
-    "마초": "출수법", "서서": "절절학문", "강유": "담대여두", "손권": "웅거", 
-    "손견": "강동맹호", "주유": "봉화연천", "대교": "정수유심", "황개": "요원지화", 
-    "여몽": "백의도강", "육손": "지변규려", "소교": "화용욕모", "손상향": "효희", 
-    "육항": "청백충근", "손책": "강동패주", "제)손권": "겸권상계", "주태": "청라산개", 
-    "정보": "칠척사모", "노숙": "탑상책", "동탁": "전권난정", "좌자": "화겁생기", 
-    "여포": "천하무쌍", "우길": "태평경", "초선": "폐월", "안량": "효장", 
-    "장각": "황천당립", "원소": "사소도", "장보": "요풍사기", "채문희": "비분시", 
-    "화타": "청낭제세", "장녕": "천의난위"
-};
-
-const allTacticsList = [
-    "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
-];
 
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
@@ -91,16 +53,6 @@ const bondRules = [
     { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
     { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
 ];
-
-const systemGuideInsights = {
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드 규격에 따라 턴 종료 시 무용이 가장 높은 아군의 무용 피해를 15% 증가시키고 적군 2명에게 즉시 계수 160% 무용 피해를 투사 격발하는 삭풍 품종의 <strong>'설조'</strong> 매 스킬과 조합하십시오.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
-    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 턴 시작 시 병력 비율이 가장 낮은 아군 2명을 치료율 220%로 세이브하고 행동 전 치료율 90% 지속 힐을 더하는 해제 불가 [축예] 상태를 획득시키는 결운 품종의 <strong>'호생'</strong> 매를 필수 편성하세요.",
-    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 턴 시작 시 아군 전체의 모략과 통솔을 30% 증가시켜 화력 한계선을 깨부수는 열공 품종의 <strong>'여천'</strong> 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
-    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 턴 종료 시 모략이 가장 높은 아군의 모략 피해를 15% 증폭하고 적군 2명에게 즉시 계수 160% 모략 피해를 투사 격발하는 삭풍 품종의 <strong>'성모'</strong> 매를 훈련시켜 탑재하세요.",
-    "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 전투 시작 시 아군 전체에게 피격 후 100% 확률 치료(치료율 50%) 리젠 및 아군 전체 1중첩 각성을 주입하여 손권의 버프 동력을 대폭 당기는 결운 품종의 <strong>'감로'</strong> 매를 조합하면 안정성이 비약적으로 상승합니다."
-};
 
 const analyzedMetaArchetypes = [
     {
@@ -168,20 +120,49 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: guide.js API 동적 호출용 파싱 브릿지 엔진
+// LAYER 2: SSOT 3중 도감 동적 파싱 브릿지 엔진
 // ==========================================================================
 function getOfficerEquipment(officerName) {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
         return window.getEquipmentRecommendationFromGuide(officerName);
     }
-    
-    // 네트워크 파이프라인 단절 대비용 하드코딩된 예외 처리 방어선 객체
     return {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
         accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "방패병 피해 감소" }
     };
 }
+
+function getOfficerDogamData(officerName) {
+    if (typeof window.getOfficerDataFromDogam === 'function') {
+        return window.getOfficerDataFromDogam(officerName);
+    }
+    return { role: "미배치", uniqueTactic: "고유 전법 누락" };
+}
+
+function getGlobalTacticsList() {
+    if (typeof window.getAllTacticsFromDogam === 'function') {
+        return window.getAllTacticsFromDogam();
+    }
+    return ["혼수모어", "반객위주", "진퇴유도"]; // 안전망 디폴트
+}
+
+function getGlobalOfficerNames() {
+    if (typeof window.getAllOfficerNamesFromDogam === 'function') {
+        return window.getAllOfficerNamesFromDogam().sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+    return ["조조", "유비", "손권", "사마의", "하후돈", "가후", "강유"].sort((a, b) => a.localeCompare(b, 'ko'));
+}
+
+const systemGuideInsights = {
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드 규격에 따라 턴 종료 시 무용이 가장 높은 아군의 무용 피해를 15% 증가시키고 적군 2명에게 즉시 계수 160% 무용 피해를 투사 격발하는 삭풍 품종의 <strong>'설조'</strong> 매 스킬과 조합하십시오.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
+    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 턴 시작 시 병력 비율이 가장 낮은 아군 2명을 치료율 220%로 세이브하고 행동 전 치료율 90% 지속 힐을 더하는 해제 불가 [축예] 상태를 획득시키는 결운 품종의 <strong>'호생'</strong> 매를 필수 편성하세요.",
+    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 턴 시작 시 아군 전체의 모략과 통솔을 30% 증가시켜 화력 한계선을 깨부수는 열공 품종의 <strong>'여천'</strong> 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
+    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 턴 종료 시 모략이 가장 높은 아군의 모략 피해를 15% 증폭하고 적군 2명에게 즉시 계수 160% 모략 피해를 투사 격발하는 삭풍 품종의 <strong>'성모'</strong> 매를 훈련시켜 탑재하세요.",
+    "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(치유 시전으로 피격후 100% 자가회복 부여 및 1중첩 각성 아군 전체 확산) 매를 조합하면 안정성이 비약적으로 상승합니다."
+};
 
 // ==========================================================================
 // LAYER 3: 코어 연산 엔진 구역
@@ -269,7 +250,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     const idealFormation = (idealDeck.formation ? idealDeck.formation : "").toString().trim();
 
     if (currentFormation.replace(/\s+/g, '') !== idealFormation.replace(/\s+/g, '')) {
-        feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경 권장)`);
+        feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
     }
 
     let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
@@ -343,11 +324,11 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
             }
         }
 
-        const inherentTactic = officerUniqueTacticMap[hName];
-        if (inherentTactic) {
-            const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
+        const officerDogamData = getOfficerDogamData(hName);
+        if (officerDogamData && officerDogamData.uniqueTactic) {
+            const cleanInherent = officerDogamData.uniqueTactic.toString().trim().replace(/\s+/g, '');
             if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
-                feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 비활성화 상태입니다.`);
+                feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${officerDogamData.uniqueTactic}]</strong>이 비활성화 상태입니다.`);
             }
         }
     });
@@ -521,7 +502,9 @@ function renderDeckBuilder() {
 
         dynamicPresetDecksSort();
 
-        const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
+        // 도감 허브에서 무장 이름 및 전법 리스트 실시간 파싱
+        const sortedHeroNames = getGlobalOfficerNames();
+        const globalTacticsList = getGlobalTacticsList();
 
         dynamicPresetDecks.forEach((deck) => {
             if (!deck) return;
@@ -542,8 +525,10 @@ function renderDeckBuilder() {
                     const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
                     const isHeroOwned = cleanOwnedHeroes.includes(cleanHName);
 
-                    if (cleanHName) {
-                        const inherentTactic = officerUniqueTacticMap[hName] || "효웅";
+                    const officerDogamData = cleanHName ? getOfficerDogamData(hName) : null;
+
+                    if (cleanHName && officerDogamData) {
+                        const inherentTactic = officerDogamData.uniqueTactic;
                         const cleanInherent = inherentTactic.trim().replace(/\s+/g, '');
                         const isInherentOwned = isHeroOwned || cleanOwnedTactics.includes(cleanInherent);
                         tacticRowsHtml += `
@@ -566,7 +551,7 @@ function renderDeckBuilder() {
                             const cleanTac = (tacticName || "").toString().trim();
                             const isOwned = cleanOwnedTactics.includes(cleanTac.replace(/\s+/g, ''));
                             let optionsHtml = `<option value="" ${cleanTac === "" ? 'selected' : ''}>선택 안함</option>`;
-                            allTacticsList.forEach(tName => {
+                            globalTacticsList.forEach(tName => {
                                 const isSelected = cleanTac === tName ? 'selected' : '';
                                 optionsHtml += `<option value="${tName}" ${isSelected}>${tName}</option>`;
                             });
@@ -748,7 +733,7 @@ function importData(input) {
 // ==========================================================================
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
-window.changeFormation = changeFormation;
+window.changeFormation = changeFormation; 
 window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
