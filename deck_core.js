@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js SSOT 도감 3중 분산 연동 및 초경량화 엔진 기동");
+console.log("[시스템 분석] deck_core.js 전투매 실시간 맵핑 및 오토 렌더링 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 필수 코어 배열 (도감 및 가이드 이관 데이터 전면 삭제 완료)
+// LAYER 1: 필수 코어 배열 (도감 및 가이드 이관 데이터 전면 삭제 상태 유지)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -24,35 +24,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"],
     "호도진": ["front", "back", "front"]
 };
-
-const bondRules = [
-    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
-    { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
-    { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
-    { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
-    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
-    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
-    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
-    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
-    { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
-    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
-    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
-    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
-    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
-    { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
-    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
-    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
-    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
-    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
-    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
-    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
-    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
-];
 
 const analyzedMetaArchetypes = [
     {
@@ -120,7 +91,7 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: SSOT 3중 도감 동적 파싱 브릿지 엔진
+// LAYER 2: SSOT 3중 도감 동적 파싱 브릿지 & 메타 전투매 매핑 엔진
 // ==========================================================================
 function getOfficerEquipment(officerName) {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
@@ -144,7 +115,7 @@ function getGlobalTacticsList() {
     if (typeof window.getAllTacticsFromDogam === 'function') {
         return window.getAllTacticsFromDogam();
     }
-    return ["혼수모어", "반객위주", "진퇴유도"]; // 안전망 디폴트
+    return ["혼수모어", "반객위주", "진퇴유도"]; 
 }
 
 function getGlobalOfficerNames() {
@@ -153,6 +124,17 @@ function getGlobalOfficerNames() {
     }
     return ["조조", "유비", "손권", "사마의", "하후돈", "가후", "강유"].sort((a, b) => a.localeCompare(b, 'ko'));
 }
+
+// [신규 자원]: 메타 덱 아키텍처에 1:1로 대응하는 최적화 전투매 매핑 딕셔너리
+const metaHawkRecommendationMap = {
+    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
+    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
+    "qun_shield": { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 및 해제 불가 지속 힐링 [축예] 상태 확정 부여" },
+    "shu_magic_bow": { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 딜링 마진 극대화)" },
+    "qun_magic_spear": { name: "성모 (SSR / 삭풍)", skill: "턴 종료 시 모략 최고 아군 책략피해 15% 버프 유지 및 적 2명에게 160% 책략 타격 즉시 격발" },
+    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매 턴 아군 전체 피해 30% 감소" },
+    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
+};
 
 const systemGuideInsights = {
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드 규격에 따라 턴 종료 시 무용이 가장 높은 아군의 무용 피해를 15% 증가시키고 적군 2명에게 즉시 계수 160% 무용 피해를 투사 격발하는 삭풍 품종의 <strong>'설조'</strong> 매 스킬과 조합하십시오.",
@@ -337,12 +319,45 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
 }
 
 function calculateActivatedBond(officers) {
+    // 하드코딩 배열 삭제. (인연 효과 연산은 시스템 코어 내 하드코딩 유지. 도감에 없는 데이터)
+    // 인연 규칙 데이터 (deck_core.js 내부에 보존되어 있는 LAYER 1의 bondRules를 참조)
+    // 원본 코드의 bondRules가 없으면 에러 발생. 위 LAYER 1 에 bondRules 추가 필요.
+    // 사용자가 제공한 이전 파일과 동일하게 동작하도록 내부에서 임시 정의.
+    const internalBondRules = [
+        { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
+        { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
+        { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
+        { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
+        { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
+        { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
+        { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
+        { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
+        { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
+        { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
+        { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
+        { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
+        { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
+        { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
+        { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
+        { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
+        { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
+        { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
+        { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
+        { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
+        { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
+        { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
+        { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
+        { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
+        { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
+        { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
+    ];
+
     if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
     if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
     let matchedBonds = [];
 
-    bondRules.forEach(rule => {
+    internalBondRules.forEach(rule => {
         const uniqueMatches = [];
         currentOfficerNames.forEach(name => {
             if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
@@ -502,7 +517,6 @@ function renderDeckBuilder() {
 
         dynamicPresetDecksSort();
 
-        // 도감 허브에서 무장 이름 및 전법 리스트 실시간 파싱
         const sortedHeroNames = getGlobalOfficerNames();
         const globalTacticsList = getGlobalTacticsList();
 
@@ -513,6 +527,35 @@ function renderDeckBuilder() {
 
             const currentComputedScore = calculateStrictDeckScore(deck);
             const computedBondText = calculateActivatedBond(deck.officers);
+
+            // [메타 덱 전투매 연산] 현재 분석된 메타 덱 아키타입 ID를 추출
+            let matchScoreMax = -1;
+            let currentBestMetaId = "shu_combo"; // 안전망
+            const currentCleanHeroNames = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "");
+            
+            analyzedMetaArchetypes.forEach(metaDeck => {
+                let mScore = 0;
+                metaDeck.officers.forEach((metaOff, idx) => {
+                    const mName = metaOff.name.replace(/\s+/g, '');
+                    if (currentCleanHeroNames.includes(mName)) mScore += 1; 
+                    if (currentCleanHeroNames[idx] === mName) mScore += 0.5;
+                });
+                if (mScore > matchScoreMax) {
+                    matchScoreMax = mScore;
+                    currentBestMetaId = metaDeck.id;
+                }
+            });
+
+            // 추출된 메타 ID를 기반으로 전투매 UI 데이터 파싱
+            const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "추천 전투매 데이터 없음", skill: "해당 덱의 메타 분석 데이터가 누락되었습니다." };
+            
+            // 인연 효과와 무장 목록 사이에 삽입될 전투매 추천 HTML 스니펫
+            const hawkHtml = `
+                <div class="hawk-recommend-box" style="margin-top: 10px; padding: 12px 15px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(20,20,20,0) 100%); border-left: 4px solid #38bdf8; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="font-size: 13px; font-weight: bold; color: #38bdf8; letter-spacing: -0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div>
+                    <div style="font-size: 12px; color: #ddd; line-height: 1.4;">${hawkData.skill}</div>
+                </div>
+            `;
 
             let officersHtml = '';
             if (deck.officers && Array.isArray(deck.officers)) {
@@ -647,6 +690,9 @@ function renderDeckBuilder() {
                     <span class="bond-highlight">부대 인연 효과 :</span> 
                     <span style="display:inline-block; outline:none;">${computedBondText}</span>
                 </div>
+                
+                ${hawkHtml}
+                
                 <div class="officers-row">
                     ${officersHtml}
                 </div>
@@ -733,7 +779,7 @@ function importData(input) {
 // ==========================================================================
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
-window.changeFormation = changeFormation; 
+window.changeFormation = changeFormation;
 window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
