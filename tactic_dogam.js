@@ -1,4 +1,4 @@
-console.log("[시스템 분석] tactic_dogam.js 와이드스크린 반응형 그리드 및 백데이터 보존 기동");
+console.log("[시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -149,14 +149,21 @@ function renderTacticDogamUI() {
     if (!container) {
         container = document.createElement('div');
         container.id = 'tactic-dogam-wrapper';
-        // [수정점] 컨테이너가 부모의 남은 영역을 100% 꽉 채우도록 스타일 강제
-        container.style.width = '100%';
-        container.style.maxWidth = '100%';
-        container.style.padding = '10px 0';
+        
+        // [해결 조치] 컨테이너에 강제 폭 확장 스타일(important) 주입
+        container.style.setProperty('width', '100%', 'important');
+        container.style.setProperty('flex', '1 1 100%', 'important');
+        container.style.setProperty('align-self', 'stretch', 'important');
+        container.style.setProperty('display', 'block', 'important');
         container.style.boxSizing = 'border-box';
+        container.style.padding = '10px 0';
         
         if (nativeContainer) {
-            nativeContainer.style.width = '100%'; // 부모 너비 확장 지원
+            // [해결 조치] 상위 부모 요소의 Flex 압축 현상 타파
+            nativeContainer.style.setProperty('width', '100%', 'important');
+            nativeContainer.style.setProperty('flex', '1 1 100%', 'important');
+            nativeContainer.style.setProperty('align-self', 'stretch', 'important');
+            nativeContainer.style.setProperty('display', 'block', 'important');
             nativeContainer.appendChild(container);
         } else {
             document.body.appendChild(container);
@@ -168,7 +175,7 @@ function renderTacticDogamUI() {
             <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">전법 도감 마스터 보드</h2>
             <span id="tactic-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
         </div>
-        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
+        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
     `;
     
     renderTacticGrid();
@@ -190,12 +197,11 @@ function renderTacticGrid() {
 
     currentTacticState.forEach(tactic => {
         const card = document.createElement('div');
-        // 카드가 꽉 찬 그리드 형태로 확장되도록 디자인 조율
         card.style.cssText = `
-            background-color: ${tactic.isOwned ? '#1c251d' : '#141414'};
-            border: 1px solid ${tactic.isOwned ? '#28a745' : '#333'};
-            border-top: 4px solid #7b2cb0;
-            border-radius: 8px;
+            background-color: ${tactic.isOwned ? '#1c1c1c' : '#111'};
+            border: 1px solid ${tactic.isOwned ? '#a855f7' : '#2d2d2d'};
+            border-top: 5px solid #7b2cb0;
+            border-radius: 6px;
             padding: 15px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -204,8 +210,8 @@ function renderTacticGrid() {
             flex-direction: column;
             justify-content: flex-start;
             box-sizing: border-box;
-            min-height: 120px;
-            box-shadow: ${tactic.isOwned ? '0 0 10px rgba(40, 167, 69, 0.2)' : 'none'};
+            min-height: 130px;
+            box-shadow: ${tactic.isOwned ? '0 0 12px rgba(168, 85, 247, 0.15)' : 'none'};
         `;
         
         if (!tactic.isOwned) {
@@ -214,12 +220,14 @@ function renderTacticGrid() {
         }
 
         card.innerHTML = `
-            <div style="font-size: 18px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'}; margin-bottom: 8px;">${tactic.name}</div>
-            <div style="font-size: 11px; margin-bottom: 6px; color: #aaa;">
+            <div style="font-size: 18px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'}; margin-bottom: 8px; letter-spacing: 1px;">${tactic.name}</div>
+            <div style="font-size: 11px; margin-bottom: 8px; color: #bbb;">
                 <span style="color: #feca57; font-weight: bold;">역할:</span> ${tactic.type} &nbsp;|&nbsp; <span style="color: #feca57; font-weight: bold;">대상:</span> ${tactic.target}
             </div>
-            <div style="font-size: 12px; color: #ccc; text-align: left; line-height: 1.5; word-break: keep-all;">${tactic.desc}</div>
-            <div style="position: absolute; top: 12px; right: 12px; font-size: 11px; padding: 4px 8px; border-radius: 4px; background-color: ${tactic.isOwned ? '#28a745' : '#333'}; color: ${tactic.isOwned ? '#fff' : '#777'}; font-weight: bold;">
+            <div style="background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 10px; font-size: 11px; color: #ddd; text-align: left; line-height: 1.5; word-break: keep-all; margin-top: auto;">
+                ${tactic.desc}
+            </div>
+            <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${tactic.isOwned ? '#a855f7' : '#333'}; color: ${tactic.isOwned ? '#fff' : '#777'}; font-weight: bold;">
                 ${tactic.isOwned ? '보유' : '미보유'}
             </div>
         `;
