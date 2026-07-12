@@ -1,4 +1,4 @@
-console.log("[시스템 분석] tactic_dogam.js 원본 레이아웃 복원 및 성급(1~5성) 엔진 이식 기동");
+console.log("[시스템 분석] tactic_dogam.js 원본 레이아웃 복원 및 성급 데이터 무결성 보존 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -40,7 +40,7 @@ function loadTacticData() {
         return {
             name: name,
             isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star) ? parseInt(found.star) : 1
+            star: (found && found.star) ? parseInt(found.star) : 1 // 백그라운드 성급 데이터 보존
         };
     });
 }
@@ -51,6 +51,7 @@ function saveTacticData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) rootData = JSON.parse(rawData);
         
+        // UI에는 없지만 app.js의 데이터를 날리지 않기 위해 star 값을 그대로 직렬화
         rootData.tactics = currentTacticState.map(t => ({ name: t.name, isOwned: t.isOwned, star: t.star }));
         localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
     } catch (e) {
@@ -66,14 +67,6 @@ function toggleTacticOwnership(tacticName) {
         renderTacticGrid();
     }
 }
-
-window.updateTacticStar = function(tacticName, starValue) {
-    const target = currentTacticState.find(t => t.name === tacticName);
-    if (target) {
-        target.star = parseInt(starValue);
-        saveTacticData();
-    }
-};
 
 function renderTacticDogamUI() {
     let container = document.getElementById('tactic-dogam-container') || document.querySelector('.tactic-dogam-container');
@@ -131,7 +124,7 @@ function renderTacticGrid() {
             justify-content: center;
             gap: 8px;
             box-sizing: border-box;
-            min-height: 80px;
+            min-height: 60px;
         `;
         
         if (!tactic.isOwned) {
@@ -139,22 +132,7 @@ function renderTacticGrid() {
             card.style.filter = 'grayscale(100%)';
         }
 
-        const starSelectHtml = tactic.isOwned ? `
-            <div style="width: 100%;" onclick="event.stopPropagation();">
-                <select onchange="updateTacticStar('${tactic.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 11px; font-weight: bold; outline: none; cursor: pointer;">
-                    <option value="1" ${tactic.star === 1 ? 'selected' : ''}>⭐ 1성</option>
-                    <option value="2" ${tactic.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
-                    <option value="3" ${tactic.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
-                    <option value="4" ${tactic.star === 4 ? 'selected' : ''}>⭐⭐⭐⭐ 4성</option>
-                    <option value="5" ${tactic.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성</option>
-                </select>
-            </div>
-        ` : '';
-
-        card.innerHTML = `
-            <div style="font-size: 15px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>
-            ${starSelectHtml}
-        `;
+        card.innerHTML = `<div style="font-size: 15px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>`;
         
         card.addEventListener('click', () => toggleTacticOwnership(tactic.name));
         gridContainer.appendChild(card);
