@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 장신구 명세 데이터 기반 최종 튜닝 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 무장 고유 전법 유형 UI 제거 무결성 엔진 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 호이스팅)
@@ -59,7 +59,7 @@ const officerUniqueTacticMap = {
     "화타": "청낭제세", "장녕": "천의난위"
 };
 
-const constTacticsList = [
+const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
@@ -74,7 +74,7 @@ const bondRules = [
     { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
     { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
     { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반 and 공심 8% 증가, 해제 불가." },
+    { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
     { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
     { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
     { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
@@ -161,7 +161,6 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 명세서 기반 대개혁: 장신구 추가속성 2번의 비표준 명칭 청산 및 각 덱 시너지 병종(방패병/창병/기병/궁병) 맞춤 정렬 패치 완료
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -216,12 +215,12 @@ const officerEquipmentMap = {
     "정욱": {
         helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
     },
     "사마의": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
     },
     "하후연": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
@@ -236,12 +235,12 @@ const officerEquipmentMap = {
     "동탁": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "결운갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
     },
     "원소": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
     },
     "여포": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -495,7 +494,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
-// [누락 완전 복구]: 인연 효과 연산 모듈 최상위 호이스팅 결선 유지
 function calculateActivatedBond(officers) {
     if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -600,7 +598,7 @@ function saveEditedText(originIdx, propertyName, element) {
 }
 
 function changeFormation(originIdx, selectElement) {
-    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === selectElement.value);
     if (targetDeck) {
         targetDeck.formation = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
@@ -608,7 +606,7 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
-// 무장 세션 교체 정상 가동 핸들러 결선
+// 무장 슬롯 값 동기화 제어 모듈
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
@@ -728,8 +726,6 @@ function renderDeckBuilder() {
                         officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
                     });
 
-                    const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
-
                     let equipmentHtml = '';
                     if (cleanHName) {
                         const eqData = officerEquipmentMap[hName] || {
@@ -747,6 +743,7 @@ function renderDeckBuilder() {
                         `;
                     }
 
+                    // [수정 조치 완료]: 요구사항에 따라 무장 드롭다운 하단의 전법 유형(능동/패시브) 출력 태그 제거로 극상 가독성 확보
                     officersHtml += `
                         <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
                             <div class="officer-meta">
@@ -757,7 +754,6 @@ function renderDeckBuilder() {
                                     </select>
                                 </div>
                             </div>
-                            <div class="officer-role-label" style="${!cleanHName ? 'color:#555;' : ''}">${currentComputedRole}</div>
                             
                             ${equipmentHtml}
                             
