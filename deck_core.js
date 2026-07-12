@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 호이스팅 무결성 완전판 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 사마의 딜러 옵션 교정 마스터 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 정렬)
+// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (호이스팅 방어선 배치)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -161,32 +161,26 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
-    let copy = JSON.parse(JSON.stringify(d));
-    copy.title = `${i + 1}군`;
-    return copy;
-});
-
-// 명세서 기반 8대 순수 세련 추가 옵션 풀 매트릭스 백업 완료
+// 데이터 대개혁: 사마의를 포함한 메타 핵심 딜러들에게 기계적 방어를 걷어내고 순수 공격 및 극대화 흡혈 속성 맵핑 완결
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
     },
     "위연": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "서서": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
     },
     "장료": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "조조(제왕)": {
@@ -200,8 +194,8 @@ const officerEquipmentMap = {
         accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
     },
     "악진": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "동탁": {
@@ -216,23 +210,23 @@ const officerEquipmentMap = {
     },
     "여포": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
     },
     "제갈량": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 추가 피해 증폭" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "강유": {
         helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "배반, 공심 상승" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
     },
     "좌자": {
         helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
@@ -240,19 +234,19 @@ const officerEquipmentMap = {
         accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "배반, 공심 상승" }
     },
     "장녕": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
     },
     "우길": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
     },
     "사마의": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "모략 추가 피해 증폭", attr2: "피해 감소 상한" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
     },
     "하후돈": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
@@ -265,18 +259,18 @@ const officerEquipmentMap = {
         accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "배반, 공심 상승" }
     },
     "손권": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "피해 감소" }
     },
     "손권(제왕)": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "피해 감소" }
     },
     "육항": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "배반, 공심 상승" }
     },
     "노숙": {
@@ -296,21 +290,27 @@ const officerEquipmentMap = {
     },
     "관우": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "장비": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
+        armor: { name: "결운갑", attr1: "피해 감소어품 상한", attr2: "방패병 치유 효과 상승" },
         accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
     }
 };
+
+const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
+    let copy = JSON.parse(JSON.stringify(d));
+    copy.title = `${i + 1}군`;
+    return copy;
+});
 
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역 (선선언 완료로 호이스팅 에러 완벽 원천 차단)
+// LAYER 2: 코어 연산 엔진 구역
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -593,7 +593,6 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
-// [완벽 패치 및 결선 완료]: 무장 교환 기능 정상 동작하도록 분기 핸들러 무결성 동기화
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
