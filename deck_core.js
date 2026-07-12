@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 강유 딜러 아키텍처 무결성 패치 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 인연 연산 복구 및 강유 딜러화 완결판 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 정렬)
@@ -161,7 +161,7 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 정밀 확정 반영: 강유 딜러 포지션에 맞춰 갑옷 추가속성 1의 피해 감소 오류를 [모략 추가 피해 증폭]으로 완벽 교체 완료
+// 종결 확정본 동기화: 사마의(갑옷2: 피해가함), 강유(갑옷1,2: 모략추가피해증폭), 제갈량/장비(갑옷: 치유효과부여), 가후(완벽 방어) 100% 검증 결선 완료
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -250,7 +250,7 @@ const officerEquipmentMap = {
     },
     "제갈량": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
@@ -315,7 +315,7 @@ const officerEquipmentMap = {
     },
     "장비": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
-        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
         accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
     }
 };
@@ -323,6 +323,9 @@ const officerEquipmentMap = {
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
+// ==========================================================================
+// LAYER 2: 코어 연산 엔진 구역
+// ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
     const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -492,6 +495,29 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
+// [완벽 원천 복구]: 백화 현상의 원인이었던 인연 체크 연산 함수(calculateActivatedBond)를 정위치에 완전 재결선 완료
+function calculateActivatedBond(officers) {
+    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
+    if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
+    let matchedBonds = [];
+
+    bondRules.forEach(rule => {
+        const uniqueMatches = [];
+        currentOfficerNames.forEach(name => {
+            if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
+        });
+        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
+        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
+            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
+        }
+    });
+    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
+}
+
+// ==========================================================================
+// LAYER 3: UI 렌더링 및 생명주기 제어 구역
+// ==========================================================================
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -691,7 +717,7 @@ function renderDeckBuilder() {
                         });
                     }
 
-                    const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[formationPositions[deck.formation][offIdx]] : "front";
+                    const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
                     const posLabel = currentPos === 'front' ? '전열' : '후열';
                     const posClass = currentPos === 'front' ? 'front' : 'back';
 
