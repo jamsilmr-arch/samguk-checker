@@ -1,7 +1,7 @@
-console.log("[시스템 분석] dogam.js 장수 성급(1~5성) 데이터베이스 및 이벤트 분리 렌더링 기동");
+console.log("[시스템 분석] dogam.js 장수 그리드 가독성 최적화 및 성급(1~5성) DB 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 무장 마스터 데이터베이스 (역할, 전법, 진영 3중 매핑 완결)
+// LAYER 1: 무장 마스터 데이터베이스
 // ==========================================================================
 const coreOfficerRoleMap = {
     "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
@@ -116,8 +116,9 @@ function toggleOfficerOwnership(officerName) {
     }
 }
 
-// [신규 자원]: 성급 드롭다운 변경 시 데이터를 갱신하고 스토리지에 저장하는 핸들러
-window.updateOfficerStar = function(officerName, starValue) {
+// 이벤트 버블링을 방지하며 성급만 변경하는 오토 핸들러
+window.updateOfficerStar = function(event, officerName, starValue) {
+    event.stopPropagation(); // 카드 토글 클릭 이벤트 차단
     const target = currentDogamState.find(h => h.name === officerName);
     if (target) {
         target.star = parseInt(starValue);
@@ -164,11 +165,11 @@ function renderDogamUI() {
     }
 
     container.innerHTML = `
-        <div id="dogam-stats-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">장수 도감 마스터 보드</h2>
-            <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
+        <div id="dogam-stats-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+            <h2 style="color: #cd9b33; margin: 0; font-size: 20px;">장수 도감 마스터 보드</h2>
+            <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 14px;">보유율: </span>
         </div>
-        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;"></div>
+        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;"></div>
     `;
     
     bindFilterButtons();
@@ -187,27 +188,28 @@ function renderDogamGrid() {
     const totalCount = filteredHeroes.length;
     
     if(countBadge) {
-        countBadge.innerHTML = `[${currentFactionFilter}] 보유율: <span style="color: #38bdf8; font-size: 18px;">${ownedCount}</span> / ${totalCount}`;
+        countBadge.innerHTML = `[${currentFactionFilter}] 보유율: <span style="color: #38bdf8; font-size: 16px;">${ownedCount}</span> / ${totalCount}`;
     }
 
     filteredHeroes.forEach(hero => {
         const card = document.createElement('div');
+        // 가독성 높은 다중 열 그리드를 위한 콤팩트 카드 디자인
         card.style.cssText = `
             background-color: ${hero.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${hero.isOwned ? '#28a745' : '#333'};
             border-radius: 8px;
-            padding: 18px;
+            padding: 15px;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
-            box-shadow: ${hero.isOwned ? '0 0 10px rgba(40, 167, 69, 0.2)' : 'none'};
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-height: 120px;
         `;
         
         if (!hero.isOwned) {
-            card.style.opacity = '0.4';
+            card.style.opacity = '0.5';
             card.style.filter = 'grayscale(100%)';
         }
 
@@ -217,10 +219,10 @@ function renderDogamGrid() {
         if(hero.faction === '오나라') factionColor = "#ef4444";
         if(hero.faction === '군웅') factionColor = "#a855f7";
 
-        // 이벤트 버블링을 방지하기 위한 onclick="event.stopPropagation();" 탑재
+        // 보유 상태일 때만 렌더링되며, 클릭 시 카드 토글(버블링)을 막는 성급 드롭다운 UI
         const starSelectHtml = hero.isOwned ? `
-            <div style="margin-top: 12px; border-top: 1px dashed #333; padding-top: 10px;" onclick="event.stopPropagation();">
-                <select class="star-select" onchange="updateOfficerStar('${hero.name}', this.value)" style="width: 100%; padding: 6px; background: rgba(0,0,0,0.5); color: #ffeb3b; border: 1px solid #555; border-radius: 4px; font-size: 13px; font-weight: bold; outline: none; cursor: pointer;">
+            <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                <select onclick="event.stopPropagation();" onchange="updateOfficerStar(event, '${hero.name}', this.value)" style="width: 100%; padding: 4px 6px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
                     <option value="1" ${hero.star === 1 ? 'selected' : ''}>⭐ 1성 (기본)</option>
                     <option value="2" ${hero.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
                     <option value="3" ${hero.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
@@ -228,26 +230,21 @@ function renderDogamGrid() {
                     <option value="5" ${hero.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성 (풀강)</option>
                 </select>
             </div>
-        ` : `
-            <div style="margin-top: 12px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px dashed #444;">
-                <span style="font-size: 12px; color: #555; font-weight: bold;">미보유 상태</span>
-            </div>
-        `;
+        ` : '';
 
         card.innerHTML = `
             <div>
-                <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 6px;">[${hero.faction}]</div>
-                <div style="font-size: 20px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; margin-bottom: 12px; letter-spacing: 1px;">${hero.name}</div>
-                <div style="font-size: 12px; color: #ccc; margin-bottom: 6px;">🎯 역할: ${hero.role}</div>
-                <div style="font-size: 12px; color: #cd9b33; font-weight: bold;">⭐ 고유: ${hero.tactic}</div>
-                <div style="position: absolute; top: 15px; right: 15px; font-size: 11px; padding: 4px 8px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
+                <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 4px;">[${hero.faction}]</div>
+                <div style="font-size: 18px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; margin-bottom: 8px;">${hero.name}</div>
+                <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">🎯 ${hero.role}</div>
+                <div style="font-size: 11px; color: #cd9b33; font-weight: bold;">⭐ ${hero.tactic}</div>
+                <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
                     ${hero.isOwned ? '보유' : '미보유'}
                 </div>
             </div>
             ${starSelectHtml}
         `;
 
-        // 카드 클릭 시에만 토글 연산 수행
         card.addEventListener('click', () => toggleOfficerOwnership(hero.name));
         gridContainer.appendChild(card);
     });
