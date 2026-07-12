@@ -1,143 +1,145 @@
+console.log("[시스템 분석] app.js 인벤토리 성급(1~5성) 렌더링 및 교차 호환 엔진 기동");
+
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역 (총 48명 장수 & 72종 전법 가나다 정렬)
 // ==========================================================================
 const heroList = [
     // 위나라 (13명)
-    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false },
-    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false },
-    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false },
-    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false },
-    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false },
-    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false },
-    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false },
-    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false },
-    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false },
-    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false },
-    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false },
-    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false },
-    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false },
+    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 1 },
+    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 1 },
     
     // 촉나라 (14명)
-    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false },
-    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false },
-    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false },
-    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false },
-    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false },
-    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false },
-    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false },
-    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false },
-    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false },
-    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false },
-    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false },
-    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false },
-    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false },
+    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 1 },
+    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 1 },
     
     // 오나라 (15명)
-    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false },
-    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false },
-    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false },
-    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false },
-    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false },
-    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false },
-    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false },
-    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false },
-    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false },
-    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false },
-    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false },
-    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false },
-    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false },
-    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false },
-    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false },
+    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 1 },
+    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 1 },
     
     // 군진영 (12명)
-    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false },
-    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false },
-    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false },
-    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false },
-    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false },
-    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false },
-    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false },
-    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false },
-    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false },
-    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false },
-    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false },
-    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false }
+    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 1 },
+    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 1 }
 ];
 
 const tacticList = [
-    { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false },
-    { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false },
-    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false },
-    { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false },
-    { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false },
-    { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false },
-    { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false },
-    { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false },
-    { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false },
-    { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false },
-    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false },
-    { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false },
-    { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false },
-    { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false },
-    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false },
-    { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false },
-    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false },
-    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false },
-    { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false },
-    { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false },
-    { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false },
-    { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false },
-    { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false },
-    { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false },
-    { id: 't_bunseong', name: '분성지계', group: 'tactic', isOwned: false },
-    { id: 't_bisa', name: '비사주석', group: 'tactic', isOwned: false },
-    { id: 't_samyeon', name: '사면초가', group: 'tactic', isOwned: false },
-    { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false },
-    { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false },
-    { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false },
-    { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false },
-    { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false },
-    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false },
-    { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false },
-    { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false },
-    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false },
-    { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false },
-    { id: 't_yosa', name: '요사여신', group: 'tactic', isOwned: false },
-    { id: 't_yongmaeng', name: '용맹무쌍', group: 'tactic', isOwned: false },
-    { id: 't_yongwang', name: '용왕직전', group: 'tactic', isOwned: false },
-    { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false },
-    { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false },
-    { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false },
-    { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false },
-    { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false },
-    { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false },
-    { id: 't_iil', name: '이일대로', group: 'tactic', isOwned: false },
-    { id: 't_itoe', name: '이퇴위진', group: 'tactic', isOwned: false },
-    { id: 't_ilgo', name: '일고작기', group: 'tactic', isOwned: false },
-    { id: 't_inse', name: '인세이도', group: 'tactic', isOwned: false },
-    { id: 't_jangsu_j', name: '전위위안', group: 'tactic', isOwned: false },
-    { id: 't_jegon', name: '제곤부위', group: 'tactic', isOwned: false },
-    { id: 't_jungjeong', name: '중정기고', group: 'tactic', isOwned: false },
-    { id: 't_jiin', name: '지인선임', group: 'tactic', isOwned: false },
-    { id: 't_jintoe', name: '진퇴유도', group: 'tactic', isOwned: false },
-    { id: 't_jinhwa', name: '진화타겁', group: 'tactic', isOwned: false },
-    { id: 't_jilpung', name: '질풍노도', group: 'tactic', isOwned: false },
-    { id: 't_cheonri', name: '천리추격', group: 'tactic', isOwned: false },
-    { id: 't_cheonsi', name: '천시지리', group: 'tactic', isOwned: false },
-    { id: 't_checheon', name: '체천행도', group: 'tactic', isOwned: false },
-    { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false },
-    { id: 't_chukho', name: '축호과간', group: 'tactic', isOwned: false },
-    { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false },
-    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false },
-    { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false },
-    { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false },
-    { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false },
-    { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false },
-    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false },
-    { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false },
-    { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false },
-    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false }
+    { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_bunseong', name: '분성지계', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_bisa', name: '비사주석', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_samyeon', name: '사면초가', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yosa', name: '요사여신', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yongmaeng', name: '용맹무쌍', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yongwang', name: '용왕직전', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_iil', name: '이일대로', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_itoe', name: '이퇴위진', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_ilgo', name: '일고작기', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_inse', name: '인세이도', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jangsu_j', name: '전위위안', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jegon', name: '제곤부위', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jungjeong', name: '중정기고', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jiin', name: '지인선임', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jintoe', name: '진퇴유도', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jinhwa', name: '진화타겁', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_jilpung', name: '질풍노도', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_cheonri', name: '천리추격', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_cheonsi', name: '천시지리', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_checheon', name: '체천행도', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_chukho', name: '축호과간', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 1 },
+    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 1 }
 ];
 
 // ==========================================================================
@@ -157,27 +159,44 @@ function renderButtons() {
     });
     if (tacticContainer) tacticContainer.innerHTML = '';
 
-    heroList.forEach(hero => {
-        const targetContainer = containers[hero.group];
-        if (!targetContainer) return;
-
-        const btn = document.createElement('button');
-        btn.id = hero.id;
-        btn.innerText = hero.name;
-        btn.className = `card-btn ${hero.group} ${hero.isOwned ? 'owned' : ''}`;
-        btn.onclick = function() { toggleState(hero.id, 'hero'); };
+    const createCard = (item, type, container) => {
+        // 기존 원시 버튼 구조를 <div> 래퍼로 교체하여 하위에 드롭다운 메뉴를 품도록 리팩토링
+        const cardNode = document.createElement('div');
+        cardNode.id = item.id;
+        cardNode.className = `card-btn ${item.group} ${item.isOwned ? 'owned' : ''}`;
+        cardNode.style.display = 'flex';
+        cardNode.style.flexDirection = 'column';
+        cardNode.style.alignItems = 'center';
+        cardNode.style.justifyContent = 'center';
+        cardNode.style.gap = '6px';
+        cardNode.style.minHeight = '50px'; 
+        cardNode.style.cursor = 'pointer';
         
-        targetContainer.appendChild(btn);
-    });
+        // 카드 본체 클릭 시 보유 여부 토글 연산 지시
+        cardNode.onclick = function() { toggleState(item.id, type); };
 
-    tacticList.forEach(tactic => {
-        const btn = document.createElement('button');
-        btn.id = tactic.id;
-        btn.innerText = tactic.name;
-        btn.className = `card-btn ${tactic.group} ${tactic.isOwned ? 'owned' : ''}`;
-        btn.onclick = function() { toggleState(tactic.id, 'tactic'); };
-        if (tacticContainer) tacticContainer.appendChild(btn);
-    });
+        let innerHtml = `<span style="font-weight: bold; pointer-events: none;">${item.name}</span>`;
+        
+        // 보유 중일 때만 성급 조작 인터페이스를 조건부 렌더링
+        if (item.isOwned) {
+            // 이벤트 버블링 차단(event.stopPropagation)으로 토글 간섭 원천 봉쇄
+            innerHtml += `
+                <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 90%; padding: 2px 4px; font-size: 11px; background: rgba(0,0,0,0.6); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none;">
+                    <option value="1" ${item.star === 1 ? 'selected' : ''}>⭐ 1성</option>
+                    <option value="2" ${item.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
+                    <option value="3" ${item.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
+                    <option value="4" ${item.star === 4 ? 'selected' : ''}>⭐⭐⭐⭐ 4성</option>
+                    <option value="5" ${item.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성</option>
+                </select>
+            `;
+        }
+        
+        cardNode.innerHTML = innerHtml;
+        if (container) container.appendChild(cardNode);
+    };
+
+    heroList.forEach(hero => createCard(hero, 'hero', containers[hero.group]));
+    tacticList.forEach(tactic => createCard(tactic, 'tactic', tacticContainer));
 }
 
 function toggleState(id, type) {
@@ -186,18 +205,25 @@ function toggleState(id, type) {
     
     if (target) {
         target.isOwned = !target.isOwned;
-        const btn = document.getElementById(id);
-        if (btn) {
-            if (target.isOwned) btn.classList.add('owned');
-            else btn.classList.remove('owned');
-        }
+        // 상태 변경 즉시 강제 리렌더링하여 성급 드롭다운을 즉각 표출/은닉
+        renderButtons();
     }
 }
+
+// 메모리 상의 성급 데이터를 조작하는 독립 핸들러 (수동 저장 사상 존중)
+window.updateStar = function(event, id, type, value) {
+    event.stopPropagation();
+    const list = (type === 'hero') ? heroList : tacticList;
+    const target = list.find(x => x.id === id);
+    if (target) {
+        target.star = parseInt(value);
+    }
+};
 
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-    alert('체크 현황이 저장되었습니다.');
+    alert('체크 현황이 안전하게 저장되었습니다.');
 }
 
 // [치유 가드 선언]: 오염 데이터 수동 파싱 구문 차단 예외 제어망 가동
@@ -211,14 +237,20 @@ function loadSavedData() {
             parsed.heroes.forEach(sh => {
                 if (!sh) return;
                 const h = heroList.find(x => x.id === sh.id);
-                if (h) h.isOwned = !!sh.isOwned;
+                if (h) {
+                    h.isOwned = !!sh.isOwned;
+                    h.star = sh.star ? parseInt(sh.star) : 1; // 성급 복구 파싱 완료
+                }
             });
         }
         if (parsed && parsed.tactics && Array.isArray(parsed.tactics)) {
             parsed.tactics.forEach(st => {
                 if (!st) return;
                 const t = tacticList.find(x => x.id === st.id);
-                if (t) t.isOwned = !!st.isOwned;
+                if (t) {
+                    t.isOwned = !!st.isOwned;
+                    t.star = st.star ? parseInt(st.star) : 1; // 성급 복구 파싱 완료
+                }
             });
         }
     } catch(e) {
