@@ -1,5 +1,8 @@
-console.log("[시스템 분석] guide.js 양식 통일 및 데이터 테이블 렌더링 엔진 기동");
+console.log("[시스템 분석] guide.js 데이터 마스터 허브 및 외부 연동 브릿지 엔진 기동");
 
+// ==========================================================================
+// LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스 (표 양식 통합 완료)
+// ==========================================================================
 const guideDatabase = {
     equip: {
         title: "장비 시스템",
@@ -153,8 +156,8 @@ const guideDatabase = {
                     ["연격률", "일반 공격 이후, 일정 확률로 추가로 1회 일반 공격을 발동 합니다.", "전술 기믹"],
                     ["추가 피해", "공격 계열 또는 피격 계열 후속 효과를 발동하지 않는 고정 독립 대미지", "전술 기믹"],
                     ["확산 피해", "이번 공격에 비례하여 다른 목표에게 피해를 확산 (후속 효과 없음)", "전술 기믹"],
-                    ["반격률", "일반 공격을 받은 뒤, 일정 확률로 공격자에게 1회 반격 합니다.", "전술 기믹"],
-                    ["파갑 / 간파", "무용/모략 피해를 가할 때, 일정 비율의 상대 통솔을 무시", "스탯 관통"]
+                    ["반격률", "일반 공격을 받은 뒤, 일정 확률로 공격자에게 정밀 반격 합니다.", "전술 기믹"],
+                    ["파갑 / 간파", "무용/모략 피해를 가할 때, 일정 비율의 상대 통솔을 관통 무시", "스탯 관통"]
                 ]
             },
             {
@@ -180,7 +183,7 @@ const guideDatabase = {
                     ["정비 / 불굴", "행동 시작 시 병력 회복 / 피해를 입은 직후 병력 즉시 회복", "유지 버프"],
                     ["출혈 / 화상", "행동 시작 시 전법 효과를 유발하지 않는 추가 무용/모략 피해 피격", "지속 디버프"],
                     ["통찰", "보유 무장에게 가해지는 제어 상태 디버프 레이어를 일시 무효화", "면역 버프"],
-                    ["축세", "평타 후 중첩을 전량 소모해 무장해제/공황을 씹는 추가 일반 공격 수행", "특수 기믹"],
+                    ["축세", "평타 후 중첩을 전량 소모해 무장해제/공황을 무시하는 추가 평타 수행", "특수 기믹"],
                     ["저항", "다음 받는 최종 피해 지표를 90% 삭감 차단 (최대 2중첩)", "방어 버프"],
                     ["쟁패 / 숙살", "다음 피해 반드시 강공/기습 격발 / 보유자의 최종 피해 70% 삭감", "공방 변수"],
                     ["각성 / 면역", "다음 가해지는 제어 상태 / 디버프 효과를 1회 확정 저항 (최대 2스택)", "방어 버프"]
@@ -190,6 +193,170 @@ const guideDatabase = {
     }
 };
 
+// ==========================================================================
+// LAYER 2: deck_core.js 연동용 마스터 장비 딕셔너리 (하드코딩 적출 브릿지 자원)
+// ==========================================================================
+const masterEquipmentMap = {
+    "마초": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" }
+    },
+    "위연": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "창병 피해 감소" }
+    },
+    "서서": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 배반, 공심 상승" }
+    },
+    "장료": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" }
+    },
+    "조조(제왕)": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    },
+    "조조": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
+    },
+    "장합": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    },
+    "하후돈": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "배반", attr2: "방패병 피해 감소" }
+    },
+    "악진": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" }
+    },
+    "전위": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
+    },
+    "정욱": {
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
+    },
+    "사마의": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "피해 가함" },
+        accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" }
+    },
+    "하후연": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" }
+    },
+    "가후": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    },
+    "동탁": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
+    },
+    "원소": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
+    },
+    "여포": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "방패병 배반, 공심 상승" }
+    },
+    "제갈량": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
+    },
+    "황충": {
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "박산로", attr1: "강공, 기습 상승", attr2: "궁병 피해 감소" }
+    },
+    "강유": {
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
+    },
+    "좌자": {
+        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "창병 피해 감소" }
+    },
+    "장녕": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" }
+    },
+    "우길": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" }
+    },
+    "손권": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
+    },
+    "손권(제왕)": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
+    },
+    "육항": {
+        helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "궁병 피해 감소" }
+    },
+    "노숙": {
+        helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "궁병 피해 감소" }
+    },
+    "유비(제왕)": {
+        helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    },
+    "유비": {
+        helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    },
+    "관우": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "방패병 피해 감소" }
+    },
+    "장비": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "방패병 피해 감소" }
+    }
+};
+
+// ==========================================================================
+// LAYER 3: UI 렌더링 및 외부 스크립트 연동 API 개방 구역
+// ==========================================================================
 window.onload = function() {
     renderGuideContent('equip');
 };
@@ -255,4 +422,16 @@ function renderGuideContent(categoryKey) {
     container.innerHTML = htmlBuilder;
 }
 
+// deck_core.js 가 호출하여 장비 세팅 딕셔너리를 실시간으로 빼갈 수 있도록 허용하는 API 브릿지 함수
+function getEquipmentRecommendationFromGuide(officerName) {
+    // 마스터 딕셔너리에서 무장 이름으로 조회 후 반환, 없으면 예외 처리용 디폴트 방어 규격 반환
+    return masterEquipmentMap[officerName] || {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "방패병 피해 감소" }
+    };
+}
+
+// 글로벌 전역 스코프에 캡슐화 함수 매핑 결선 완료
 window.switchGuideTab = switchGuideTab;
+window.getEquipmentRecommendationFromGuide = getEquipmentRecommendationFromGuide;
