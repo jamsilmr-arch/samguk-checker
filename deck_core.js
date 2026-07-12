@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 인게임 정식 UI 명칭 동기화 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 갑옷 파트 치유 효과 부여/받음 최종 정정본 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (호이스팅 세션 일제 정렬)
+// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 정렬)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -95,7 +95,7 @@ const bondRules = [
 const systemGuideInsights = {
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해) 스킬을 조합하세요.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
-    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구와 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
+    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구 and 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
     "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 증가) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
     "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해) 매를 훈련시켜 탑재하세요.",
     "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
@@ -161,7 +161,7 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 정식 규격 동기화: '치유 효과 부여' 가칭을 전량 색출하여 인게임 오피셜 용어인 '치유 효과 상승'으로 전면 보완 완료
+// 요구사항 최종 동기화 완결: 갑옷 슬롯 내에 오염되어 잔존하던 '치유 효과 상승'을 완벽 축출하고 [치유 효과 부여], [치유 효과 받음] 중 유효 옵션으로 100% 매핑 변경[cite: 1]
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -250,7 +250,7 @@ const officerEquipmentMap = {
     },
     "제갈량": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
@@ -300,12 +300,12 @@ const officerEquipmentMap = {
     },
     "유비(제왕)": {
         helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
         accessory: { name: "박산로", attr1: "피해 감소", attr2: "치유 효과 받음" }
     },
     "유비": {
         helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
         accessory: { name: "박산로", attr1: "피해 감소", attr2: "치유 효과 받음" }
     },
     "관우": {
@@ -315,7 +315,7 @@ const officerEquipmentMap = {
     },
     "장비": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
-        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 상승" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
         accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
     }
 };
@@ -323,9 +323,6 @@ const officerEquipmentMap = {
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
-// ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역
-// ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
     const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -495,28 +492,6 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
-function calculateActivatedBond(officers) {
-    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
-    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
-    if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
-    let matchedBonds = [];
-
-    bondRules.forEach(rule => {
-        const uniqueMatches = [];
-        currentOfficerNames.forEach(name => {
-            if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
-        });
-        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
-        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
-            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
-        }
-    });
-    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
-}
-
-// ==========================================================================
-// LAYER 3: UI 렌더링 및 생명주기 제어 구역
-// ==========================================================================
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
