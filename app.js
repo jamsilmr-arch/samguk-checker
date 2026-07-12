@@ -1,253 +1,345 @@
-console.log("[시스템 분석] dogam.js 스마트 DOM 앵커링 및 오토 렌더링 엔진 기동");
+console.log("[시스템 분석] app.js 인벤토리 0성 베이스라인 및 가독성 최적화 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 무장 마스터 데이터베이스
+// LAYER 1: 마스터 정적 인벤토리 데이터 구역 (베이스라인 0성 초기화 완결)
 // ==========================================================================
-const coreOfficerRoleMap = {
-    "조조": "지휘 (100%)", "순욱": "능동 (50%)", "곽가": "능동 (50%)", "장합": "지휘 (100%)", 
-    "하후돈": "패시브 (50%)", "악진": "능동 (70%)", "전위": "패시브 (100%)", "정욱": "추격 (50%)", 
-    "장료": "패시브 (100%)", "사마의": "능동 (60%)", "하후연": "능동 (50%)", "조조(제왕)": "지휘 (100%)", 
-    "가후": "능동 (65%)", "유비": "지휘 (100%)", "마대": "능동 (35%)", "관우": "능동 (50%)", 
-    "위연": "패시브 (70%)", "장비": "패시브 (50%)", "사마가": "추격 (35%)", "황충": "패시브 (100%)", 
-    "황월영": "지휘 (100%)", "제갈량": "지휘 (100%)", "유비(제왕)": "지휘 (100%)", "조운": "패시브 (100%)", 
-    "마초": "패시브 (100%)", "서서": "지휘 (100%)", "강유": "추격 (50%)", "손권": "지휘 (100%)", 
-    "손견": "지휘 (100%)", "주유": "패시브 (80%)", "대교": "지휘 (100%)", "황개": "능동 (50%)", 
-    "여몽": "지휘 (100%)", "육손": "추격 (50%)", "소교": "능동 (70%)", "손상향": "능동 (50%)", 
-    "육항": "능동 (60%)", "손책": "능동 (50%)", "제)손권": "지휘 (100%)", "주태": "지휘 (100%)", 
-    "정보": "지휘 (100%)", "노숙": "지휘 (100%)", "동탁": "지휘 (100%)", "좌자": "패시브 (100%)", 
-    "여포": "패시브 (100%)", "우길": "지휘 (70%)", "초선": "능동 (50%)", "안량": "능동 (50%)", 
-    "장각": "능동 (50%)", "원소": "지휘 (100%)", "장보": "능동 (50%)", "채문희": "능동 (70%)", 
-    "화타": "능동 (50%)", "장녕": "능동 (50%)"
-};
-
-const coreOfficerUniqueTacticMap = {
-    "조조": "효웅", "순욱": "거중지중", "곽가": "산무유책", "장합": "교변병기", 
-    "하후돈": "발시담정", "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", 
-    "장료": "함진살적", "사마의": "응시낭고", "하후연": "충용", "조조(제왕)": "군령여산", 
-    "가후": "경달권변", "유비": "인정", "마대": "습참", "관우": "무성", 
-    "위연": "실병제위", "장비": "연인노호", "사마가": "만왕", "황충": "적혈도", 
-    "황월영": "묘산천기", "제갈량": "초선차전", "유비(제왕)": "재주복주", "조운": "칠진칠출", 
-    "마초": "출수법", "서서": "절절학문", "강유": "담대여두", "손권": "웅거", 
-    "손견": "강동맹호", "주유": "봉화연천", "대교": "정수유심", "황개": "요원지화", 
-    "여몽": "백의도강", "육손": "지변규려", "소교": "화용욕모", "손상향": "효희", 
-    "육항": "청백충근", "손책": "강동패주", "제)손권": "겸권상계", "주태": "청라산개", 
-    "정보": "칠척사모", "노숙": "탑상책", "동탁": "전권난정", "좌자": "화겁생기", 
-    "여포": "천하무쌍", "우길": "태평경", "초선": "폐월", "안량": "효장", 
-    "장각": "황천당립", "원소": "사소도", "장보": "요풍사기", "채문희": "비분시", 
-    "화타": "청낭제세", "장녕": "천의난위"
-};
-
-const coreOfficerFactionMap = {
-    "조조": "위나라", "순욱": "위나라", "곽가": "위나라", "장합": "위나라", "하후돈": "위나라", "악진": "위나라", "전위": "위나라", "정욱": "위나라", "장료": "위나라", "사마의": "위나라", "하후연": "위나라", "조조(제왕)": "위나라", "가후": "위나라",
-    "유비": "촉나라", "마대": "촉나라", "관우": "촉나라", "위연": "촉나라", "장비": "촉나라", "황충": "촉나라", "황월영": "촉나라", "제갈량": "촉나라", "유비(제왕)": "촉나라", "조운": "촉나라", "마초": "촉나라", "서서": "촉나라", "강유": "촉나라",
-    "손권": "오나라", "손견": "오나라", "주유": "오나라", "대교": "오나라", "황개": "오나라", "여몽": "오나라", "육손": "오나라", "소교": "오나라", "손상향": "오나라", "육항": "오나라", "손책": "오나라", "제)손권": "오나라", "주태": "오나라", "정보": "오나라", "노숙": "오나라",
-    "사마가": "군웅", "동탁": "군웅", "좌자": "군웅", "여포": "군웅", "우길": "군웅", "초선": "군웅", "안량": "군웅", "장각": "군웅", "원소": "군웅", "장보": "군웅", "채문희": "군웅", "화타": "군웅", "장녕": "군웅"
-};
-
-// ==========================================================================
-// LAYER 2: API 브릿지 개방 구역
-// ==========================================================================
-window.getAllOfficerNamesFromDogam = function() {
-    return Object.keys(coreOfficerRoleMap);
-};
-
-window.getOfficerDataFromDogam = function(officerName) {
-    return {
-        role: coreOfficerRoleMap[officerName] || "보조, 버퍼",
-        uniqueTactic: coreOfficerUniqueTacticMap[officerName] || "고유 전법 누락"
-    };
-};
-
-// ==========================================================================
-// LAYER 3: 도감 렌더링 및 백데이터 보존 파이프라인
-// ==========================================================================
-let currentDogamState = [];
-let currentFactionFilter = '전체';
-
-function loadDogamData() {
-    const defaultNames = Object.keys(coreOfficerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
-    let savedHeroes = [];
+const heroList = [
+    // 위나라 (13명)
+    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0 },
     
-    try {
-        const rawData = localStorage.getItem('samguk_hobby_data');
-        if (rawData) {
-            const parsed = JSON.parse(rawData);
-            if (parsed && Array.isArray(parsed.heroes)) {
-                savedHeroes = parsed.heroes;
-            }
-        }
-    } catch (e) {
-        console.error("장수 도감 데이터 로드 실패:", e);
-    }
+    // 촉나라 (14명)
+    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 0 },
+    
+    // 오나라 (15명)
+    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0 },
+    
+    // 군진영 (12명)
+    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0 },
+    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0 }
+];
 
-    currentDogamState = defaultNames.map(name => {
-        const found = savedHeroes.find(h => h.name === name);
-        return {
-            name: name,
-            faction: coreOfficerFactionMap[name] || "기타",
-            isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star) : 0, // app.js의 성급 데이터 보존
-            role: coreOfficerRoleMap[name],
-            tactic: coreOfficerUniqueTacticMap[name]
-        };
+const tacticList = [
+    { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_bunseong', name: '분성지계', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_bisa', name: '비사주석', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_samyeon', name: '사면초가', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yosa', name: '요사여신', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yongmaeng', name: '용맹무쌍', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yongwang', name: '용왕직전', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_iil', name: '이일대로', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_itoe', name: '이퇴위진', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_ilgo', name: '일고작기', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_inse', name: '인세이도', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jangsu_j', name: '전위위안', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jegon', name: '제곤부위', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jungjeong', name: '중정기고', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jiin', name: '지인선임', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jintoe', name: '진퇴유도', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jinhwa', name: '진화타겁', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_jilpung', name: '질풍노도', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_cheonri', name: '천리추격', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_cheonsi', name: '천시지리', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_checheon', name: '체천행도', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_chukho', name: '축호과간', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
+];
+
+// ==========================================================================
+// LAYER 2: 비즈니스 렌더링 및 보유 상향 체크 다이렉트 컨트롤러
+// ==========================================================================
+function renderButtons() {
+    const containers = {
+        wei: document.getElementById('hero-container-wei'),
+        shu: document.getElementById('hero-container-shu'),
+        wu: document.getElementById('hero-container-wu'),
+        qun: document.getElementById('hero-container-qun')
+    };
+    const tacticContainer = document.getElementById('tactic-container');
+
+    Object.keys(containers).forEach(key => {
+        if (containers[key]) containers[key].innerHTML = '';
     });
-}
+    if (tacticContainer) tacticContainer.innerHTML = '';
 
-function saveDogamData() {
-    try {
-        let rootData = { heroes: [], tactics: [] };
-        const rawData = localStorage.getItem('samguk_hobby_data');
-        if (rawData) rootData = JSON.parse(rawData);
+    const createCard = (item, type, container) => {
+        const cardNode = document.createElement('div');
+        cardNode.id = item.id;
+        cardNode.className = `card-btn ${item.group} ${item.isOwned ? 'owned' : ''}`;
+        cardNode.style.display = 'flex';
+        cardNode.style.flexDirection = 'column';
+        cardNode.style.alignItems = 'center';
+        cardNode.style.justifyContent = 'center';
+        cardNode.style.gap = '6px';
+        cardNode.style.minHeight = '50px'; 
+        cardNode.style.cursor = 'pointer';
+        cardNode.style.padding = '8px 4px';
+        cardNode.style.boxSizing = 'border-box';
         
-        rootData.heroes = currentDogamState.map(h => ({ name: h.name, isOwned: h.isOwned, star: h.star }));
-        localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
-    } catch (e) {
-        console.error("장수 도감 세이브 실패:", e);
-    }
+        cardNode.onclick = function() { toggleState(item.id, type); };
+
+        let innerHtml = `<span style="font-weight: bold; pointer-events: none; font-size: 13px;">${item.name}</span>`;
+        
+        if (item.isOwned) {
+            // 이모지 제거, 0성부터 5성까지 간결한 텍스트 및 중앙 정렬 탑재 완료
+            innerHtml += `
+                <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 80%; max-width: 60px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center;">
+                    <option value="0" ${item.star === 0 ? 'selected' : ''}>0성</option>
+                    <option value="1" ${item.star === 1 ? 'selected' : ''}>1성</option>
+                    <option value="2" ${item.star === 2 ? 'selected' : ''}>2성</option>
+                    <option value="3" ${item.star === 3 ? 'selected' : ''}>3성</option>
+                    <option value="4" ${item.star === 4 ? 'selected' : ''}>4성</option>
+                    <option value="5" ${item.star === 5 ? 'selected' : ''}>5성</option>
+                </select>
+            `;
+        }
+        
+        cardNode.innerHTML = innerHtml;
+        if (container) container.appendChild(cardNode);
+    };
+
+    heroList.forEach(hero => createCard(hero, 'hero', containers[hero.group]));
+    tacticList.forEach(tactic => createCard(tactic, 'tactic', tacticContainer));
 }
 
-function toggleOfficerOwnership(officerName) {
-    const target = currentDogamState.find(h => h.name === officerName);
+function toggleState(id, type) {
+    const list = (type === 'hero') ? heroList : tacticList;
+    const target = list.find(x => x.id === id);
+    
     if (target) {
         target.isOwned = !target.isOwned;
-        saveDogamData();
-        renderDogamGrid(); 
+        renderButtons();
     }
 }
 
-function bindFilterButtons() {
-    const buttons = document.querySelectorAll('button');
-    const filterKeywords = ['전체', '위나라', '촉나라', '오나라', '군웅'];
-    
-    buttons.forEach(btn => {
-        const txt = btn.innerText.trim();
-        if (filterKeywords.includes(txt)) {
-            btn.style.cursor = 'pointer';
-            btn.onclick = (e) => {
-                currentFactionFilter = txt;
-                buttons.forEach(b => {
-                    if(filterKeywords.includes(b.innerText.trim())) {
-                        b.style.backgroundColor = 'transparent';
-                        b.style.color = '#888';
-                        b.style.border = '1px solid #444';
-                    }
-                });
-                e.target.style.backgroundColor = '#fff';
-                e.target.style.color = '#000';
-                
-                renderDogamGrid();
-            };
-        }
-    });
+window.updateStar = function(event, id, type, value) {
+    event.stopPropagation();
+    const list = (type === 'hero') ? heroList : tacticList;
+    const target = list.find(x => x.id === id);
+    if (target) {
+        target.star = parseInt(value);
+    }
+};
+
+function saveData() {
+    const data = { heroes: heroList, tactics: tacticList };
+    localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
+    alert('체크 현황이 안전하게 저장되었습니다.');
 }
 
-function renderDogamUI() {
-    // 1. 기존 HTML 컨테이너 추적 (우선순위 타겟팅)
-    let nativeContainer = document.getElementById('hero-list') || document.getElementById('dogam-list') || document.getElementById('officer-list');
-    
-    let container = document.getElementById('samguk-dogam-wrapper');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'samguk-dogam-wrapper';
-        container.style.marginTop = '20px';
-        container.style.maxWidth = '1400px';
-        container.style.marginLeft = 'auto';
-        container.style.marginRight = 'auto';
+function loadSavedData() {
+    try {
+        const saved = localStorage.getItem('samguk_hobby_data');
+        if (!saved) return;
         
-        // 2. 스마트 DOM 앵커링: 기존 HTML 컨테이너가 없으면 '필터 버튼' 바로 아래에 강력 접착
-        if (nativeContainer) {
-            nativeContainer.appendChild(container);
-        } else {
-            let filterBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.trim() === '전체');
-            if (filterBtn && filterBtn.parentElement) {
-                let filterRow = filterBtn.parentElement;
-                filterRow.parentElement.insertBefore(container, filterRow.nextSibling);
-            } else {
-                document.body.appendChild(container); // 최후의 수단
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.heroes && Array.isArray(parsed.heroes)) {
+            parsed.heroes.forEach(sh => {
+                if (!sh) return;
+                const h = heroList.find(x => x.id === sh.id);
+                if (h) {
+                    h.isOwned = !!sh.isOwned;
+                    // Falsy(0) 오판 방어를 위한 엄격한 일치 연산 필터 탑재
+                    h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star) : 0;
+                }
+            });
+        }
+        if (parsed && parsed.tactics && Array.isArray(parsed.tactics)) {
+            parsed.tactics.forEach(st => {
+                if (!st) return;
+                const t = tacticList.find(x => x.id === st.id);
+                if (t) {
+                    t.isOwned = !!st.isOwned;
+                    t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star) : 0;
+                }
+            });
+        }
+    } catch(e) {
+        console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e);
+    }
+}
+
+// ==========================================================================
+// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진
+// ==========================================================================
+function exportData() {
+    try {
+        var hobbyData = localStorage.getItem('samguk_hobby_data');
+        var deckData = localStorage.getItem('samguk_deck_text');
+        
+        var backupObject = {
+            samguk_hobby_data: hobbyData ? JSON.parse(hobbyData) : null,
+            samguk_deck_text: deckData ? JSON.parse(deckData) : null
+        };
+        
+        var jsonString = JSON.stringify(backupObject, null, 2);
+        var blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+        
+        var downloadAnchor = document.createElement('a');
+        downloadAnchor.href = URL.createObjectURL(blob);
+        downloadAnchor.download = "samguk_wangjeon_database_backup.json";
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+        
+        console.log("[백업 시스템] 인벤토리 페이지 백업 추출 마감");
+    } catch (err) {
+        alert("백업 생성 실패: " + err.message);
+    }
+}
+
+function triggerImport() {
+    var fileInput = document.getElementById('import-file-input');
+    if (fileInput) {
+        fileInput.click();
+    }
+}
+
+function importData(input) {
+    var file = input.files[0];
+    if (!file) return;
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var importedDatabase = JSON.parse(e.target.result);
+            
+            if (!importedDatabase.samguk_hobby_data && !importedDatabase.samguk_deck_text) {
+                alert("삼국지 왕전의 정식 백업 스냅샷 파일이 아닙니다.");
+                return;
             }
+            
+            if (importedDatabase.samguk_hobby_data) {
+                localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
+            }
+            if (importedDatabase.samguk_deck_text) {
+                localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
+            }
+            
+            alert("보유 데이터 복구 완료. 인벤토리 체크 동기화를 위해 화면을 리로드합니다.");
+            location.reload();
+            
+        } catch (err) {
+            alert("JSON 구조 파싱 에러: 파손된 아카이브 파일입니다.");
         }
-    }
-
-    container.innerHTML = `
-        <div id="dogam-stats-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">장수 도감 마스터 보드</h2>
-            <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
-        </div>
-        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;"></div>
-    `;
-    
-    bindFilterButtons();
-    renderDogamGrid();
+    };
+    reader.readAsText(file, "utf-8");
 }
 
-function renderDogamGrid() {
-    const gridContainer = document.getElementById('dogam-card-grid');
-    const countBadge = document.getElementById('dogam-count-badge');
-    if(!gridContainer) return;
+// 전역 윈도우 인라인 맵핑 바인딩
+window.toggleSortMode = function() {};
+window.toggleState = toggleState;
+window.saveData = saveData;
+window.exportData = exportData;
+window.triggerImport = triggerImport;
+window.importData = importData;
 
-    gridContainer.innerHTML = '';
-    
-    const filteredHeroes = currentDogamState.filter(h => currentFactionFilter === '전체' || h.faction === currentFactionFilter);
-    const ownedCount = filteredHeroes.filter(h => h.isOwned).length;
-    const totalCount = filteredHeroes.length;
-    
-    if(countBadge) {
-        countBadge.innerHTML = `[${currentFactionFilter}] 보유율: <span style="color: #38bdf8; font-size: 18px;">${ownedCount}</span> / ${totalCount}`;
-    }
-
-    filteredHeroes.forEach(hero => {
-        const card = document.createElement('div');
-        card.style.cssText = `
-            background-color: ${hero.isOwned ? '#1c251d' : '#141414'};
-            border: 1px solid ${hero.isOwned ? '#28a745' : '#333'};
-            border-radius: 8px;
-            padding: 18px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            box-shadow: ${hero.isOwned ? '0 0 10px rgba(40, 167, 69, 0.2)' : 'none'};
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            min-height: 95px;
-        `;
-        
-        if (!hero.isOwned) {
-            card.style.opacity = '0.4';
-            card.style.filter = 'grayscale(100%)';
-        }
-
-        let factionColor = "#aaa";
-        if(hero.faction === '위나라') factionColor = "#3b82f6";
-        if(hero.faction === '촉나라') factionColor = "#22c55e";
-        if(hero.faction === '오나라') factionColor = "#ef4444";
-        if(hero.faction === '군웅') factionColor = "#a855f7";
-
-        card.innerHTML = `
-            <div>
-                <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 6px;">[${hero.faction}]</div>
-                <div style="font-size: 20px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; margin-bottom: 12px; letter-spacing: 1px;">${hero.name}</div>
-                <div style="font-size: 12px; color: #ccc; margin-bottom: 6px;">🎯 역할: ${hero.role}</div>
-                <div style="font-size: 12px; color: #cd9b33; font-weight: bold;">⭐ 고유: ${hero.tactic}</div>
-                <div style="position: absolute; top: 15px; right: 15px; font-size: 11px; padding: 4px 8px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
-                    ${hero.isOwned ? '보유' : '미보유'}
-                </div>
-            </div>
-        `;
-
-        card.addEventListener('click', () => toggleOfficerOwnership(hero.name));
-        gridContainer.appendChild(card);
-    });
-}
-
-function initDogamEngine() {
-    loadDogamData();
-    setTimeout(renderDogamUI, 100); 
+// 강제 실행 돔 생명주기 엔진
+function initAppEngine() {
+    loadSavedData();
+    renderButtons();
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDogamEngine);
+    document.addEventListener('DOMContentLoaded', initAppEngine);
 } else {
-    initDogamEngine();
+    initAppEngine();
 }
