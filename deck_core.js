@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 갑옷 파트 치유 효과 부여/받음 최종 정정본 기동 승인");
+console.log("[시스템 분석] deck_core.js 강유 딜러 아키텍처 무결성 패치 엔진 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 정렬)
@@ -161,7 +161,7 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 요구사항 최종 동기화 완결: 갑옷 슬롯 내에 오염되어 잔존하던 '치유 효과 상승'을 완벽 축출하고 [치유 효과 부여], [치유 효과 받음] 중 유효 옵션으로 100% 매핑 변경[cite: 1]
+// 정밀 확정 반영: 강유 딜러 포지션에 맞춰 갑옷 추가속성 1의 피해 감소 오류를 [모략 추가 피해 증폭]으로 완벽 교체 완료
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -250,7 +250,7 @@ const officerEquipmentMap = {
     },
     "제갈량": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
-        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
@@ -260,7 +260,7 @@ const officerEquipmentMap = {
     },
     "강유": {
         helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
+        armor: { name: "명재복", attr1: "모략 추가 피해 증폭", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
     },
     "좌자": {
@@ -309,13 +309,13 @@ const officerEquipmentMap = {
         accessory: { name: "박산로", attr1: "피해 감소", attr2: "치유 효과 받음" }
     },
     "관우": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "장비": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
-        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 상승" },
         accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
     }
 };
@@ -691,7 +691,7 @@ function renderDeckBuilder() {
                         });
                     }
 
-                    const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
+                    const currentPos = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[formationPositions[deck.formation][offIdx]] : "front";
                     const posLabel = currentPos === 'front' ? '전열' : '후열';
                     const posClass = currentPos === 'front' ? 'front' : 'back';
 
