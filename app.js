@@ -1,7 +1,7 @@
-console.log("[시스템 분석] app.js 인벤토리 초월(Transcend) 시스템 및 예외 차단 가드 기동");
+console.log("[시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 인벤토리 데이터 구역 (초월 파라미터 기본값 추가)
+// LAYER 1: 마스터 정적 인벤토리 데이터 구역
 // ==========================================================================
 const heroList = [
     // 위나라 (13명)
@@ -78,14 +78,14 @@ const tacticList = [
     { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geum창', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false, star: 0 },
-    { id: ' Manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
@@ -189,7 +189,6 @@ function renderButtons() {
                 </select>
             `;
             
-            // 장수(hero) 진영 카드 하단에만 '초월' 버튼 컴포넌트 추가 생성
             if (type === 'hero') {
                 const isTrans = !!item.transcend;
                 innerHtml += `
@@ -227,7 +226,6 @@ window.updateStar = function(event, id, type, value) {
     }
 };
 
-// [신규 자원]: 장수 초월 상태 변경용 독립 핸들러 정의 (이벤트 버블링 완전 무력화)
 window.toggleTranscend = function(event, id) {
     event.stopPropagation();
     const target = heroList.find(x => x.id === id);
@@ -256,7 +254,7 @@ function loadSavedData() {
                 if (h) {
                     h.isOwned = !!sh.isOwned;
                     h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star) : 0;
-                    h.transcend = !!sh.transcend; // 스토리지 내 초월 데이터 디코딩 복원 완결
+                    h.transcend = !!sh.transcend; 
                 }
             });
         }
@@ -276,15 +274,16 @@ function loadSavedData() {
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진
+// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진 (초월 및 실시간 상태 동기화)
 // ==========================================================================
 function exportData() {
     try {
-        var hobbyData = localStorage.getItem('samguk_hobby_data');
+        // [핵심 패치]: 로컬 스토리지 대신 현재 메모리(Live memory)의 초월/성급 객체를 즉시 빌드하여 누락 전면 방어
+        const liveHobbyData = { heroes: heroList, tactics: tacticList };
         var deckData = localStorage.getItem('samguk_deck_text');
         
         var backupObject = {
-            samguk_hobby_data: hobbyData ? JSON.parse(hobbyData) : null,
+            samguk_hobby_data: liveHobbyData,
             samguk_deck_text: deckData ? JSON.parse(deckData) : null
         };
         
@@ -299,7 +298,7 @@ function exportData() {
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
         
-        console.log("[백업 시스템] 인벤토리 페이지 백업 추출 마감");
+        console.log("[백업 인프라] 메모리 상의 실시간 초월 및 성급 파라미터 백업 직렬화 마감 완료");
     } catch (err) {
         alert("백업 생성 실패: " + err.message);
     }
@@ -326,6 +325,19 @@ function importData(input) {
                 return;
             }
             
+            // [하위 호환 패치]: 구버전 백업 파일 로드 시 꼬임 방지를 위해 transcend/star 누락분 복구 튜닝 사전 연산
+            if (importedDatabase.samguk_hobby_data && importedDatabase.samguk_hobby_data.heroes) {
+                importedDatabase.samguk_hobby_data.heroes.forEach(h => {
+                    if (h && h.transcend === undefined) h.transcend = false;
+                    if (h && h.star === undefined) h.star = 0;
+                });
+            }
+            if (importedDatabase.samguk_hobby_data && importedDatabase.samguk_hobby_data.tactics) {
+                importedDatabase.samguk_hobby_data.tactics.forEach(t => {
+                    if (t && t.star === undefined) t.star = 0;
+                });
+            }
+            
             if (importedDatabase.samguk_hobby_data) {
                 localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
             }
@@ -333,7 +345,7 @@ function importData(input) {
                 localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
             }
             
-            alert("보유 데이터 복구 완료. 인벤토리 체크 동기화를 위해 화면을 리로드합니다.");
+            alert("보유 및 초월 데이터 마이그레이션 완료. 인벤토리 동기화를 위해 화면을 리로드합니다.");
             location.reload();
             
         } catch (err) {
