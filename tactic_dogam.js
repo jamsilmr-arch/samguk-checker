@@ -1,7 +1,7 @@
-console.log("[시스템 분석] tactic_dogam.js 원본 설명 데이터 복원 및 무결성 보존 엔진 기동");
+console.log("[시스템 분석] tactic_dogam.js 스마트 DOM 앵커링 엔진 및 백데이터 보존 기동");
 
 // ==========================================================================
-// LAYER 1: 전법 마스터 데이터베이스 구역 (원본 설명 데이터 100% 복원 완결)
+// LAYER 1: 전법 마스터 데이터베이스 구역
 // ==========================================================================
 const tacticDogamData = [
     { id: 't_gajeong', name: '가정지전', type: '추격 (35%)', target: '적군 1팀', desc: '일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다.' },
@@ -35,8 +35,8 @@ const tacticDogamData = [
     { id: 't_seondeung', name: '선등함진', type: '능동 (50%)', target: '적군 전체', desc: '적 전체에게 100%의 무용 피해를 입히고, 35%의 확률로 겁전 부여, 1턴 지속합니다. 각 목표별 확률은 독립적으로 계산됩니다.' },
     { id: 't_susang', name: '수상개화', type: '패시브 (100%)', target: '자신', desc: '무장 고유의 능동 전법 발동 확률이 12% 증가하며 해제 불가합니다. 매 턴 시작 시, 자신이 가하는 피해가 12% 증가하며, 최대 4회 중첩되고 해제 불가합니다.' },
     { id: 't_sunsu', name: '순수견양', type: '능동 (50%)', target: '적군 2팀, 아군 2팀', desc: '2턴 동안 적군 2명이 가하는 피해를 15% 감소(모략의 영향을 받음)시키고, 50% 확률로 무장 해제를 부여하여 1턴간 지속시킵니다. 이후 아군 2명의 병력을 회복시킵니다(치료율 90%, 모략의 영향을 받음).' },
-    { id: 't_simmo', name: '심모원려', type: '추격 (50%)', target: '자신, 적군 1팀', desc: '일반 공격 후 자신의 모략 피해가 5% 상승하며 최대 4중첩, 해제 불가이며 일반 공격 대상에게 240% 모략 피해를 가합니다.' },
-    { id: 't_anyoung', name: '안영찰채', type: '지휘 (100%)', target: '적군 2팀, 아군 전체', desc: '매 턴 시작 시 70% 확률로 아군 전체의 병력을 회복시키고(치료율 80%, 모략의 영향 받음), 아군 전체가 행동하기 전 받는 피해를 20% 감소시킵니다(대상의 모략이 무용보다 높을 경우 계수 30% 상승). 이후 30% 확률(모략의 영향 받음)로 적군 전열에 피곤을(를) 부여합니다(턴 종료 시까지 지속).' }, 
+    { id: 't_simmo', name: '심모원려', type: '추격 (50%)', target: '자신, 적군 1팀', desc: '일반 공격 후 자신의 모략 피해가 5% 상승하며 최대 4중첩, 해제 불가이며 일반 공격 대상에게 240% 모략 피해 가합니다.' },
+    { id: 't_anyoung', name: '안영찰채', type: '지휘 (100%)', target: '적군 2팀, 아군 전체', desc: '매 턴 시작 시 70% 확률로 아군 전체의 병력을 회복시키고(치료율 80%, 모략의 영향 받음), 아군 전체가 행동하기 전 받는 피해를 20% 감소시킵니다(대상의 모략이 무용보다 높을 경우 계수 30% 상승). 이후 30% 확률(모략의 영향 받음)로 적군 전열에 피곤을 부여합니다(턴 종료 시까지 지속).' }, 
     { id: 't_amjeon', name: '암전난방', type: '능동 (50%)', target: '자신, 적군 1팀', desc: '자신의 강공 30% 증가하고 2턴 지속하며 적군 대상 1명에게 220% 무용 피해를 가합니다. 대상이 전열일 경우 피해 계수가 110% 상승합니다.' },
     { id: 't_yangui', name: '양의화생', type: '능동 (50%)', target: '자신, 적군 2팀', desc: '자신에게 2턴 동안 다모를 부여합니다. 적군 대상 2명에게 160%의 모략 피해를 입힙니다. 대상의 무용이 모략보다 높을 경우 피해 계수가 20% 상승합니다. 반대로 대상의 모략이 더 높을 경우, [양의화생]으로 입힌 피해의 30%만큼 자신의 병력을 회복합니다.' },
     { id: 't_yangcho', name: '양초선행', type: '능동 (50%)', target: '아군 1팀', desc: '아군 중 병력이 가장 낮은 대상의 병력을 회복(치료율174%, 모략 영향)하고 해당 대상의 병력이 60% 미만이면 치료 계수 58% 증가합니다.' },
@@ -63,7 +63,7 @@ const tacticDogamData = [
     { id: 't_jilpung', name: '질풍노도', type: '능동 (70%)', target: '자신, 적군 2팀', desc: '자신의 파갑 15% 상승(무용의 영향 받음), 2턴 동안 지속됩니다. 동시에 적군 대상 2명에게 110%의 무용 피해를 입힙니다. 40%의 확률(무용의 영향 받음)로 무용이 가장 낮은 적군 대상에게 110%의 무용 피해를 추가로 입힙니다.' },
     { id: 't_cheonri', name: '천리추격', type: '추격 (50%)', target: '자신, 적군 2팀', desc: '일반 공격 후, 자신 추격 전법 발동률 3% 증가, 추격 전법 가하는 피해 6% 증가, 최대 3중첩, 해제 불가, 전투 종료 시까지 지속됩니다. 또한 적군 대상 2명에게 130% 모략 피해를 입힙니다.' },
     { id: 't_cheonsi', name: '천시지리', type: '능동 (50%)', target: '아군 전체', desc: '아군 전열이 받는 무용 피해를 22% 감소시키고 후열이 받는 모략 피해를 22% 감소시켜 2턴 동안 지속합니다.' },
-    { id: 't_checheon', name: '체천행도', type: '패시브 (100%)', target: '자신, 적군 2팀', desc: '자신의 공심이(가) 20% 증가합니다. 해제 불가. 추격 피해를 입힐 시, 50%의 확률로 목표의 아군 2명에게 65%의 확산 피해를(를) 입힙니다.' },
+    { id: 't_checheon', name: '체천행도', type: '패시브 (100%)', target: '자신, 적군 2팀', desc: '자신의 공심이(가) 20% 증가합니다. 해제 불가. 추격 피해를 입힐 시, 50%의 확률로 목표의 아군 2명에게 65%의 확산 피해를 입힙니다.' },
     { id: 't_chukse', name: '축세대발', type: '능동 (50%)', target: '자신, 적군 2팀', desc: '자신이 가하는 무용 피해 20% 증가하고 2턴 지속하며 적군 2개 대상에게 130% 무용 피해를 가합니다.' },
     { id: 't_chukho', name: '축호과간', type: '패시브 (100%)', target: '적군 1팀, 자신', desc: '피해를 입은 후, 피해 시전자에게 \'적의\'를 부여합니다(중첩당 대상의 통솔 4% 감소). 또한 자신의 통솔이 4% 증가하며, 최대 5중첩, 턴 종료 시까지 지속됩니다. 자신의 행동 시, 70% 확률로 자신의 병력 회복(치료율 240%, 통솔의 영향 받음), \'적의\' 중첩이 가장 높은 적군 대상에게 200%의 무용 피해를 입히고(통솔의 영향 받음) \'적의\' 중첩이 가장 낮은 적군 대상에게 멸시 부여, 1턴 지속합니다.' },
     { id: 't_taecheong', name: '태청단경', type: '패시브 (50%)', target: '아군 2팀', desc: '피해를 입은 후, 아군 2명의 병력을 회복하고(치율 45%, 모략에 영향받음), 50%의 확률로 디버프 1개를 해제합니다. 매 턴 최대 5회 발동합니다.' },
@@ -79,14 +79,14 @@ const tacticDogamData = [
 ];
 
 // ==========================================================================
-// LAYER 2: deck_core.js 연동을 위한 전역 API 브릿지 개방 구역
+// LAYER 2: API 브릿지 개방 구역
 // ==========================================================================
 window.getAllTacticsFromDogam = function() {
     return tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 // ==========================================================================
-// LAYER 3: 도감 UI 강제 렌더링 및 데이터 세이브 구역
+// LAYER 3: 도감 UI 렌더링 및 백데이터 보존 구역
 // ==========================================================================
 let currentTacticState = [];
 
@@ -115,7 +115,7 @@ function loadTacticData() {
             type: originData ? originData.type : "-",
             target: originData ? originData.target : "-",
             isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star !== undefined) ? parseInt(found.star) : 0 // app.js의 성급 데이터 백그라운드 무결성 보존
+            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star) : 0
         };
     });
 }
@@ -126,7 +126,6 @@ function saveTacticData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) rootData = JSON.parse(rawData);
         
-        // UI에서는 성급을 조작하지 않지만, 인벤토리의 데이터를 날리지 않기 위해 star를 보존 직렬화
         rootData.tactics = currentTacticState.map(t => ({ name: t.name, isOwned: t.isOwned, star: t.star }));
         localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
     } catch (e) {
@@ -144,16 +143,24 @@ function toggleTacticOwnership(tacticName) {
 }
 
 function renderTacticDogamUI() {
-    let container = document.getElementById('tactic-dogam-container') || document.querySelector('.tactic-dogam-container');
+    // 1. 기존 HTML 컨테이너 추적
+    let nativeContainer = document.getElementById('tactic-list') || document.getElementById('tactic-container');
     
-    // HTML에 도화지가 없으면 강제로 DOM을 생성하여 부착
+    let container = document.getElementById('tactic-dogam-wrapper');
     if (!container) {
         container = document.createElement('div');
-        container.id = 'tactic-dogam-container';
-        container.style.padding = '20px 40px';
+        container.id = 'tactic-dogam-wrapper';
+        container.style.marginTop = '20px';
         container.style.maxWidth = '1400px';
-        container.style.margin = '0 auto';
-        document.body.appendChild(container);
+        container.style.marginLeft = 'auto';
+        container.style.marginRight = 'auto';
+        
+        // 2. 스마트 DOM 앵커링
+        if (nativeContainer) {
+            nativeContainer.appendChild(container);
+        } else {
+            document.body.appendChild(container); // 최후의 수단
+        }
     }
 
     container.innerHTML = `
@@ -183,7 +190,6 @@ function renderTacticGrid() {
 
     currentTacticState.forEach(tactic => {
         const card = document.createElement('div');
-        // 긴 설명 텍스트를 담을 수 있도록 높이를 가변적으로 설정 (min-height 최적화)
         card.style.cssText = `
             background-color: ${tactic.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${tactic.isOwned ? '#28a745' : '#333'};
@@ -206,7 +212,6 @@ function renderTacticGrid() {
             card.style.filter = 'grayscale(100%)';
         }
 
-        // 가독성 높은 다열 그리드 레이아웃 적용
         card.innerHTML = `
             <div style="font-size: 18px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'}; margin-bottom: 8px;">${tactic.name}</div>
             <div style="font-size: 11px; margin-bottom: 6px; color: #aaa;">
