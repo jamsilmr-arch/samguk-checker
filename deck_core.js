@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 가후 장비 속성 교정 무결성 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 사마의 피해 가함 종결 빌드 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (호이스팅 세션 일제 정렬)
@@ -112,7 +112,7 @@ const analyzedMetaArchetypes = [
         ]
     },
     {
-        id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진",
+        id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스ئت 펌핑을 결합한 속전속결 조합", formation: "호도진",
         officers: [
             { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
             { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] },
@@ -161,7 +161,7 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 데이터 대보정: 가후의 쓸모없는 '치유 효과 받음' 오염 스탯을 축출하고 명세서 풀 기준 100% 실전형 피해 감소 레이어로 전수 개조[cite: 1]
+// 요청사항 반영: 사마의의 갑옷 추가속성2를 독립형 파괴 옵션인 '피해 가함'으로 최종 보정 패치 완료
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -193,10 +193,45 @@ const officerEquipmentMap = {
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
         accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
     },
+    "장합": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "치유 효과 받음" }
+    },
+    "하후돈": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
+    },
     "악진": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "전위": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
+    },
+    "정욱": {
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
+    },
+    "사마의": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "모략 추가 피해 증폭", attr2: "피해 가함" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
+    },
+    "하후연": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "가후": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "모략 피해 감소" }
     },
     "동탁": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
@@ -214,12 +249,12 @@ const officerEquipmentMap = {
         accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
     },
     "제갈량": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
-        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 추가 피해 증폭" },
+        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
-        helmet: { name: "강공, 기습 상승", attr2: "무용 피해 감소" },
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "무용 피해 감소" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
@@ -242,21 +277,6 @@ const officerEquipmentMap = {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
-    },
-    "사마의": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "모략 추가 피해 증폭", attr2: "피해 감소 상한" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 추가 피해 증폭" }
-    },
-    "하후돈": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
-    },
-    "가후": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "박산로", attr1: "피해 감소", attr2: "모략 피해 감소" }
     },
     "손권": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
