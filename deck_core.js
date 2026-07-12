@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js SSR 전투매 4대 마스터 스펙 통합 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js SSR 마스터 전투매 8대 종결 규격 통합 엔진 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 호이스팅)
@@ -95,14 +95,13 @@ const bondRules = [
 const systemGuideInsights = {
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해가함 및 행동 종료 시까지 15% 버프 가산, 적 2명에게 160% 물리 타격 격발) 스킬을 필히 조합하세요.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
-    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구 and 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
-    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 증가) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
+    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구 and 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 비율 최저 2명 즉시 복구 및 해제불가 축예 연계) 매를 편성하세요.",
+    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 및 통솔 30% 증가, Lv.20 도달 시 버프 상태 대상 아군 전체 지정) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
     "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해가함 및 행동 종료 시까지 15% 버프 가산, 적 2명에게 160% 지력 타격 격발) 매를 훈련시켜 탑재하세요.",
     "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(치유 시전으로 피격후 100% 자가회복 부여 및 1중첩 각성 아군 전체 확산) 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
-// [신규 자원 동기화 완결]: 인게임 SSR 최고 존엄 4대 전투매 Lv.20 마스터 스펙 데이터 세션 완전 결선
 const ssrHawkSkillsDatabase = {
     "전우": {
         level: "Lv.20", type: "지휘", probability: "100%", target: "아군 전체",
@@ -127,6 +126,30 @@ const ssrHawkSkillsDatabase = {
         baseEffect: "턴 종료 시 모략이 가장 높은 아군 대상이 가하는 모략 피해를 15% 증가시켜 목표의 행동 종료 시까지 지속. 또한 해당 목표가 적군 2명에게 160% 모략 피해를 투사하도록 즉시 격발 시전.",
         breakthrough10: "선택한 대상이 가하는 모략 피해 증가 버프 구조 유지(목표의 행동 종료 시까지 관통)",
         breakthrough20: "가하는 지력 분쇄 타격의 투사 피해 대상 범위가 적군 2명으로 확정 스펙화"
+    },
+    "여천": {
+        level: "Lv.20", type: "지휘", probability: "50%", target: "아군 전체",
+        baseEffect: "턴 시작 시, 아군 전체의 모략이 30%, 통솔이 30% 증가하며 턴 종료 시까지 지속됩니다.",
+        breakthrough10: "버프 상태 시 추가로 통솔 증가",
+        breakthrough20: "버프 상태의 대상이 아군 전체로 변경됩니다."
+    },
+    "전광": {
+        level: "Lv.20", type: "지휘", probability: "50%", target: "아군 전체",
+        baseEffect: "턴 시작 시, 아군 전체의 무용이 30%, 통솔이 30% 증가하며 턴 종료 시까지 지속됩니다.",
+        breakthrough10: "버프 상태 시 추가로 통솔 증가",
+        breakthrough20: "버프 상태의 대상이 아군 전체로 변경됩니다."
+    },
+    "호생": {
+        level: "Lv.20", type: "지휘", probability: "70%", target: "아군 2팀",
+        baseEffect: "턴 시작 시, 병력 비율이 가장 낮은 아군 2명이 자신의 병력을 회복(치료율 220%, 가장 높은 스탯의 영향을 받음)하게 하며, [축예] 상태를 획득합니다: 행동 전 자신의 병력을 회복(치료율 90%, 가장 높은 스탯의 영향을 받음)하며 턴 종료 시까지 지속, 해제 불가합니다.",
+        breakthrough10: "치료 효과의 대상이 2명으로 변경됩니다.",
+        breakthrough20: "치료 효과 대상이 '축예'를 획득합니다(행동 전 자신의 병력 회복), 턴 종료 시까지 지속됩니다."
+    },
+    "감로": {
+        level: "Lv.20", type: "지휘", probability: "100%", target: "아군 전체",
+        baseEffect: "전투 시작 시 아군 전체에게 '치유'를 부여합니다. 피해를 입은 후 100%의 확률로 병력을 회복하며(치료율 50%, 최고 속성 영향), 매 턴 최대 4회 발동됩니다. 또한 100%의 확률로 아군 전체에게 1중첩의 각성을 부여합니다.",
+        breakthrough10: "각성 및 병력 회복 확률이 증가합니다.",
+        breakthrough20: "각성 확률이 증가하며, 버프 상태 대상이 아군 전체로 변경됩니다."
     }
 };
 
@@ -288,7 +311,7 @@ const officerEquipmentMap = {
     "강유": {
         helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
     },
     "좌자": {
         helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "치유 효과 상승" },
@@ -353,198 +376,12 @@ let currentSortMode = 'default';
 // ==========================================================================
 // LAYER 2: 코어 연산 엔진 구역
 // ==========================================================================
-function calculateStrictDeckScore(deck) {
-    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
-    const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
-    if (currentNames.length === 0) return 0;
-
-    let bestMeta = analyzedMetaArchetypes[0];
-    let maxMatch = -1;
-
-    analyzedMetaArchetypes.forEach(meta => {
-        let matchCount = 0;
-        meta.officers.forEach((mo, idx) => {
-            if (currentNames.includes(mo.name)) matchCount += 1;
-            if (deck.officers[idx] && deck.officers[idx].name === mo.name) matchCount += 0.5;
-        });
-        if (matchCount > maxMatch) {
-            maxMatch = matchCount;
-            bestMeta = meta;
-        }
-    });
-
-    let score = 100;
-    if (deck.formation !== bestMeta.formation) score -= 10;
-
-    bestMeta.officers.forEach((metaOff, idx) => {
-        const userOff = deck.officers[idx];
-        if (!userOff || !userOff.name) {
-            score -= 30;
-            return;
-        }
-        if (userOff.name !== metaOff.name) score -= 20;
-
-        const metaTacs = metaOff.chosenTactics.map(t => t.toString().trim());
-        if (userOff.chosenTactics && Array.isArray(userOff.chosenTactics)) {
-            userOff.chosenTactics.forEach((userTac, tIdx) => {
-                const cleanUserTac = userTac ? userTac.toString().trim() : "";
-                if (cleanUserTac !== metaTacs[tIdx]) score -= 5;
-            });
-        } else {
-            score -= 10;
-        }
-    });
-
-    if (score < 0) score = 0;
-    return score;
-}
-
-function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
-    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return [];
-    const currentCleanNames = [];
-    deck.officers.forEach(o => {
-        if (o && o.name) currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
-    });
-
-    if (currentCleanNames.length === 0) return [];
-
-    let bestMatchDeck = analyzedMetaArchetypes[0]; 
-    let maxMatchScore = -1;
-
-    analyzedMetaArchetypes.forEach(metaDeck => {
-        let matchScore = 0;
-        metaDeck.officers.forEach((metaOff, idx) => {
-            const metaName = metaOff.name.replace(/\s+/g, '');
-            if (currentCleanNames.includes(metaName)) matchScore += 1; 
-            if (currentCleanNames[idx] === metaName) matchScore += 0.5;
-        });
-        if (matchScore > maxMatchScore) {
-            maxMatchScore = matchScore;
-            bestMatchDeck = metaDeck;
-        }
-    });
-
-    const idealDeck = bestMatchDeck;
-    let feedbackList = [];
-    feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
-    
-    if (systemGuideInsights[idealDeck.id]) feedbackList.push(systemGuideInsights[idealDeck.id]);
-
-    const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
-    const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
-    const currentFormation = (deck.formation ? deck.formation : "").toString().trim();
-    const idealFormation = (idealDeck.formation ? idealDeck.formation : "").toString().trim();
-
-    if (currentFormation.replace(/\s+/g, '') !== idealFormation.replace(/\s+/g, '')) {
-        feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
+function dynamicPresetDecksSort() {
+    if (currentSortMode === 'default') {
+        dynamicPresetDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
     }
-
-    let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
-
-    deck.officers.forEach((off, offIdx) => {
-        if (!off) return;
-        const hName = (off.name || "").toString().trim();
-        const cleanHName = hName.replace(/\s+/g, '');
-        
-        if (!cleanHName) {
-            if (trulyMissingMetaOfficers.length > 0) {
-                const replaceWith = trulyMissingMetaOfficers.shift();
-                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${replaceWith.name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)`);
-                feedbackList.push(`전법 권장: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 지시합니다.`);
-            } else {
-                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ 타겟 메타에 부합하는 임의의 서포터 장수를 배치하세요.`);
-            }
-            return;
-        }
-
-        const isHeroOwned = cleanOwnedHeroes.includes(cleanHName); 
-        if (!isHeroOwned) feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
-
-        const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
-
-        if (metaOfficerIndex !== -1) {
-            const metaOff = idealDeck.officers[metaOfficerIndex];
-            const currentUserRow = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
-            const idealRow = (formationPositions[idealDeck.formation] && formationPositions[idealDeck.formation][metaOfficerIndex]) ? formationPositions[idealDeck.formation][metaOfficerIndex] : "front";
-
-            if (currentUserRow !== idealRow) {
-                const idealRowKo = idealRow === 'front' ? '전열' : '후열';
-                const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
-                feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
-            }
-
-            const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
-            let unmatchedMetaTactics = [...metaOff.chosenTactics];
-
-            if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
-                off.chosenTactics.forEach(tac => {
-                    if (!tac) return;
-                    const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
-                    if (unmatchedMetaTactics.includes(cleanUserTac)) {
-                        const idx = unmatchedMetaTactics.indexOf(cleanUserTac);
-                        unmatchedMetaTactics.splice(idx, 1);
-                    }
-                });
-
-                off.chosenTactics.forEach((addTac, tacIdx) => {
-                    if (!addTac) return;
-                    const currentCleanTac = addTac.toString().trim();
-                    const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
-
-                    if (!metaTacsClean.includes(cleanUserTac)) {
-                        if (unmatchedMetaTactics.length > 0) {
-                            const replaceWith = unmatchedMetaTactics.shift();
-                            feedbackList.push(`전법 튜닝: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
-                        }
-                    }
-                    if (!cleanOwnedTactics.includes(cleanUserTac)) feedbackList.push(`자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
-                });
-            }
-        } else {
-            if (trulyMissingMetaOfficers.length > 0) {
-                const replaceWith = trulyMissingMetaOfficers.shift();
-                feedbackList.push(`장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)`);
-                feedbackList.push(`전법 세팅: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 권장합니다.`);
-            } else {
-                feedbackList.push(`장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.`);
-            }
-        }
-
-        const inherentTactic = officerUniqueTacticMap[hName];
-        if (inherentTactic) {
-            const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
-            if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
-                feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 비활성화 상태입니다.`);
-            }
-        }
-    });
-
-    return feedbackList;
 }
 
-// 인연 효과 연산 모듈 무결성 결선 완결
-function calculateActivatedBond(officers) {
-    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
-    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
-    if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
-    let matchedBonds = [];
-
-    bondRules.forEach(rule => {
-        const uniqueMatches = [];
-        currentOfficerNames.forEach(name => {
-            if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
-        });
-        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
-        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
-            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
-        }
-    });
-    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
-}
-
-// ==========================================================================
-// LAYER 3: UI 렌더링 및 생명주기 제어 구역
-// ==========================================================================
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -678,13 +515,11 @@ function renderDeckBuilder() {
             if (parsed && parsed.tactics) ownedTactics = parsed.tactics.filter(x => x && x.isOwned).map(x => (x.name || "").toString().trim());
         }
 
-        let displayDecks = [];
-        for (let i = 0; i < dynamicPresetDecks.length; i++) displayDecks.push(dynamicPresetDecks[i]);
-        displayDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
+        dynamicPresetDecksSort();
 
         const sortedHeroNames = Object.keys(officerRoleMap).sort((a, b) => a.localeCompare(b, 'ko'));
 
-        displayDecks.forEach((deck) => {
+        dynamicPresetDecks.forEach((deck) => {
             if (!deck) return;
             const deckCard = document.createElement('div');
             deckCard.className = 'deck-card';
@@ -753,8 +588,6 @@ function renderDeckBuilder() {
                         const isSelected = hName === hKey ? 'selected' : '';
                         officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
                     });
-
-                    const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
 
                     let equipmentHtml = '';
                     if (cleanHName) {
@@ -862,6 +695,7 @@ function renderDeckBuilder() {
     }
 }
 
+// 스토리지 백업 데이터 제어 프레임 워크
 function exportData() {
     try {
         var hobbyData = localStorage.getItem('samguk_hobby_data');
