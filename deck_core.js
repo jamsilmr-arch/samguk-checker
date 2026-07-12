@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 인터페이스 바인딩 무결성 복구판 빌드 엔진 기동");
+console.log("[시스템 분석] deck_core.js 점수 연산 핵심 파이프라인 무결성 완전 재결선 기동");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 호이스팅)
@@ -152,65 +152,6 @@ const ssrHawkSkillsDatabase = {
         breakthrough20: "각성 확률이 증가하며, 버프 상태 대상이 아군 전체로 변경됩니다."
     }
 };
-
-const analyzedMetaArchetypes = [
-    {
-        id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진",
-        officers: [
-            { name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] },
-            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
-            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
-        ]
-    },
-    {
-        id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진",
-        officers: [
-            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
-            { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] },
-            { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }
-        ]
-    },
-    {
-        id: "qun_shield", name: "군 물리 방패덱", concept: "방원진의 단단함을 바탕으로 동탁/원소의 유지력과 여포의 폭발력을 융합한 조합", formation: "방원진",
-        officers: [
-            { name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] },
-            { name: "원소", chosenTactics: ["견진연봉", "위위구조"] },
-            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
-        ]
-    },
-    {
-        id: "shu_magic_bow", name: "촉 지력 궁병덱", concept: "제갈량의 능동 제어와 황충/강유의 안정적인 지속 모략 딜링을 노리는 조합", formation: "방원진",
-        officers: [
-            { name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] },
-            { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] },
-            { name: "강유", chosenTactics: ["반객위주", "일고작기"] }
-        ]
-    },
-    {
-        id: "qun_magic_spear", name: "군 모략 회피덱", concept: "좌자의 강력한 회피 부여와 장녕/우길의 갉아먹기식 광역 모략 피해를 활용하는 조합", formation: "구행진",
-        officers: [
-            { name: "좌자", chosenTactics: ["여자동포", "진퇴유도"] },
-            { name: "장녕", chosenTactics: ["양의화생", "수상개화"] },
-            { name: "우길", chosenTactics: ["강유겸제", "안영찰채"] }
-        ]
-    },
-    {
-        id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력과 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진",
-        officers: [
-            { name: "사마의", chosenTactics: ["요사여신", "반객위주"] },
-            { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] },
-            { name: "가후", chosenTactics: ["여자동포", "안영찰채"] }
-        ]
-    },
-    {
-        id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진",
-        officers: [
-            { name: "손권", chosenTactics: ["여자동포", "진퇴유도"] },
-            { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
-            { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }
-        ]
-    }
-];
 
 const officerEquipmentMap = {
     "마초": {
@@ -370,6 +311,65 @@ const officerEquipmentMap = {
     }
 };
 
+const analyzedMetaArchetypes = [
+    {
+        id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진",
+        officers: [
+            { name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
+            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
+        ]
+    },
+    {
+        id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진",
+        officers: [
+            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
+            { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] },
+            { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }
+        ]
+    },
+    {
+        id: "qun_shield", name: "군 물리 방패덱", concept: "방원진의 단단함을 바탕으로 동탁/원소의 유지력과 여포의 폭발력을 융합한 조합", formation: "방원진",
+        officers: [
+            { name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] },
+            { name: "원소", chosenTactics: ["견진연봉", "위위구조"] },
+            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
+        ]
+    },
+    {
+        id: "shu_magic_bow", name: "촉 지력 궁병덱", concept: "제갈량의 능동 제어와 황충/강유의 안정적인 지속 모략 딜링을 노리는 조합", formation: "방원진",
+        officers: [
+            { name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] },
+            { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] },
+            { name: "강유", chosenTactics: ["반객위주", "일고작기"] }
+        ]
+    },
+    {
+        id: "qun_magic_spear", name: "군 모략 회피덱", concept: "좌자의 강력한 회피 부여와 장녕/우길의 갉아먹기식 광역 모략 피해를 활용하는 조합", formation: "구행진",
+        officers: [
+            { name: "좌자", chosenTactics: ["여자동포", "진퇴유도"] },
+            { name: "장녕", chosenTactics: ["양의화생", "수상개화"] },
+            { name: "우길", chosenTactics: ["강유겸제", "안영찰채"] }
+        ]
+    },
+    {
+        id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력과 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진",
+        officers: [
+            { name: "사마의", chosenTactics: ["요사여신", "반객위주"] },
+            { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] },
+            { name: "가후", chosenTactics: ["여자동포", "안영찰채"] }
+        ]
+    },
+    {
+        id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진",
+        officers: [
+            { name: "손권", chosenTactics: ["여자동포", "진퇴유도"] },
+            { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
+            { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }
+        ]
+    }
+];
+
 const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
     let copy = JSON.parse(JSON.stringify(d));
     copy.title = `${i + 1}군`;
@@ -377,7 +377,198 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역
+// LAYER 2: 코어 연산 엔진 구역 (오류의 주체였던 커널 함수 완전 재결선)
+// ==========================================================================
+function calculateStrictDeckScore(deck) {
+    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
+    const currentNames = deck.officers.map(o => o && o.name ? o.name.toString().trim() : "").filter(n => n !== "");
+    if (currentNames.length === 0) return 0;
+
+    let bestMeta = analyzedMetaArchetypes[0];
+    let maxMatch = -1;
+
+    analyzedMetaArchetypes.forEach(meta => {
+        let matchCount = 0;
+        meta.officers.forEach((mo, idx) => {
+            if (currentNames.includes(mo.name)) matchCount += 1;
+            if (deck.officers[idx] && deck.officers[idx].name === mo.name) matchCount += 0.5;
+        });
+        if (matchCount > maxMatch) {
+            maxMatch = matchCount;
+            bestMeta = meta;
+        }
+    });
+
+    let score = 100;
+    if (deck.formation !== bestMeta.formation) score -= 10;
+
+    bestMeta.officers.forEach((metaOff, idx) => {
+        const userOff = deck.officers[idx];
+        if (!userOff || !userOff.name) {
+            score -= 30;
+            return;
+        }
+        if (userOff.name !== metaOff.name) score -= 20;
+
+        const metaTacs = metaOff.chosenTactics.map(t => t.toString().trim());
+        if (userOff.chosenTactics && Array.isArray(userOff.chosenTactics)) {
+            userOff.chosenTactics.forEach((userTac, tIdx) => {
+                const cleanUserTac = userTac ? userTac.toString().trim() : "";
+                if (cleanUserTac !== metaTacs[tIdx]) score -= 5;
+            });
+        } else {
+            score -= 10;
+        }
+    });
+
+    if (score < 0) score = 0;
+    return score;
+}
+
+function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
+    if (!deck || !deck.officers || !Array.isArray(deck.officers)) return [];
+    const currentCleanNames = [];
+    deck.officers.forEach(o => {
+        if (o && o.name) currentCleanNames.push(o.name.toString().trim().replace(/\s+/g, ''));
+    });
+
+    if (currentCleanNames.length === 0) return [];
+
+    let bestMatchDeck = analyzedMetaArchetypes[0]; 
+    let maxMatchScore = -1;
+
+    analyzedMetaArchetypes.forEach(metaDeck => {
+        let matchScore = 0;
+        metaDeck.officers.forEach((metaOff, idx) => {
+            const metaName = metaOff.name.replace(/\s+/g, '');
+            if (currentCleanNames.includes(metaName)) matchScore += 1; 
+            if (currentCleanNames[idx] === metaName) matchScore += 0.5;
+        });
+        if (matchScore > maxMatchScore) {
+            maxMatchScore = matchScore;
+            bestMatchDeck = metaDeck;
+        }
+    });
+
+    const idealDeck = bestMatchDeck;
+    let feedbackList = [];
+    feedbackList.push(`🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})`);
+    
+    if (systemGuideInsights[idealDeck.id]) feedbackList.push(systemGuideInsights[idealDeck.id]);
+
+    const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
+    const cleanOwnedTactics = ownedTactics.map(t => t.replace(/\s+/g, ''));
+    const currentFormation = (deck.formation ? deck.formation : "").toString().trim();
+    const idealFormation = (idealDeck.formation ? idealDeck.formation : "").toString().trim();
+
+    if (currentFormation.replace(/\s+/g, '') !== idealFormation.replace(/\s+/g, '')) {
+        feedbackList.push(`진형 교정: [${currentFormation}] ➔ <strong>[${idealFormation}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)`);
+    }
+
+    let trulyMissingMetaOfficers = idealDeck.officers.filter(mo => !currentCleanNames.includes(mo.name.replace(/\s+/g, '')));
+
+    deck.officers.forEach((off, offIdx) => {
+        if (!off) return;
+        const hName = (off.name || "").toString().trim();
+        const cleanHName = hName.replace(/\s+/g, '');
+        
+        if (!cleanHName) {
+            if (trulyMissingMetaOfficers.length > 0) {
+                const replaceWith = trulyMissingMetaOfficers.shift();
+                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${replaceWith.name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)`);
+                feedbackList.push(`전법 권장: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 지시합니다.`);
+            } else {
+                feedbackList.push(`장수 배치: <strong>[빈 슬롯]</strong> ➔ 타겟 메타에 부합하는 임의의 서포터 장수를 배치하세요.`);
+            }
+            return;
+        }
+
+        const isHeroOwned = cleanOwnedHeroes.includes(cleanHName); 
+        if (!isHeroOwned) feedbackList.push(`자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)`);
+
+        const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
+
+        if (metaOfficerIndex !== -1) {
+            const metaOff = idealDeck.officers[metaOfficerIndex];
+            const currentUserRow = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
+            const idealRow = (formationPositions[idealDeck.formation] && formationPositions[idealDeck.formation][metaOfficerIndex]) ? formationPositions[idealDeck.formation][metaOfficerIndex] : "front";
+
+            if (currentUserRow !== idealRow) {
+                const idealRowKo = idealRow === 'front' ? '전열' : '후열';
+                const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
+                feedbackList.push(`배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다. 올바른 열 슬롯으로 배치 이동을 권장합니다.`);
+            }
+
+            const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
+            let unmatchedMetaTactics = [...metaOff.chosenTactics];
+
+            if (off.chosenTactics && Array.isArray(off.chosenTactics)) {
+                off.chosenTactics.forEach(tac => {
+                    if (!tac) return;
+                    const cleanUserTac = tac.toString().trim().replace(/\s+/g, '');
+                    if (unmatchedMetaTactics.includes(cleanUserTac)) {
+                        const idx = unmatchedMetaTactics.indexOf(cleanUserTac);
+                        unmatchedMetaTactics.splice(idx, 1);
+                    }
+                });
+
+                off.chosenTactics.forEach((addTactic, tacticIdx) => {
+                    if (!addTactic) return;
+                    const currentCleanTac = addTactic.toString().trim();
+                    const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
+
+                    if (!metaTacsClean.includes(cleanUserTac)) {
+                        if (unmatchedMetaTactics.length > 0) {
+                            const replaceWith = unmatchedMetaTactics.shift();
+                            feedbackList.push(`전법 튜닝: [${hName}]의 ${tacticIdx + 2}번 슬롯 전법 [${currentCleanTac}] ➔ <strong>[${replaceWith}]</strong> (통계적 최고 승률 전법으로 교체를 권장합니다.)`);
+                        }
+                    }
+                    if (!cleanOwnedTactics.includes(cleanUserTac)) feedbackList.push(`자원 부족: [${hName}]의 ${tacticIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.`);
+                });
+            }
+        } else {
+            if (trulyMissingMetaOfficers.length > 0) {
+                const replaceWith = trulyMissingMetaOfficers.shift();
+                feedbackList.push(`장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)`);
+                feedbackList.push(`전법 세팅: 투입할 <strong>[${replaceWith.name}]</strong>에게 <strong>[${replaceWith.chosenTactics[0]}]</strong>, <strong>[${replaceWith.chosenTactics[1]}]</strong> 장착을 권장합니다.`);
+            } else {
+                feedbackList.push(`장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.`);
+            }
+        }
+
+        const inherentTactic = officerUniqueTacticMap[hName];
+        if (inherentTactic) {
+            const cleanInherent = inherentTactic.toString().trim().replace(/\s+/g, '');
+            if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
+                feedbackList.push(`고유 전법 누락: [${hName}]의 고유 전법 <strong>[${inherentTactic.toString().trim()}]</strong>이 비활성화 상태입니다.`);
+            }
+        }
+    });
+
+    return feedbackList;
+}
+
+function calculateActivatedBond(officers) {
+    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
+    if (currentOfficerNames.length === 0) return "활성화된 부대 인연 효과 없음";
+    let matchedBonds = [];
+
+    bondRules.forEach(rule => {
+        const uniqueMatches = [];
+        currentOfficerNames.forEach(name => {
+            if (rule.heroes.includes(name) && !uniqueMatches.includes(name)) uniqueMatches.push(name);
+        });
+        const totalMatches = currentOfficerNames.filter(name => rule.heroes.includes(name)).length;
+        if (totalMatches >= rule.req && uniqueMatches.length >= (rule.req === 3 ? 2 : 1)) {
+            matchedBonds.push(`<strong>[${rule.name}]</strong> ${rule.effect}`);
+        }
+    });
+    return matchedBonds.length > 0 ? matchedBonds.join(" / ") : "활성화된 부대 인연 효과 없음";
+}
+
+// ==========================================================================
+// LAYER 3: UI 렌더링 및 생명주기 제어 구역
 // ==========================================================================
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
@@ -754,7 +945,7 @@ function importData(input) {
 // ==========================================================================
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
-window.changeFormation = changeFormation; // [복구 완료] 객체 대입 오염을 걷어내고 정상 함수로 완전 원천 바인딩 완료
+window.changeFormation = changeFormation; 
 window.changeOfficer = changeOfficer;
 window.changeTactic = changeTactic;
 window.resetDeck = resetDeck;
