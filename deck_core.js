@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 모략/무용 피해 가함 정식 표준어 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 하후돈 장신구 종결 세련 옵션 반영 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 호이스팅)
@@ -161,26 +161,26 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 요구사항 반영: 인게임 오피셜 검증을 마친 [모략 피해 가함], [무용 피해 가함] 마스터 밸런싱 세션 전수 교정 완료
+// 수리 확인 지점: 하후돈의 장신구 추가속성 1, 2 오염 영역을 완벽 적출하고 오피셜 물리 반격 사양인 [무용 피해 가함], [피해 가함] 조합으로 정밀 보정
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
     },
     "위연": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "서서": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" }
     },
     "장료": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
     "조조(제왕)": {
@@ -201,7 +201,7 @@ const officerEquipmentMap = {
     "하후돈": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
+        accessory: { name: "쌍호뉴", attr1: "무용 피해 가함", attr2: "피해 가함" }
     },
     "악진": {
         helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" },
