@@ -1,70 +1,70 @@
-console.log("[시스템 분석] app.js 인벤토리 0성 베이스라인 및 가독성 최적화 엔진 기동");
+console.log("[시스템 분석] app.js 인벤토리 초월(Transcend) 시스템 및 예외 차단 가드 기동");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 인벤토리 데이터 구역 (베이스라인 0성 초기화 완결)
+// LAYER 1: 마스터 정적 인벤토리 데이터 구역 (초월 파라미터 기본값 추가)
 // ==========================================================================
 const heroList = [
     // 위나라 (13명)
-    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0 },
-    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0 },
+    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
     
     // 촉나라 (14명)
-    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 0 },
-    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 0 },
+    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 0, transcend: false },
     
     // 오나라 (15명)
-    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0 },
-    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0 },
+    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0, transcend: false },
     
     // 군진영 (12명)
-    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0 },
-    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0 }
+    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0, transcend: false },
+    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
 const tacticList = [
@@ -85,7 +85,7 @@ const tacticList = [
     { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
+    { id: ' Manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
@@ -167,10 +167,10 @@ function renderButtons() {
         cardNode.style.flexDirection = 'column';
         cardNode.style.alignItems = 'center';
         cardNode.style.justifyContent = 'center';
-        cardNode.style.gap = '6px';
-        cardNode.style.minHeight = '50px'; 
+        cardNode.style.gap = '5px';
+        cardNode.style.minHeight = '55px'; 
         cardNode.style.cursor = 'pointer';
-        cardNode.style.padding = '8px 4px';
+        cardNode.style.padding = '6px 4px';
         cardNode.style.boxSizing = 'border-box';
         
         cardNode.onclick = function() { toggleState(item.id, type); };
@@ -178,9 +178,8 @@ function renderButtons() {
         let innerHtml = `<span style="font-weight: bold; pointer-events: none; font-size: 13px;">${item.name}</span>`;
         
         if (item.isOwned) {
-            // 이모지 제거, 0성부터 5성까지 간결한 텍스트 및 중앙 정렬 탑재 완료
             innerHtml += `
-                <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 80%; max-width: 60px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center;">
+                <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center;">
                     <option value="0" ${item.star === 0 ? 'selected' : ''}>0성</option>
                     <option value="1" ${item.star === 1 ? 'selected' : ''}>1성</option>
                     <option value="2" ${item.star === 2 ? 'selected' : ''}>2성</option>
@@ -189,6 +188,16 @@ function renderButtons() {
                     <option value="5" ${item.star === 5 ? 'selected' : ''}>5성</option>
                 </select>
             `;
+            
+            // 장수(hero) 진영 카드 하단에만 '초월' 버튼 컴포넌트 추가 생성
+            if (type === 'hero') {
+                const isTrans = !!item.transcend;
+                innerHtml += `
+                    <button onclick="event.stopPropagation(); window.toggleTranscend(event, '${item.id}')" style="width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: ${isTrans ? '#00b0ff' : 'rgba(255,255,255,0.1)'}; color: ${isTrans ? '#ffffff' : '#888888'}; border: 1px solid ${isTrans ? '#00b0ff' : '#444444'}; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; text-shadow: ${isTrans ? '0 0 3px rgba(0,0,0,0.5)' : 'none'}; box-shadow: ${isTrans ? '0 0 5px rgba(0,176,255,0.4)' : 'none'}; transition: all 0.15s ease;">
+                        ${isTrans ? '초월' : '초월'}
+                    </button>
+                `;
+            }
         }
         
         cardNode.innerHTML = innerHtml;
@@ -218,6 +227,16 @@ window.updateStar = function(event, id, type, value) {
     }
 };
 
+// [신규 자원]: 장수 초월 상태 변경용 독립 핸들러 정의 (이벤트 버블링 완전 무력화)
+window.toggleTranscend = function(event, id) {
+    event.stopPropagation();
+    const target = heroList.find(x => x.id === id);
+    if (target) {
+        target.transcend = !target.transcend;
+        renderButtons();
+    }
+};
+
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
@@ -236,8 +255,8 @@ function loadSavedData() {
                 const h = heroList.find(x => x.id === sh.id);
                 if (h) {
                     h.isOwned = !!sh.isOwned;
-                    // Falsy(0) 오판 방어를 위한 엄격한 일치 연산 필터 탑재
                     h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star) : 0;
+                    h.transcend = !!sh.transcend; // 스토리지 내 초월 데이터 디코딩 복원 완결
                 }
             });
         }
