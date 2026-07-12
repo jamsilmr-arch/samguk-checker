@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 사마의 딜러 옵션 교정 마스터 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 가후 장비 속성 교정 무결성 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (호이스팅 방어선 배치)
+// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (호이스팅 세션 일제 정렬)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -161,7 +161,7 @@ const analyzedMetaArchetypes = [
     }
 ];
 
-// 데이터 대개혁: 사마의를 포함한 메타 핵심 딜러들에게 기계적 방어를 걷어내고 순수 공격 및 극대화 흡혈 속성 맵핑 완결
+// 데이터 대보정: 가후의 쓸모없는 '치유 효과 받음' 오염 스탯을 축출하고 명세서 풀 기준 100% 실전형 피해 감소 레이어로 전수 개조[cite: 1]
 const officerEquipmentMap = {
     "마초": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -194,7 +194,7 @@ const officerEquipmentMap = {
         accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
     },
     "악진": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
@@ -219,7 +219,7 @@ const officerEquipmentMap = {
         accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
     },
     "황충": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 추가 피해 증폭" },
+        helmet: { name: "강공, 기습 상승", attr2: "무용 피해 감소" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
         accessory: { name: "박산로", attr1: "강공, 기습 상승", attr2: "연격률" }
     },
@@ -254,9 +254,9 @@ const officerEquipmentMap = {
         accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
     },
     "가후": {
-        helmet: { name: "진현관", attr1: "치유 효과 받음", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "배반, 공심 상승" }
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "모략 피해 감소" }
     },
     "손권": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 추가 피해 증폭" },
@@ -295,16 +295,10 @@ const officerEquipmentMap = {
     },
     "장비": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "결운갑", attr1: "피해 감소어품 상한", attr2: "방패병 치유 효과 상승" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
         accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
     }
 };
-
-const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
-    let copy = JSON.parse(JSON.stringify(d));
-    copy.title = `${i + 1}군`;
-    return copy;
-});
 
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
