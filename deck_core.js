@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 무장 고유 전법 유형 UI 제거 무결성 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js SSR 전투매 4대 마스터 스펙 통합 엔진 기동 승인");
 
 // ==========================================================================
 // LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 호이스팅)
@@ -93,13 +93,41 @@ const bondRules = [
 ];
 
 const systemGuideInsights = {
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해) 스킬을 조합하세요.",
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드에 명시된 대로 일반 공격 후 추가 공격을 발동하므로, 장비 세련 시 '무용' 및 '연격률' 추가 속성을 우선 확보하고, 전투매 훈련 시 삭풍 품종의 <strong>'설조'</strong>(무용 피해가함 및 행동 종료 시까지 15% 버프 가산, 적 2명에게 160% 물리 타격 격발) 스킬을 필히 조합하세요.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
     "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 장기전 생존을 위해 투구 and 갑옷 세련에서 <strong>[피해 감소]</strong> 옵션을 어품 등급 한계치까지 챙기고, 결운 품종의 <strong>'호생'</strong>(병력 회복) 매를 편성하세요.",
     "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 모략 기반 덱이므로 장비의 기본 속성을 모략으로 맞추고(<strong>진현관, 명재복, 박산로</strong>), 열공 품종의 <strong>'여천'</strong>(모략 증가) 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
-    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해) 매를 훈련시켜 탑재하세요.",
+    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 적을 갉아먹는 동안의 유지력을 위해 장비 추가 속성에서 <strong>[공심]</strong>(모략 피해 비례 병력 회복)을 챙기고, 상태이상 누적을 돕는 삭풍 품종의 <strong>'성모'</strong>(모략 피해가함 및 행동 종료 시까지 15% 버프 가산, 적 2명에게 160% 지력 타격 격발) 매를 훈련시켜 탑재하세요.",
     "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
+};
+
+// [신규 자원 동기화 완결]: 인게임 SSR 최고 존엄 4대 전투매 Lv.20 마스터 스펙 데이터 세션 완전 결선
+const ssrHawkSkillsDatabase = {
+    "전우": {
+        level: "Lv.20", type: "지휘", probability: "100%", target: "아군 전체",
+        baseEffect: "전투 시작 시 아군 전체에게 '교활' 상태 부여(모략 피해를 받으면 50% 확률로 저항 1중첩 획득, 턴당 최대 1회). 매 턴 시작 시 50% 확률로 아군 전체가 받는 피해 30% 감소(턴 종료 시까지 지속).",
+        breakthrough10: "버프 상태 대상이 '교활'을 획득(모략 피해를 입은 후 확률적으로 방어 1회 획득 기믹 결선)",
+        breakthrough20: "방어 획득 버프 상태 대상 범위가 아군 전체로 확장 정렬"
+    },
+    "진시": {
+        level: "Lv.20", type: "지휘", probability: "100%", target: "아군 전체",
+        baseEffect: "전투 시작 시 아군 전체에게 '절극' 상태 부여(무용 피해를 받으면 50% 확률로 저항 1중첩 획득, 턴당 최대 1회). 매 턴 시작 시 50% 확률로 아군 전체가 받는 피해 30% 감소(턴 종료 시까지 지속).",
+        breakthrough10: "버프 상태 대상이 '절극'을 획득(무용 피해를 입은 후 확률적으로 방어 1회 획득 기믹 결선)",
+        breakthrough20: "방어 획득 버프 상태 대상 범위가 아군 전체로 확장 정렬"
+    },
+    "설조": {
+        level: "Lv.20", type: "지휘", probability: "50%", target: "적군 2팀, 아군 1팀",
+        baseEffect: "턴 종료 시 무용이 가장 높은 아군 대상이 가하는 무용 피해를 15% 증가시켜 목표의 행동 종료 시까지 지속. 또한 해당 목표가 적군 2명에게 160% 무용 피해를 투사하도록 즉시 격발 시전.",
+        breakthrough10: "선택한 대상이 가하는 무용 피해 증가 버프 구조 유지(목표의 행동 종료 시까지 관통)",
+        breakthrough20: "가하는 물리 분쇄 타격의 투사 피해 대상 범위가 적군 2명으로 확정 스펙화"
+    },
+    "성모": {
+        level: "Lv.20", type: "지휘", probability: "50%", target: "적군 2팀, 아군 1팀",
+        baseEffect: "턴 종료 시 모략이 가장 높은 아군 대상이 가하는 모략 피해를 15% 증가시켜 목표의 행동 종료 시까지 지속. 또한 해당 목표가 적군 2명에게 160% 모략 피해를 투사하도록 즉시 격발 시전.",
+        breakthrough10: "선택한 대상이 가하는 모략 피해 증가 버프 구조 유지(목표의 행동 종료 시까지 관통)",
+        breakthrough20: "가하는 지력 분쇄 타격의 투사 피해 대상 범위가 적군 2명으로 확정 스펙화"
+    }
 };
 
 const analyzedMetaArchetypes = [
@@ -235,12 +263,12 @@ const officerEquipmentMap = {
     "동탁": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "결운갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
     },
     "원소": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
         armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
     },
     "여포": {
         helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
@@ -260,7 +288,7 @@ const officerEquipmentMap = {
     "강유": {
         helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
     },
     "좌자": {
         helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "치유 효과 상승" },
@@ -270,12 +298,12 @@ const officerEquipmentMap = {
     "장녕": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" }
     },
     "우길": {
         helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" }
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" }
     },
     "손권": {
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
@@ -458,9 +486,9 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
                     }
                 });
 
-                off.chosenTactics.forEach((tac, tacIdx) => {
-                    if (!tac) return;
-                    const currentCleanTac = tac.toString().trim();
+                off.chosenTactics.forEach((addTac, tacIdx) => {
+                    if (!addTac) return;
+                    const currentCleanTac = addTac.toString().trim();
                     const cleanUserTac = currentCleanTac.replace(/\s+/g, '');
 
                     if (!metaTacsClean.includes(cleanUserTac)) {
@@ -494,6 +522,7 @@ function generateDeckFeedback(deck, ownedHeroes, ownedTactics) {
     return feedbackList;
 }
 
+// 인연 효과 연산 모듈 무결성 결선 완결
 function calculateActivatedBond(officers) {
     if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const currentOfficerNames = officers.map(o => (o && o.name) ? o.name.toString().trim() : "").filter(n => n !== "");
@@ -598,7 +627,7 @@ function saveEditedText(originIdx, propertyName, element) {
 }
 
 function changeFormation(originIdx, selectElement) {
-    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === selectElement.value);
+    const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
         targetDeck.formation = selectElement.value;
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
@@ -606,7 +635,6 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
-// 무장 슬롯 값 동기화 제어 모듈
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
@@ -726,6 +754,8 @@ function renderDeckBuilder() {
                         officerOptionsHtml += `<option value="${hKey}" ${isSelected}>${hKey}</option>`;
                     });
 
+                    const currentComputedRole = cleanHName ? (officerRoleMap[hName] || "보조, 버퍼") : "미배치";
+
                     let equipmentHtml = '';
                     if (cleanHName) {
                         const eqData = officerEquipmentMap[hName] || {
@@ -743,7 +773,6 @@ function renderDeckBuilder() {
                         `;
                     }
 
-                    // [수정 조치 완료]: 요구사항에 따라 무장 드롭다운 하단의 전법 유형(능동/패시브) 출력 태그 제거로 극상 가독성 확보
                     officersHtml += `
                         <div class="officer-slot" style="${!cleanHName ? 'border: 1px dashed #444; background-color: rgba(0,0,0,0.1);' : ''}">
                             <div class="officer-meta">
