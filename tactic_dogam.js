@@ -1,4 +1,4 @@
-console.log("[시스템 분석] tactic_dogam.js 전법 성급(1~5성) 데이터베이스 및 이벤트 분리 렌더링 기동");
+console.log("[시스템 분석] tactic_dogam.js 전법 그리드 가독성 최적화 및 성급(1~5성) DB 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -67,8 +67,9 @@ function toggleTacticOwnership(tacticName) {
     }
 }
 
-// [신규 자원]: 성급 드롭다운 변경 시 이벤트
-window.updateTacticStar = function(tacticName, starValue) {
+// 이벤트 버블링 방지 및 전법 성급 개별 업데이트 로직
+window.updateTacticStar = function(event, tacticName, starValue) {
+    event.stopPropagation(); // 부모 DOM의 토글 이벤트를 강제 중단
     const target = currentTacticState.find(t => t.name === tacticName);
     if (target) {
         target.star = parseInt(starValue);
@@ -89,11 +90,11 @@ function renderTacticDogamUI() {
     }
 
     container.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">전법 도감 마스터 보드</h2>
-            <span id="tactic-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+            <h2 style="color: #cd9b33; margin: 0; font-size: 20px;">전법 도감 마스터 보드</h2>
+            <span id="tactic-count-badge" style="color: #aaa; font-weight: bold; font-size: 14px;">보유율: </span>
         </div>
-        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;"></div>
+        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;"></div>
     `;
     
     renderTacticGrid();
@@ -110,33 +111,35 @@ function renderTacticGrid() {
     const totalCount = currentTacticState.length;
     
     if(countBadge) {
-        countBadge.innerHTML = `보유율: <span style="color: #38bdf8; font-size: 18px;">${ownedCount}</span> / ${totalCount}`;
+        countBadge.innerHTML = `보유율: <span style="color: #38bdf8; font-size: 16px;">${ownedCount}</span> / ${totalCount}`;
     }
 
     currentTacticState.forEach(tactic => {
         const card = document.createElement('div');
+        // 한눈에 여러 전법을 파악하기 좋은 콤팩트 그리드 디자인 채택
         card.style.cssText = `
             background-color: ${tactic.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${tactic.isOwned ? '#28a745' : '#333'};
             border-radius: 6px;
-            padding: 15px 10px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            min-height: 75px;
         `;
         
         if (!tactic.isOwned) {
-            card.style.opacity = '0.5';
+            card.style.opacity = '0.4';
             card.style.filter = 'grayscale(100%)';
         }
 
         const starSelectHtml = tactic.isOwned ? `
-            <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 8px;" onclick="event.stopPropagation();">
-                <select class="star-select" onchange="updateTacticStar('${tactic.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.5); color: #ffeb3b; border: 1px solid #555; border-radius: 4px; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+            <div style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                <select onclick="event.stopPropagation();" onchange="updateTacticStar(event, '${tactic.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 11px; font-weight: bold; outline: none; cursor: pointer;">
                     <option value="1" ${tactic.star === 1 ? 'selected' : ''}>⭐ 1성</option>
                     <option value="2" ${tactic.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
                     <option value="3" ${tactic.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
@@ -147,7 +150,7 @@ function renderTacticGrid() {
         ` : '';
 
         card.innerHTML = `
-            <div style="font-size: 15px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>
+            <div style="font-size: 14px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>
             ${starSelectHtml}
         `;
 
