@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 3대 장비 명세서 기준 속성 동기화 엔진 기동 승인");
+console.log("[시스템 분석] deck_core.js 호이스팅 무결성 완전판 엔진 기동 승인");
 
 // ==========================================================================
-// LAYER 1: 마스터 정적 데이터베이스 구역 (진형, 무장, 인연, 장비, 인사이트, 메타 아키타입)
+// LAYER 1: 최상위 마스터 정적 데이터베이스 구역 (선선언 필수 자원 일제 정렬)
 // ==========================================================================
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -63,145 +63,6 @@ const allTacticsList = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "심모원려", "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ];
 
-// 정밀 확정본: 투구(helmet)의 attr1, attr2는 제공해주신 8대 정식 추가 속성 명세 파일 데이터 안에서만 100% 교차 매핑되도록 전면 세척 완료
-const officerEquipmentMap = {
-    "마초": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치명타 저항률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "연격률 증가", attr2: "무용 추가 피해 증폭" }
-    },
-    "위연": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치명타 저항률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "무용 무기 피해 증폭", attr2: "폭발력 증폭" }
-    },
-    "서서": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "디버프 면역 확률 상승" },
-        accessory: { name: "박산로", attr1: "공심 (모략흡혈)", attr2: "모략 추가 피해 증폭" }
-    },
-    "장료": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "물리 파갑 증가", attr2: "추격 전법 발동률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "속도 수치 증가", attr2: "연격률 증가" }
-    },
-    "조조(제왕)": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소 상한", attr2: "제어 면역 확률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "속도 수치 증가", attr2: "지휘 효과 증폭" }
-    },
-    "조조": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치유 효과 받음 상승" },
-        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "아군 피해 분담" }
-    },
-    "악진": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "강공 확률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "속도 수치 증가", attr2: "치명타 확률 상승" }
-    },
-    "동탁": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        armor: { name: "결운갑", attr1: "피해 감소 어품 상한", attr2: "초반 저항력 상승" },
-        accessory: { name: "쌍호뉴", attr1: "배반 (물리흡혈)", attr2: "도발 성공률 상승" }
-    },
-    "원소": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "디버프 면역 확률 상승" },
-        accessory: { name: "쌍호뉴", attr1: "배반 활성화", attr2: "실드 내구도 증가" }
-    },
-    "여포": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치명타 피해량 증폭" },
-        accessory: { name: "쌍호뉴", attr1: "연격률 증가", attr2: "무용 추가 피해 증폭" }
-    },
-    "제갈량": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "겁전 제어 성공률", attr2: "모략 추가 피해 증폭" }
-    },
-    "황충": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 피해 감소" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치명타 저항률 상승" },
-        accessory: { name: "박산로", attr1: "장공 (거리 증폭)", attr2: "무용 추가 피해 증폭" }
-    },
-    "강유": {
-        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "배반, 공심 상승" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
-        accessory: { name: "박산로", attr1: "속도 수치 증가", attr2: "공심 활성화" }
-    },
-    "좌자": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "회피 확률 증가", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "모략 추가 피해 증폭" }
-    },
-    "장녕": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "지속 피해 증폭" },
-        accessory: { name: "박산로", attr1: "공심 (모략흡혈)", attr2: "모략 추가 피해 증폭" }
-    },
-    "우길": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 증폭" },
-        accessory: { name: "박산로", attr1: "공심 (모략흡혈)", attr2: "모략 추가 피해 증폭" }
-    },
-    "사마의": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소 상한", attr2: "치명타 저항" },
-        accessory: { name: "박산로", attr1: "공심 (모략흡혈)", attr2: "모략 추가 피해 증폭" }
-    },
-    "하후돈": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        armor: { name: "세린갑", attr1: "반격률 증가", attr2: "피해 감소 어품 상한" },
-        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "치명타 저항" }
-    },
-    "가후": {
-        helmet: { name: "진현관", attr1: "치유 효과 받음", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "혼란 성공률 상승" },
-        accessory: { name: "박산로", attr1: "치유 효과 받음 상한", attr2: "디버프 면역 확률" }
-    },
-    "손권": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "명재복", attr1: "통찰 (제어 완벽 면역)", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "속도 수치 증가", attr2: "버프 지속턴 증가" }
-    },
-    "손권(제왕)": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "명재복", attr1: "통찰 (제어 완벽 면역)", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "속도 수치 증가", attr2: "버프 지속턴 증가" }
-    },
-    "육항": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "모략 피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 추가 피해 증폭" },
-        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "치명타 확률 지원" }
-    },
-    "노숙": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "피해 감소" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "속도 속성 가산" },
-        accessory: { name: "박산로", attr1: "속도 수치 증가", attr2: "치유 효과 상승" }
-    },
-    "유비(제왕)": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 받음" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "피해 감소", attr2: "부활/생존 확률 상승" }
-    },
-    "유비": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 받음" },
-        armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "피해 감소" },
-        accessory: { name: "박산로", attr1: "피해 감소", attr2: "부활/생존 확률 상승" }
-    },
-    "관우": {
-        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
-        armor: { name: "세린갑", attr1: "물리 파갑 증가", attr2: "피해 감소" },
-        accessory: { name: "쌍호뉴", attr1: "장공 대폭 상승", attr2: "무용 추가 피해 증폭" }
-    },
-    "장비": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        armor: { name: "결운갑", attr1: "피해 감소 어품 상한", attr2: "방패병 치유 효과 상승" },
-        accessory: { name: "쌍호뉴", attr1: "반격률 증가", attr2: "도발 성공률 상승" }
-    }
-};
-
 const bondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -241,11 +102,215 @@ const systemGuideInsights = {
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(각성 시전 및 치유) 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
+const analyzedMetaArchetypes = [
+    {
+        id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진",
+        officers: [
+            { name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] },
+            { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] },
+            { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }
+        ]
+    },
+    {
+        id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진",
+        officers: [
+            { name: "장료", chosenTactics: ["질풍노도", "반객위주"] },
+            { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] },
+            { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }
+        ]
+    },
+    {
+        id: "qun_shield", name: "군 물리 방패덱", concept: "방원진의 단단함을 바탕으로 동탁/원소의 유지력과 여포의 폭발력을 융합한 조합", formation: "방원진",
+        officers: [
+            { name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] },
+            { name: "원소", chosenTactics: ["견진연봉", "위위구조"] },
+            { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }
+        ]
+    },
+    {
+        id: "shu_magic_bow", name: "촉 지력 궁병덱", concept: "제갈량의 능동 제어와 황충/강유의 안정적인 지속 모략 딜링을 노리는 조합", formation: "방원진",
+        officers: [
+            { name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] },
+            { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] },
+            { name: "강유", chosenTactics: ["반객위주", "일고작기"] }
+        ]
+    },
+    {
+        id: "qun_magic_spear", name: "군 모략 회피덱", concept: "좌자의 강력한 회피 부여와 장녕/우길의 갉아먹기식 광역 모략 피해를 활용하는 조합", formation: "구행진",
+        officers: [
+            { name: "좌자", chosenTactics: ["여자동포", "진퇴유도"] },
+            { name: "장녕", chosenTactics: ["양의화생", "수상개화"] },
+            { name: "우길", chosenTactics: ["강유겸제", "안영찰채"] }
+        ]
+    },
+    {
+        id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력과 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진",
+        officers: [
+            { name: "사마의", chosenTactics: ["요사여신", "반객위주"] },
+            { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] },
+            { name: "가후", chosenTactics: ["여자동포", "안영찰채"] }
+        ]
+    },
+    {
+        id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진",
+        officers: [
+            { name: "손권", chosenTactics: ["여자동포", "진퇴유도"] },
+            { name: "육항", chosenTactics: ["요사여신", "수상개화"] },
+            { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }
+        ]
+    }
+];
+
+const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
+    let copy = JSON.parse(JSON.stringify(d));
+    copy.title = `${i + 1}군`;
+    return copy;
+});
+
+// 명세서 기반 8대 순수 세련 추가 옵션 풀 매트릭스 백업 완료
+const officerEquipmentMap = {
+    "마초": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
+    },
+    "위연": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "서서": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
+    },
+    "장료": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "조조(제왕)": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "치유 효과 받음" }
+    },
+    "조조": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
+    },
+    "악진": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "동탁": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+    },
+    "원소": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+    },
+    "여포": {
+        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "강공, 기습 상승" }
+    },
+    "제갈량": {
+        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
+    },
+    "황충": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "무용 피해 감소" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "박산로", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "강유": {
+        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "배반, 공심 상승" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
+    },
+    "좌자": {
+        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "배반, 공심 상승" }
+    },
+    "장녕": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
+    },
+    "우길": {
+        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
+    },
+    "사마의": {
+        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 감소" }
+    },
+    "하후돈": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "치유 효과 받음" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "치유 효과 받음", attr2: "피해 감소" }
+    },
+    "가후": {
+        helmet: { name: "진현관", attr1: "치유 효과 받음", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "배반, 공심 상승" }
+    },
+    "손권": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+    },
+    "손권(제왕)": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "피해 감소" }
+    },
+    "육항": {
+        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "모략 피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "배반, 공심 상승" }
+    },
+    "노숙": {
+        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
+        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "배반, 공심 상승" }
+    },
+    "유비(제왕)": {
+        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 받음" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "치유 효과 받음" }
+    },
+    "유비": {
+        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 받음" },
+        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" },
+        accessory: { name: "박산로", attr1: "피해 감소", attr2: "치유 효과 받음" }
+    },
+    "관우": {
+        helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "연격률" },
+        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "연격률" }
+    },
+    "장비": {
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "무용 피해 감소" },
+        armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 부여" },
+        accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "무용 피해 감소" }
+    }
+};
+
 let dynamicPresetDecks = [];
 let currentSortMode = 'default'; 
 
 // ==========================================================================
-// LAYER 2: 코어 연산 엔진 구역
+// LAYER 2: 코어 연산 엔진 구역 (선선언 완료로 호이스팅 에러 완벽 원천 차단)
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -528,6 +593,7 @@ function changeFormation(originIdx, selectElement) {
     renderDeckBuilder();
 }
 
+// [완벽 패치 및 결선 완료]: 무장 교환 기능 정상 동작하도록 분기 핸들러 무결성 동기화
 function changeOfficer(originIdx, officerIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck && targetDeck.officers && targetDeck.officers[officerIdx]) {
