@@ -1,4 +1,4 @@
-console.log("[시스템 분석] dogam.js 마스터 데이터 허브 및 오토 UI 렌더링 엔진 기동");
+console.log("[시스템 분석] dogam.js 원본 레이아웃 복원 및 성급(1~5성) 엔진 이식 기동");
 
 // ==========================================================================
 // LAYER 1: 무장 마스터 데이터베이스 (역할, 전법, 진영 3중 매핑 완결)
@@ -86,6 +86,7 @@ function loadDogamData() {
             name: name,
             faction: coreOfficerFactionMap[name] || "기타",
             isOwned: found ? !!found.isOwned : false,
+            star: (found && found.star) ? parseInt(found.star) : 1, // 성급 파싱 (기본 1성)
             role: coreOfficerRoleMap[name],
             tactic: coreOfficerUniqueTacticMap[name]
         };
@@ -98,7 +99,7 @@ function saveDogamData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) rootData = JSON.parse(rawData);
         
-        rootData.heroes = currentDogamState.map(h => ({ name: h.name, isOwned: h.isOwned }));
+        rootData.heroes = currentDogamState.map(h => ({ name: h.name, isOwned: h.isOwned, star: h.star }));
         localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
     } catch (e) {
         console.error("장수 도감 세이브 실패:", e);
@@ -110,11 +111,19 @@ function toggleOfficerOwnership(officerName) {
     if (target) {
         target.isOwned = !target.isOwned;
         saveDogamData();
-        renderDogamGrid(); // 전체 렌더링 대신 그리드만 갱신
+        renderDogamGrid(); 
     }
 }
 
-// 필터 버튼을 자동으로 추적하여 클릭 이벤트를 강제 연결하는 오토 바인딩 엔진
+// 이벤트 버블링 차단 기능이 포함된 성급 업데이트 핸들러
+window.updateOfficerStar = function(officerName, starValue) {
+    const target = currentDogamState.find(h => h.name === officerName);
+    if (target) {
+        target.star = parseInt(starValue);
+        saveDogamData();
+    }
+};
+
 function bindFilterButtons() {
     const buttons = document.querySelectorAll('button');
     const filterKeywords = ['전체', '위나라', '촉나라', '오나라', '군웅'];
@@ -125,7 +134,6 @@ function bindFilterButtons() {
             btn.style.cursor = 'pointer';
             btn.onclick = (e) => {
                 currentFactionFilter = txt;
-                // 버튼 시각적 활성화 토글 (스크린샷 기반 CSS 강제 주입)
                 buttons.forEach(b => {
                     if(filterKeywords.includes(b.innerText.trim())) {
                         b.style.backgroundColor = 'transparent';
@@ -142,11 +150,9 @@ function bindFilterButtons() {
     });
 }
 
-// 메인 렌더링 파이프라인 (컨테이너가 없으면 스스로 창조)
 function renderDogamUI() {
     let container = document.getElementById('dogam-container') || document.querySelector('.dogam-container');
     
-    // 타겟 DOM이 HTML에 존재하지 않으면 강제로 생성하여 문서 최하단에 부착
     if (!container) {
         container = document.createElement('div');
         container.id = 'dogam-container';
@@ -185,6 +191,7 @@ function renderDogamGrid() {
 
     filteredHeroes.forEach(hero => {
         const card = document.createElement('div');
+        // 가독성 유지를 위해 flex-direction: column과 justify-content: space-between 사용
         card.style.cssText = `
             background-color: ${hero.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${hero.isOwned ? '#28a745' : '#333'};
@@ -194,6 +201,11 @@ function renderDogamGrid() {
             transition: all 0.2s ease;
             position: relative;
             box-shadow: ${hero.isOwned ? '0 0 10px rgba(40, 167, 69, 0.2)' : 'none'};
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            min-height: 120px;
         `;
         
         if (!hero.isOwned) {
@@ -207,14 +219,30 @@ function renderDogamGrid() {
         if(hero.faction === '오나라') factionColor = "#ef4444";
         if(hero.faction === '군웅') factionColor = "#a855f7";
 
-        card.innerHTML = `
-            <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 6px;">[${hero.faction}]</div>
-            <div style="font-size: 20px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; margin-bottom: 12px; letter-spacing: 1px;">${hero.name}</div>
-            <div style="font-size: 12px; color: #ccc; margin-bottom: 6px;">🎯 역할: ${hero.role}</div>
-            <div style="font-size: 12px; color: #cd9b33; font-weight: bold;">⭐ 고유: ${hero.tactic}</div>
-            <div style="position: absolute; top: 15px; right: 15px; font-size: 11px; padding: 4px 8px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
-                ${hero.isOwned ? '보유' : '미보유'}
+        // 보유 상태일 때만 렌더링되며, 클릭 시 카드 토글(버블링)을 막는 성급 드롭다운 UI
+        const starSelectHtml = hero.isOwned ? `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation();">
+                <select onchange="updateOfficerStar('${hero.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+                    <option value="1" ${hero.star === 1 ? 'selected' : ''}>⭐ 1성 (기본)</option>
+                    <option value="2" ${hero.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
+                    <option value="3" ${hero.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
+                    <option value="4" ${hero.star === 4 ? 'selected' : ''}>⭐⭐⭐⭐ 4성</option>
+                    <option value="5" ${hero.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성 (풀강)</option>
+                </select>
             </div>
+        ` : '';
+
+        card.innerHTML = `
+            <div>
+                <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 6px;">[${hero.faction}]</div>
+                <div style="font-size: 20px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; margin-bottom: 12px; letter-spacing: 1px;">${hero.name}</div>
+                <div style="font-size: 12px; color: #ccc; margin-bottom: 6px;">🎯 역할: ${hero.role}</div>
+                <div style="font-size: 12px; color: #cd9b33; font-weight: bold;">⭐ 고유: ${hero.tactic}</div>
+                <div style="position: absolute; top: 15px; right: 15px; font-size: 11px; padding: 4px 8px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold;">
+                    ${hero.isOwned ? '보유' : '미보유'}
+                </div>
+            </div>
+            ${starSelectHtml}
         `;
 
         card.addEventListener('click', () => toggleOfficerOwnership(hero.name));
@@ -224,7 +252,6 @@ function renderDogamGrid() {
 
 function initDogamEngine() {
     loadDogamData();
-    // DOM 트리가 완성된 후 UI 렌더링 강제 개시
     setTimeout(renderDogamUI, 100); 
 }
 
