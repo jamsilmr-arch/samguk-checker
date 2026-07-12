@@ -1,4 +1,4 @@
-console.log("[시스템 분석] tactic_dogam.js 스마트 DOM 앵커링 엔진 및 백데이터 보존 기동");
+console.log("[시스템 분석] tactic_dogam.js 와이드스크린 반응형 그리드 및 백데이터 보존 기동");
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -143,23 +143,23 @@ function toggleTacticOwnership(tacticName) {
 }
 
 function renderTacticDogamUI() {
-    // 1. 기존 HTML 컨테이너 추적
     let nativeContainer = document.getElementById('tactic-list') || document.getElementById('tactic-container');
     
     let container = document.getElementById('tactic-dogam-wrapper');
     if (!container) {
         container = document.createElement('div');
         container.id = 'tactic-dogam-wrapper';
-        container.style.marginTop = '20px';
-        container.style.maxWidth = '1400px';
-        container.style.marginLeft = 'auto';
-        container.style.marginRight = 'auto';
+        // [수정점] 컨테이너가 부모의 남은 영역을 100% 꽉 채우도록 스타일 강제
+        container.style.width = '100%';
+        container.style.maxWidth = '100%';
+        container.style.padding = '10px 0';
+        container.style.boxSizing = 'border-box';
         
-        // 2. 스마트 DOM 앵커링
         if (nativeContainer) {
+            nativeContainer.style.width = '100%'; // 부모 너비 확장 지원
             nativeContainer.appendChild(container);
         } else {
-            document.body.appendChild(container); // 최후의 수단
+            document.body.appendChild(container);
         }
     }
 
@@ -168,7 +168,7 @@ function renderTacticDogamUI() {
             <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">전법 도감 마스터 보드</h2>
             <span id="tactic-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
         </div>
-        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;"></div>
+        <div id="tactic-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
     `;
     
     renderTacticGrid();
@@ -190,6 +190,7 @@ function renderTacticGrid() {
 
     currentTacticState.forEach(tactic => {
         const card = document.createElement('div');
+        // 카드가 꽉 찬 그리드 형태로 확장되도록 디자인 조율
         card.style.cssText = `
             background-color: ${tactic.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${tactic.isOwned ? '#28a745' : '#333'};
