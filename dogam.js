@@ -1,4 +1,4 @@
-console.log("[시스템 분석] dogam.js 원본 스탯 복구 및 와이드스크린 렌더링 엔진 기동");
+console.log("[시스템 분석] dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 무장 마스터 데이터베이스 (원본 스탯 및 설명 데이터 완전 복구)
@@ -222,14 +222,19 @@ const heroDogamData = [
 
     // 군진영 (12명)
     { 
+        id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
+        skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.',
+        stats: { martial: 372, tactical: 598, command: 509, speed: 558 }
+    },
+    { 
+        id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', 
+        skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.',
+        stats: { martial: 461, tactical: 598, command: 556, speed: 457 }
+    },
+    { 
         id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', 
         skillDesc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.',
         stats: { martial: 556, tactical: 491, command: 646, speed: 481 }
-    },
-    { 
-        id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', 
-        skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.',
-        stats: { martial: 598, tactical: 384, command: 515, speed: 534 }
     },
     { 
         id: 'h_yeopo', name: '여포', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '천하무쌍', 
@@ -237,14 +242,9 @@ const heroDogamData = [
         stats: { martial: 675, tactical: 378, command: 556, speed: 546 }
     },
     { 
-        id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', 
-        skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.',
-        stats: { martial: 443, tactical: 592, command: 527, speed: 516 }
-    },
-    { 
-        id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', 
-        skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.',
-        stats: { martial: 515, tactical: 521, command: 634, speed: 493 }
+        id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', 
+        skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.',
+        stats: { martial: 372, tactical: 592, command: 556, speed: 433 }
     },
     { 
         id: 'h_janggak', name: '장각', group: 'qun', role: '능동 (50%)', location: '후열', skill: '황천당립', 
@@ -252,9 +252,9 @@ const heroDogamData = [
         stats: { martial: 473, tactical: 610, command: 616, speed: 368 }
     },
     { 
-        id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', 
-        skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.',
-        stats: { martial: 461, tactical: 598, command: 556, speed: 457 }
+        id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', 
+        skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.',
+        stats: { martial: 372, tactical: 598, command: 432, speed: 362 }
     },
     { 
         id: 'h_jangbo', name: '장보', group: 'qun', role: '능동 (50%)', location: '후열', skill: '요풍사기', 
@@ -267,19 +267,19 @@ const heroDogamData = [
         stats: { martial: 437, tactical: 658, command: 497, speed: 403 }
     },
     { 
-        id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
-        skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.',
-        stats: { martial: 372, tactical: 598, command: 509, speed: 558 }
+        id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', 
+        skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.',
+        stats: { martial: 443, tactical: 592, command: 527, speed: 516 }
     },
     { 
-        id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', 
-        skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.',
-        stats: { martial: 372, tactical: 592, command: 556, speed: 433 }
+        id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', 
+        skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.',
+        stats: { martial: 598, tactical: 384, command: 515, speed: 534 }
     },
     { 
-        id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', 
-        skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.',
-        stats: { martial: 372, tactical: 598, command: 432, speed: 362 }
+        id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', 
+        skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.',
+        stats: { martial: 515, tactical: 521, command: 634, speed: 493 }
     }
 ];
 
@@ -393,22 +393,27 @@ function bindFilterButtons() {
 }
 
 function renderDogamUI() {
-    // 기존 HTML 컨테이너 추적 (강제 숨김 스타일 초기화)
     let nativeContainer = document.getElementById('hero-list') || document.getElementById('dogam-list') || document.getElementById('hero-container');
     
     let container = document.getElementById('samguk-dogam-wrapper');
     if (!container) {
         container = document.createElement('div');
         container.id = 'samguk-dogam-wrapper';
-        // 와이드 화면 대응 100% 강제 확장
-        container.style.width = '100%';
-        container.style.maxWidth = '100%';
-        container.style.padding = '10px 0';
+        
+        // [해결 조치] 컨테이너에 강제 폭 확장 스타일(important) 주입
+        container.style.setProperty('width', '100%', 'important');
+        container.style.setProperty('flex', '1 1 100%', 'important');
+        container.style.setProperty('align-self', 'stretch', 'important');
+        container.style.setProperty('display', 'block', 'important');
         container.style.boxSizing = 'border-box';
+        container.style.padding = '10px 0';
         
         if (nativeContainer) {
-            nativeContainer.style.display = 'block'; 
-            nativeContainer.style.width = '100%'; 
+            // [해결 조치] 상위 부모 요소의 Flex 압축 현상 타파
+            nativeContainer.style.setProperty('width', '100%', 'important');
+            nativeContainer.style.setProperty('flex', '1 1 100%', 'important');
+            nativeContainer.style.setProperty('align-self', 'stretch', 'important');
+            nativeContainer.style.setProperty('display', 'block', 'important');
             nativeContainer.appendChild(container);
         } else {
             let filterBtn = Array.from(document.querySelectorAll('button, li')).find(b => b.innerText.trim().includes('전체'));
@@ -426,7 +431,7 @@ function renderDogamUI() {
             <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">장수 도감 마스터 보드</h2>
             <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
         </div>
-        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
+        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; width: 100%; align-items: stretch;"></div>
     `;
     
     bindFilterButtons();
