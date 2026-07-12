@@ -1,4 +1,4 @@
-console.log("[시스템 분석] tactic_dogam.js 마스터 허브 및 오토 UI 렌더링 엔진 기동");
+console.log("[시스템 분석] tactic_dogam.js 원본 레이아웃 복원 및 성급(1~5성) 엔진 이식 기동");
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -39,7 +39,8 @@ function loadTacticData() {
         const found = savedTactics.find(t => t.name === name);
         return {
             name: name,
-            isOwned: found ? !!found.isOwned : false
+            isOwned: found ? !!found.isOwned : false,
+            star: (found && found.star) ? parseInt(found.star) : 1
         };
     });
 }
@@ -50,7 +51,7 @@ function saveTacticData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) rootData = JSON.parse(rawData);
         
-        rootData.tactics = currentTacticState.map(t => ({ name: t.name, isOwned: t.isOwned }));
+        rootData.tactics = currentTacticState.map(t => ({ name: t.name, isOwned: t.isOwned, star: t.star }));
         localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
     } catch (e) {
         console.error("전법 도감 세이브 실패:", e);
@@ -65,6 +66,14 @@ function toggleTacticOwnership(tacticName) {
         renderTacticGrid();
     }
 }
+
+window.updateTacticStar = function(tacticName, starValue) {
+    const target = currentTacticState.find(t => t.name === tacticName);
+    if (target) {
+        target.star = parseInt(starValue);
+        saveTacticData();
+    }
+};
 
 function renderTacticDogamUI() {
     let container = document.getElementById('tactic-dogam-container') || document.querySelector('.tactic-dogam-container');
@@ -106,6 +115,7 @@ function renderTacticGrid() {
 
     currentTacticState.forEach(tactic => {
         const card = document.createElement('div');
+        // 가독성 유지를 위해 flex-direction: column과 align-items: center 속성 부여
         card.style.cssText = `
             background-color: ${tactic.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${tactic.isOwned ? '#28a745' : '#333'};
@@ -115,6 +125,13 @@ function renderTacticGrid() {
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-sizing: border-box;
+            min-height: 80px;
         `;
         
         if (!tactic.isOwned) {
@@ -122,7 +139,23 @@ function renderTacticGrid() {
             card.style.filter = 'grayscale(100%)';
         }
 
-        card.innerHTML = `<div style="font-size: 15px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>`;
+        const starSelectHtml = tactic.isOwned ? `
+            <div style="width: 100%;" onclick="event.stopPropagation();">
+                <select onchange="updateTacticStar('${tactic.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 11px; font-weight: bold; outline: none; cursor: pointer;">
+                    <option value="1" ${tactic.star === 1 ? 'selected' : ''}>⭐ 1성</option>
+                    <option value="2" ${tactic.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
+                    <option value="3" ${tactic.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
+                    <option value="4" ${tactic.star === 4 ? 'selected' : ''}>⭐⭐⭐⭐ 4성</option>
+                    <option value="5" ${tactic.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성</option>
+                </select>
+            </div>
+        ` : '';
+
+        card.innerHTML = `
+            <div style="font-size: 15px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'};">${tactic.name}</div>
+            ${starSelectHtml}
+        `;
+        
         card.addEventListener('click', () => toggleTacticOwnership(tactic.name));
         gridContainer.appendChild(card);
     });
