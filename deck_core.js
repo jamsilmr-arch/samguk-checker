@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 실시간 반응성 및 객체 지향 AI 처방전 엔진 기동");
+console.log("[시스템 분석] deck_core.js 동적 라이브 바인딩 및 레이스 컨디션 킬러 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 필수 코어 배열 (도감 및 가이드 이관 데이터 전면 삭제 상태 유지)
@@ -91,7 +91,7 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: SSOT 3중 도감 동적 파싱 브릿지 & 메타 전투매 매핑 엔진
+// LAYER 2: SSOT 도감 동적 파싱 브릿지 구역
 // ==========================================================================
 function getOfficerEquipment(officerName) {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
@@ -146,7 +146,7 @@ const systemGuideInsights = {
 };
 
 // ==========================================================================
-// LAYER 3: 코어 연산 엔진 구역 (객체 지향 피드백 고도화 완료)
+// LAYER 3: 코어 연산 엔진 구역
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck || !deck.officers || !Array.isArray(deck.officers)) return 0;
@@ -194,7 +194,6 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
-// [고도화 1]: 하드코딩 인덱스를 파쇄하고 객체(Object) 지향 형태로 데이터 무결성 캡슐화
 function generateStructuredFeedback(deck, ownedHeroes, ownedTactics) {
     const feedbackResult = { insight: "", logs: [] };
 
@@ -225,7 +224,6 @@ function generateStructuredFeedback(deck, ownedHeroes, ownedTactics) {
     const idealDeck = bestMatchDeck;
     feedbackResult.logs.push({ type: 'info', text: `🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${idealDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${idealDeck.concept})` });
     
-    // 메타 가이드 인사이트를 별도의 프로퍼티로 안전하게 격리
     if (systemGuideInsights[idealDeck.id]) feedbackResult.insight = systemGuideInsights[idealDeck.id];
 
     const cleanOwnedHeroes = ownedHeroes.map(h => h.replace(/\s+/g, ''));
@@ -309,7 +307,6 @@ function generateStructuredFeedback(deck, ownedHeroes, ownedTactics) {
         }
 
         const officerDogamData = getOfficerDogamData(hName);
-        // [고도화 2]: API 단절 및 더미 데이터 오진 방어를 위한 Null Coalescing 안전망
         if (officerDogamData && officerDogamData.uniqueTactic && officerDogamData.uniqueTactic !== "고유 전법 누락") {
             const cleanInherent = officerDogamData.uniqueTactic.toString().trim().replace(/\s+/g, '');
             if (!isHeroOwned && !cleanOwnedTactics.includes(cleanInherent)) {
@@ -620,7 +617,7 @@ function renderDeckBuilder() {
                     if (cleanHName) {
                         const eqData = getOfficerEquipment(hName);
                         equipmentHtml = `
-                            <div class="equipment-recommendation-box" style="margin-top: 8px; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px dashed #555; border-radius: 4px; font-size: 11px; text-align: left; line-height: 1.6; color:#ddd;">
+                            <div class="equipment-recommendation-box" style="margin-top: 8px; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid #555; border-radius: 4px; font-size: 11px; text-align: left; line-height: 1.6; color:#ddd;">
                                 <div style="color: #ff9f43; font-weight: bold; margin-bottom: 4px;">🛠️ 시스템 권장 장비 세트</div>
                                 <div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eqData.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eqData.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eqData.helmet.attr2}</span>)</div>
                                 <div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eqData.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eqData.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eqData.armor.attr2}</span>)</div>
@@ -658,7 +655,6 @@ function renderDeckBuilder() {
 
             const currentEffectText = formationEffects[deck.formation] || formationEffects["추형진"];
             
-            // [고도화 반영]: 하드코딩 인덱스 탈피 및 객체화된 피드백 엔진 렌더링
             const feedbackData = generateStructuredFeedback(deck, ownedHeroes, ownedTactics);
             let feedbackHtml = '';
             
@@ -786,7 +782,6 @@ window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
 
-// [고도화 3]: 도감 조작 시 덱 렌더링이 즉각 동기화되도록 로컬 스토리지 프록시 가로채기 이식
 const originalSetItem = localStorage.setItem;
 localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
@@ -800,7 +795,6 @@ window.addEventListener('local-storage-update', function(e) {
     }
 });
 
-// 크로스 탭 동기화 지원
 window.addEventListener('storage', function(e) {
     if (e.key === 'samguk_hobby_data') {
         if(document.getElementById('deck-container')) renderDeckBuilder();
@@ -812,8 +806,17 @@ function initDeckCoreEngine() {
     renderDeckBuilder();
 }
 
+// [핵심 해결 조치]: DOM 생성 직후는 물론, 브라우저의 모든 도감 리소스(window.load)가 완료된 순간 강제 동적 재정렬을 걸어 레이스 컨디션을 원천 폭쇄
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initDeckCoreEngine);
 } else {
     initDeckCoreEngine();
 }
+
+// 도감 스크립트들이 뒤늦게 로드되더라도 100% 목록을 갱신하도록 최고 주석 생명주기 결선
+window.addEventListener('load', () => {
+    if(document.getElementById('deck-container')) {
+        console.log("[생명주기 안전망] 풀 도감 인프라 감지 완료, 덱 선택 목록 최종 핫 리로드 실행");
+        renderDeckBuilder();
+    }
+});
