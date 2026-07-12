@@ -1,4 +1,4 @@
-console.log("[시스템 분석] dogam.js 원본 레이아웃 복원 및 성급(1~5성) 엔진 이식 기동");
+console.log("[시스템 분석] dogam.js 원본 레이아웃 복원 및 성급 데이터 무결성 보존 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 무장 마스터 데이터베이스 (역할, 전법, 진영 3중 매핑 완결)
@@ -86,7 +86,7 @@ function loadDogamData() {
             name: name,
             faction: coreOfficerFactionMap[name] || "기타",
             isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star) ? parseInt(found.star) : 1, // 성급 파싱 (기본 1성)
+            star: (found && found.star) ? parseInt(found.star) : 1, // 백그라운드 성급 데이터 보존
             role: coreOfficerRoleMap[name],
             tactic: coreOfficerUniqueTacticMap[name]
         };
@@ -99,6 +99,7 @@ function saveDogamData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) rootData = JSON.parse(rawData);
         
+        // UI에는 없지만 app.js의 데이터를 날리지 않기 위해 star 값을 그대로 직렬화
         rootData.heroes = currentDogamState.map(h => ({ name: h.name, isOwned: h.isOwned, star: h.star }));
         localStorage.setItem('samguk_hobby_data', JSON.stringify(rootData));
     } catch (e) {
@@ -114,15 +115,6 @@ function toggleOfficerOwnership(officerName) {
         renderDogamGrid(); 
     }
 }
-
-// 이벤트 버블링 차단 기능이 포함된 성급 업데이트 핸들러
-window.updateOfficerStar = function(officerName, starValue) {
-    const target = currentDogamState.find(h => h.name === officerName);
-    if (target) {
-        target.star = parseInt(starValue);
-        saveDogamData();
-    }
-};
 
 function bindFilterButtons() {
     const buttons = document.querySelectorAll('button');
@@ -191,7 +183,6 @@ function renderDogamGrid() {
 
     filteredHeroes.forEach(hero => {
         const card = document.createElement('div');
-        // 가독성 유지를 위해 flex-direction: column과 justify-content: space-between 사용
         card.style.cssText = `
             background-color: ${hero.isOwned ? '#1c251d' : '#141414'};
             border: 1px solid ${hero.isOwned ? '#28a745' : '#333'};
@@ -205,7 +196,7 @@ function renderDogamGrid() {
             flex-direction: column;
             justify-content: space-between;
             box-sizing: border-box;
-            min-height: 120px;
+            min-height: 95px;
         `;
         
         if (!hero.isOwned) {
@@ -219,19 +210,6 @@ function renderDogamGrid() {
         if(hero.faction === '오나라') factionColor = "#ef4444";
         if(hero.faction === '군웅') factionColor = "#a855f7";
 
-        // 보유 상태일 때만 렌더링되며, 클릭 시 카드 토글(버블링)을 막는 성급 드롭다운 UI
-        const starSelectHtml = hero.isOwned ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation();">
-                <select onchange="updateOfficerStar('${hero.name}', this.value)" style="width: 100%; padding: 4px; background: rgba(0,0,0,0.4); color: #feca57; border: 1px solid #555; border-radius: 4px; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
-                    <option value="1" ${hero.star === 1 ? 'selected' : ''}>⭐ 1성 (기본)</option>
-                    <option value="2" ${hero.star === 2 ? 'selected' : ''}>⭐⭐ 2성</option>
-                    <option value="3" ${hero.star === 3 ? 'selected' : ''}>⭐⭐⭐ 3성</option>
-                    <option value="4" ${hero.star === 4 ? 'selected' : ''}>⭐⭐⭐⭐ 4성</option>
-                    <option value="5" ${hero.star === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ 5성 (풀강)</option>
-                </select>
-            </div>
-        ` : '';
-
         card.innerHTML = `
             <div>
                 <div style="font-size: 11px; font-weight: bold; color: ${factionColor}; margin-bottom: 6px;">[${hero.faction}]</div>
@@ -242,7 +220,6 @@ function renderDogamGrid() {
                     ${hero.isOwned ? '보유' : '미보유'}
                 </div>
             </div>
-            ${starSelectHtml}
         `;
 
         card.addEventListener('click', () => toggleOfficerOwnership(hero.name));
