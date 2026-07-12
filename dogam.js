@@ -1,4 +1,4 @@
-console.log("[시스템 분석] dogam.js 스마트 DOM 앵커링 및 오토 렌더링 엔진 기동");
+console.log("[시스템 분석] dogam.js 와이드스크린 반응형 그리드 렌더링 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 무장 마스터 데이터베이스
@@ -86,7 +86,7 @@ function loadDogamData() {
             name: name,
             faction: coreOfficerFactionMap[name] || "기타",
             isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star) : 0, // app.js의 성급 데이터 보존
+            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star) : 0, 
             role: coreOfficerRoleMap[name],
             tactic: coreOfficerUniqueTacticMap[name]
         };
@@ -142,20 +142,20 @@ function bindFilterButtons() {
 }
 
 function renderDogamUI() {
-    // 1. 기존 HTML 컨테이너 추적 (우선순위 타겟팅)
     let nativeContainer = document.getElementById('hero-list') || document.getElementById('dogam-list') || document.getElementById('officer-list');
     
     let container = document.getElementById('samguk-dogam-wrapper');
     if (!container) {
         container = document.createElement('div');
         container.id = 'samguk-dogam-wrapper';
-        container.style.marginTop = '20px';
-        container.style.maxWidth = '1400px';
-        container.style.marginLeft = 'auto';
-        container.style.marginRight = 'auto';
+        // [수정점] 컨테이너가 부모의 남은 영역을 100% 꽉 채우도록 스타일 강제
+        container.style.width = '100%';
+        container.style.maxWidth = '100%';
+        container.style.padding = '10px 0';
+        container.style.boxSizing = 'border-box';
         
-        // 2. 스마트 DOM 앵커링: 기존 HTML 컨테이너가 없으면 '필터 버튼' 바로 아래에 강력 접착
         if (nativeContainer) {
+            nativeContainer.style.width = '100%'; // 부모 너비 확장 지원
             nativeContainer.appendChild(container);
         } else {
             let filterBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.trim() === '전체');
@@ -163,7 +163,7 @@ function renderDogamUI() {
                 let filterRow = filterBtn.parentElement;
                 filterRow.parentElement.insertBefore(container, filterRow.nextSibling);
             } else {
-                document.body.appendChild(container); // 최후의 수단
+                document.body.appendChild(container);
             }
         }
     }
@@ -173,7 +173,7 @@ function renderDogamUI() {
             <h2 style="color: #cd9b33; margin: 0; font-size: 22px;">장수 도감 마스터 보드</h2>
             <span id="dogam-count-badge" style="color: #aaa; font-weight: bold; font-size: 15px;">보유율: </span>
         </div>
-        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;"></div>
+        <div id="dogam-card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; width: 100%;"></div>
     `;
     
     bindFilterButtons();
