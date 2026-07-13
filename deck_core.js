@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 및 무장 전무 시 전투매 공란 가드 엔진 기동");
+console.log("[시스템 분석] deck_core.js 지시형 문구(성급/초월) 삭제 및 처방전 고순도 정제 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 백엔드 결선)
@@ -174,7 +174,7 @@ const metaHawkRecommendationMap = {
     "qun_shield": { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 및 해제 불가 지속 힐링 [축예] 상태 확정 부여" },
     "shu_magic_bow": { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 딜링 마진 극대화)" },
     "qun_magic_spear": { name: "성모 (SSR / 삭풍)", skill: "턴 종료 시 모략 최고 아군 책략피해 15% 버프 유지 및 적 2명에게 160% 책략 타격 즉시 격발" },
-    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매  턴 아군 전체 피해 30% 감소" },
+    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매 턴 아군 전체 피해 30% 감소" },
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
@@ -237,6 +237,7 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
+// [리팩토링 완결]: 단순 수치 기반 절대 지시형 피드백을 완전 제거하고 상대 화력 분석 체계로만 정제
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const feedbackResult = { insight: "", logs: [] };
 
@@ -295,10 +296,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
         if (!heroInv.isOwned) {
             feedbackResult.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
-        } else {
-            if (!heroInv.transcend) {
-                feedbackResult.logs.push({ type: 'info', text: `⚡ 한계 돌파 권장: 조합 핵심 무장인 <strong>[${hName}]</strong>의 초월 각성이 비활성화 상태입니다. 인벤토리에서 초월을 격발하십시오.` });
-            }
         }
 
         const metaOfficerIndex = idealDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
@@ -308,6 +305,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             const currentUserRow = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
             const idealRow = (formationPositions[idealDeck.formation] && formationPositions[idealDeck.formation][metaOfficerIndex]) ? formationPositions[idealDeck.formation][metaOfficerIndex] : "front";
 
+            // [수리 완결]: 런타임 크래시 유발 인스턴스인 feedbackResult.push를 객체 내부 logs 컬렉션 경로로 긴급 수리 정착
             if (currentUserRow !== idealRow) {
                 const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                 const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
@@ -342,12 +340,11 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                     const tacInv = tacticDataMap[cleanUserTac] || { isOwned: false, star: 0 };
                     if (!tacInv.isOwned) {
                         feedbackResult.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.` });
-                    } else if (tacInv.star < 3) {
-                        feedbackResult.logs.push({ type: 'info', text: `🔧 화력 보정: [${hName}]의 <strong>[${currentCleanTac}]</strong> 전법 성급이 낮습니다(${tacInv.star}성). 화력 마진 극대화를 위해 성급 업그레이드를 지시합니다.` });
                     }
                 });
             }
         } else {
+            // [상대적 화력 보정 엔진 구현부]: 배치 장수와 메타 무장의 성급 대조 결과 가이드라인 발행 구역
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
                 const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0, transcend: false };
@@ -374,7 +371,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
 function calculateActivatedBond(officers) {
     const internalBondRules = [
-        { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
+        { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장을 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
         { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
         { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
         { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
@@ -384,7 +381,7 @@ function calculateActivatedBond(officers) {
         { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
         { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
         { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-        { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반과 공심 8% 증가, 해제 불가." },
+        { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반และ 공심 8% 증가, 해제 불가." },
         { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
         { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
         { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
@@ -513,7 +510,7 @@ function saveEditedText(originIdx, propertyName, element) {
     renderDeckBuilder();
 }
 
-function changeFormation(originIdx, selectElement) {
+function formationChange(originIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
         targetDeck.formation = selectElement.value;
@@ -604,7 +601,6 @@ function renderDeckBuilder() {
             let currentBestMetaId = "shu_combo"; 
             const currentCleanHeroNames = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "").filter(n => n !== "");
             
-            // [패치 조치 완료]: 수동 드롭다운 해제 또는 초기화 버튼 작동 등으로 무장이 완전히 비었을 때(길이 0) 추천매 구역을 공란 처리
             let hawkHtml = '';
             if (currentCleanHeroNames.length > 0) {
                 analyzedMetaArchetypes.forEach(metaDeck => {
