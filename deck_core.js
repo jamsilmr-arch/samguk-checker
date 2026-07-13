@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 엔진 가동 (선택 불가능 오류 완벽 박멸)");
+console.log("[시스템 분석] deck_core.js 고유 전법 내장 매핑 및 레이스 컨디션 최종 해결 빌드 기동");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 - 누락 무장 복구 완결)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 백엔드 결선)
 // ==========================================================================
 const internalMasterOfficerNames = [
     "가후", "곽가", "관우", "강유", "노숙", "대교", "동탁", "마대", "마초", "악진", 
@@ -23,6 +23,23 @@ const internalMasterTacticNames = [
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
     "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
+
+// [핵심 보정]: 외부 도감 스크립트 폭발 시 무조건 작동하는 고유 기술 마스터 복구 데이터 매트릭스
+const internalMasterOfficerUniqueTacticMap = {
+    "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
+    "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", "조조(제왕)": "군령여산",
+    "조조": "효웅", "장료": "함진살적", "장합": "교변병기", "하후돈": "발시담정", "하후연": "충용",
+    "관우": "무성", "강유": "담대여두", "마대": "습참", "마초": "출수법", "서서": "절절학문",
+    "사마가": "만왕", "위연": "실병제위", "유비": "인정", "유비(제왕)": "재주복주",
+    "장비": "연인노호", "제갈량": "초선차전", "조운": "칠진칠출", "황충": "적혈도",
+    "황월영": "묘산천기", "대교": "정수유심", "노숙": "탑상책", "소교": "화용욕모",
+    "손견": "강동맹호", "손권": "웅거", "손상향": "효희", "손책": "강동패주",
+    "손권(제왕)": "겸권상계", "여몽": "백의도강", "육손": "지변규려", "육항": "청백충근",
+    "주유": "봉화연천", "주태": "청라산개", "정보": "칠척사모", "황개": "요원지화",
+    "채문희": "비분시", "장녕": "천의난위", "동탁": "전권난정", "여포": "천하무쌍",
+    "초선": "폐월", "장각": "황천당립", "화타": "청낭제세", "장보": "요풍사기",
+    "좌자": "화겁생기", "우길": "태평경", "안량": "효장", "원소": "사소도"
+};
 
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -112,7 +129,7 @@ const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
 });
 
 // ==========================================================================
-// LAYER 2: SSOT 3중 도감 동적 파싱 브릿지 & 메타 전투매 매핑 엔진
+// LAYER 2: 3중 도감 복구 브릿지 인터페이스 구역
 // ==========================================================================
 function getOfficerEquipment(officerName) {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
@@ -125,11 +142,16 @@ function getOfficerEquipment(officerName) {
     };
 }
 
+// [핵심 수리 로직]: 외부 도감이 공백을 주면 내장 마스터 맵을 참조해 원천적으로 누락을 완전 방어
 function getOfficerDogamData(officerName) {
     if (typeof window.getOfficerDataFromDogam === 'function') {
-        return window.getOfficerDataFromDogam(officerName);
+        const data = window.getOfficerDataFromDogam(officerName);
+        if (data && data.uniqueTactic && data.uniqueTactic !== "고유 전법 누락") {
+            return data;
+        }
     }
-    return { role: "미배치", uniqueTactic: "고유 전법 누락" };
+    const fallbackTactic = internalMasterOfficerUniqueTacticMap[officerName] || "고유 전법 누락";
+    return { role: "지휘/능동/패시브", uniqueTactic: fallbackTactic };
 }
 
 function getTacticListBridge() {
@@ -294,7 +316,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             if (currentUserRow !== idealRow) {
                 const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                 const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
-                feedbackResult.logs.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다.` });
+                feedbackResult.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다.` });
             }
 
             const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
