@@ -1,19 +1,17 @@
 console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 엔진 가동 (선택 불가능 오류 완벽 박멸)");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 - 누락 무장 복구 완결)
 // ==========================================================================
-// 외부 도감 로드 순서 꼬임에 영향을 받지 않도록 54명 장수 목록을 내장 결선합니다.
 const internalMasterOfficerNames = [
     "가후", "곽가", "관우", "강유", "노숙", "대교", "동탁", "마대", "마초", "악진", 
     "안량", "여몽", "여포", "유비", "유비(제왕)", "육손", "육항", "원소", "우길", "위연", 
-    "순욱", "순욱", "사마가", "사마의", "소교", "손견", "손권", "손권(제왕)", "손상향", "손책", 
+    "순욱", "서서", "사마가", "사마의", "소교", "손견", "손권", "손권(제왕)", "손상향", "손책", 
     "장각", "장녕", "장보", "장료", "장비", "장합", "전위", "정욱", "정보", "제갈량", 
     "조운", "조조", "조조(제왕)", "주유", "주태", "채문희", "초선", "화타", "황개", "황충", 
-    "황월영", "하후돈", "하후연"
+    "황월영", "하후돈", "하후연", "좌자"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
-// 외부 도감 로드 순서 꼬임에 영향을 받지 않도록 72종 전법 목록을 내장 결선합니다.
 const internalMasterTacticNames = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", 
     "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", 
@@ -134,7 +132,6 @@ function getOfficerDogamData(officerName) {
     return { role: "미배치", uniqueTactic: "고유 전법 누락" };
 }
 
-// [핵심 교정]: 도감 스크립트 로드 유무에 관계없이 하드코딩 마스터 배열을 결선해 100% 드롭다운 복구[cite: 1]
 function getTacticListBridge() {
     if (typeof window.getAllTacticsFromDogam === 'function') {
         const extList = window.getAllTacticsFromDogam();
@@ -143,7 +140,6 @@ function getTacticListBridge() {
     return [...internalMasterTacticNames];
 }
 
-// [핵심 교정]: 도감 스크립트 로드 유무에 관계없이 하드코딩 마스터 배열을 결선해 100% 드롭다운 복구[cite: 1]
 function getOfficerNamesBridge() {
     if (typeof window.getAllOfficerNamesFromDogam === 'function') {
         const extList = window.getAllOfficerNamesFromDogam();
@@ -326,7 +322,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                         }
                     }
 
-                    const tacInv = tacticDataMap[currentCleanTac] || { isOwned: false, star: 0 };
+                    const tacInv = tacticDataMap[cleanUserTac] || { isOwned: false, star: 0 };
                     if (!tacInv.isOwned) {
                         feedbackResult.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tacIdx + 2}번 슬롯 전법 <strong>[${currentCleanTac}]</strong>이 미보유 상태입니다.` });
                     } else if (tacInv.star < 3) {
@@ -571,7 +567,6 @@ function renderDeckBuilder() {
 
         dynamicPresetDecksSort();
 
-        // 2중 안전 브릿지 함수 호출 구동
         const sortedHeroNames = getOfficerNamesBridge();
         const globalTacticsList = getTacticListBridge();
 
@@ -828,9 +823,6 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
-// ==========================================================================
-// LAYER 5: 글로벌 윈도우 인터페이스 바인딩 및 동기화 프록시 구축
-// ==========================================================================
 window.toggleSortMode = toggleSortMode;
 window.saveEditedText = saveEditedText;
 window.changeFormation = changeFormation;
