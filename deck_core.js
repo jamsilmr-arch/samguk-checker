@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 및 상대 화력 비교 보정 엔진 기동");
+console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 및 무장 전무 시 전투매 공란 가드 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 백엔드 결선)
@@ -174,7 +174,7 @@ const metaHawkRecommendationMap = {
     "qun_shield": { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 및 해제 불가 지속 힐링 [축예] 상태 확정 부여" },
     "shu_magic_bow": { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 딜링 마진 극대화)" },
     "qun_magic_spear": { name: "성모 (SSR / 삭풍)", skill: "턴 종료 시 모략 최고 아군 책략피해 15% 버프 유지 및 적 2명에게 160% 책략 타격 즉시 격발" },
-    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매 턴 아군 전체 피해 30% 감소" },
+    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매  턴 아군 전체 피해 30% 감소" },
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
@@ -237,7 +237,6 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
-// [핵심 로직 고도화]: 장수 간의 성급을 교차 대조하여 유동적인 실시간 화력 분기 로그 구현 완결
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const feedbackResult = { insight: "", logs: [] };
 
@@ -297,7 +296,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
         if (!heroInv.isOwned) {
             feedbackResult.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
         } else {
-            // 제거 완료: 고정 문구 탈피 완료
             if (!heroInv.transcend) {
                 feedbackResult.logs.push({ type: 'info', text: `⚡ 한계 돌파 권장: 조합 핵심 무장인 <strong>[${hName}]</strong>의 초월 각성이 비활성화 상태입니다. 인벤토리에서 초월을 격발하십시오.` });
             }
@@ -350,7 +348,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 });
             }
         } else {
-            // [상대적 화력 보정 시스템 연산 유닛]: 배치된 비메타 장수(A)와 빈 슬롯의 타겟 메타 장수(B) 성급 전격 대조
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
                 const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0, transcend: false };
@@ -605,28 +602,33 @@ function renderDeckBuilder() {
 
             let matchScoreMax = -1;
             let currentBestMetaId = "shu_combo"; 
-            const currentCleanHeroNames = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "");
+            const currentCleanHeroNames = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "").filter(n => n !== "");
             
-            analyzedMetaArchetypes.forEach(metaDeck => {
-                let mScore = 0;
-                metaDeck.officers.forEach((metaOff, idx) => {
-                    const mName = metaOff.name.replace(/\s+/g, '');
-                    if (currentCleanHeroNames.includes(mName)) mScore += 1; 
-                    if (currentCleanHeroNames[idx] === mName) mScore += 0.5;
+            // [패치 조치 완료]: 수동 드롭다운 해제 또는 초기화 버튼 작동 등으로 무장이 완전히 비었을 때(길이 0) 추천매 구역을 공란 처리
+            let hawkHtml = '';
+            if (currentCleanHeroNames.length > 0) {
+                analyzedMetaArchetypes.forEach(metaDeck => {
+                    let mScore = 0;
+                    metaDeck.officers.forEach((metaOff, idx) => {
+                        const mName = metaOff.name.replace(/\s+/g, '');
+                        const userHeroNamesAll = deck.officers.map(o => (o && o.name) ? o.name.toString().trim().replace(/\s+/g, '') : "");
+                        if (userHeroNamesAll.includes(mName)) mScore += 1; 
+                        if (userHeroNamesAll[idx] === mName) mScore += 0.5;
+                    });
+                    if (mScore > matchScoreMax) {
+                        matchScoreMax = mScore;
+                        currentBestMetaId = metaDeck.id;
+                    }
                 });
-                if (mScore > matchScoreMax) {
-                    matchScoreMax = mScore;
-                    currentBestMetaId = metaDeck.id;
-                }
-            });
 
-            const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "추천 전투매 데이터 없음", skill: "해당 덱의 메타 분석 데이터가 누락되었습니다." };
-            const hawkHtml = `
-                <div class="hawk-recommend-box" style="margin-top: 10px; padding: 12px 15px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(20,20,20,0) 100%); border-left: 4px solid #38bdf8; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
-                    <div style="font-size: 13px; font-weight: bold; color: #38bdf8; letter-spacing: -0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div>
-                    <div style="font-size: 12px; color: #ddd; line-height: 1.4;">${hawkData.skill}</div>
-                </div>
-            `;
+                const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "추천 전투매 데이터 없음", skill: "해당 덱의 메타 분석 데이터가 누락되었습니다." };
+                hawkHtml = `
+                    <div class="hawk-recommend-box" style="margin-top: 10px; padding: 12px 15px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(20,20,20,0) 100%); border-left: 4px solid #38bdf8; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
+                        <div style="font-size: 13px; font-weight: bold; color: #38bdf8; letter-spacing: -0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div>
+                        <div style="font-size: 12px; color: #ddd; line-height: 1.4;">${hawkData.skill}</div>
+                    </div>
+                `;
+            }
 
             let officersHtml = '';
             if (deck.officers && Array.isArray(deck.officers)) {
