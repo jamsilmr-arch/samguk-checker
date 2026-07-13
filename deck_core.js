@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 고유 전법 내장 매핑 및 레이스 컨디션 최종 해결 빌드 기동");
+console.log("[시스템 분석] deck_core.js 자체 마스터 데이터 및 상대 화력 비교 보정 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 백엔드 결선)
@@ -24,7 +24,6 @@ const internalMasterTacticNames = [
     "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
-// [핵심 보정]: 외부 도감 스크립트 폭발 시 무조건 작동하는 고유 기술 마스터 복구 데이터 매트릭스
 const internalMasterOfficerUniqueTacticMap = {
     "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
     "악진": "분용당선", "전위": "축호과간", "정욱": "십면매복", "조조(제왕)": "군령여산",
@@ -142,7 +141,6 @@ function getOfficerEquipment(officerName) {
     };
 }
 
-// [핵심 수리 로직]: 외부 도감이 공백을 주면 내장 마스터 맵을 참조해 원천적으로 누락을 완전 방어
 function getOfficerDogamData(officerName) {
     if (typeof window.getOfficerDataFromDogam === 'function') {
         const data = window.getOfficerDataFromDogam(officerName);
@@ -239,6 +237,7 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
+// [핵심 로직 고도화]: 장수 간의 성급을 교차 대조하여 유동적인 실시간 화력 분기 로그 구현 완결
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const feedbackResult = { insight: "", logs: [] };
 
@@ -298,9 +297,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
         if (!heroInv.isOwned) {
             feedbackResult.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
         } else {
-            if (heroInv.star < 3) {
-                feedbackResult.logs.push({ type: 'warning', text: ` 체급 경고: 배치된 <strong>[${hName}]</strong>의 현재 성급이 저조합니다(${heroInv.star}성). 최소 3성 이상 돌파해야 전선 유지력을 보장받습니다.` });
-            }
+            // 제거 완료: 고정 문구 탈피 완료
             if (!heroInv.transcend) {
                 feedbackResult.logs.push({ type: 'info', text: `⚡ 한계 돌파 권장: 조합 핵심 무장인 <strong>[${hName}]</strong>의 초월 각성이 비활성화 상태입니다. 인벤토리에서 초월을 격발하십시오.` });
             }
@@ -316,7 +313,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             if (currentUserRow !== idealRow) {
                 const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                 const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
-                feedbackResult.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다.` });
+                feedbackResult.logs.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRowKo}</strong> 포지션이어야 하나, 현재 <strong>${currentRowKo}</strong> 슬롯에 가 있습니다.` });
             }
 
             const metaTacsClean = metaOff.chosenTactics.map(t => t.toString().trim().replace(/\s+/g, ''));
@@ -353,18 +350,24 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 });
             }
         } else {
+            // [상대적 화력 보정 시스템 연산 유닛]: 배치된 비메타 장수(A)와 빈 슬롯의 타겟 메타 장수(B) 성급 전격 대조
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
-                feedbackResult.logs.push({ type: 'warning', text: `장수 교체: [${hName}] ➔ <strong>[${replaceWith.name}]</strong> (시너지 극대화를 위한 핵심 코어 장수입니다.)` });
-            }
-        }
-
-        const officerDogamData = getOfficerDogamData(hName);
-        if (officerDogamData && officerDogamData.uniqueTactic && officerDogamData.uniqueTactic !== "고유 전법 누락") {
-            const cleanInherent = officerDogamData.uniqueTactic.toString().trim().replace(/\s+/g, '');
-            const tacInv = tacticDataMap[officerDogamData.uniqueTactic] || { isOwned: false, star: 0 };
-            if (!heroInv.isOwned && !tacInv.isOwned) {
-                feedbackResult.logs.push({ type: 'warning', text: `고유 전법 누락: [${hName}]의 고유 전법 <strong>[${officerDogamData.uniqueTactic}]</strong>이 비활성화 상태입니다.` });
+                const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0, transcend: false };
+                
+                if (heroInv.isOwned && heroInv.star > metaHeroInv.star) {
+                    feedbackResult.logs.push({ 
+                        type: 'info', 
+                        text: `⚖️ <strong>화력 보정 분석:</strong> 원래 메타 추천 무장은 <strong>[${replaceWith.name}]</strong>이나, 현재 배치된 <strong>[${hName}]</strong>의 성급이 더 높으므로(<strong>${heroInv.star}성</strong> > ${metaHeroInv.star}성), 실전 화력 체급을 고려하여 현재는 <strong>[${hName}]</strong>을 그대로 기용하는 것을 더 추천합니다.` 
+                    });
+                } else {
+                    feedbackResult.logs.push({ 
+                        type: 'warning', 
+                        text: `🚀 <strong>화력 보정 추천:</strong> 메타 코어 장수 <strong>[${replaceWith.name}]</strong>의 돌파 체급이 현재 배치된 [${hName}] 이상이므로(<strong>${metaHeroInv.star}성</strong> >= ${heroInv.star}성), 지금 즉시 <strong>[${replaceWith.name}]</strong>으로 교체하여 화력과 시너지를 동시에 보정하십시오.` 
+                    });
+                }
+            } else {
+                feedbackResult.logs.push({ type: 'warning', text: `장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.` });
             }
         }
     });
