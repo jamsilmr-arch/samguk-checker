@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 지시형 문구(성급/초월) 삭제 및 처방전 고순도 정제 엔진 기동");
+console.log("[시스템 분석] deck_core.js 참조 오류 교정 및 가로 정렬 렌더링 엔진 최종 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 구역 (2중 안전망 엔진 백엔드 결선)
@@ -104,7 +104,7 @@ const analyzedMetaArchetypes = [
         ]
     },
     {
-        id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력과 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진",
+        id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력하고 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진",
         officers: [
             { name: "사마의", chosenTactics: ["요사여신", "반객위주"] },
             { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] },
@@ -237,7 +237,6 @@ function calculateStrictDeckScore(deck) {
     return score;
 }
 
-// [리팩토링 완결]: 단순 수치 기반 절대 지시형 피드백을 완전 제거하고 상대 화력 분석 체계로만 정제
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const feedbackResult = { insight: "", logs: [] };
 
@@ -305,7 +304,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             const currentUserRow = (formationPositions[deck.formation] && formationPositions[deck.formation][offIdx]) ? formationPositions[deck.formation][offIdx] : "front";
             const idealRow = (formationPositions[idealDeck.formation] && formationPositions[idealDeck.formation][metaOfficerIndex]) ? formationPositions[idealDeck.formation][metaOfficerIndex] : "front";
 
-            // [수리 완결]: 런타임 크래시 유발 인스턴스인 feedbackResult.push를 객체 내부 logs 컬렉션 경로로 긴급 수리 정착
             if (currentUserRow !== idealRow) {
                 const idealRowKo = idealRow === 'front' ? '전열' : '후열';
                 const currentRowKo = currentUserRow === 'front' ? '전열' : '후열';
@@ -344,7 +342,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 });
             }
         } else {
-            // [상대적 화력 보정 엔진 구현부]: 배치 장수와 메타 무장의 성급 대조 결과 가이드라인 발행 구역
             if (trulyMissingMetaOfficers.length > 0) {
                 const replaceWith = trulyMissingMetaOfficers.shift();
                 const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0, transcend: false };
@@ -381,7 +378,7 @@ function calculateActivatedBond(officers) {
         { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
         { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
         { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
-        { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반และ 공심 8% 증가, 해제 불가." },
+        { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반 및 공심 8% 증가, 해제 불가." },
         { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
         { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
         { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
@@ -510,7 +507,8 @@ function saveEditedText(originIdx, propertyName, element) {
     renderDeckBuilder();
 }
 
-function formationChange(originIdx, selectElement) {
+// [교정 완결]: 스크린샷 에러의 핵심인 함수명을 changeFormation으로 올바르게 정렬 인코딩
+function changeFormation(originIdx, selectElement) {
     const targetDeck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (targetDeck) {
         targetDeck.formation = selectElement.value;
@@ -750,6 +748,7 @@ function renderDeckBuilder() {
                 }
             }
 
+            // HTML 구역 내 onchange 타겟 명칭도 changeFormation으로 완벽 결선 복구
             deckCard.innerHTML = `
                 <div class="deck-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div>
