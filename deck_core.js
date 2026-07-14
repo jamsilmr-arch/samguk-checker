@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 장비 속성 스마트 분류 엔진 및 경량화 기동");
+console.log("[시스템 분석] deck_core.js 장신구 병종 일괄 동기화 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
@@ -45,7 +45,10 @@ const tacticAlternativesMap = {
     "안영찰채": ["동장철벽", "미우주무"], "일고작기": ["사생취의", "용맹무쌍"],
     "여자동포": ["동구적개", "천시지리"], "양의화생": ["기문둔갑", "화소적벽"],
     "수상개화": ["요사여신", "사생취의"], "요사여신": ["수상개화", "사생취의"],
-    "견불가최": ["동장철벽", "동구적개"], "분성지계": ["화소적벽", "기문둔갑"]
+    "견불가최": ["동장철벽", "동구적개"], "분성지계": ["화소적벽", "기문둔갑"],
+    "운주유악": ["태청단경", "미우주무"], "동구적개": ["안영찰채", "위위구조"],
+    "사생취의": ["일고작기", "용맹무쌍"], "양초선행": ["문치무공", "휴양생식"],
+    "휴양생식": ["양초선행", "현호제세"]
 };
 
 const formationEffects = {
@@ -63,14 +66,23 @@ const formationPositions = {
 };
 
 const analyzedMetaArchetypes = [
+    { id: "wei_nuke", name: "위나라 방패 핵폭탄 덱", concept: "사마의의 후반 캐리력과 조조(제왕)의 버프를 결합한 0티어 장기전 특화 방패병 조합", formation: "추형진", officers: [{ name: "하후돈", chosenTactics: ["견불가최", "유좌유용"] }, { name: "조조(제왕)", chosenTactics: ["횡징폭렴", "동구적개"] }, { name: "사마의", chosenTactics: ["운주유악", "반객위주"] }] },
+    { id: "shu_perfect", name: "촉나라 무상성 창병 덱", concept: "유비의 병종(A) 패널티를 감수하더라도 제갈량(S)과 조운(S)의 파괴력으로 상성을 씹어먹는 0티어 창병 조합", formation: "방원진", officers: [{ name: "조운", chosenTactics: ["만부막적", "용왕직전"] }, { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] }, { name: "유비", chosenTactics: ["위위구조", "동장철벽"] }] },
+    { id: "qun_evasion", name: "군웅 무쌍 궁병 덱", concept: "좌자의 병종(C) 패널티를 상시 회피율로 무마시키고, 여포(S)와 화타(S)의 시너지로 1턴 킬을 노리는 궁병 조합", formation: "어린진", officers: [{ name: "여포", chosenTactics: ["일고작기", "사생취의"] }, { name: "화타", chosenTactics: ["양초선행", "휴양생식"] }, { name: "좌자", chosenTactics: ["여자동포", "진퇴유도"] }] },
     { id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] }, { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] }, { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }] },
     { id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["질풍노도", "반객위주"] }, { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] }, { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }] },
-    { id: "qun_shield", name: "군 물리 방패덱", concept: "방원진의 단단함을 바탕으로 동탁/원소의 유지력과 여포의 폭발력을 융합한 조합", formation: "방원진", officers: [{ name: "동탁", chosenTactics: ["진퇴유도", "횡징폭렴"] }, { name: "원소", chosenTactics: ["견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["용왕직전", "만부막적"] }] },
-    { id: "shu_magic_bow", name: "촉 지력 궁병덱", concept: "제갈량의 능동 제어와 황충/강유의 안정적인 지속 모략 딜링을 노리는 조합", formation: "방원진", officers: [{ name: "황충", chosenTactics: ["강유겸제", "진퇴유도"] }, { name: "제갈량", chosenTactics: ["전위위안", "안영찰채"] }, { name: "강유", chosenTactics: ["반객위주", "일고작기"] }] },
-    { id: "qun_magic_spear", name: "군 모략 회피덱", concept: "좌자의 강력한 회피 부여와 장녕/우길의 갉아먹기식 광역 모략 피해를 활용하는 조합", formation: "구행진", officers: [{ name: "좌자", chosenTactics: ["여자동포", "진퇴유도"] }, { name: "장녕", chosenTactics: ["양의화생", "수상개화"] }, { name: "우길", chosenTactics: ["강유겸제", "안영찰채"] }] },
-    { id: "wei_magic_shield", name: "위 모략 방패덱", concept: "사마의의 후반 캐리력과 하후돈의 반격, 가후의 혼란을 조합한 후반 지향덱", formation: "추형진", officers: [{ name: "사마의", chosenTactics: ["요사여신", "반객위주"] }, { name: "하후돈", chosenTactics: ["유좌유용", "견불가최"] }, { name: "가후", chosenTactics: ["여자동포", "안영찰채"] }] },
     { id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["여자동포", "진퇴유도"] }, { name: "육항", chosenTactics: ["요사여신", "수상개화"] }, { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }] }
 ];
+
+// [신규 패치]: 분석된 덱의 ID를 바탕으로 부대 전체에 강제 주입될 통일 병종 매핑 트리
+const metaDeckUnitTypeMap = {
+    "wei_nuke": "방패병",
+    "shu_perfect": "창병",
+    "qun_evasion": "궁병",
+    "shu_combo": "기병",
+    "wei_burst": "기병",
+    "wu_magic_bow": "궁병"
+};
 
 const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군` }));
 
@@ -106,8 +118,8 @@ const internalBondRules = [
 // ==========================================================================
 // LAYER 2: 3중 도감 복구 및 스마트 분류 엔진 인터페이스
 // ==========================================================================
-// [패치 완료] 더미 데이터 강제 맵핑을 탈피하여 무용/모략/보조 및 병종 스마트 분류 시스템 장착
-function getOfficerEquipment(officerName) {
+// [패치 완료]: deckUnitType 인자를 받아 부대 전체에 병종 수식어를 100% 동일하게 맵핑
+function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
         const extEq = window.getEquipmentRecommendationFromGuide(officerName);
         if (extEq && extEq.helmet) return extEq;
@@ -120,19 +132,10 @@ function getOfficerEquipment(officerName) {
     if (tacticalList.includes(officerName)) damageAttr = "모략 피해 가함";
     if (supportList.includes(officerName)) damageAttr = "치유 효과 상승"; 
 
-    let unitType = "창병"; // 기본값
-    const shieldList = ["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"];
-    const cavList = ["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "태사자"];
-    const bowList = ["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕"];
-    
-    if (shieldList.includes(officerName)) unitType = "방패병";
-    else if (cavList.includes(officerName)) unitType = "기병";
-    else if (bowList.includes(officerName)) unitType = "궁병";
-
     return { 
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" }, 
         armor: { name: "명재복", attr1: "피해 감소", attr2: damageAttr }, 
-        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: `${unitType} 피해 감소` } 
+        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: `${deckUnitType} 피해 감소` } 
     };
 }
 
@@ -161,23 +164,21 @@ function getOfficerNamesBridge() {
 }
 
 const metaHawkRecommendationMap = {
+    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소 (장기전 특화)" },
+    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 및 안정성 극대화" },
+    "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
     "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
     "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
-    "qun_shield": { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 및 해제 불가 지속 힐링 [축예] 상태 확정 부여" },
-    "shu_magic_bow": { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 딜링 마진 극대화)" },
-    "qun_magic_spear": { name: "성모 (SSR / 삭풍)", skill: "턴 종료 시 모략 최고 아군 책략피해 15% 버프 유지 및 적 2명에게 160% 책략 타격 즉시 격발" },
-    "wei_magic_shield": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여 (무용 피격 시 확률 방어막). 매 턴 아군 전체 피해 30% 감소" },
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
 const systemGuideInsights = {
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 시스템 가이드 규격에 따라 턴 종료 시 무용이 가장 높은 아군의 무용 피해를 15% 증가시키고 적군 2명에게 즉시 계수 160% 무용 피해를 투사 격발하는 삭풍 품종의 <strong>'설조'</strong> 매 스킬과 조합하십시오.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다. 행동 순서를 선점하기 위해 기본 속도가 붙어있는 장비인 <strong>'백옥잠(투구)', '세린갑(갑옷)', '쌍호뉴(장신구)'</strong>를 양품 이상으로 제련하여 속도 수치를 극대화하는 것을 권장합니다.",
-    "qun_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 방원진의 후열 연격률 효과와 <strong>[배반]</strong>(무용 피해 비례 병력 회복) 시너지를 노리는 덱입니다. 턴 시작 시 병력 비율이 가장 낮은 아군 2명을 치료율 220%로 세이브하고 행동 전 치료율 90% 지속 힐을 더하는 해제 불가 [축예] 상태를 획득시키는 결운 품종의 <strong>'호생'</strong> 매를 필수 편성하세요.",
-    "shu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 <strong>[겁전]</strong>(능동 전법 발동 불가 제어)과 확정 모략 딜이 결합된 형태입니다. 턴 시작 시 아군 전체의 모략과 통솔을 30% 증가시켜 화력 한계선을 깨부수는 열공 품종의 <strong>'여천'</strong> 매 스킬과 조합하면 통계적 최고점을 달성합니다.",
-    "qun_magic_spear": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 지속 피해와 회피 무효화 구조를 갖춘 덱입니다. 턴 종료 시 모략이 가장 높은 아군의 모략 피해를 15% 증폭하고 적군 2명에게 즉시 계수 160% 모략 피해를 투사 격발하는 삭풍 품종의 <strong>'성모'</strong> 매를 훈련시켜 탑재하세요.",
-    "wei_magic_shield": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 가후의 <strong>[혼란]</strong>(무차별 대상 선택) 제어 상태와 하후돈의 <strong>[반격률]</strong>을 활용한 수비형 카운터 덱입니다. 피격 횟수가 많으므로 장비에서 <strong>'치유 효과 받음'</strong> 수치를 어품 등급 상한선(11.07%)까지 끌어올리는 것이 핵심입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>(제어 상태 일시 무효화)을 보조할 수 있도록 결운 품종의 <strong>'감로'</strong>(치유 시전으로 피격후 100% 자가회복 부여 및 1중첩 각성 아군 전체 확산) 매를 조합하면 안정성이 비약적으로 상승합니다."
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 전투 초중반을 압도적인 맷집과 힐링으로 버텨낸 뒤, 후반 턴에 사마의(응시낭고)로 적을 지워버리는 장기전 특화 방패병 덱입니다. 4턴 이후까지 버티는 것이 핵심이므로 진시 매를 활용하십시오.",
+    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제어(제갈량), 면역(조운), 회복(유비)이 조화된 육각형 덱입니다. <strong>[전술 노트]:</strong> 부대를 '창병'으로 편성하십시오. 유비의 적성이 A급으로 패널티를 받지만, 메인 딜러인 제갈량/조운의 파괴력 극대화(S급)가 부대 전체 승률에 압도적으로 유리합니다.",
+    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 상대의 공격을 '회피'로 씹고, 여포의 연타로 주장을 베는 1턴 킬 덱입니다. <strong>[전술 노트]:</strong> 부대를 '궁병'으로 편성하십시오. 좌자의 적성이 C급으로 급락하나, 그의 '회피율 버프'는 스탯의 영향을 받지 않는 고정 확률이므로 덱의 파괴력은 전혀 훼손되지 않습니다.",
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 설조 매 스킬과 조합하십시오.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>을 보조할 수 있도록 감로 매를 조합하면 안정성이 비약적으로 상승합니다."
 };
 
 // ==========================================================================
@@ -442,9 +443,8 @@ function renderDeckBuilder() {
             const currentComputedScore = calculateStrictDeckScore(deck);
             const curNamesClean = deck.officers.map(o => o?.name?.trim().replace(/\s+/g, '') || "").filter(Boolean);
             
-            let hawkHtml = '';
+            let matchScoreMax = -1, currentBestMetaId = "shu_combo"; 
             if (curNamesClean.length > 0) {
-                let matchScoreMax = -1, currentBestMetaId = "shu_combo"; 
                 analyzedMetaArchetypes.forEach(meta => {
                     let mScore = 0;
                     meta.officers.forEach((mo, idx) => {
@@ -454,7 +454,13 @@ function renderDeckBuilder() {
                     });
                     if (mScore > matchScoreMax) { matchScoreMax = mScore; currentBestMetaId = meta.id; }
                 });
+            }
 
+            // [핵심 패치]: 부대의 메타를 판독하여 병종 변수(deckUnitType) 추출
+            const deckUnitType = metaDeckUnitTypeMap[currentBestMetaId] || "방패병";
+
+            let hawkHtml = '';
+            if (curNamesClean.length > 0) {
                 const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
                 hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
             }
@@ -487,7 +493,8 @@ function renderDeckBuilder() {
                 
                 let eqHtml = '';
                 if (cleanHName) {
-                    const eq = getOfficerEquipment(hName);
+                    // [핵심 패치]: 추출된 부대 병종(deckUnitType)을 강제로 주입하여 속성2를 완벽하게 통일
+                    const eq = getOfficerEquipment(hName, deckUnitType);
                     eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 시스템 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.accessory.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.accessory.attr2}</span>)</div></div>`;
                 }
 
