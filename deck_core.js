@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 실존 전법 기반 0티어 메타 및 다중 티어 대체망 기동");
+console.log("[시스템 분석] deck_core.js 최상위 랭커 진형/포지셔닝 메타 업데이트 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
@@ -33,7 +33,6 @@ const internalMasterTacticNames = [
     "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
-// [신규 패치]: 조운(만부/횡소)과 여포(천리/암전)의 2, 3순위 대체 전법 유기적 결선
 const tacticAlternativesMap = {
     "횡징폭렴": ["동구적개", "동장철벽"], "이퇴위진": ["미우주무", "천시지리"],
     "용맹무쌍": ["만부막적", "비사주석"], "질풍노도": ["암전난방", "교취호탈"],
@@ -68,11 +67,14 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [신규 패치]: 조운과 여포의 0티어 메타 전법을 실제 분석 데이터(만부막적, 횡소천군, 천리추격, 암전난방)로 하드코딩
+// [신규 패치]: 0티어 덱의 포지셔닝(전열/후열) 배열 순서를 formationPositions 스키마에 완벽하게 일치하도록 정밀 재정렬
+// 1. 위나라(추형진: back/front/back): 하후돈(후열), 조조제왕(전열), 사마의(후열)
+// 2. 촉나라(어린진: front/back/back): 조운(전열), 제갈량(후열), 유비(후열)
+// 3. 군웅(방원진: front/front/back): 좌자(전열), 화타(전열), 여포(후열)
 const analyzedMetaArchetypes = [
     { id: "wei_nuke", name: "위나라 방패 핵폭탄 덱", concept: "사마의의 후반 캐리력과 조조(제왕)의 버프를 결합한 0티어 장기전 특화 방패병 조합", formation: "추형진", officers: [{ name: "하후돈", chosenTactics: ["견불가최", "유좌유용"] }, { name: "조조(제왕)", chosenTactics: ["횡징폭렴", "동구적개"] }, { name: "사마의", chosenTactics: ["운주유악", "반객위주"] }] },
-    { id: "shu_perfect", name: "촉나라 무상성 창병 덱", concept: "상대는 제어기에 걸려 아무것도 못 하고, 우리는 면역과 힐을 두르고 일방적으로 패는 0티어 무결점 조합", formation: "방원진", officers: [{ name: "조운", chosenTactics: ["만부막적", "횡소천군"] }, { name: "제갈량", chosenTactics: ["혼수모어", "전위위안"] }, { name: "유비", chosenTactics: ["안영찰채", "동구적개"] }] },
-    { id: "qun_evasion", name: "군웅 무쌍 궁병 덱", concept: "아군이 죽기 전에 여포가 제어기에 걸리지 않고 1~2턴 만에 적 주장을 썰어버리는 0티어 1턴킬 조합", formation: "어린진", officers: [{ name: "여포", chosenTactics: ["천리추격", "암전난방"] }, { name: "화타", chosenTactics: ["동구적개", "동장철벽"] }, { name: "좌자", chosenTactics: ["운주유악", "횡징폭렴"] }] },
+    { id: "shu_perfect", name: "촉나라 무상성 창병 덱", concept: "조운이 전열에서 적 제어를 무시하고 폭딜을 넣으며, 후열에서 제어와 힐을 지원하는 0티어 무결점 조합", formation: "어린진", officers: [{ name: "조운", chosenTactics: ["만부막적", "횡소천군"] }, { name: "제갈량", chosenTactics: ["혼수모어", "전위위안"] }, { name: "유비", chosenTactics: ["안영찰채", "동구적개"] }] },
+    { id: "qun_evasion", name: "군웅 무쌍 궁병 덱", concept: "여포가 후열에서 연격 버프를 독식하여 1~2턴 만에 적 주장을 썰어버리는 변칙 0티어 1턴킬 조합", formation: "방원진", officers: [{ name: "좌자", chosenTactics: ["운주유악", "횡징폭렴"] }, { name: "화타", chosenTactics: ["동구적개", "동장철벽"] }, { name: "여포", chosenTactics: ["천리추격", "암전난방"] }] },
     { id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] }, { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] }, { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }] },
     { id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["질풍노도", "반객위주"] }, { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] }, { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }] },
     { id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["여자동포", "진퇴유도"] }, { name: "육항", chosenTactics: ["요사여신", "수상개화"] }, { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }] }
@@ -174,10 +176,11 @@ const metaHawkRecommendationMap = {
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
+// [업데이트]: 브리핑 텍스트에 진형과 포지셔닝에 대한 강력한 전술 가이드를 명시
 const systemGuideInsights = {
-    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 전투 초중반을 압도적인 맷집과 힐링으로 버텨낸 뒤, 후반 턴에 사마의(응시낭고)로 적을 지워버리는 장기전 특화 방패병 덱입니다. 4턴 이후까지 버티는 것이 핵심이므로 진시 매를 활용하십시오.",
-    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 제갈량의 차단/혼란 제어, 조운의 면역과 폭딜, 유비의 확정 힐이 완벽하게 맞물리는 0티어 덱입니다. <strong>[전술 노트]:</strong> 부대를 '창병'으로 편성하십시오. 유비의 적성이 A급으로 패널티를 받지만, 메인 딜러인 제갈량/조운의 파괴력 극대화(S급)가 부대 전체 승률에 압도적으로 유리합니다.",
-    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 좌자/화타의 회피와 극한 뎀감으로 생존을 보장받은 뒤, 여포의 돌격 전법 연타로 1턴 만에 주장을 베는 폭딜 덱입니다. <strong>[전술 노트]:</strong> 부대를 '궁병'으로 편성하십시오. 좌자의 적성이 C급으로 급락하나, 그의 '회피율 버프'는 스탯의 영향을 받지 않는 고정 확률이므로 파괴력은 훼손되지 않습니다.",
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다. 하후돈을 후열에 배치하여 반격 누적 딜을 극대화하는 것이 핵심입니다.",
+    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다. '어린진'을 채용하여 전후열 밸런스를 완벽히 사수하십시오.",
+    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 물몸 서포터인 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼주는 완벽한 종결 배치입니다.",
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 설조 매 스킬과 조합하십시오.",
     "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다.",
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>을 보조할 수 있도록 감로 매를 조합하면 안정성이 비약적으로 상승합니다."
