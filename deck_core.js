@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 최상위 랭커 진형/포지셔닝 메타 업데이트 기동");
+console.log("[시스템 분석] deck_core.js 대체 전법 장착 인지 및 빌드업 처방전 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
@@ -30,7 +30,8 @@ const internalMasterTacticNames = [
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
-    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
+    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식",
+    "파진최견", "천하무적", "일기당천", "귀신정정"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
 const tacticAlternativesMap = {
@@ -67,10 +68,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [신규 패치]: 0티어 덱의 포지셔닝(전열/후열) 배열 순서를 formationPositions 스키마에 완벽하게 일치하도록 정밀 재정렬
-// 1. 위나라(추형진: back/front/back): 하후돈(후열), 조조제왕(전열), 사마의(후열)
-// 2. 촉나라(어린진: front/back/back): 조운(전열), 제갈량(후열), 유비(후열)
-// 3. 군웅(방원진: front/front/back): 좌자(전열), 화타(전열), 여포(후열)
 const analyzedMetaArchetypes = [
     { id: "wei_nuke", name: "위나라 방패 핵폭탄 덱", concept: "사마의의 후반 캐리력과 조조(제왕)의 버프를 결합한 0티어 장기전 특화 방패병 조합", formation: "추형진", officers: [{ name: "하후돈", chosenTactics: ["견불가최", "유좌유용"] }, { name: "조조(제왕)", chosenTactics: ["횡징폭렴", "동구적개"] }, { name: "사마의", chosenTactics: ["운주유악", "반객위주"] }] },
     { id: "shu_perfect", name: "촉나라 무상성 창병 덱", concept: "조운이 전열에서 적 제어를 무시하고 폭딜을 넣으며, 후열에서 제어와 힐을 지원하는 0티어 무결점 조합", formation: "어린진", officers: [{ name: "조운", chosenTactics: ["만부막적", "횡소천군"] }, { name: "제갈량", chosenTactics: ["혼수모어", "전위위안"] }, { name: "유비", chosenTactics: ["안영찰채", "동구적개"] }] },
@@ -81,43 +78,21 @@ const analyzedMetaArchetypes = [
 ];
 
 const metaDeckUnitTypeMap = {
-    "wei_nuke": "방패병",
-    "shu_perfect": "창병",
-    "qun_evasion": "궁병",
-    "shu_combo": "기병",
-    "wei_burst": "기병",
-    "wu_magic_bow": "궁병"
+    "wei_nuke": "방패병", "shu_perfect": "창병", "qun_evasion": "궁병",
+    "shu_combo": "기병", "wei_burst": "기병", "wu_magic_bow": "궁병"
 };
 
 const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군` }));
 
 const internalBondRules = [
-    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
+    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장을 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
     { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
     { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
-    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
-    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
-    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
-    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
     { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
     { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반 및 공심 8% 증가, 해제 불가." },
-    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
-    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
-    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
-    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
-    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
-    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
-    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
-    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
-    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
-    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
-    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
+    { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." }
 ];
 
 // ==========================================================================
@@ -132,14 +107,22 @@ function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     const tacticalList = ["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"];
     const supportList = ["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙"];
     
-    let damageAttr = "무용 피해 가함";
-    if (tacticalList.includes(officerName)) damageAttr = "모략 피해 가함";
-    if (supportList.includes(officerName)) damageAttr = "치유 효과 상승"; 
+    let damageAttr = "무용 피해 가함"; 
+    let accAttr1 = "무용 피해 가함";   
+
+    if (tacticalList.includes(officerName)) {
+        damageAttr = "모략 피해 가함";
+        accAttr1 = "모략 피해 가함";
+    }
+    if (supportList.includes(officerName)) {
+        damageAttr = "치유 효과 상승";
+        accAttr1 = "치유 효과 상승";
+    }
 
     return { 
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" }, 
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "통솔 증가" }, 
         armor: { name: "명재복", attr1: "피해 감소", attr2: damageAttr }, 
-        accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: `${deckUnitType} 피해 감소` } 
+        accessory: { name: "박산로", attr1: accAttr1, attr2: `${deckUnitType} 피해 감소` } 
     };
 }
 
@@ -176,14 +159,13 @@ const metaHawkRecommendationMap = {
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
-// [업데이트]: 브리핑 텍스트에 진형과 포지셔닝에 대한 강력한 전술 가이드를 명시
 const systemGuideInsights = {
-    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다. 하후돈을 후열에 배치하여 반격 누적 딜을 극대화하는 것이 핵심입니다.",
-    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다. '어린진'을 채용하여 전후열 밸런스를 완벽히 사수하십시오.",
-    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 물몸 서포터인 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼주는 완벽한 종결 배치입니다.",
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 이 부대는 <strong>[연격률]</strong>과 <strong>[확산 피해]</strong> 기반의 무용 딜이 핵심입니다. 설조 매 스킬과 조합하십시오.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 적 주장을 선제 타격하는 속전속결 부대로 <strong>[속도]</strong> 스탯이 생명입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 구행진을 활용해 후열의 가하는 피해를 증폭시키는 덱입니다. 손권의 버프 중첩이 중요하므로 <strong>[통찰]</strong>을 보조할 수 있도록 감로 매를 조합하면 안정성이 비약적으로 상승합니다."
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다.",
+    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다.",
+    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼줍니다.",
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 마초 중심의 확산 물리 폭딜 부대입니다.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 손권의 통찰과 중첩 버프를 활용한 대기만성 조합입니다."
 };
 
 // ==========================================================================
@@ -204,6 +186,8 @@ function calculateStrictDeckScore(deck) {
         });
         if (matchCount > maxMatch) { maxMatch = matchCount; bestMeta = meta; }
     });
+
+    if (maxMatch === 0) return 0; 
 
     let score = 100;
     if (deck.formation !== bestMeta.formation) score -= 10;
@@ -245,7 +229,31 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
         if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = metaDeck; }
     });
 
-    fb.logs.push({ type: 'info', text: `🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${bestMatchDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${bestMatchDeck.concept})` });
+    if (maxMatchScore === 0) {
+        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 현재 덱은 시스템에 등록된 주류 메타(0~1티어)와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 고유의 시너지를 연구해 보십시오.` });
+        deck.officers.forEach((off, offIdx) => {
+            if (!off?.name) return;
+            const hName = off.name.toString().trim();
+            if (!heroDataMap[hName]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다.` });
+
+            if (Array.isArray(off.chosenTactics)) {
+                off.chosenTactics.forEach((tac, tIdx) => {
+                    const rawTac = tac?.toString().trim() || "";
+                    if (rawTac !== "" && !tacticDataMap[rawTac.replace(/\s+/g, '')]?.isOwned) {
+                        fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tIdx + 2}번 슬롯 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
+                    }
+                });
+            }
+        });
+        return fb;
+    }
+
+    if (maxMatchScore <= 1.5) {
+        fb.logs.push({ type: 'info', text: `⚖️ <strong>하이브리드 조합 분석:</strong> 코어 장수 1명을 기반으로 메타를 조합해 나가는 <strong>[빌드업 단계]</strong>입니다. 무리한 장수 교체보다는 현재 자원에 맞춰 유동적으로 완성해 나가십시오.` });
+    } else {
+        fb.logs.push({ type: 'info', text: `🎯 <strong>분석 완료:</strong> 현재 덱은 랭커 메타인 <strong>[${bestMatchDeck.name}]</strong> 기반으로 세팅하는 것이 수학적 고점이 가장 높습니다. (${bestMatchDeck.concept})` });
+    }
+    
     if (systemGuideInsights[bestMatchDeck.id]) fb.insight = systemGuideInsights[bestMatchDeck.id];
 
     const curFmt = deck.formation?.toString().trim() || "";
@@ -253,6 +261,13 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     if (curFmt.replace(/\s+/g, '') !== idealFmt.replace(/\s+/g, '')) {
         fb.logs.push({ type: 'warning', text: `진형 교정: [${curFmt}] ➔ <strong>[${idealFmt}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)` });
     }
+
+    const allEquippedTacticsInDeck = [];
+    deck.officers.forEach(o => {
+        o?.chosenTactics?.forEach(t => {
+            if (t) allEquippedTacticsInDeck.push(t.toString().trim().replace(/\s+/g, ''));
+        });
+    });
 
     let missingMeta = bestMatchDeck.officers.filter(mo => !curNames.includes(mo.name.replace(/\s+/g, '')));
 
@@ -266,7 +281,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             return;
         }
 
-        const heroInv = heroDataMap[hName] || { isOwned: false, star: 0, transcend: false };
+        const heroInv = heroDataMap[hName] || { isOwned: false, star: 0 };
         if (!heroInv.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
 
         const metaIdx = bestMatchDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
@@ -281,7 +296,11 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             }
 
             const metaTacsClean = metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
-            let unmatchTac = [...metaOff.chosenTactics];
+            
+            let unmatchTac = metaOff.chosenTactics.filter(t => {
+                const cT = t.trim().replace(/\s+/g, '');
+                return !allEquippedTacticsInDeck.includes(cT);
+            });
 
             if (Array.isArray(off.chosenTactics)) {
                 off.chosenTactics.forEach(tac => {
@@ -304,12 +323,33 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                         }
                     } else {
                         if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
-                            const primaryTac = unmatchTac.shift();
-                            const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
-                            fb.logs.push({ 
-                                type: 'warning', 
-                                text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 [${rawTac}] 교체 요망 ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 권장` 
-                            });
+                            // [신규 패치]: 대체 전법 장착 여부 확인 (빌드업 인지형 분기)
+                            let matchedPrimaryIdx = -1;
+                            for (let i = 0; i < unmatchTac.length; i++) {
+                                const pTac = unmatchTac[i];
+                                const alts = tacticAlternativesMap[pTac] || [];
+                                if (alts.includes(cleanTac)) {
+                                    matchedPrimaryIdx = i;
+                                    break;
+                                }
+                            }
+
+                            if (matchedPrimaryIdx !== -1) {
+                                // 2순위 혹은 3순위 대체 전법을 장착 중인 경우 (칭찬 및 1순위 목표 제시)
+                                const primaryTac = unmatchTac.splice(matchedPrimaryIdx, 1)[0];
+                                fb.logs.push({ 
+                                    type: 'info', 
+                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 추후 덱의 최고점을 위해 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드하는 것을 목표로 하십시오.` 
+                                });
+                            } else {
+                                // 아예 상관없는 전법을 장착 중인 경우 (기존 튜닝 경고)
+                                const primaryTac = unmatchTac.shift();
+                                const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
+                                fb.logs.push({ 
+                                    type: 'warning', 
+                                    text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 [${rawTac}] 교체 요망 ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 권장` 
+                                });
+                            }
                         }
 
                         if (!tacticDataMap[cleanTac]?.isOwned) {
@@ -319,15 +359,15 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 });
             }
         } else {
-            if (missingMeta.length) {
+            if (maxMatchScore > 1.5 && missingMeta.length) {
                 const replaceWith = missingMeta.shift();
-                const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0, transcend: false };
+                const metaHeroInv = heroDataMap[replaceWith.name] || { isOwned: false, star: 0 };
                 if (heroInv.isOwned && heroInv.star > metaHeroInv.star) {
-                    fb.logs.push({ type: 'info', text: `⚖️ <strong>화력 보정 분석:</strong> 원래 메타 추천 무장은 <strong>[${replaceWith.name}]</strong>이나, 현재 배치된 <strong>[${hName}]</strong>의 성급이 더 높으므로(<strong>${heroInv.star}성</strong> > ${metaHeroInv.star}성), 실전 화력 체급을 고려하여 현재는 <strong>[${hName}]</strong>을 그대로 기용하는 것을 더 추천합니다.` });
+                    fb.logs.push({ type: 'info', text: `⚖️ <strong>화력 보정 분석:</strong> 원래 메타 추천 무장은 <strong>[${replaceWith.name}]</strong>이나, 현재 배치된 <strong>[${hName}]</strong>의 성급이 더 높으므로 실전 체급을 고려해 기용을 추천합니다.` });
                 } else {
-                    fb.logs.push({ type: 'warning', text: `🚀 <strong>화력 보정 추천:</strong> 메타 코어 장수 <strong>[${replaceWith.name}]</strong>의 돌파 체급이 현재 배치된 [${hName}] 이상이므로(<strong>${metaHeroInv.star}성</strong> >= ${heroInv.star}성), 지금 즉시 <strong>[${replaceWith.name}]</strong>으로 교체하여 화력과 시너지를 동시에 보정하십시오.` });
+                    fb.logs.push({ type: 'warning', text: `🚀 <strong>화력 보정 추천:</strong> 메타 코어 장수 <strong>[${replaceWith.name}]</strong>으로 교체하여 화력과 시너지를 동시에 보정하십시오.` });
                 }
-            } else {
+            } else if (maxMatchScore > 1.5) {
                 fb.logs.push({ type: 'warning', text: `장수 잉여: [${hName}] 장수는 현재 타겟 메타 시너지에 포함되지 않습니다.` });
             }
         }
@@ -448,7 +488,7 @@ function renderDeckBuilder() {
             const currentComputedScore = calculateStrictDeckScore(deck);
             const curNamesClean = deck.officers.map(o => o?.name?.trim().replace(/\s+/g, '') || "").filter(Boolean);
             
-            let matchScoreMax = -1, currentBestMetaId = "shu_combo"; 
+            let matchScoreMax = -1, currentBestMetaId = null; 
             if (curNamesClean.length > 0) {
                 analyzedMetaArchetypes.forEach(meta => {
                     let mScore = 0;
@@ -461,12 +501,37 @@ function renderDeckBuilder() {
                 });
             }
 
-            const deckUnitType = metaDeckUnitTypeMap[currentBestMetaId] || "방패병";
-
+            let deckUnitType = "방패병";
             let hawkHtml = '';
+
             if (curNamesClean.length > 0) {
-                const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
-                hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
+                if (matchScoreMax > 0 && currentBestMetaId) {
+                    deckUnitType = metaDeckUnitTypeMap[currentBestMetaId];
+                    const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
+                } else {
+                    let typeCounts = { "방패병": 0, "기병": 0, "궁병": 0, "창병": 0 };
+                    let roleCounts = { physical: 0, magic: 0, support: 0 };
+
+                    curNamesClean.forEach(name => {
+                        if (["조조", "유비", "화타", "좌자", "채문희", "노숙", "순욱"].some(n => name.includes(n))) roleCounts.support++;
+                        else if (["사마의", "가후", "곽가", "제갈량", "서서", "강유", "육손", "주유", "장각", "장녕"].some(n => name.includes(n))) roleCounts.magic++;
+                        else roleCounts.physical++;
+
+                        if (["장비", "조조", "유비", "전위", "동탁", "장각", "사마의", "손견"].some(n => name.includes(n))) typeCounts["방패병"]++;
+                        else if (["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향"].some(n => name.includes(n))) typeCounts["기병"]++;
+                        else if (["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕"].some(n => name.includes(n))) typeCounts["궁병"]++;
+                        else typeCounts["창병"]++;
+                    });
+
+                    deckUnitType = Object.keys(typeCounts).reduce((a, b) => typeCounts[a] > typeCounts[b] ? a : b) || "창병";
+
+                    let hawkData = { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용/통솔 30% 증가 (범용 무력 최적화)" };
+                    if (roleCounts.magic > roleCounts.physical) hawkData = { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략/통솔 30% 증가 (범용 모략 딜링 최적화)" };
+                    if (roleCounts.support >= 2) hawkData = { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 (유지력 생존 최적화)" };
+
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(248, 113, 113, 0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #f87171; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#f87171; letter-spacing:-0.5px;">🦅 커스텀 분석 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
+                }
             }
 
             let officersHtml = deck.officers.map((off, offIdx) => {
@@ -530,7 +595,7 @@ function renderDeckBuilder() {
         });
     } catch(e) {
         container.style.display = 'block';
-        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;"><h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3><p>원인: ${e.message}</p><p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p><button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 재시작</button></div>`;
+        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;"><h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3><p>원인: ${e.message}</p><p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p><button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 대시작</button></div>`;
     }
 }
 
