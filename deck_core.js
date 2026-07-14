@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 최종 경량화 및 처방전 고순도 정제 엔진 기동");
+console.log("[시스템 분석] deck_core.js 빈 슬롯 예외 처리 및 처방전 고도화 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
@@ -226,7 +226,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
         const heroInv = heroDataMap[hName] || { isOwned: false, star: 0, transcend: false };
         if (!heroInv.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
-        // 삭제 완료: 단순 초월 격발 안내 스레드 배제
 
         const metaIdx = bestMatchDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
 
@@ -252,14 +251,20 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                     const rawTac = tac?.toString().trim() || "";
                     const cleanTac = rawTac.replace(/\s+/g, '');
 
-                    if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
-                        fb.logs.push({ type: 'warning', text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 전법 [${rawTac}] ➔ <strong>[${unmatchTac.shift()}]</strong> 권장` });
-                    }
+                    // [패치 완료]: 전법 슬롯이 '선택 안함(공란)'일 경우 섀도우 에러(자원 부족) 차단 및 문맥 교정
+                    if (cleanTac === "") {
+                        if (unmatchTac.length) {
+                            fb.logs.push({ type: 'warning', text: `전법 장착: [${hName}]의 ${tIdx + 2}번 슬롯에 <strong>[${unmatchTac.shift()}]</strong> 장착을 권장합니다.` });
+                        }
+                    } else {
+                        if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
+                            fb.logs.push({ type: 'warning', text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 전법 [${rawTac}] ➔ <strong>[${unmatchTac.shift()}]</strong> 권장` });
+                        }
 
-                    if (!tacticDataMap[cleanTac]?.isOwned) {
-                        fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tIdx + 2}번 슬롯 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
+                        if (!tacticDataMap[cleanTac]?.isOwned) {
+                            fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tIdx + 2}번 슬롯 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
+                        }
                     }
-                    // 삭제 완료: 전법 성급 업그레이드 강제 지시 스레드 배제
                 });
             }
         } else {
