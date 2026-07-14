@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 빈 슬롯 예외 처리 및 처방전 고도화 엔진 기동");
+console.log("[시스템 분석] deck_core.js 다중 티어(1~3순위) 전법 대체망 및 처방전 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
@@ -32,6 +32,34 @@ const internalMasterTacticNames = [
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
     "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
+
+// [신규 엔진]: 1순위 코어 전법 부재 시 2, 3순위를 유기적으로 투사하는 정밀 대체 매핑 딕셔너리
+const tacticAlternativesMap = {
+    "횡징폭렴": ["동구적개", "동장철벽"],
+    "이퇴위진": ["미우주무", "천시지리"],
+    "용맹무쌍": ["만부막적", "비사주석"],
+    "질풍노도": ["암전난방", "교취호탈"],
+    "문치무공": ["양초선행", "중정기고"],
+    "혼수모어": ["이간계", "낙정하석"],
+    "반객위주": ["일고작기", "사생취의"],
+    "유좌유용": ["휴양생식", "제곤부위"],
+    "선등함진": ["만천과해", "만전제발"],
+    "강유겸제": ["동장철벽", "천시지리"],
+    "진퇴유도": ["위위구조", "동구적개"],
+    "견진연봉": ["동장철벽", "순수견양"],
+    "위위구조": ["태청단경", "현호제세"],
+    "용왕직전": ["만부막적", "과하탁교"],
+    "만부막적": ["용왕직전", "비사주석"],
+    "전위위안": ["태청단경", "현호제세"],
+    "안영찰채": ["동장철벽", "미우주무"],
+    "일고작기": ["사생취의", "용맹무쌍"],
+    "여자동포": ["동구적개", "천시지리"],
+    "양의화생": ["기문둔갑", "화소적벽"],
+    "수상개화": ["요사여신", "사생취의"],
+    "요사여신": ["수상개화", "사생취의"],
+    "견불가최": ["동장철벽", "동구적개"],
+    "분성지계": ["화소적벽", "기문둔갑"]
+};
 
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -",
@@ -247,18 +275,28 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                     if (unmatchTac.includes(cleanTac)) unmatchTac.splice(unmatchTac.indexOf(cleanTac), 1);
                 });
 
+                // [고도화 연산]: 빈 슬롯 섀도우 에러 방지 및 다중 티어(1, 2, 3순위) 유기적 대체 매핑
                 off.chosenTactics.forEach((tac, tIdx) => {
                     const rawTac = tac?.toString().trim() || "";
                     const cleanTac = rawTac.replace(/\s+/g, '');
 
-                    // [패치 완료]: 전법 슬롯이 '선택 안함(공란)'일 경우 섀도우 에러(자원 부족) 차단 및 문맥 교정
                     if (cleanTac === "") {
                         if (unmatchTac.length) {
-                            fb.logs.push({ type: 'warning', text: `전법 장착: [${hName}]의 ${tIdx + 2}번 슬롯에 <strong>[${unmatchTac.shift()}]</strong> 장착을 권장합니다.` });
+                            const primaryTac = unmatchTac.shift();
+                            const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
+                            fb.logs.push({ 
+                                type: 'warning', 
+                                text: `전법 장착: [${hName}]의 ${tIdx + 2}번 슬롯이 비어있습니다. ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 장착 권장` 
+                            });
                         }
                     } else {
                         if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
-                            fb.logs.push({ type: 'warning', text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 전법 [${rawTac}] ➔ <strong>[${unmatchTac.shift()}]</strong> 권장` });
+                            const primaryTac = unmatchTac.shift();
+                            const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
+                            fb.logs.push({ 
+                                type: 'warning', 
+                                text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 [${rawTac}] 교체 요망 ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 권장` 
+                            });
                         }
 
                         if (!tacticDataMap[cleanTac]?.isOwned) {
@@ -507,8 +545,8 @@ function importData(input) {
     reader.readAsText(input.files[0], "utf-8");
 }
 
-window.toggleSortMode = function(){}; // Dummy for legacy compat
-window.saveEditedText = function(){}; // Abstracted to updateDeckState
+window.toggleSortMode = function(){}; 
+window.saveEditedText = function(){}; 
 window.changeFormation = (i, el) => updateDeckState(i, 'formation', el.value);
 window.changeOfficer = (i, oI, el) => updateDeckState(i, 'off', el.value, oI);
 window.changeTactic = (i, oI, sI, el) => updateDeckState(i, 'tac', el.value, oI, sI);
