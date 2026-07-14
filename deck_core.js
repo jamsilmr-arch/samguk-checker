@@ -1,4 +1,4 @@
-console.log("[시스템 최적화 완결] deck_core.js 1~3순위 전투매 다중 티어 대체망 최종 기동");
+console.log("[시스템 최적화 완결] deck_core.js 전투매 랜덤 속성 1~3순위 정밀 분석 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
@@ -96,14 +96,13 @@ const internalBondRules = [
 
 const metaHawkRecommendationMap = {
     "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소" },
-    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 및 안정성 극대화" },
+    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 극대화" },
     "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
-    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
+    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 160% 즉시 격발" },
     "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가" },
     "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
 };
 
-// [신규 엔진]: 메타 0티어 덱별 2, 3순위 대체 전투매 정밀 인덱싱 상수화
 const metaHawkAlternativesMap = {
     "wei_nuke": ["설조 (SSR / 삭풍)", "호생 (SSR / 결운)"],
     "shu_perfect": ["여천 (SSR / 열공)", "전광 (SSR / 열공)"],
@@ -111,6 +110,45 @@ const metaHawkAlternativesMap = {
     "shu_combo": ["전광 (SSR / 열공)", "성모 (SSR / 삭풍)"],
     "wei_burst": ["설조 (SSR / 삭풍)", "진시 (SSR / 능소)"],
     "wu_magic_bow": ["여천 (SSR / 열공)", "호생 (SSR / 결운)"]
+};
+
+// [신규 엔진]: 매의 랜덤 속성 1, 2, 3순위를 덱 기믹에 맞춰 완벽 통제 및 역산
+const metaHawkRandomAttributesMap = {
+    "wei_nuke": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
+        attr2: { rank1: "받는 피해 감소 +8%", rank2: "모략 피해 감소 +10%", rank3: "무용 피해 감소 +10%" },
+        attr3: { rank1: "치유 효과 상승 +12%", rank2: "피격 시 10% 저항", rank3: "디버프 해제(확률)" }
+    },
+    "shu_perfect": {
+        attr1: { rank1: "전능(모든 스탯) +6%", rank2: "무용 +10%", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 피해 증가 +8%", rank2: "받는 피해 감소 +8%", rank3: "전법 발동률 +4%" },
+        attr3: { rank1: "첫 턴 제어 면역", rank2: "무용 타격 시 15% 흡혈", rank3: "모면(회피) +6%" }
+    },
+    "qun_evasion": {
+        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
+        attr2: { rank1: "파갑(방어 관통) +10%", rank2: "연격률 +8%", rank3: "가하는 물리 피해 +10%" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "돌격 전법 데미지 +15%", rank3: "평타 시 10% 혼란" }
+    },
+    "shu_combo": {
+        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "전능 +6%" },
+        attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
+        attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
+    },
+    "wei_burst": {
+        attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
+        attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "적 주장 타격 보너스" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "적 회피 15% 무시" }
+    },
+    "wu_magic_bow": {
+        attr1: { rank1: "모략 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "능동 전법 발동률 +5%", rank3: "받는 피해 감소 +8%" },
+        attr3: { rank1: "치유 효과 상승 +12%", rank2: "매 턴 디버프 해제", rank3: "모면(회피) +6%" }
+    },
+    "custom": {
+        attr1: { rank1: "전능 +5%", rank2: "통솔 +10%", rank3: "무용 +10%" },
+        attr2: { rank1: "가하는 피해 증가 +6%", rank2: "받는 피해 감소 +6%", rank3: "전법 발동률 +3%" },
+        attr3: { rank1: "첫 턴 제어 면역", rank2: "첫 턴 선공", rank3: "턴 종료 시 병력 회복" }
+    }
 };
 
 const systemGuideInsights = {
@@ -517,13 +555,19 @@ function renderDeckBuilder() {
                 if (matchScoreMax > 0 && currentBestMetaId) {
                     deckUnitType = metaDeckUnitTypeMap[currentBestMetaId];
                     const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
-                    
-                    // [최적화 패치]: 2, 3순위 전투매 연동 인터페이스 구현 및 인라인 경량화 출력
                     const hawkAlts = metaHawkAlternativesMap[currentBestMetaId] || ["범용 SSR 매", "범용 SR 매"];
+                    const hawkAttr = metaHawkRandomAttributesMap[currentBestMetaId] || metaHawkRandomAttributesMap["custom"];
+                    
                     hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
                         <div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 세팅</div>
                         <div style="font-size:12px; color:#ddd; line-height:1.4;">🥇1순위: <strong>${hawkData.name}</strong> (${hawkData.skill})</div>
                         <div style="font-size:11px; color:#bbb; line-height:1.4;">🥈2순위: <strong>${hawkAlts[0]}</strong> / 🥉3순위: <strong>${hawkAlts[1]}</strong> 권장</div>
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(56,189,248,0.3);">
+                            <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom: 2px;">🎲 권장 랜덤 속성 (1~3순위)</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성1/기초]</strong> 🥇${hawkAttr.attr1.rank1} / 🥈${hawkAttr.attr1.rank2} / 🥉${hawkAttr.attr1.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성2/보정]</strong> 🥇${hawkAttr.attr2.rank1} / 🥈${hawkAttr.attr2.rank2} / 🥉${hawkAttr.attr2.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성3/기믹]</strong> 🥇${hawkAttr.attr3.rank1} / 🥈${hawkAttr.attr3.rank2} / 🥉${hawkAttr.attr3.rank3}</div>
+                        </div>
                     </div>`;
                 } else {
                     let typeCounts = { "방패병": 0, "기병": 0, "궁병": 0, "창병": 0 };
@@ -544,19 +588,37 @@ function renderDeckBuilder() {
 
                     let hawkData = { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용/통솔 30% 증가 (범용 무력 최적화)" };
                     let fallbackAlts = "🥇1순위: 전광 / 🥈2순위: 설조 / 🥉3순위: 진시";
+                    let hawkAttr = metaHawkRandomAttributesMap["custom"];
+
                     if (roleCounts.magic > roleCounts.physical) {
                         hawkData = { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략/통솔 30% 증가 (범용 모략 딜링 최적화)" };
                         fallbackAlts = "🥇1순위: 여천 / 🥈2순위: 성모 / 🥉3순위: 감로";
+                        hawkAttr = {
+                            attr1: { rank1: "모략 +10%", rank2: "전능 +5%", rank3: "통솔 +10%" },
+                            attr2: { rank1: "모략 피해 증가 +8%", rank2: "받는 피해 감소 +6%", rank3: "전법 발동률 +3%" },
+                            attr3: { rank1: "첫 턴 제어 면역", rank2: "첫 턴 선공", rank3: "치유 효과 +10%" }
+                        };
                     }
                     if (roleCounts.support >= 2) {
                         hawkData = { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 (유지력 생존 최적화)" };
                         fallbackAlts = "🥇1순위: 호생 / 🥈2순위: 감로 / 🥉3순위: 진시";
+                        hawkAttr = {
+                            attr1: { rank1: "통솔 +12%", rank2: "전능 +5%", rank3: "속도 +15" },
+                            attr2: { rank1: "받는 피해 감소 +8%", rank2: "치유 효과 상승 +10%", rank3: "전법 발동률 +3%" },
+                            attr3: { rank1: "턴 종료 시 디버프 해제", rank2: "첫 턴 제어 면역", rank3: "모면(회피) +6%" }
+                        };
                     }
 
                     hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(248, 113, 113, 0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #f87171; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
                         <div style="font-size:13px; font-weight:bold; color:#f87171; letter-spacing:-0.5px;">🦅 커스텀 분석 전투매 : ${hawkData.name}</div>
                         <div style="font-size:12px; color:#ddd; line-height:1.4; margin-bottom:2px;">${hawkData.skill}</div>
                         <div style="font-size:11px; color:#bbb; line-height:1.4;">📋 속성 대체 추천 ➔ ${fallbackAlts}</div>
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(248, 113, 113, 0.3);">
+                            <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom: 2px;">🎲 권장 랜덤 속성 (1~3순위)</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성1/기초]</strong> 🥇${hawkAttr.attr1.rank1} / 🥈${hawkAttr.attr1.rank2} / 🥉${hawkAttr.attr1.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성2/보정]</strong> 🥇${hawkAttr.attr2.rank1} / 🥈${hawkAttr.attr2.rank2} / 🥉${hawkAttr.attr2.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성3/기믹]</strong> 🥇${hawkAttr.attr3.rank1} / 🥈${hawkAttr.attr3.rank2} / 🥉${hawkAttr.attr3.rank3}</div>
+                        </div>
                     </div>`;
                 }
             }
@@ -580,7 +642,6 @@ function renderDeckBuilder() {
                 off.chosenTactics?.forEach((tac, slotIdx) => {
                     const cleanTac = tac?.trim() || "";
                     const isOwnTac = tacticDataMap[cleanTac.replace(/\s+/g, '')]?.isOwned;
-                    const options = `<option value="" ${cleanTac===""?'selected':''}>선택 안함</option>` + globalTacticsList.map(t => `<option value="${t}" ${cleanTac===t?'selected':''}>${t?</option>`).join('') || ''; // fix syntax inside 리터럴
                     let dropdownOptionsHtml = `<option value="" ${cleanTac===""?'selected':''}>선택 안함</option>`;
                     globalTacticsList.forEach(t => { dropdownOptionsHtml += `<option value="${t}" ${cleanTac===t?'selected':''}>${t}</option>`; });
                     tacticRowsHtml += `<div class="tactic-row ${cleanTac===""?'missing':(isOwnTac?'owned':'missing')}" style="padding:4px 12px;"><select class="tactic-dropdown" onchange="updateDeckState(${deck.originIdx}, 'tac', this.value, ${offIdx}, ${slotIdx})">${dropdownOptionsHtml}</select><span class="tactic-status-text" style="${cleanTac===""?'color:#666;':''}">${cleanTac===""?'슬롯 비어있음':(isOwnTac?'장착 완료':'미보유')}</span></div>`;
