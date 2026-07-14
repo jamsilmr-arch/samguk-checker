@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 대체 전법 장착 인지 및 빌드업 처방전 엔진 기동");
+console.log("[시스템 분석] deck_core.js 런타임 메모리(RAM) 및 Big-O 연산 최적화 빌드 가동");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 (중복 제거 및 정적 데이터 전역 승격)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
 // ==========================================================================
 const internalMasterOfficerUniqueTacticMap = {
     "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
@@ -30,8 +30,7 @@ const internalMasterTacticNames = [
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
-    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식",
-    "파진최견", "천하무적", "일기당천", "귀신정정"
+    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
 const tacticAlternativesMap = {
@@ -95,6 +94,31 @@ const internalBondRules = [
     { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." }
 ];
 
+const metaHawkRecommendationMap = {
+    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소 (장기전 특화)" },
+    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 및 안정성 극대화" },
+    "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
+    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
+    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
+    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
+};
+
+const systemGuideInsights = {
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다.",
+    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다.",
+    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼줍니다.",
+    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 마초 중심의 확산 물리 폭딜 부대입니다.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 손권의 통찰과 중첩 버프를 활용한 대기만성 조합입니다."
+};
+
+// [경량화]: 함수 내부에서 O(N)으로 반복 순회하던 배열들을 전역 O(1) 해시 Set으로 격상하여 메모리 누수 원천 차단
+const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
+const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙"]);
+const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
+const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "태사자"]);
+const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕"]);
+
 // ==========================================================================
 // LAYER 2: 3중 도감 복구 및 스마트 분류 엔진 인터페이스
 // ==========================================================================
@@ -104,17 +128,14 @@ function getOfficerEquipment(officerName, deckUnitType = "방패병") {
         if (extEq && extEq.helmet) return extEq;
     }
 
-    const tacticalList = ["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"];
-    const supportList = ["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙"];
-    
     let damageAttr = "무용 피해 가함"; 
     let accAttr1 = "무용 피해 가함";   
 
-    if (tacticalList.includes(officerName)) {
+    if (tacticalSet.has(officerName)) {
         damageAttr = "모략 피해 가함";
         accAttr1 = "모략 피해 가함";
     }
-    if (supportList.includes(officerName)) {
+    if (supportSet.has(officerName)) {
         damageAttr = "치유 효과 상승";
         accAttr1 = "치유 효과 상승";
     }
@@ -149,24 +170,6 @@ function getOfficerNamesBridge() {
     }
     return [...internalMasterOfficerNames];
 }
-
-const metaHawkRecommendationMap = {
-    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소 (장기전 특화)" },
-    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 및 안정성 극대화" },
-    "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
-    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
-    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
-    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
-};
-
-const systemGuideInsights = {
-    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다.",
-    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다.",
-    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼줍니다.",
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 마초 중심의 확산 물리 폭딜 부대입니다.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 손권의 통찰과 중첩 버프를 활용한 대기만성 조합입니다."
-};
 
 // ==========================================================================
 // LAYER 3: 코어 연산 엔진 구역
@@ -323,7 +326,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                         }
                     } else {
                         if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
-                            // [신규 패치]: 대체 전법 장착 여부 확인 (빌드업 인지형 분기)
                             let matchedPrimaryIdx = -1;
                             for (let i = 0; i < unmatchTac.length; i++) {
                                 const pTac = unmatchTac[i];
@@ -335,14 +337,12 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                             }
 
                             if (matchedPrimaryIdx !== -1) {
-                                // 2순위 혹은 3순위 대체 전법을 장착 중인 경우 (칭찬 및 1순위 목표 제시)
                                 const primaryTac = unmatchTac.splice(matchedPrimaryIdx, 1)[0];
                                 fb.logs.push({ 
                                     type: 'info', 
                                     text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 추후 덱의 최고점을 위해 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드하는 것을 목표로 하십시오.` 
                                 });
                             } else {
-                                // 아예 상관없는 전법을 장착 중인 경우 (기존 튜닝 경고)
                                 const primaryTac = unmatchTac.shift();
                                 const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
                                 fb.logs.push({ 
@@ -514,13 +514,14 @@ function renderDeckBuilder() {
                     let roleCounts = { physical: 0, magic: 0, support: 0 };
 
                     curNamesClean.forEach(name => {
-                        if (["조조", "유비", "화타", "좌자", "채문희", "노숙", "순욱"].some(n => name.includes(n))) roleCounts.support++;
-                        else if (["사마의", "가후", "곽가", "제갈량", "서서", "강유", "육손", "주유", "장각", "장녕"].some(n => name.includes(n))) roleCounts.magic++;
+                        // [경량화 적용점]: 배열 내장 메서드 대신 O(1) 해시 테이블 탐색 사용
+                        if (supportSet.has(name) || name === "순욱") roleCounts.support++;
+                        else if (tacticalSet.has(name)) roleCounts.magic++;
                         else roleCounts.physical++;
 
-                        if (["장비", "조조", "유비", "전위", "동탁", "장각", "사마의", "손견"].some(n => name.includes(n))) typeCounts["방패병"]++;
-                        else if (["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향"].some(n => name.includes(n))) typeCounts["기병"]++;
-                        else if (["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕"].some(n => name.includes(n))) typeCounts["궁병"]++;
+                        if (shieldSet.has(name)) typeCounts["방패병"]++;
+                        else if (cavSet.has(name)) typeCounts["기병"]++;
+                        else if (bowSet.has(name)) typeCounts["궁병"]++;
                         else typeCounts["창병"]++;
                     });
 
@@ -595,7 +596,7 @@ function renderDeckBuilder() {
         });
     } catch(e) {
         container.style.display = 'block';
-        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;"><h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3><p>원인: ${e.message}</p><p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p><button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 대시작</button></div>`;
+        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;"><h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3><p>원인: ${e.message}</p><p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p><button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 재시작</button></div>`;
     }
 }
 
