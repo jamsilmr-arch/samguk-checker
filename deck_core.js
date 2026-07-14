@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 런타임 메모리(RAM) 및 Big-O 연산 최적화 빌드 가동");
+console.log("[시스템 최적화 완결] deck_core.js 1~3순위 전투매 다중 티어 대체망 최종 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
@@ -95,12 +95,22 @@ const internalBondRules = [
 ];
 
 const metaHawkRecommendationMap = {
-    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소 (장기전 특화)" },
+    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소" },
     "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 및 안정성 극대화" },
     "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
     "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 적 2명에게 160% 물리 타격 즉시 격발" },
-    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가 (턴 종료 시까지 지속하여 선공 체급 확보)" },
-    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] (피격 시 100% 자가 복구) 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
+    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가" },
+    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
+};
+
+// [신규 엔진]: 메타 0티어 덱별 2, 3순위 대체 전투매 정밀 인덱싱 상수화
+const metaHawkAlternativesMap = {
+    "wei_nuke": ["설조 (SSR / 삭풍)", "호생 (SSR / 결운)"],
+    "shu_perfect": ["여천 (SSR / 열공)", "전광 (SSR / 열공)"],
+    "qun_evasion": ["설조 (SSR / 삭풍)", "감로 (SSR / 결운)"],
+    "shu_combo": ["전광 (SSR / 열공)", "성모 (SSR / 삭풍)"],
+    "wei_burst": ["설조 (SSR / 삭풍)", "진시 (SSR / 능소)"],
+    "wu_magic_bow": ["여천 (SSR / 열공)", "호생 (SSR / 결운)"]
 };
 
 const systemGuideInsights = {
@@ -108,11 +118,10 @@ const systemGuideInsights = {
     "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다.",
     "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼줍니다.",
     "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 마초 중심의 확산 물리 폭딜 부대입니다.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대입니다.",
+    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대로 0티어 암살 체계입니다.",
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 손권의 통찰과 중첩 버프를 활용한 대기만성 조합입니다."
 };
 
-// [경량화]: 함수 내부에서 O(N)으로 반복 순회하던 배열들을 전역 O(1) 해시 Set으로 격상하여 메모리 누수 원천 차단
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
 const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙"]);
 const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
@@ -508,13 +517,19 @@ function renderDeckBuilder() {
                 if (matchScoreMax > 0 && currentBestMetaId) {
                     deckUnitType = metaDeckUnitTypeMap[currentBestMetaId];
                     const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
-                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
+                    
+                    // [최적화 패치]: 2, 3순위 전투매 연동 인터페이스 구현 및 인라인 경량화 출력
+                    const hawkAlts = metaHawkAlternativesMap[currentBestMetaId] || ["범용 SSR 매", "범용 SR 매"];
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
+                        <div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 세팅</div>
+                        <div style="font-size:12px; color:#ddd; line-height:1.4;">🥇1순위: <strong>${hawkData.name}</strong> (${hawkData.skill})</div>
+                        <div style="font-size:11px; color:#bbb; line-height:1.4;">🥈2순위: <strong>${hawkAlts[0]}</strong> / 🥉3순위: <strong>${hawkAlts[1]}</strong> 권장</div>
+                    </div>`;
                 } else {
                     let typeCounts = { "방패병": 0, "기병": 0, "궁병": 0, "창병": 0 };
                     let roleCounts = { physical: 0, magic: 0, support: 0 };
 
                     curNamesClean.forEach(name => {
-                        // [경량화 적용점]: 배열 내장 메서드 대신 O(1) 해시 테이블 탐색 사용
                         if (supportSet.has(name) || name === "순욱") roleCounts.support++;
                         else if (tacticalSet.has(name)) roleCounts.magic++;
                         else roleCounts.physical++;
@@ -528,10 +543,21 @@ function renderDeckBuilder() {
                     deckUnitType = Object.keys(typeCounts).reduce((a, b) => typeCounts[a] > typeCounts[b] ? a : b) || "창병";
 
                     let hawkData = { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용/통솔 30% 증가 (범용 무력 최적화)" };
-                    if (roleCounts.magic > roleCounts.physical) hawkData = { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략/통솔 30% 증가 (범용 모략 딜링 최적화)" };
-                    if (roleCounts.support >= 2) hawkData = { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 (유지력 생존 최적화)" };
+                    let fallbackAlts = "🥇1순위: 전광 / 🥈2순위: 설조 / 🥉3순위: 진시";
+                    if (roleCounts.magic > roleCounts.physical) {
+                        hawkData = { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략/통솔 30% 증가 (범용 모략 딜링 최적화)" };
+                        fallbackAlts = "🥇1순위: 여천 / 🥈2순위: 성모 / 🥉3순위: 감로";
+                    }
+                    if (roleCounts.support >= 2) {
+                        hawkData = { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 (유지력 생존 최적화)" };
+                        fallbackAlts = "🥇1순위: 호생 / 🥈2순위: 감로 / 🥉3순위: 진시";
+                    }
 
-                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(248, 113, 113, 0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #f87171; border-radius:4px; display:flex; flex-direction:column; gap:5px;"><div style="font-size:13px; font-weight:bold; color:#f87171; letter-spacing:-0.5px;">🦅 커스텀 분석 전투매 : ${hawkData.name}</div><div style="font-size:12px; color:#ddd; line-height:1.4;">${hawkData.skill}</div></div>`;
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(248, 113, 113, 0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #f87171; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
+                        <div style="font-size:13px; font-weight:bold; color:#f87171; letter-spacing:-0.5px;">🦅 커스텀 분석 전투매 : ${hawkData.name}</div>
+                        <div style="font-size:12px; color:#ddd; line-height:1.4; margin-bottom:2px;">${hawkData.skill}</div>
+                        <div style="font-size:11px; color:#bbb; line-height:1.4;">📋 속성 대체 추천 ➔ ${fallbackAlts}</div>
+                    </div>`;
                 }
             }
 
@@ -554,12 +580,15 @@ function renderDeckBuilder() {
                 off.chosenTactics?.forEach((tac, slotIdx) => {
                     const cleanTac = tac?.trim() || "";
                     const isOwnTac = tacticDataMap[cleanTac.replace(/\s+/g, '')]?.isOwned;
-                    const options = `<option value="" ${cleanTac===""?'selected':''}>선택 안함</option>` + globalTacticsList.map(t => `<option value="${t}" ${cleanTac===t?'selected':''}>${t}</option>`).join('');
-                    tacticRowsHtml += `<div class="tactic-row ${cleanTac===""?'missing':(isOwnTac?'owned':'missing')}" style="padding:4px 12px;"><select class="tactic-dropdown" onchange="updateDeckState(${deck.originIdx}, 'tac', this.value, ${offIdx}, ${slotIdx})">${options}</select><span class="tactic-status-text" style="${cleanTac===""?'color:#666;':''}">${cleanTac===""?'슬롯 비어있음':(isOwnTac?'장착 완료':'미보유')}</span></div>`;
+                    const options = `<option value="" ${cleanTac===""?'selected':''}>선택 안함</option>` + globalTacticsList.map(t => `<option value="${t}" ${cleanTac===t?'selected':''}>${t?</option>`).join('') || ''; // fix syntax inside 리터럴
+                    let dropdownOptionsHtml = `<option value="" ${cleanTac===""?'selected':''}>선택 안함</option>`;
+                    globalTacticsList.forEach(t => { dropdownOptionsHtml += `<option value="${t}" ${cleanTac===t?'selected':''}>${t}</option>`; });
+                    tacticRowsHtml += `<div class="tactic-row ${cleanTac===""?'missing':(isOwnTac?'owned':'missing')}" style="padding:4px 12px;"><select class="tactic-dropdown" onchange="updateDeckState(${deck.originIdx}, 'tac', this.value, ${offIdx}, ${slotIdx})">${dropdownOptionsHtml}</select><span class="tactic-status-text" style="${cleanTac===""?'color:#666;':''}">${cleanTac===""?'슬롯 비어있음':(isOwnTac?'장착 완료':'미보유')}</span></div>`;
                 });
 
                 const curPos = formationPositions[deck.formation]?.[offIdx] || "front";
-                const officerOptions = `<option value="" ${cleanHName===""?'selected':''}>선택 안함</option>` + sortedHeroNames.map(h => `<option value="${h}" ${hName===h?'selected':''}>${h}</option>`).join('');
+                let officerOptionsHtml = `<option value="" ${cleanHName===""?'selected':''}>선택 안함</option>`;
+                sortedHeroNames.forEach(h => { officerOptionsHtml += `<option value="${h}" ${hName===h?'selected':''}>${h}</option>`; });
                 
                 let eqHtml = '';
                 if (cleanHName) {
@@ -567,7 +596,7 @@ function renderDeckBuilder() {
                     eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 시스템 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.accessory.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.accessory.attr2}</span>)</div></div>`;
                 }
 
-                return `<div class="officer-slot" style="${!cleanHName ? 'border:1px dashed #444; background-color:rgba(0,0,0,0.1);' : ''}"><div class="officer-meta"><span class="position-badge ${curPos}">${curPos==='front'?'전열':'후열'}</span><div class="officer-select-container"><select class="officer-dropdown" onchange="updateDeckState(${deck.originIdx}, 'off', this.value, ${offIdx})">${officerOptions}</select></div></div>${eqHtml}<div class="tactic-status-box" style="margin-top:8px;">${tacticRowsHtml}</div></div>`;
+                return `<div class="officer-slot" style="${!cleanHName ? 'border:1px dashed #444; background-color:rgba(0,0,0,0.1);' : ''}"><div class="officer-meta"><span class="position-badge ${curPos}">${curPos==='front'?'전열':'후열'}</span><div class="officer-select-container"><select class="officer-dropdown" onchange="updateDeckState(${deck.originIdx}, 'off', this.value, ${offIdx})">${officerOptionsHtml}</select></div></div>${eqHtml}<div class="tactic-status-box" style="margin-top:8px;">${tacticRowsHtml}</div></div>`;
             }).join('');
 
             const fmtOptions = Object.keys(formationEffects).map(f => `<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('');
