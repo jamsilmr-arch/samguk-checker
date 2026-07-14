@@ -1,7 +1,7 @@
-console.log("[시스템 최적화 완결] deck_core.js 전투매 랜덤 속성 1~3순위 정밀 분석 엔진 기동");
+console.log("[시스템 분석] deck_core.js 점수 연산기(Score Engine) 다차원 무결성 동기화 기동");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기
 // ==========================================================================
 const internalMasterOfficerUniqueTacticMap = {
     "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
@@ -30,7 +30,8 @@ const internalMasterTacticNames = [
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
-    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
+    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식",
+    "파진최견", "천하무적", "일기당천", "귀신정정"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
 const tacticAlternativesMap = {
@@ -112,7 +113,6 @@ const metaHawkAlternativesMap = {
     "wu_magic_bow": ["여천 (SSR / 열공)", "호생 (SSR / 결운)"]
 };
 
-// [신규 엔진]: 매의 랜덤 속성 1, 2, 3순위를 덱 기믹에 맞춰 완벽 통제 및 역산
 const metaHawkRandomAttributesMap = {
     "wei_nuke": {
         attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
@@ -221,39 +221,87 @@ function getOfficerNamesBridge() {
 // ==========================================================================
 // LAYER 3: 코어 연산 엔진 구역
 // ==========================================================================
+
+// [신규 패치]: 순서 제약, 이중 감점, 하이브리드 편향 오류를 완벽히 통제하는 다차원 스코어링 모듈 적용
 function calculateStrictDeckScore(deck) {
     if (!deck?.officers || !Array.isArray(deck.officers)) return 0;
-    const currentNames = deck.officers.map(o => o?.name?.toString().trim() || "").filter(Boolean);
-    if (!currentNames.length) return 0;
+    const curNamesClean = deck.officers.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean);
+    if (!curNamesClean.length) return 0;
 
-    let bestMeta = analyzedMetaArchetypes[0], maxMatch = -1;
+    let bestMatchDeck = analyzedMetaArchetypes[0], maxMatchScore = -1;
 
-    analyzedMetaArchetypes.forEach(meta => {
-        let matchCount = 0;
-        meta.officers.forEach((mo, idx) => {
-            if (currentNames.includes(mo.name)) matchCount += 1;
-            if (deck.officers[idx]?.name === mo.name) matchCount += 0.5;
+    analyzedMetaArchetypes.forEach(metaDeck => {
+        let matchScore = 0;
+        metaDeck.officers.forEach((metaOff, idx) => {
+            const mName = metaOff.name.replace(/\s+/g, '');
+            if (curNamesClean.includes(mName)) matchScore += 1; 
+            if (curNamesClean[idx] === mName) matchScore += 0.5;
         });
-        if (matchCount > maxMatch) { maxMatch = matchCount; bestMeta = meta; }
+        if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = metaDeck; }
     });
 
-    if (maxMatch === 0) return 0; 
+    if (maxMatchScore === 0) return 0; 
 
     let score = 100;
-    if (deck.formation !== bestMeta.formation) score -= 10;
+    const curFmt = deck.formation?.toString().trim() || "";
+    const idealFmt = bestMatchDeck.formation.trim();
+    if (curFmt.replace(/\s+/g, '') !== idealFmt.replace(/\s+/g, '')) score -= 10;
 
-    bestMeta.officers.forEach((metaOff, idx) => {
-        const userOff = deck.officers[idx];
-        if (!userOff?.name) return score -= 30;
-        if (userOff.name !== metaOff.name) score -= 20;
+    bestMatchDeck.officers.forEach((metaOff, metaIdx) => {
+        const mName = metaOff.name.replace(/\s+/g, '');
+        const userOffIdx = curNamesClean.indexOf(mName);
 
-        const metaTacs = metaOff.chosenTactics.map(t => t.trim());
-        if (Array.isArray(userOff.chosenTactics)) {
-            userOff.chosenTactics.forEach((userTac, tIdx) => {
-                if ((userTac?.trim() || "") !== metaTacs[tIdx]) score -= 5;
-            });
+        if (userOffIdx === -1) {
+            // 메타 무장 누락 시 치명적 감점
+            score -= 30; 
         } else {
-            score -= 10;
+            // 배치 위치 오등록 시 독립적 소폭 감점 (-10점)
+            const curRow = formationPositions[curFmt]?.[userOffIdx] || "front";
+            const idealRow = formationPositions[idealFmt]?.[metaIdx] || "front";
+            if (curRow !== idealRow) score -= 10;
+
+            const userOff = deck.officers[userOffIdx];
+            const metaTacsClean = metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
+            let unmatchTac = [...metaTacsClean];
+            
+            let emptyOrWrongCount = 0;
+            let altCount = 0;
+
+            if (Array.isArray(userOff.chosenTactics)) {
+                // 1. 순서 무관하게 1순위 일치 전법 먼저 소거
+                userOff.chosenTactics.forEach(tac => {
+                    const cleanTac = tac?.toString().trim().replace(/\s+/g, '') || "";
+                    const exactIdx = unmatchTac.indexOf(cleanTac);
+                    if (exactIdx !== -1) unmatchTac.splice(exactIdx, 1);
+                });
+
+                // 2. 남은 전법들이 대체(빌드업) 전법인지 빈 슬롯/오답인지 분석
+                userOff.chosenTactics.forEach(tac => {
+                    const cleanTac = tac?.toString().trim().replace(/\s+/g, '') || "";
+                    if (cleanTac !== "" && !metaTacsClean.includes(cleanTac)) {
+                        let isAlt = false;
+                        for (let i = 0; i < unmatchTac.length; i++) {
+                            const pTac = unmatchTac[i];
+                            const alts = tacticAlternativesMap[pTac] || [];
+                            if (alts.includes(cleanTac)) {
+                                isAlt = true;
+                                unmatchTac.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (isAlt) altCount++;
+                        else emptyOrWrongCount++;
+                    } else if (cleanTac === "") {
+                        emptyOrWrongCount++;
+                    }
+                });
+            } else {
+                emptyOrWrongCount += 2;
+            }
+
+            // 하이브리드 차등 감점 적용: 빌드업 전법(-2점), 미배치/오답(-5점)
+            score -= (altCount * 2);
+            score -= (emptyOrWrongCount * 5);
         }
     });
 
