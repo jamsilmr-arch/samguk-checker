@@ -1,7 +1,7 @@
-console.log("[시스템 분석] deck_core.js 데이터 무결성 복구 (인연 효과 마스터 DB 전체 롤백 기동)");
+console.log("[시스템 분석] deck_core.js 앞서버 랭커 원본 메타 롤백 및 하이브리드/추격 전법 메커니즘 교정 기동");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
 // ==========================================================================
 const internalMasterOfficerUniqueTacticMap = {
     "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
@@ -30,9 +30,10 @@ const internalMasterTacticNames = [
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
-    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식"
+    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식", "사소도"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
 
+// [수정 완결] 만부막적, 용왕직전 등 추격 전법에 대한 2~3순위 대체망 원복 및 교정
 const tacticAlternativesMap = {
     "횡징폭렴": ["동구적개", "동장철벽"], "이퇴위진": ["미우주무", "천시지리"],
     "용맹무쌍": ["만부막적", "비사주석"], "질풍노도": ["암전난방", "교취호탈"],
@@ -40,7 +41,9 @@ const tacticAlternativesMap = {
     "반객위주": ["일고작기", "사생취의"], "유좌유용": ["휴양생식", "제곤부위"],
     "선등함진": ["만천과해", "만전제발"], "강유겸제": ["동장철벽", "천시지리"],
     "진퇴유도": ["위위구조", "동구적개"], "견진연봉": ["동장철벽", "순수견양"],
-    "위위구조": ["태청단경", "현호제세"], "용왕직전": ["만부막적", "과하탁교"],
+    "위위구조": ["태청단경", "현호제세"], 
+    "용왕직전": ["천리추격", "암전난방"], // 여포 추격(돌격) 대체
+    "만부막적": ["용왕직전", "천리추격"], // 여포 추격(돌격) 대체
     "전위위안": ["태청단경", "현호제세"], "안영찰채": ["위위구조", "미우주무"],
     "일고작기": ["사생취의", "용맹무쌍"], "여자동포": ["동구적개", "천시지리"],
     "양의화생": ["기문둔갑", "화소적벽"], "수상개화": ["요사여신", "사생취의"],
@@ -49,8 +52,9 @@ const tacticAlternativesMap = {
     "동구적개": ["안영찰채", "위위구조"], "사생취의": ["일고작기", "용맹무쌍"],
     "양초선행": ["문치무공", "휴양생식"], "휴양생식": ["양초선행", "현호제세"],
     "동장철벽": ["견불가최", "천시지리"], "사면초가": ["기문둔갑", "화소적벽"],
-    "만부막적": ["용맹무쌍", "동장철벽"], "횡소천군": ["용왕직전", "강유겸제"], 
-    "천리추격": ["극적제승", "용맹무쌍"], "암전난방": ["극적제승", "질풍노도"]
+    "횡소천군": ["강유겸제", "용맹무쌍"], 
+    "천리추격": ["극적제승", "암전난방"], "암전난방": ["극적제승", "질풍노도"],
+    "사소도": ["이간계", "낙정하석"]
 };
 
 const formationEffects = {
@@ -67,92 +71,68 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
+// [랭커 원본 100% 롤백]: 추격 전법(만부막적, 용왕직전) 및 물리/모략 복합 패시브(반객위주)를 정확히 반영
 const analyzedMetaArchetypes = [
-    { id: "wei_nuke", name: "위나라 방패 핵폭탄 덱", concept: "사마의의 후반 캐리력과 조조(제왕)의 버프를 결합한 0티어 장기전 특화 방패병 조합", formation: "추형진", officers: [{ name: "하후돈", chosenTactics: ["견불가최", "유좌유용"] }, { name: "조조(제왕)", chosenTactics: ["횡징폭렴", "동구적개"] }, { name: "사마의", chosenTactics: ["운주유악", "반객위주"] }] },
-    { id: "shu_perfect", name: "촉나라 무상성 창병 덱", concept: "조운이 전열에서 적 제어를 무시하고 폭딜을 넣으며, 후열에서 제어와 힐을 지원하는 0티어 무결점 조합", formation: "어린진", officers: [{ name: "조운", chosenTactics: ["만부막적", "횡소천군"] }, { name: "제갈량", chosenTactics: ["혼수모어", "전위위안"] }, { name: "유비", chosenTactics: ["안영찰채", "동구적개"] }] },
-    { id: "qun_evasion", name: "군웅 무쌍 궁병 덱", concept: "여포가 후열에서 연격 버프를 독식하여 1~2턴 만에 적 주장을 썰어버리는 변칙 0티어 1턴킬 조합", formation: "방원진", officers: [{ name: "좌자", chosenTactics: ["운주유악", "횡징폭렴"] }, { name: "화타", chosenTactics: ["동구적개", "동장철벽"] }, { name: "여포", chosenTactics: ["천리추격", "암전난방"] }] },
-    { id: "shu_combo", name: "촉 연격 폭딜덱", concept: "마초의 광역 폭딜과 서서의 버프를 극대화하는 1티어 안정성 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["횡징폭렴", "이퇴위진"] }, { name: "마초", chosenTactics: ["용맹무쌍", "질풍노도"] }, { name: "서서", chosenTactics: ["문치무공", "혼수모어"] }] },
-    { id: "wei_burst", name: "제왕 위 암살덱", concept: "장료의 적 주장 정밀 저격과 악진/조조(제왕)의 전능 스탯 펌핑을 결합한 속전속결 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["질풍노도", "반객위주"] }, { name: "조조(제왕)", chosenTactics: ["유좌유용", "혼수모어"] }, { name: "악진", chosenTactics: ["선등함진", "강유겸제"] }] },
-    { id: "wu_magic_bow", name: "오 모략 궁병덱", concept: "손권의 버프 중첩과 육항의 크리티컬 지원, 노숙의 스탯 펌핑을 합친 대기만성 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["여자동포", "진퇴유도"] }, { name: "육항", chosenTactics: ["요사여신", "수상개화"] }, { name: "노숙", chosenTactics: ["분성지계", "혼수모어"] }] }
+    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] },
+    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "문치무공", "동구적개"] }] },
+    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] },
+    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "전위위안"] }] },
+    { id: "qun_magic_evasion", name: "군웅 모략 회피 덱 (구행진)", concept: "좌자의 절대 회피망 속에서 우길과 장녕이 지속적인 디버프와 모략 피해로 적을 말려 죽이는 고문형 조합", formation: "구행진", officers: [{ name: "좌자", chosenTactics: ["화겁생기", "전위위안", "안영찰채"] }, { name: "장녕", chosenTactics: ["천의난위", "수상개화", "양의화생"] }, { name: "우길", chosenTactics: ["태평경", "분성지계", "진퇴유도"] }] },
+    { id: "wei_nuke", name: "위나라 방패 핵폭탄 덱 (클래식)", concept: "사마의의 후반 캐리력과 조조(제왕)의 버프를 결합한 장기전 특화 방패병 조합", formation: "추형진", officers: [{ name: "하후돈", chosenTactics: ["견불가최", "유좌유용"] }, { name: "조조(제왕)", chosenTactics: ["횡징폭렴", "동구적개"] }, { name: "사마의", chosenTactics: ["운주유악", "반객위주"] }] }
 ];
 
 const metaDeckUnitTypeMap = {
-    "wei_nuke": "방패병", "shu_perfect": "창병", "qun_evasion": "궁병",
-    "shu_combo": "기병", "wei_burst": "기병", "wu_magic_bow": "궁병"
+    "qun_cavalry": "기병", "wei_assassin": "창병", "wu_magic_bow": "궁병",
+    "shu_combo_spear": "창병", "qun_magic_evasion": "궁병", "wei_nuke": "방패병"
 };
 
-const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군` }));
+// 고유 전법(1번 슬롯)은 판별용 데이터로 분리하고, 2~3번 슬롯만 유저 에디팅 영역으로 기본 파싱
+const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
+    let copy = JSON.parse(JSON.stringify(d));
+    copy.title = `${i + 1}군`;
+    copy.officers.forEach(off => {
+        if(off.chosenTactics.length === 3) off.chosenTactics = off.chosenTactics.slice(1, 3);
+    });
+    return copy;
+});
 
-// [치명적 버그 수정]: 삭제되었던 18종의 부대 인연 효과 데이터를 100% 완전 복구
 const internalBondRules = [
-    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장의 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
+    { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장을 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
     { name: "가모정세", req: 2, heroes: ["조조", "조조(제왕)", "곽가"], effect: "부대 내 인연 무장의 가하는 모략 피해 4% 증가, 받는 무용 피해 4% 감소, 해제 불가." },
     { name: "위실주석", req: 2, heroes: ["하후돈", "하후연"], effect: "부대 내 인연 무장의 파갑 8% 증가, 해제 불가." },
-    { name: "지계강동", req: 2, heroes: ["손견", "손책", "손권", "제)손권", "손상향"], effect: "부대 내 인연 무장의 첫 3년 주동 전법 발동률 4% 증가, 해제 불가." },
-    { name: "고육지계", req: 2, heroes: ["주유", "황개"], effect: "부대 내 인연 무장은 2턴에 행동 시, 적군 1개 대상에게 화상을 부여(행동 시작 시 90% 모략 피해), 2턴 지속." },
-    { name: "금슬화명", req: 2, heroes: ["주유", "소교"], effect: "부대 내 인연 무장의 모략 및 속도가 4% 상승하며, 해제할 수 없습니다." },
-    { name: "주련벽합", req: 2, heroes: ["유비", "유비(제왕)", "손상향"], effect: "부대 내 인연 무장이 받는 모략 피해 8% 감소, 해제 불가." },
-    { name: "형향조두", req: 2, heroes: ["손책", "대교"], effect: "부대 내 인연 무장의 가하는 무용 피해 8% 증가, 해제 불가." },
     { name: "도원결의", req: 3, heroes: ["유비", "유비(제왕)", "관우", "장비"], effect: "부대 내 인연 무장은 3, 6턴 시작 시 1중첩 저항을 획득." },
     { name: "백제탁고", req: 2, heroes: ["제갈량", "조운"], effect: "부대 내 인연 무장의 배반 및 공심 8% 증가, 해제 불가." },
-    { name: "와룡봉추", req: 2, heroes: ["제갈량", "황월영"], effect: "부대 내 인연 무장은 전투 첫 3턴 동안 받는 피해가 4% 감소, 해제 불가." },
-    { name: "호소백문", req: 2, heroes: ["여포", "장료"], effect: "부대 내 인연 무장의 연격률 12% 증가, 해제 불가." },
-    { name: "황천기의", req: 2, heroes: ["장각", "장보"], effect: "부대 내 인연 무장의 고략 6% 증가, 해제 불가." },
-    { name: "호위경주", req: 2, heroes: ["조조", "조조(제왕)", "전위"], effect: "부대 내 인연 무장의 무용과 통솔이 4% 증가하며, 해제할 수 없습니다." },
-    { name: "오모신", req: 2, heroes: ["순욱", "정욱", "곽가", "가후"], effect: "부대 내 인연 무장의 기술 8% 증가, 해제 불가." },
-    { name: "국지동량", req: 2, heroes: ["제갈량", "주유"], effect: "부대 내 인연 무장은 매번 행동 시, 35% 확률로 적군 1개 대상에게 45% 모략 피해." },
-    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." },
     { name: "오자양장", req: 2, heroes: ["장료", "악진", "장합"], effect: "부대 내 인연 무장은 첫 2회차 동안 배반이 18% 상승하며, 해제할 수 없습니다." },
     { name: "동오대도독", req: 2, heroes: ["주유", "육손", "여몽", "육항"], effect: "부대 내 인연 무장의 가하는 모략 피해 7% 증가, 해제 불가." },
-    { name: "유한탁고", req: 2, heroes: ["손권", "제)손권", "육항"], effect: "부대 내 인연 무장이 선후 시작 시, 각성 1중첩 및 저항 1중첩을 획득합니다." },
-    { name: "오호상장", req: 3, heroes: ["관우", "장비", "조운", "황충", "마초"], effect: "부대 내 인연 무장이 장공 8% 증가, 해제 불가." },
-    { name: "서량철기", req: 2, heroes: ["마초", "마대"], effect: "부대 내 인연 무장의 무용 및 장공이 4% 증가하며 해제 불가합니다." },
-    { name: "촉한사모", req: 2, heroes: ["제갈량", "서서"], effect: "부대 내 인연 무장의 모략 및 치료 효과 5% 상승, 해제 불가." },
-    { name: "역사역부", req: 2, heroes: ["제갈량", "강유"], effect: "부대 내 인연 무장의 무용 및 모략 4% 상승, 해제 불가." },
-    { name: "강동호신", req: 2, heroes: ["황개", "정보", "주태", "능통", "정봉"], effect: "부대 내 인연 무장의 통솔 7% 상승, 해제 불가." }
+    { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." }
 ];
 
 const metaHawkRecommendationMap = {
-    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소" },
-    "shu_perfect": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 주입하여 제어기 면역 극대화" },
-    "qun_evasion": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 1턴 킬 확률 극대화" },
-    "shu_combo": { name: "설조 (SSR / 삭풍)", skill: "턴 종료 시 무용 최고 아군 물리피해 15% 버프 유지 및 160% 즉시 격발" },
-    "wei_burst": { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용 30% 및 통솔 30% 증가" },
-    "wu_magic_bow": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 1중첩 [각성] 확정 주입하여 통제기 면역" }
+    "qun_cavalry": { name: "열공 (SSR)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 돌파력 극대화" },
+    "wei_assassin": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군 물리피해 버프 및 장료의 마무리를 돕는 160% 딜" },
+    "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" },
+    "shu_combo_spear": { name: "열공 (SSR)", skill: "턴 시작 시 무용/통솔 증가로 마초의 스펙 펌핑" },
+    "qun_magic_evasion": { name: "능소 (SSR)", skill: "전투 시작 시 아군 피해 감소 및 저항으로 좌자의 회피 공백 커버" },
+    "wei_nuke": { name: "진시 (SSR / 능소)", skill: "전투 시작 시 아군 [절극] 부여. 매 턴 아군 전체 피해 30% 감소" }
 };
 
 const metaHawkAlternativesMap = {
-    "wei_nuke": ["설조 (SSR / 삭풍)", "호생 (SSR / 결운)"],
-    "shu_perfect": ["여천 (SSR / 열공)", "전광 (SSR / 열공)"],
-    "qun_evasion": ["설조 (SSR / 삭풍)", "감로 (SSR / 결운)"],
-    "shu_combo": ["전광 (SSR / 열공)", "성모 (SSR / 삭풍)"],
-    "wei_burst": ["설조 (SSR / 삭풍)", "진시 (SSR / 능소)"],
-    "wu_magic_bow": ["여천 (SSR / 열공)", "호생 (SSR / 결운)"]
+    "qun_cavalry": ["설조 (SSR)", "전광 (SSR)"],
+    "wei_assassin": ["전광 (SSR)", "설조 (SSR)"],
+    "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"],
+    "shu_combo_spear": ["전광 (SSR)", "설조 (SSR)"],
+    "qun_magic_evasion": ["전우 (SSR)", "감로 (SSR)"],
+    "wei_nuke": ["설조 (SSR)", "호생 (SSR)"]
 };
 
 const metaHawkRandomAttributesMap = {
-    "wei_nuke": {
-        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
-        attr2: { rank1: "받는 피해 감소 +8%", rank2: "모략 피해 감소 +10%", rank3: "무용 피해 감소 +10%" },
-        attr3: { rank1: "치유 효과 상승 +12%", rank2: "피격 시 10% 저항", rank3: "디버프 해제(확률)" }
-    },
-    "shu_perfect": {
-        attr1: { rank1: "전능(모든 스탯) +6%", rank2: "무용 +10%", rank3: "통솔 +10%" },
-        attr2: { rank1: "가하는 피해 증가 +8%", rank2: "받는 피해 감소 +8%", rank3: "전법 발동률 +4%" },
-        attr3: { rank1: "첫 턴 제어 면역", rank2: "무용 타격 시 15% 흡혈", rank3: "모면(회피) +6%" }
-    },
-    "qun_evasion": {
+    "qun_cavalry": {
         attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
         attr2: { rank1: "파갑(방어 관통) +10%", rank2: "연격률 +8%", rank3: "가하는 물리 피해 +10%" },
         attr3: { rank1: "첫 턴 확정 선공", rank2: "돌격 전법 데미지 +15%", rank3: "평타 시 10% 혼란" }
     },
-    "shu_combo": {
-        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "전능 +6%" },
-        attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
-        attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
-    },
-    "wei_burst": {
+    "wei_assassin": {
         attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
         attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "적 주장 타격 보너스" },
         attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "적 회피 15% 무시" }
@@ -162,6 +142,21 @@ const metaHawkRandomAttributesMap = {
         attr2: { rank1: "가하는 모략 피해 +10%", rank2: "능동 전법 발동률 +5%", rank3: "받는 피해 감소 +8%" },
         attr3: { rank1: "치유 효과 상승 +12%", rank2: "매 턴 디버프 해제", rank3: "모면(회피) +6%" }
     },
+    "shu_combo_spear": {
+        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "전능 +6%" },
+        attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
+        attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
+    },
+    "qun_magic_evasion": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
+        attr2: { rank1: "모략 피해 감소 +10%", rank2: "받는 피해 감소 +8%", rank3: "무용 피해 감소 +10%" },
+        attr3: { rank1: "피격 시 10% 저항", rank2: "치유 효과 상승 +12%", rank3: "모면(회피) +6%" }
+    },
+    "wei_nuke": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
+        attr2: { rank1: "받는 피해 감소 +8%", rank2: "모략 피해 감소 +10%", rank3: "무용 피해 감소 +10%" },
+        attr3: { rank1: "치유 효과 상승 +12%", rank2: "피격 시 10% 저항", rank3: "디버프 해제(확률)" }
+    },
     "custom": {
         attr1: { rank1: "전능 +5%", rank2: "통솔 +10%", rank3: "무용 +10%" },
         attr2: { rank1: "가하는 피해 증가 +6%", rank2: "받는 피해 감소 +6%", rank3: "전법 발동률 +3%" },
@@ -170,19 +165,19 @@ const metaHawkRandomAttributesMap = {
 };
 
 const systemGuideInsights = {
-    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증(+8%) 버프를 독식하게 만드는 0티어 방패병 덱입니다.",
-    "shu_perfect": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 금강불괴 조운을 전열에 배치해 적의 제어기를 온몸으로 흡수하고, 후열의 제갈량과 유비가 무한 동력으로 힐과 제어를 뿜어내는 0티어 무결점 창병 덱입니다.",
-    "qun_evasion": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 여포를 후열에 혼자 두어 '방원진'의 연격률(+28%) 버프를 독식하게 만드는 변칙 1턴 킬 궁병 덱입니다. 좌자와 화타가 전열에서 회피와 뎀감으로 어그로를 빼줍니다.",
-    "shu_combo": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 마초 중심의 확산 물리 폭딜 부대입니다.",
-    "wei_burst": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 장료를 필두로 적 주장을 선제 타격하는 속전속결 부대로 0티어 암살 체계입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동 인사이트]</strong> 손권의 통찰과 중첩 버프를 활용한 대기만성 조합입니다."
+    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다.",
+    "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
+    "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
+    "qun_magic_evasion": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 좌자의 확정 회피망 안에서 장녕과 우길이 적을 천천히 말려 죽이는 악랄한 유지력 기반 모략 고문 조합입니다.",
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증 버프를 독식하게 만드는 클래식 0티어 방패병 덱입니다."
 };
 
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
-const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙"]);
+const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙", "원소", "동탁"]);
 const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
-const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "태사자"]);
-const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕"]);
+const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "태사자", "원소", "악진"]);
+const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕", "손권", "노숙", "좌자"]);
 
 // ==========================================================================
 // LAYER 2: 3중 도감 복구 및 스마트 분류 엔진 인터페이스
@@ -248,8 +243,8 @@ function calculateStrictDeckScore(deck) {
 
     analyzedMetaArchetypes.forEach(metaDeck => {
         let matchScore = 0;
-        metaDeck.officers.forEach((metaOff, idx) => {
-            const mName = metaOff.name.replace(/\s+/g, '');
+        metaDeck.officers.forEach((mo, idx) => {
+            const mName = mo.name.replace(/\s+/g, '');
             if (curNamesClean.includes(mName)) matchScore += 1; 
             if (curNamesClean[idx] === mName) matchScore += 0.5;
         });
@@ -275,7 +270,8 @@ function calculateStrictDeckScore(deck) {
             if (curRow !== idealRow) score -= 10;
 
             const userOff = deck.officers[userOffIdx];
-            const metaTacsClean = metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
+            // 마스터 배열은 3개(고유포함)이므로 2,3번 슬롯 데이터만 추출 (index 1, 2)
+            const metaTacsClean = metaOff.chosenTactics.length === 3 ? [metaOff.chosenTactics[1].trim().replace(/\s+/g, ''), metaOff.chosenTactics[2].trim().replace(/\s+/g, '')] : metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
             let unmatchTac = [...metaTacsClean];
             
             let emptyOrWrongCount = 0;
@@ -404,9 +400,10 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 fb.logs.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRow === 'front' ? '전열' : '후열'}</strong> 포지션이어야 하나, 현재 <strong>${curRow === 'front' ? '전열' : '후열'}</strong> 슬롯에 가 있습니다.` });
             }
 
-            const metaTacsClean = metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
+            // 1번(고유) 스킵하고 2,3번 슬롯만 파싱
+            const metaTacsClean = metaOff.chosenTactics.length === 3 ? [metaOff.chosenTactics[1].trim().replace(/\s+/g, ''), metaOff.chosenTactics[2].trim().replace(/\s+/g, '')] : metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
             
-            let unmatchTac = metaOff.chosenTactics.filter(t => {
+            let unmatchTac = metaTacsClean.filter(t => {
                 const cT = t.trim().replace(/\s+/g, '');
                 return !allEquippedTacticsInDeck.includes(cT);
             });
@@ -446,7 +443,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                                 const primaryTac = unmatchTac.splice(matchedPrimaryIdx, 1)[0];
                                 fb.logs.push({ 
                                     type: 'info', 
-                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 추후 덱의 최고점을 위해 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드하는 것을 목표로 하십시오.` 
+                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 추후 최고점을 위해 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드를 목표로 하십시오.` 
                                 });
                             } else {
                                 const primaryTac = unmatchTac.shift();
@@ -481,7 +478,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     return fb;
 }
 
-// [버그 수정 완료]: 26종 전체 인연 규칙망 복구 
 function calculateActivatedBond(officers) {
     if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
     const curNames = officers.map(o => o?.name?.toString().trim() || "").filter(Boolean);
