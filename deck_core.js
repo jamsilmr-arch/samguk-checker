@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 함정 덱(클래식) 전면 소거 및 최정예 7대 아키텍처 무결성 기동");
+console.log("[시스템 분석] deck_core.js 랭커 1~5위 절대 기준 정립 및 잔여 덱 전면 삭제 완료");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -74,25 +74,27 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [함정 덱 소거 완료]: 클래식 3종(위 핵폭탄, 촉 무상성 공덱, 군웅 무쌍 궁병) 전면 삭제 및 최정예 7개 덱 유지
+// [유저 요청 수행]: 기존 덱 싹 지우고 앞서버 랭커 1~5위 덱 5종으로만 DB 구성
 const analyzedMetaArchetypes = [
-    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 1위/5위 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "혼수모어", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "동구적개", "강유겸제"] }] },
-    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 2위 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "혼수모어"] }] },
-    { id: "shu_evasion_bangwon", name: "촉나라 황제강 디버프 덱 (방원진)", concept: "황충이 전열에서 공방을 수행하고 제갈량의 보호 속에서 후열 강유가 적의 스탯을 무한 강탈하는 랭커 3위 조합", formation: "방원진", officers: [{ name: "황충", chosenTactics: ["적혈도", "강유겸제", "진퇴유도"] }, { name: "제갈량", chosenTactics: ["초선차전", "전위위안", "안영찰채"] }, { name: "강유", chosenTactics: ["담대여두", "반객위주", "일고작기"] }] },
-    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] },
-    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] }
+    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "문치무공", "동구적개"] }] },
+    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 랭커 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] },
+    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "전위위안"] }] },
+    { id: "qun_magic_evasion", name: "군웅 모략 회피 덱 (구행진)", concept: "좌자의 절대 회피망 속에서 우길과 장녕이 지속적인 디버프와 모략 피해로 적을 말려 죽이는 랭커 조합", formation: "구행진", officers: [{ name: "좌자", chosenTactics: ["화겁생기", "전위위안", "안영찰채"] }, { name: "장녕", chosenTactics: ["천의난위", "수상개화", "양의화생"] }, { name: "우길", chosenTactics: ["태평경", "분성지계", "진퇴유도"] }] },
+    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 랭커 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] }
 ];
 
 const metaDeckUnitTypeMap = {
-    "wei_assassin": "창병", "shu_combo_spear": "창병", "shu_evasion_bangwon": "궁병",
-    "shu_emperor_chu": "기병", "shu_defense_spear": "창병", "qun_cavalry": "기병",
-    "wu_magic_bow": "궁병"
+    "wei_assassin": "창병",
+    "wu_magic_bow": "궁병",
+    "shu_combo_spear": "창병",
+    "qun_magic_evasion": "방패병", 
+    "qun_cavalry": "기병"
 };
 
-const defaultPresetDecks = analyzedMetaArchetypes.slice(0, 5).map((d, i) => {
+const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => {
     let copy = JSON.parse(JSON.stringify(d));
     copy.title = `${i + 1}군`;
-    copy.unitType = "";
+    copy.unitType = ""; 
     copy.officers.forEach(off => {
         if(off.chosenTactics.length === 3) off.chosenTactics = off.chosenTactics.slice(1, 3);
     });
@@ -112,23 +114,19 @@ const internalBondRules = [
 ];
 
 const metaHawkRecommendationMap = {
-    "wei_assassin": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소 및 [진시/전우] 스킬 연동 최적화" },
-    "shu_combo_spear": { name: "능소 (SSR)", skill: "전투 시작 시 아군 [전우] 효과 활성화로 안정적 연격 딜 수급" },
-    "shu_evasion_bangwon": { name: "결운 (SSR)", skill: "턴 시작 시 병력 최저 아군 치료 및 [호생] 기믹을 통한 궁병 생존력 보완" },
-    "shu_emperor_chu": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군의 물리 피해 15% 버프 및 [설조] 공격 발동" },
-    "shu_defense_spear": { name: "감로 (SSR / 결운)", skill: "전투 시작 시 아군 [치유] 및 제어기 면역으로 수비력 극대화" },
-    "qun_cavalry": { name: "열공 (SSR)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 돌파력 극대화" },
-    "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" }
+    "wei_assassin": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군 물리피해 버프 및 장료의 마무리를 돕는 160% 딜" },
+    "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" },
+    "shu_combo_spear": { name: "열공 (SSR)", skill: "턴 시작 시 무용/통솔 증가로 마초의 스펙 펌핑" },
+    "qun_magic_evasion": { name: "능소 (SSR)", skill: "전투 시작 시 아군 피해 감소 및 저항으로 좌자의 회피 공백 커버" },
+    "qun_cavalry": { name: "열공 (SSR)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 돌파력 극대화" }
 };
 
 const metaHawkAlternativesMap = {
-    "wei_assassin": ["전광 (SSR)", "설조 (SSR)"],
+    "wei_assassin": ["설조 (SSR)", "전광 (SSR)"],
+    "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"],
     "shu_combo_spear": ["전광 (SSR)", "설조 (SSR)"],
-    "shu_evasion_bangwon": ["감로 (SSR)", "전우 (SSR)"],
-    "shu_emperor_chu": ["전광 (SSR)", "성모 (SSR)"],
-    "shu_defense_spear": ["호생 (SSR)", "능소 (SSR)"],
-    "qun_cavalry": ["설조 (SSR)", "전광 (SSR)"],
-    "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"]
+    "qun_magic_evasion": ["전우 (SSR)", "감로 (SSR)"],
+    "qun_cavalry": ["전광 (SSR)", "설조 (SSR)"]
 };
 
 const metaHawkRandomAttributesMap = {
@@ -137,35 +135,25 @@ const metaHawkRandomAttributesMap = {
         attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "적 주장 타격 보너스" },
         attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "적 회피 15% 무시" }
     },
+    "wu_magic_bow": {
+        attr1: { rank1: "모략 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "능동 전법 발동률 +5%", rank3: "받는 피해 감소 +8%" },
+        attr3: { rank1: "치유 효과 상승 +12%", rank2: "매 턴 디버프 해제", rank3: "모면(회피) +6%" }
+    },
     "shu_combo_spear": {
         attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "전능 +6%" },
         attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
         attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
     },
-    "shu_evasion_bangwon": {
-        attr1: { rank1: "모략 +12%", rank2: "전능 +6%", rank3: "통솔 +10%" },
-        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "받는 피해 감소 +8%", rank3: "치유 효과 상승 +12%" },
-        attr3: { rank1: "모면(회피) +6%", rank2: "매 턴 디버프 해제", rank3: "피격 시 10% 저항" }
-    },
-    "shu_emperor_chu": {
-        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
-        attr2: { rank1: "가하는 물리 피해 +10%", rank2: "연격률 +8%", rank3: "가하는 피해 증가 +8%" },
-        attr3: { rank1: "첫 턴 확정 선공", rank2: "돌격 전법 데미지 +15%", rank3: "무용 타격 시 15% 흡혈" }
-    },
-    "shu_defense_spear": {
-        attr1: { rank1: "통솔 +12%", rank2: "전능 +6%", rank3: "최대 병력 +8%" },
-        attr2: { rank1: "받는 피해 감소 +8%", rank2: "모략 피해 감소 +10%", rank3: "무용 피해 감소 +10%" },
-        attr3: { rank1: "치유 효과 상승 +12%", rank2: "피격 시 10% 저항", rank3: "디버프 해제(확률)" }
+    "qun_magic_evasion": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
+        attr2: { rank1: "모략 피해 감소 +10%", rank2: "받는 피해 감소 +8%", rank3: "무용 피해 감소 +10%" },
+        attr3: { rank1: "피격 시 10% 저항", rank2: "치유 효과 상승 +12%", rank3: "모면(회피) +6%" }
     },
     "qun_cavalry": {
         attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
         attr2: { rank1: "파갑(방어 관통) +10%", rank2: "연격률 +8%", rank3: "가하는 물리 피해 +10%" },
         attr3: { rank1: "첫 턴 확정 선공", rank2: "돌격 전법 데미지 +15%", rank3: "평타 시 10% 혼란" }
-    },
-    "wu_magic_bow": {
-        attr1: { rank1: "모략 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
-        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "능동 전법 발동률 +5%", rank3: "받는 피해 감소 +8%" },
-        attr3: { rank1: "치유 효과 상승 +12%", rank2: "매 턴 디버프 해제", rank3: "모면(회피) +6%" }
     },
     "custom": {
         attr1: { rank1: "전능 +5%", rank2: "통솔 +10%", rank3: "무용 +10%" },
@@ -176,12 +164,10 @@ const metaHawkRandomAttributesMap = {
 
 const systemGuideInsights = {
     "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
     "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
-    "shu_evasion_bangwon": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 황충이 전열을 버티고 제갈량의 보호막 안에서 강유가 적의 스탯을 무한 강탈하는 변칙 방원진 덱입니다.",
-    "shu_emperor_chu": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 유비(제왕)의 전열 토템 탱킹 아래 후열 장비와 강유가 추형진 가피증을 받아 물리 돌격력을 몰아치는 극공 덱입니다.",
-    "shu_defense_spear": "💡 <strong style='color:#a855f7;'>[방어 덱 특화 로직]</strong> 공격적인 돌파를 포기하는 대신, 조운과 제갈량의 단단한 맷집에 강유의 유틸리티를 섞어 거점 수비 및 적 에이스 부대 소모전에 최적화된 우주방어 덱입니다.",
-    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다."
+    "qun_magic_evasion": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 좌자의 확정 회피망 안에서 장녕과 우길이 적을 천천히 말려 죽이는 악랄한 유지력 기반 모략 고문 조합입니다.",
+    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다."
 };
 
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
@@ -191,7 +177,7 @@ const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", 
 const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "감녕", "황월영", "육항", "우길", "초선", "장보", "장녕", "손권", "노숙", "좌자"]);
 
 // ==========================================================================
-// LAYER 2: 3중 도감 복구 및 스마트 분류 엔진 인터페이스
+// LAYER 2: 스마트 분류 엔진 인터페이스
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
@@ -337,7 +323,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     analyzedMetaArchetypes.forEach(metaDeck => {
         let matchScore = 0;
         metaDeck.officers.forEach((metaOff, idx) => {
-            const mName = metaOff.name.replace(/\s+/g, '');
+            const mName = mo.name.replace(/\s+/g, '');
             if (curNames.includes(mName)) matchScore += 1; 
             if (curNames[idx] === mName) matchScore += 0.5;
         });
@@ -345,7 +331,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     });
 
     if (maxMatchScore === 0) {
-        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 시스템에 등록된 0티어 정답 메타와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 압도적인 성능을 원하신다면 100점 달성을 위한 코어 장수(예: 여포, 장료, 마초 등)를 기반으로 덱을 재설계해 보십시오.` });
+        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 시스템에 등록된 0티어 랭커 메타와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 압도적인 성능을 원하신다면 100점 달성을 위한 코어 장수(예: 여포, 장료, 마초 등)를 기반으로 덱을 재설계해 보십시오.` });
         deck.officers.forEach((off, offIdx) => {
             if (!off?.name) return;
             const hName = off.name.toString().trim();
