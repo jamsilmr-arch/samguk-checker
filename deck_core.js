@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js AI 메타 역추적 기반 원클릭 일괄 자동 교정 엔진 기동");
+console.log("[시스템 분석] deck_core.js 황제강 메타 통합 및 공식 상성 엔진(Matchup Engine) 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -74,19 +74,28 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
+// [신규 로직]: 인게임 공식 병종 상성 규격 정의
+const unitMatchupMap = {
+    "창병": { strong: "기병", weak: "궁병" },
+    "기병": { strong: "방패병", weak: "창병" },
+    "방패병": { strong: "궁병", weak: "기병" },
+    "궁병": { strong: "창병", weak: "방패병" }
+};
+
+// [오류 정정]: 누락되었던 랭커 3위 황제강 방원진 덱(shu_evasion_bangwon) 복원
 const analyzedMetaArchetypes = [
-    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "문치무공", "동구적개"] }] },
-    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 랭커 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] },
-    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "전위위안"] }] },
-    { id: "qun_magic_evasion", name: "군웅 모략 회피 덱 (구행진)", concept: "좌자의 절대 회피망 속에서 우길과 장녕이 지속적인 디버프와 모략 피해로 적을 말려 죽이는 랭커 조합", formation: "구행진", officers: [{ name: "좌자", chosenTactics: ["화겁생기", "전위위안", "안영찰채"] }, { name: "장녕", chosenTactics: ["천의난위", "수상개화", "양의화생"] }, { name: "우길", chosenTactics: ["태평경", "분성지계", "진퇴유도"] }] },
-    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 랭커 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] }
+    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 1위/5위 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "혼수모어", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "동구적개", "강유겸제"] }] },
+    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 2위 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "혼수모어"] }] },
+    { id: "shu_evasion_bangwon", name: "촉나라 황제강 디버프 덱 (방원진)", concept: "황충이 전열에서 공방을 수행하고 제갈량의 보호 속에서 후열 강유가 적의 스탯을 무한 강탈하는 랭커 3위 조합", formation: "방원진", officers: [{ name: "황충", chosenTactics: ["적혈도", "강유겸제", "진퇴유도"] }, { name: "제갈량", chosenTactics: ["초선차전", "전위위안", "안영찰채"] }, { name: "강유", chosenTactics: ["담대여두", "반객위주", "일고작기"] }] },
+    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 랭커 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] },
+    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 랭커 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] }
 ];
 
 const metaDeckUnitTypeMap = {
     "wei_assassin": "창병",
     "wu_magic_bow": "궁병",
     "shu_combo_spear": "창병",
-    "qun_magic_evasion": "방패병", 
+    "shu_evasion_bangwon": "궁병",
     "qun_cavalry": "기병"
 };
 
@@ -116,7 +125,7 @@ const metaHawkRecommendationMap = {
     "wei_assassin": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군 물리피해 버프 및 장료의 마무리를 돕는 160% 딜" },
     "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" },
     "shu_combo_spear": { name: "열공 (SSR)", skill: "턴 시작 시 무용/통솔 증가로 마초의 스펙 펌핑" },
-    "qun_magic_evasion": { name: "능소 (SSR)", skill: "전투 시작 시 아군 피해 감소 및 저항으로 좌자의 회피 공백 커버" },
+    "shu_evasion_bangwon": { name: "결운 (SSR)", skill: "턴 시작 시 병력 최저 아군 치료 및 [호생] 기믹을 통한 궁병 생존력 보완" },
     "qun_cavalry": { name: "열공 (SSR)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 돌파력 극대화" }
 };
 
@@ -124,7 +133,7 @@ const metaHawkAlternativesMap = {
     "wei_assassin": ["설조 (SSR)", "전광 (SSR)"],
     "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"],
     "shu_combo_spear": ["전광 (SSR)", "설조 (SSR)"],
-    "qun_magic_evasion": ["전우 (SSR)", "감로 (SSR)"],
+    "shu_evasion_bangwon": ["감로 (SSR)", "전우 (SSR)"],
     "qun_cavalry": ["전광 (SSR)", "설조 (SSR)"]
 };
 
@@ -144,10 +153,10 @@ const metaHawkRandomAttributesMap = {
         attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
         attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
     },
-    "qun_magic_evasion": {
-        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "최대 병력 +8%" },
-        attr2: { rank1: "모략 피해 감소 +10%", rank2: "받는 피해 감소 +8%", rank3: "무용 피해 감소 +10%" },
-        attr3: { rank1: "피격 시 10% 저항", rank2: "치유 효과 상승 +12%", rank3: "모면(회피) +6%" }
+    "shu_evasion_bangwon": {
+        attr1: { rank1: "모략 +12%", rank2: "전능 +6%", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "받는 피해 감소 +8%", rank3: "치유 효과 상승 +12%" },
+        attr3: { rank1: "모면(회피) +6%", rank2: "매 턴 디버프 해제", rank3: "피격 시 10% 저항" }
     },
     "qun_cavalry": {
         attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
@@ -162,11 +171,11 @@ const metaHawkRandomAttributesMap = {
 };
 
 const systemGuideInsights = {
-    "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
-    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
-    "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
-    "qun_magic_evasion": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 좌자의 확정 회피망 안에서 장녕과 우길이 적을 천천히 말려 죽이는 악랄한 유지력 기반 모략 고문 조합입니다.",
-    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다."
+    "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
+    "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
+    "shu_evasion_bangwon": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 황충이 전열을 버티고 제갈량의 보호막 안에서 강유가 적의 스탯을 무한 강탈하는 변칙 방원진 덱입니다.",
+    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다."
 };
 
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
@@ -539,7 +548,6 @@ function updateDeckState(originIdx, prop, value, officerIdx = null, slotIdx = nu
     renderDeckBuilder();
 }
 
-// [신규 기능]: 일괄 자동 교정 (Auto Fix) 엔진 함수
 window.autoFixDeck = function(originIdx) {
     const deck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (!deck) return;
@@ -564,12 +572,11 @@ window.autoFixDeck = function(originIdx) {
         return;
     }
 
-    // 0티어 정답 아키타입으로 유저 덱 강제 덮어쓰기
     deck.formation = bestMatchDeck.formation;
     deck.unitType = metaDeckUnitTypeMap[bestMatchDeck.id] || "";
     deck.officers = bestMatchDeck.officers.map(mo => {
         let tacs = mo.chosenTactics;
-        if (tacs.length === 3) tacs = tacs.slice(1, 3); // 1번(고유) 전법은 배제하고 2, 3번 슬롯만 매핑
+        if (tacs.length === 3) tacs = tacs.slice(1, 3); 
         return {
             name: mo.name,
             chosenTactics: [...tacs]
@@ -753,6 +760,12 @@ function renderDeckBuilder() {
                 .map(u => `<option value="${u === '자동 판별' ? '' : u}" ${deck.unitType === (u === '자동 판별' ? '' : u) ? 'selected' : ''}>${u}</option>`)
                 .join('');
 
+            // [상성 렌더링]: 선택된 병종의 상성 우위/열위 HTML 주입
+            let matchupHtml = '';
+            if (unitMatchupMap[deckUnitType]) {
+                matchupHtml = `<span style="margin-left: 15px; font-size: 12px; color: #aaa; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px;">⚔️ 강함: <strong style="color: #28a745;">${unitMatchupMap[deckUnitType].strong}</strong> | ⚠️ 약함: <strong style="color: #dc3545;">${unitMatchupMap[deckUnitType].weak}</strong></span>`;
+            }
+
             const fb = generateStructuredFeedback(deck, heroDataMap, tacticDataMap);
             let fbHtml = '';
             
@@ -763,7 +776,6 @@ function renderDeckBuilder() {
             }
             if (fb.insight) fbHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb.insight}</div>`;
 
-            // [UI 신규 구성]: AI 자동 교정(Auto-Fix) 버튼 마운트
             deckCard.innerHTML = `
                 <div class="deck-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                     <div>
@@ -780,9 +792,10 @@ function renderDeckBuilder() {
                 <div class="officers-row">${officersHtml}</div>
                 <div class="feedback-container-box"><div class="feedback-header-title">📋 AI 메타 역추적 기반 실시간 맞춤 처방전</div><div class="feedback-list-wrapper">${fbHtml}</div></div>
                 <div class="deck-footer-bar">
-                    <div class="footer-left">
+                    <div class="footer-left" style="display: flex; align-items: center;">
                         <select class="formation-select" onchange="updateDeckState(${deck.originIdx}, 'formation', this.value)">${fmtOptions}</select>
                         <select class="unit-type-select" style="margin-left: 8px; padding: 6px 10px; background-color: #2a2a2a; color: #feca57; border: 1px solid #555; border-radius: 4px; font-weight: bold; cursor: pointer; outline: none;" onchange="updateDeckState(${deck.originIdx}, 'unitType', this.value)">${unitTypeOptionsHtml}</select>
+                        ${matchupHtml}
                     </div>
                     <div class="footer-right">${formationEffects[deck.formation] || formationEffects["추형진"]}</div>
                 </div>
