@@ -15,9 +15,10 @@
     <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 -->
     <script src="navbar.js"></script>
 
-    <!-- 상단 제어 버튼 컴포넌트 레이어 (기록 저장 및 백업/복구 통합 결선) -->
+    <!-- 상단 제어 버튼 컴포넌트 레이어 (파이어베이스 클라우드 동기화 버튼 추가) -->
     <div style="max-width: 1200px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
-        <button id="save-btn" onclick="saveData()">기록 저장</button>
+        <button id="save-btn" onclick="saveData()">로컬 기록 저장</button>
+        <button id="firebase-save-btn" style="background-color: #f97316; color: white; border: 1px solid #f97316; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">☁️ 클라우드 동기화</button>
         <button id="export-btn" onclick="exportData()" style="background-color: #28a745; color: white; border: 1px solid #28a745; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">데이터 영구 백업 (내보내기)</button>
         <button id="import-btn" onclick="triggerImport()" style="background-color: #17a2b8; color: white; border: 1px solid #17a2b8; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">데이터 즉시 복구 (가져오기)</button>
         
@@ -52,5 +53,54 @@
     </main>
 
     <script src="app.js"></script>
+
+    <!-- Firebase Cloud Firestore 연동 모듈 (Web SDK v9) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // TODO: Firebase 콘솔에서 발급받은 본인의 프로젝트 설정값으로 반드시 교체하십시오.
+        const firebaseConfig = {
+            apiKey: "AIzaSy_YOUR_API_KEY_HERE",
+            authDomain: "your-project-id.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        // 파이어베이스 엔진 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 클라우드 동기화 이벤트 리스너
+        document.getElementById('firebase-save-btn').addEventListener('click', async () => {
+            try {
+                // 로컬 스토리지에 저장된 현재 앱 상태 데이터를 즉시 파싱
+                const hobbyData = localStorage.getItem('samguk_hobby_data');
+                const deckText = localStorage.getItem('samguk_deck_text');
+
+                if (!hobbyData && !deckText) {
+                    alert("클라우드에 동기화할 로컬 데이터가 없습니다. 먼저 '로컬 기록 저장'을 진행해 주세요.");
+                    return;
+                }
+
+                // Firestore에 적재할 Payload 객체 조립
+                const syncData = {
+                    hobbyData: hobbyData ? JSON.parse(hobbyData) : null,
+                    deckText: deckText ? JSON.parse(deckText) : null,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // 'users' 컬렉션의 'master_account' 문서에 데이터 덮어쓰기 (setDoc 활용)
+                await setDoc(doc(db, "users", "master_account"), syncData);
+                
+                alert("☁️ 클라우드 동기화 완료! 데이터가 안전하게 서버에 덮어씌워졌습니다.");
+            } catch (error) {
+                console.error("Firebase Sync Error: ", error);
+                alert("동기화 실패: 파이어베이스 설정 및 보안 규칙(Security Rules)을 확인해 주십시오.\n" + error.message);
+            }
+        });
+    </script>
 </body>
 </html>
