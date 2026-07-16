@@ -1,7 +1,7 @@
-console.log("[시스템 최적화 완결] deck_core.js 서버 1위~5위 랭커 최상위 정답지 전면 동기화 가동");
+console.log("[시스템 분석] deck_core.js 렌더링 에러(systemGuideInsights 누락) 긴급 픽스 및 재기동");
 
 // ==========================================================================
-// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 (메모리 최적화)
+// LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
 // ==========================================================================
 const internalMasterOfficerUniqueTacticMap = {
     "가후": "경달권변", "곽가": "산무유책", "사마의": "응시낭고", "순욱": "거중지중",
@@ -74,7 +74,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [최종 랭커 무결성 정형화]: 서버 1위~5위 덱 스냅샷을 100% 무결하게 분석하여 정답 아키타입으로 승격 등록
 const analyzedMetaArchetypes = [
     { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 1위/5위 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "혼수모어", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "동구적개", "강유겸제"] }] },
     { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 2위 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "혼수모어"] }] },
@@ -183,6 +182,18 @@ const metaHawkRandomAttributesMap = {
     }
 };
 
+// [치명적 버그 수정]: 직전 업데이트에서 누락되었던 처방전 인사이트(가이드 텍스트) 객체 복구
+const systemGuideInsights = {
+    "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
+    "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
+    "shu_evasion_bangwon": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 황충이 전열을 버티고 제갈량의 보호막 안에서 강유가 적의 스탯을 무한 강탈하는 변칙 방원진 덱입니다.",
+    "shu_emperor_chu": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 유비(제왕)의 전열 토템 탱킹 아래 후열 장비와 강유가 추형진 가피증을 받아 물리 돌격력을 몰아치는 극공 덱입니다.",
+    "shu_defense_spear": "💡 <strong style='color:#a855f7;'>[방어 덱 특화 로직]</strong> 공격적인 돌파를 포기하는 대신, 조운과 제갈량의 단단한 맷집에 강유의 유틸리티를 섞어 거점 수비 및 적 에이스 부대 소모전에 최적화된 우주방어 덱입니다.",
+    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 교정 완료]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 교차 검증]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
+    "wei_nuke": "💡 <strong style='color:#a855f7;'>[시스템 가이드 연동]</strong> 조조(제왕)를 전열에 세워 탱킹을 전담하고, 사마의와 하후돈을 후열에 배치해 '추형진'의 가피증 버프를 독식하게 만드는 클래식 0티어 방패병 덱입니다."
+};
+
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
 const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙", "원소", "동탁"]);
 const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
@@ -223,6 +234,22 @@ function getOfficerDogamData(officerName) {
         if (data && data.uniqueTactic && data.uniqueTactic !== "고유 전법 누락") return data;
     }
     return { role: "지휘/능동/패시브", uniqueTactic: internalMasterOfficerUniqueTacticMap[officerName] || "고유 전법 누락" };
+}
+
+function getTacticListBridge() {
+    if (typeof window.getAllTacticsFromDogam === 'function') {
+        const extList = window.getAllTacticsFromDogam();
+        if (extList && extList.length > 5) return extList;
+    }
+    return [...internalMasterTacticNames];
+}
+
+function getOfficerNamesBridge() {
+    if (typeof window.getAllOfficerNamesFromDogam === 'function') {
+        const extList = window.getAllOfficerNamesFromDogam();
+        if (extList && extList.length > 5) return extList.sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+    return [...internalMasterOfficerNames];
 }
 
 // ==========================================================================
@@ -431,7 +458,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                                 const primaryTac = unmatchTac.splice(matchedPrimaryIdx, 1)[0];
                                 fb.logs.push({ 
                                     type: 'info', 
-                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 100점 도달을 위해 추후 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드 하십시오.` 
+                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 추후 최고점을 위해 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드를 목표로 하십시오.` 
                                 });
                             } else {
                                 const primaryTac = unmatchTac.shift();
@@ -461,20 +488,18 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     return fb;
 }
 
-function getTacticListBridge() {
-    if (typeof window.getAllTacticsFromDogam === 'function') {
-        const extList = window.getAllTacticsFromDogam();
-        if (extList && extList.length > 5) return extList;
-    }
-    return [...internalMasterTacticNames];
-}
-
-function getOfficerNamesBridge() {
-    if (typeof window.getAllOfficerNamesFromDogam === 'function') {
-        const extList = window.getAllOfficerNamesFromDogam();
-        if (extList && extList.length > 5) return extList.sort((a, b) => a.localeCompare(b, 'ko'));
-    }
-    return [...internalMasterOfficerNames];
+function calculateActivatedBond(officers) {
+    if (!officers || !Array.isArray(officers)) return "활성화된 부대 인연 효과 없음";
+    const curNames = officers.map(o => o?.name?.toString().trim() || "").filter(Boolean);
+    if (!curNames.length) return "활성화된 부대 인연 효과 없음";
+    
+    const matched = internalBondRules.filter(rule => {
+        const matchCount = curNames.filter(n => rule.heroes.includes(n)).length;
+        const uniqueCount = new Set(curNames.filter(n => rule.heroes.includes(n))).size;
+        return matchCount >= rule.req && uniqueCount >= (rule.req === 3 ? 2 : 1);
+    });
+    
+    return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화된 부대 인연 효과 없음";
 }
 
 // ==========================================================================
