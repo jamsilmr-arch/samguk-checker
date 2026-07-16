@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 랭커 1~5위 절대 기준 정립 및 잔여 덱 전면 삭제 완료");
+console.log("[시스템 분석] deck_core.js AI 메타 역추적 기반 원클릭 일괄 자동 교정 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -74,7 +74,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [유저 요청 수행]: 기존 덱 싹 지우고 앞서버 랭커 1~5위 덱 5종으로만 DB 구성
 const analyzedMetaArchetypes = [
     { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "문치무공", "동구적개"] }] },
     { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 랭커 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] },
@@ -322,7 +321,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
     analyzedMetaArchetypes.forEach(metaDeck => {
         let matchScore = 0;
-        metaDeck.officers.forEach((metaOff, idx) => {
+        metaDeck.officers.forEach((mo, idx) => {
             const mName = mo.name.replace(/\s+/g, '');
             if (curNames.includes(mName)) matchScore += 1; 
             if (curNames[idx] === mName) matchScore += 0.5;
@@ -540,6 +539,48 @@ function updateDeckState(originIdx, prop, value, officerIdx = null, slotIdx = nu
     renderDeckBuilder();
 }
 
+// [신규 기능]: 일괄 자동 교정 (Auto Fix) 엔진 함수
+window.autoFixDeck = function(originIdx) {
+    const deck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
+    if (!deck) return;
+
+    const curNamesClean = deck.officers.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean);
+    let bestMatchDeck = analyzedMetaArchetypes[0], maxMatchScore = -1;
+
+    if (curNamesClean.length > 0) {
+        analyzedMetaArchetypes.forEach(meta => {
+            let matchScore = 0;
+            meta.officers.forEach((mo, idx) => {
+                const mName = mo.name.replace(/\s+/g, '');
+                if (curNamesClean.includes(mName)) matchScore += 1; 
+                if (curNamesClean[idx] === mName) matchScore += 0.5;
+            });
+            if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = meta; }
+        });
+    }
+
+    if (maxMatchScore === 0 || curNamesClean.length === 0) {
+        alert("[교정 실패] 기준이 될 코어 장수가 없습니다. 1명 이상의 메타 장수를 배치한 후 다시 시도해 주십시오.");
+        return;
+    }
+
+    // 0티어 정답 아키타입으로 유저 덱 강제 덮어쓰기
+    deck.formation = bestMatchDeck.formation;
+    deck.unitType = metaDeckUnitTypeMap[bestMatchDeck.id] || "";
+    deck.officers = bestMatchDeck.officers.map(mo => {
+        let tacs = mo.chosenTactics;
+        if (tacs.length === 3) tacs = tacs.slice(1, 3); // 1번(고유) 전법은 배제하고 2, 3번 슬롯만 매핑
+        return {
+            name: mo.name,
+            chosenTactics: [...tacs]
+        };
+    });
+
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    renderDeckBuilder();
+    alert(`[교정 성공] 0티어 정답 메타인 [${bestMatchDeck.name}](으)로 일괄 수정되었습니다.`);
+};
+
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -722,10 +763,17 @@ function renderDeckBuilder() {
             }
             if (fb.insight) fbHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb.insight}</div>`;
 
+            // [UI 신규 구성]: AI 자동 교정(Auto-Fix) 버튼 마운트
             deckCard.innerHTML = `
                 <div class="deck-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div><span contenteditable="true" onblur="updateDeckState(${deck.originIdx}, 'title', this.innerText.trim().replace(/\\s*\\[추천도:\\s*\\d+점\\]/g, '') || '${deck.title}')" style="outline:none;">${deck.title}</span><span style="color:#ff9f43; font-size:13px; margin-left:12px; font-weight:bold; user-select:none;">[추천도: ${currentComputedScore}점]</span></div>
-                    <button class="reset-deck-btn" onclick="updateDeckState(${deck.originIdx}, 'reset')" style="background-color:#c82333; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">부대 초기화</button>
+                    <div>
+                        <span contenteditable="true" onblur="updateDeckState(${deck.originIdx}, 'title', this.innerText.trim().replace(/\\s*\\[추천도:\\s*\\d+점\\]/g, '') || '${deck.title}')" style="outline:none;">${deck.title}</span>
+                        <span style="color:#ff9f43; font-size:13px; margin-left:12px; font-weight:bold; user-select:none;">[추천도: ${currentComputedScore}점]</span>
+                    </div>
+                    <div>
+                        <button class="auto-fix-btn" onclick="autoFixDeck(${deck.originIdx})" style="background-color:#8b5cf6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">✨ AI 자동 교정</button>
+                        <button class="reset-deck-btn" onclick="updateDeckState(${deck.originIdx}, 'reset')" style="background-color:#c82333; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">부대 초기화</button>
+                    </div>
                 </div>
                 <div class="bond-box"><span class="bond-highlight">부대 인연 효과 :</span> <span style="display:inline-block; outline:none;">${calculateActivatedBond(deck.officers)}</span></div>
                 ${hawkHtml}
