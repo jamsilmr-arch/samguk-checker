@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 황제강 메타 통합 및 공식 상성 엔진(Matchup Engine) 기동");
+console.log("[시스템 분석] deck_core.js 사마의 종결(장기전 방패) 덱 엔진 통합 기동");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -52,6 +52,7 @@ const tacticAlternativesMap = {
     "동구적개": ["안영찰채", "위위구조"], "사생취의": ["일고작기", "용맹무쌍"],
     "양초선행": ["문치무공", "휴양생식"], "휴양생식": ["양초선행", "현호제세"],
     "동장철벽": ["견불가최", "천시지리"], "사면초가": ["기문둔갑", "화소적벽"],
+    "심모원려": ["사면초가", "기문둔갑"],
     "횡소천군": ["강유겸제", "용맹무쌍"], 
     "천리추격": ["극적제승", "암전난방"], "암전난방": ["극적제승", "질풍노도"],
     "사소도": ["이간계", "낙정하석"],
@@ -74,7 +75,6 @@ const formationPositions = {
     "안행진": ["back", "front", "front"], "호도진": ["front", "back", "front"]
 };
 
-// [신규 로직]: 인게임 공식 병종 상성 규격 정의
 const unitMatchupMap = {
     "창병": { strong: "기병", weak: "궁병" },
     "기병": { strong: "방패병", weak: "창병" },
@@ -82,8 +82,10 @@ const unitMatchupMap = {
     "궁병": { strong: "창병", weak: "방패병" }
 };
 
-// [오류 정정]: 누락되었던 랭커 3위 황제강 방원진 덱(shu_evasion_bangwon) 복원
+// [신규 등록]: 사마의 기반 '위나라 응시낭고 장기전 방패 덱' 최상위 아키텍처 추가
 const analyzedMetaArchetypes = [
+    { id: "wei_sima_shield", name: "위나라 응시낭고 방패 덱 (추형진/방패병)", concept: "조조의 방어막과 가후의 혼란 제어기로 전반부를 버티고, 4턴 이후 사마의가 심모원려 스택을 터뜨려 전장을 지배하는 장기전 종결 덱", formation: "추형진", officers: [{ name: "사마의", chosenTactics: ["응시낭고", "심모원려", "사면초가"] }, { name: "조조", chosenTactics: ["효웅", "휴양생식", "현호제세"] }, { name: "가후", chosenTactics: ["경달권변", "혼수모어", "이간계"] }] },
+    { id: "wei_flawless_assassin", name: "위나라 무결점 암살 덱 (호도진/기병)", concept: "악진 대신 곽가를 투입하여 장료에게 2턴 통찰(제어 면역)을 부여, 적의 CC기를 무시하고 주장을 확정 암살하는 궁극의 진화형 덱", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "곽가", chosenTactics: ["산무유책", "동구적개", "강유겸제"] }] },
     { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 1위/5위 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "혼수모어", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "동구적개", "강유겸제"] }] },
     { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 2위 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "혼수모어"] }] },
     { id: "shu_evasion_bangwon", name: "촉나라 황제강 디버프 덱 (방원진)", concept: "황충이 전열에서 공방을 수행하고 제갈량의 보호 속에서 후열 강유가 적의 스탯을 무한 강탈하는 랭커 3위 조합", formation: "방원진", officers: [{ name: "황충", chosenTactics: ["적혈도", "강유겸제", "진퇴유도"] }, { name: "제갈량", chosenTactics: ["초선차전", "전위위안", "안영찰채"] }, { name: "강유", chosenTactics: ["담대여두", "반객위주", "일고작기"] }] },
@@ -92,6 +94,8 @@ const analyzedMetaArchetypes = [
 ];
 
 const metaDeckUnitTypeMap = {
+    "wei_sima_shield": "방패병",
+    "wei_flawless_assassin": "기병", 
     "wei_assassin": "창병",
     "wu_magic_bow": "궁병",
     "shu_combo_spear": "창병",
@@ -122,6 +126,8 @@ const internalBondRules = [
 ];
 
 const metaHawkRecommendationMap = {
+    "wei_sima_shield": { name: "호생 (SSR)", skill: "턴 시작 시 병력 최저 아군 치료 및 사마의의 장기전 생존률 200% 보장" },
+    "wei_flawless_assassin": { name: "전광 (SSR)", skill: "턴 시작 시 아군 무용/통솔 증가 및 기병 속도전의 우위 선점" },
     "wei_assassin": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군 물리피해 버프 및 장료의 마무리를 돕는 160% 딜" },
     "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" },
     "shu_combo_spear": { name: "열공 (SSR)", skill: "턴 시작 시 무용/통솔 증가로 마초의 스펙 펌핑" },
@@ -130,7 +136,9 @@ const metaHawkRecommendationMap = {
 };
 
 const metaHawkAlternativesMap = {
-    "wei_assassin": ["설조 (SSR)", "전광 (SSR)"],
+    "wei_sima_shield": ["감로 (SSR)", "진시 (SSR)"],
+    "wei_flawless_assassin": ["삭풍 (SSR)", "설조 (SSR)"],
+    "wei_assassin": ["전광 (SSR)", "설조 (SSR)"],
     "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"],
     "shu_combo_spear": ["전광 (SSR)", "설조 (SSR)"],
     "shu_evasion_bangwon": ["감로 (SSR)", "전우 (SSR)"],
@@ -138,6 +146,16 @@ const metaHawkAlternativesMap = {
 };
 
 const metaHawkRandomAttributesMap = {
+    "wei_sima_shield": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "전능 +6%" },
+        attr2: { rank1: "받는 피해 감소 +10%", rank2: "치유 효과 상승 +10%", rank3: "가하는 모략 피해 +8%" },
+        attr3: { rank1: "턴 종료 시 디버프 해제", rank2: "피격 시 10% 저항", rank3: "모면(회피) +6%" }
+    },
+    "wei_flawless_assassin": {
+        attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
+        attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "전법 발동률 +5%" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "평타 시 10% 혼란" }
+    },
     "wei_assassin": {
         attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
         attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "적 주장 타격 보너스" },
@@ -171,6 +189,8 @@ const metaHawkRandomAttributesMap = {
 };
 
 const systemGuideInsights = {
+    "wei_sima_shield": "💡 <strong style='color:#a855f7;'>[장기전 종결 메타]</strong> 조조의 절대 방어막과 가후의 혼란 제어기로 전반부를 무손실로 버티고, 사마의의 후반 모략 폭딜로 적 전열을 분쇄하는 정통 0티어 방패 덱입니다.",
+    "wei_flawless_assassin": "💡 <strong style='color:#a855f7;'>[진화형 종결 메타]</strong> 악진을 제외하고 곽가를 투입하여, 장료에게 2턴간 100% 제어 면역(통찰)을 부여합니다. 적의 CC기를 무시하고 주장을 확정 타격하는 최강의 암살 덱입니다.",
     "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
     "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
     "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
@@ -339,7 +359,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     });
 
     if (maxMatchScore === 0) {
-        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 시스템에 등록된 0티어 랭커 메타와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 압도적인 성능을 원하신다면 100점 달성을 위한 코어 장수(예: 여포, 장료, 마초 등)를 기반으로 덱을 재설계해 보십시오.` });
+        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 시스템에 등록된 0티어 정답 메타와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 압도적인 성능을 원하신다면 100점 달성을 위한 코어 장수(예: 사마의, 여포, 장료 등)를 기반으로 덱을 재설계해 보십시오.` });
         deck.officers.forEach((off, offIdx) => {
             if (!off?.name) return;
             const hName = off.name.toString().trim();
@@ -760,7 +780,6 @@ function renderDeckBuilder() {
                 .map(u => `<option value="${u === '자동 판별' ? '' : u}" ${deck.unitType === (u === '자동 판별' ? '' : u) ? 'selected' : ''}>${u}</option>`)
                 .join('');
 
-            // [상성 렌더링]: 선택된 병종의 상성 우위/열위 HTML 주입
             let matchupHtml = '';
             if (unitMatchupMap[deckUnitType]) {
                 matchupHtml = `<span style="margin-left: 15px; font-size: 12px; color: #aaa; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px;">⚔️ 강함: <strong style="color: #28a745;">${unitMatchupMap[deckUnitType].strong}</strong> | ⚠️ 약함: <strong style="color: #dc3545;">${unitMatchupMap[deckUnitType].weak}</strong></span>`;
