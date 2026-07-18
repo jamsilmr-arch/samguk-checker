@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 사마의 종결(장기전 방패) 덱 엔진 통합 기동 및 덱 순서 변경(Swap) 기능 패치 완료");
+console.log("[시스템 분석] deck_core.js 사마의 종결 덱 엔진 통합 기동 및 무장 드래그 앤 드랍(Drag & Drop) 스왑 기능 패치 완료");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -511,6 +511,80 @@ function calculateActivatedBond(officers) {
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default'; 
 
+// [신규] 무장 슬롯 드래그 앤 드랍(Drag & Drop) 전역 상태 관리 변수
+let draggedDeckOriginIdx = null;
+let draggedOfficerSlotIdx = null;
+
+window.handleOfficerDragStart = function(e, deckOriginIdx, officerSlotIdx) {
+    draggedDeckOriginIdx = deckOriginIdx;
+    draggedOfficerSlotIdx = officerSlotIdx;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => {
+        const slot = e.target.closest('.officer-slot');
+        if (slot) slot.style.opacity = '0.4';
+    }, 0);
+};
+
+window.handleOfficerDragOver = function(e) {
+    e.preventDefault(); 
+    const slot = e.target.closest('.officer-slot');
+    if (slot && !slot.classList.contains('drag-over-highlight')) {
+        slot.classList.add('drag-over-highlight');
+        slot.style.boxShadow = '0 0 10px 2px #a855f7 inset';
+        slot.style.borderColor = '#a855f7';
+    }
+};
+
+window.handleOfficerDragLeave = function(e) {
+    const slot = e.target.closest('.officer-slot');
+    if (slot) {
+        slot.classList.remove('drag-over-highlight');
+        slot.style.boxShadow = '';
+        slot.style.borderColor = '';
+    }
+};
+
+window.handleOfficerDrop = function(e, targetDeckOriginIdx, targetOfficerSlotIdx) {
+    e.preventDefault();
+    const slot = e.target.closest('.officer-slot');
+    if (slot) {
+        slot.classList.remove('drag-over-highlight');
+        slot.style.boxShadow = '';
+        slot.style.borderColor = '';
+    }
+
+    if (draggedDeckOriginIdx === null || draggedOfficerSlotIdx === null) return;
+    
+    // 에러 방어 격벽: 동일 부대 내에서만 무장 스왑 허용
+    if (draggedDeckOriginIdx !== targetDeckOriginIdx) {
+        alert("데이터 무결성을 위해 동일한 부대 내에서만 무장 순서를 변경할 수 있습니다.");
+        return;
+    }
+    
+    if (draggedOfficerSlotIdx === targetOfficerSlotIdx) return;
+
+    const deck = dynamicPresetDecks.find(d => d.originIdx === draggedDeckOriginIdx);
+    if (deck) {
+        // 인덱스 배열 데이터 맞교환 (Swap)
+        const tempOfficer = deck.officers[draggedOfficerSlotIdx];
+        deck.officers[draggedOfficerSlotIdx] = deck.officers[targetOfficerSlotIdx];
+        deck.officers[targetOfficerSlotIdx] = tempOfficer;
+        
+        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+        renderDeckBuilder();
+    }
+    
+    draggedDeckOriginIdx = null;
+    draggedOfficerSlotIdx = null;
+};
+
+window.handleOfficerDragEnd = function(e) {
+    const slot = e.target.closest('.officer-slot');
+    if (slot) slot.style.opacity = '1';
+    draggedDeckOriginIdx = null;
+    draggedOfficerSlotIdx = null;
+};
+
 function loadDeckTextData() {
     try {
         const savedText = localStorage.getItem('samguk_deck_text');
@@ -608,17 +682,14 @@ window.autoFixDeck = function(originIdx) {
     alert(`[교정 성공] 0티어 정답 메타인 [${bestMatchDeck.name}](으)로 일괄 수정되었습니다.`);
 };
 
-// 핵심 로직 추가: 덱 위치 스왑 엔진
 window.moveDeckAction = function(currentIndex, direction) {
     const targetIndex = currentIndex + direction;
     if (targetIndex < 0 || targetIndex >= dynamicPresetDecks.length) return;
     
-    // 배열 요소 스왑
     const temp = dynamicPresetDecks[currentIndex];
     dynamicPresetDecks[currentIndex] = dynamicPresetDecks[targetIndex];
     dynamicPresetDecks[targetIndex] = temp;
     
-    // 데이터 렌더링 무결성을 위해 originIdx 재할당
     dynamicPresetDecks.forEach((d, idx) => d.originIdx = idx);
     
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
@@ -656,7 +727,6 @@ function renderDeckBuilder() {
         const sortedHeroNames = getOfficerNamesBridge();
         const globalTacticsList = getTacticListBridge();
 
-        // 덱 렌더링 루프 (arrayIndex 기반)
         dynamicPresetDecks.forEach((deck, arrayIndex) => {
             if (!deck) return;
             const deckCard = document.createElement('div');
@@ -789,7 +859,24 @@ function renderDeckBuilder() {
                     eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 시스템 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.accessory.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.accessory.attr2}</span>)</div></div>`;
                 }
 
-                return `<div class="officer-slot" style="${!cleanHName ? 'border:1px dashed #444; background-color:rgba(0,0,0,0.1);' : ''}"><div class="officer-meta"><span class="position-badge ${curPos}">${curPos==='front'?'전열':'후열'}</span><div class="officer-select-container"><select class="officer-dropdown" onchange="updateDeckState(${deck.originIdx}, 'off', this.value, ${offIdx})">${officerOptionsHtml}</select></div></div>${eqHtml}<div class="tactic-status-box" style="margin-top:8px;">${tacticRowsHtml}</div></div>`;
+                // UI 변경 구역: 드래그 앤 드랍 이벤트 바인딩 적용
+                return `<div class="officer-slot" 
+                            draggable="true" 
+                            ondragstart="handleOfficerDragStart(event, ${deck.originIdx}, ${offIdx})" 
+                            ondragover="handleOfficerDragOver(event)" 
+                            ondragleave="handleOfficerDragLeave(event)" 
+                            ondrop="handleOfficerDrop(event, ${deck.originIdx}, ${offIdx})" 
+                            ondragend="handleOfficerDragEnd(event)"
+                            style="${!cleanHName ? 'border:1px dashed #444; background-color:rgba(0,0,0,0.1);' : ''} cursor: grab; transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s;">
+                            <div class="officer-meta">
+                                <span class="position-badge ${curPos}">${curPos==='front'?'전열':'후열'}</span>
+                                <div class="officer-select-container">
+                                    <select class="officer-dropdown" onchange="updateDeckState(${deck.originIdx}, 'off', this.value, ${offIdx})">${officerOptionsHtml}</select>
+                                </div>
+                            </div>
+                            ${eqHtml}
+                            <div class="tactic-status-box" style="margin-top:8px;">${tacticRowsHtml}</div>
+                        </div>`;
             }).join('');
 
             const fmtOptions = Object.keys(formationEffects).map(f => `<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('');
@@ -813,7 +900,6 @@ function renderDeckBuilder() {
             }
             if (fb.insight) fbHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb.insight}</div>`;
 
-            // UI 변경 구역: 상하 이동 컨트롤러 탑재
             deckCard.innerHTML = `
                 <div class="deck-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                     <div style="display:flex; align-items:center;">
