@@ -5,7 +5,6 @@
 // ==========================================================================
 const internalMasterOfficerUniqueTacticMap = {"가후":"경달권변","곽가":"산무유책","사마의":"응시낭고","순욱":"거중지중","악진":"분용당선","전위":"축호과간","정욱":"십면매복","조조(제왕)":"군령여산","조조":"효웅","장료":"함진살적","장합":"교변병기","하후돈":"발시담정","하후연":"충용","관우":"무성","강유":"담대여두","마대":"습참","마초":"출수법","서서":"절절학문","사마가":"만왕","위연":"실병제위","유비":"인정","유비(제왕)":"재주복주","장비":"연인노호","제갈량":"초선차전","조운":"칠진칠출","황충":"적혈도","황월영":"묘산천기","대교":"정수유심","노숙":"탑상책","소교":"화용욕모","손견":"강동맹호","손권":"웅거","손상향":"효희","손책":"강동패주","손권(제왕)":"겸권상계","여몽":"백의도강","육손":"지변규려","육항":"청백충근","주유":"봉화연천","주태":"청라산개","정보":"칠척사모","황개":"요원지화","채문희":"비분시","장녕":"천의난위","동탁":"전권난정","여포":"천하무쌍","초선":"폐월","장각":"황천당립","화타":"청낭제세","장보":"요풍사기","좌자":"화겁생기","우길":"태평경","안량":"효장","원소":"사소도","공손찬":"위진새북"};
 
-// [수정 완료] tactic_dogam.js에 없는 외부 전법 전량 폐기
 const internalMasterTacticNames = ["가정지전","강유겸제","견불가최","견진연봉","공기불비","과하탁교","교취호탈","극적제승","금낭묘계","금적금왕","금창신","금철교명","기문둔갑","낙정하석","동구적개","동장철벽","동촉기선","만부막적","만전제발","만천과해","문치무공","미우주무","반객위주","병량촌단","분성지계","비사주석","사면초가","사생취의","선등함진","수상개화","순수견양","승승장구","심모원려","안영찰채","암전난방","양의화생","양초선행","여자동포","요사여신","용맹무쌍","용왕직전","운주유악","원성재도","위위구조","유좌유용","이간계","이아환아","이일대로","이퇴위진","일고작기","인세이도","전위위안","제곤부위","중정기고","지인선임","진퇴유도","진화타겁","질풍노도","천리추격","천시지리","체천행도","축세대발","축호과간","태청단경","토적격문","현호제세","호령삼군","혼수모어","홍수첨향","화소적벽","횡소천군","횡징폭렴","휴양생식"].sort((a, b) => a.localeCompare(b, 'ko'));
 
 const internalMasterOfficerNames = Object.keys(internalMasterOfficerUniqueTacticMap).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -52,10 +51,8 @@ const internalMasterEquipmentMap = {
     "장비": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" }, armor: { name: "결운갑", attr1: "피해 감소", attr2: "치유 효과 상승" }, accessory: { name: "쌍호뉴", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
-// [수정 완료] 미지원 외부 전법 매핑 제거
 const tacticAlternativesMap = {"횡징폭렴":["동구적개","동장철벽"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"전위위안":["태청단경","현호제세"],"안영찰채":["위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"동장철벽":["견불가최","천시지리"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"]};
 
-// [수정 완료] 존재하지 않는 외부 전법(잠피기봉, 군민위로, 봉시진 등) 수치 매핑 폐기
 const internalTacticStatMap = {
     "심모원려": { strategyDmg: 6 }, "휴양생식": { healGiven: 8 }, "혼수모어": { damageTakenRed: 4 },
     "효웅": { damageTakenRed: 5, healGiven: 5 }, "반객위주": { physicalDmg: 6 }, "실병제위": { damageDealtInc: 5 },
@@ -65,7 +62,6 @@ const internalTacticStatMap = {
 const formationEffects = {"일자진":"전열: 피해 감소 6.0% | 후열: -","구행진":"전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%","추형진":"전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%","기형진":"전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%","어린진":"전열: 반격률 20.0% | 후열: 피해 감소 6.0%","방원진":"전열: 피해 감소 5.0% | 후열: 연격률 28.0%","안행진":"전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%","호도진":"전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%"};
 const formationPositions = {"일자진":["front","front","front"],"구행진":["front","back","front"],"추형진":["back","front","back"],"기형진":["back","back","front"],"어린진":["front","back","back"],"방원진":["front","front","back"],"안행진":["back","front","front"],"호도진":["front","back","front"]};
 
-// [수정 완료] 메타 덱 구성 중 미구현 전법(파진최견, 일기당천 등) 일괄 정제
 const analyzedMetaArchetypes = [
     {id:"wei_sima_shield",name:"위나라 응시낭고 방패 덱",concept:"장기전 종결",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","심모원려","사면초가"]},{name:"조조",chosenTactics:["효웅","휴양생식","현호제세"]},{name:"가후",chosenTactics:["경달권변","혼수모어","이간계"]}]},
     {id:"wei_flawless_assassin",name:"위나라 무결점 암살 덱",concept:"제어 면역 확정 암살",formation:"호도진",officers:[{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]},{name:"조조",chosenTactics:["군령여산","횡징폭렴","진퇴유도"]},{name:"곽가",chosenTactics:["산무유책","동구적개","강유겸제"]}]},
@@ -148,7 +144,6 @@ function aggregateIntegratedStats(deck, officerIndex) {
     return stats;
 }
 
-// [수정 완료] evaluateDeckPerfection 피드백 텍스트를 유효한 전법으로 전면 교체
 function evaluateDeckPerfection(deck, metaId) {
     let totalDmgRed = 0, totalHeal = 0, totalDmgInc = 0;
     let isComplete = true;
@@ -213,7 +208,7 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 덱 코어 및 렌더링 로직
+// LAYER 3: 덱 코어 및 렌더링 로직 (팝업 모달 엔진 포함)
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     const unitPrefix = deckUnitType && deckUnitType !== "자동 판별" ? deckUnitType : "방패병";
@@ -354,6 +349,63 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
+// [팝업 UI 추가 설계] 렌더링을 위한 전역 스크립트 모달 엔진
+window.showTacticPopup = function(e, tacticName) {
+    if(!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
+    
+    // Select 드롭다운 동작 중 팝업 발생을 방지 (Event Interceptor)
+    if(e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
+
+    let popup = document.getElementById('tactic-popup-modal');
+    if(!popup) {
+        popup = document.createElement('div');
+        popup.id = 'tactic-popup-modal';
+        document.body.appendChild(popup);
+        
+        // 배경 클릭 시 팝업 닫기 (비명시적 아웃포커싱 UX)
+        document.addEventListener('click', (evt) => {
+            if(!evt.target.closest('.tactic-row') && !evt.target.closest('#tactic-popup-modal')) {
+                popup.style.display = 'none';
+            }
+        });
+    }
+
+    // 도감 DOM 실시간 데이터 스크래핑(Scraping) 엔진 - 하드코딩 회피용
+    let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
+    const grid = document.getElementById('tactic-card-grid');
+    if(grid) {
+        const cards = Array.from(grid.children);
+        const targetCard = cards.find(c => c.querySelector('div:first-child')?.innerText.trim() === tacticName);
+        if(targetCard) {
+            const metaText = targetCard.querySelector('div:nth-child(2)')?.innerText || "";
+            const rM = metaText.match(/역할:\s*(.*?)\s*\|/);
+            const tM = metaText.match(/대상:\s*(.*)/);
+            pRole = rM ? rM[1] : "-";
+            pTarget = tM ? tM[1] : "-";
+            pDesc = targetCard.querySelector('div:nth-child(3)')?.innerText || pDesc;
+        }
+    }
+
+    popup.innerHTML = `
+        <div class="p-title">⭐ ${tacticName}</div>
+        <div class="p-meta">타입: ${pRole} | 대상: ${pTarget}</div>
+        <div class="p-desc">${pDesc}</div>
+    `;
+    popup.style.display = 'block';
+
+    // 팝업 반응형 동적 레이아웃 보정 로직 (화면 짤림 방지)
+    const rect = e.currentTarget.getBoundingClientRect();
+    let top = rect.top + window.scrollY - 10;
+    let left = rect.right + window.scrollX + 10;
+
+    if (left + 280 > window.innerWidth) {
+        left = rect.left + window.scrollX - 290;
+    }
+    
+    popup.style.top = top + 'px';
+    popup.style.left = left + 'px';
+};
+
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
@@ -380,6 +432,14 @@ const injectCustomUIStyles = () => {
         .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
         .tactic-row select { margin-top: 2px; }
         .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
+        
+        /* 팝업 모달 전용 CSS 속성 추가 */
+        #tactic-popup-modal { display:none; position:absolute; z-index:9999; background:rgba(15,23,42,0.98); border:1px solid #a855f7; padding:12px; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.6); width:280px; color:#f8fafc; font-size:12px; backdrop-filter:blur(4px); pointer-events:none; }
+        #tactic-popup-modal .p-title { font-size:14px; font-weight:700; color:#facc15; margin-bottom:6px; border-bottom:1px solid #334155; padding-bottom:6px; letter-spacing:0.5px; }
+        #tactic-popup-modal .p-meta { color:#38bdf8; font-size:11px; margin-bottom:8px; font-weight:600; }
+        #tactic-popup-modal .p-desc { line-height:1.6; color:#cbd5e1; word-break:keep-all; }
+        .tactic-row { cursor: pointer; position: relative; transition: background 0.2s; }
+        .tactic-row:hover { background-color: rgba(255,255,255,0.05); }
     `;
     document.head.appendChild(style);
 };
@@ -462,10 +522,13 @@ function renderDeckBuilder() {
                 
                 const unitBadgeHtml = cName && dg?.unitSuitability ? `<div class="unit-badge">🎖️ ${dg.unitSuitability}</div>` : '';
 
-                let tRows = `<div class="tactic-row ${cName&&(hMap[hName]?.isOwned||tMap[dg?.uniqueTactic?.replace(/\s+/g,'')]?.isOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
+                // [클릭 이벤트 탑재] 고유 전법 행에 클릭 시 팝업 띄우는 함수 연결
+                let tRows = `<div class="tactic-row ${cName&&(hMap[hName]?.isOwned||tMap[dg?.uniqueTactic?.replace(/\s+/g,'')]?.isOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
+                
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT=t?.trim()||"", isOwn=tMap[cT.replace(/\s+/g,'')]?.isOwned;
-                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
+                    // [클릭 이벤트 탑재] 일반 선택 전법 행에 팝업 엔진 연결 (자식 Select value 연동)
+                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
@@ -479,10 +542,7 @@ function renderDeckBuilder() {
 
             const fb = generateStructuredFeedback(deck, hMap, tMap), score = calculateStrictDeckScore(deck);
             
-            // [로직 연결] 기존 피드백에 퍼펙트 시너지 검증 결과를 덧붙임
             let fbH = fb.logs.map(l=>`<div class="feedback-item ${l.type}">${l.text}</div>`).join('') + (fb.insight?`<div class="feedback-item info">${fb.insight}</div>`:'');
-            
-            // 합산 스탯 평가에 따른 최종 코멘트 (퍼펙트 추천) 추가
             const perfectionFeedback = evaluateDeckPerfection(deck, match?.bestMeta?.id || "custom");
             fbH += perfectionFeedback;
 
