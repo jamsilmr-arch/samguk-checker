@@ -1,7 +1,7 @@
 console.log("[시스템 분석] dogam.js 헤더 레이아웃 교정 및 가독성 최적화 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 무장 마스터 데이터베이스 (원본 데이터 무결성 유지)
+// LAYER 1: 무장 마스터 데이터베이스 (원본 데이터 무결성 유지 및 확장)
 // ==========================================================================
 const heroDogamData = [
     // 위나라 (13명)
@@ -78,9 +78,11 @@ const heroDogamData = [
         stats: { martial: 658, tactical: 503, command: 628, speed: 558 }
     },
     { 
+        // [데이터 주입] 강유 병종(방패병/기병) 추가 반영
         id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', 
         skillDesc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.',
-        stats: { martial: 556, tactical: 622, command: 574, speed: 475 }
+        stats: { martial: 556, tactical: 622, command: 574, speed: 475 },
+        unit: '방패병/기병'
     },
     { 
         id: 'h_madae', name: '마대', group: 'shu', role: '능동 (35%)', location: '전열', skill: '습참', 
@@ -222,10 +224,11 @@ const heroDogamData = [
 
     // 군진영 (13명)
     { 
-        // [신규 추가] 공손찬 마스터 데이터 등재[cite: 3]
+        // [데이터 주입] 공손찬 병종(기병/창병) 추가 반영
         id: 'h_gongsonchan', name: '공손찬', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '위진새북', 
         skillDesc: '턴 시작 시 확률적으로 무용과 속도를 증폭하고 면역을 얻으며, 액티브 타격 후 속도 차이에 비례한 확산 피해를 추가로 입힙니다.',
-        stats: { martial: 604, tactical: 527, command: 592, speed: 582 }
+        stats: { martial: 604, tactical: 527, command: 592, speed: 582 },
+        unit: '기병/창병'
     },
     { 
         id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', 
@@ -336,7 +339,8 @@ function loadDogamData() {
             location: originData ? originData.location : "-",
             skill: originData ? originData.skill : "-",
             skillDesc: originData ? originData.skillDesc : "-",
-            stats: originData ? originData.stats : null
+            stats: originData ? originData.stats : null,
+            unit: originData && originData.unit ? originData.unit : "-" // [로직 확장] 도감 상태 객체에 병종(unit) 매핑 추가
         };
     });
 }
@@ -504,6 +508,7 @@ function renderDogamGrid() {
             `;
         }
 
+        // [로직 확장] 속성 여부(unit)를 검증하여 존재 시에만 병종 UI를 동적 렌더링
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
                 <div style="font-size: 18px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; letter-spacing: 1px;">${hero.name}</div>
@@ -518,6 +523,7 @@ function renderDogamGrid() {
             <div style="display: flex; gap: 12px; font-size: 11px; color: #bbb; margin-bottom: 4px;">
                 <div><span style="color: #feca57; font-weight: bold;">역할:</span> ${hero.role}</div>
                 <div><span style="color: #feca57; font-weight: bold;">배치:</span> ${hero.location}</div>
+                ${hero.unit && hero.unit !== "-" ? `<div><span style="color: #feca57; font-weight: bold;">병종:</span> ${hero.unit}</div>` : ''}
             </div>
             
             ${statsHtml}
