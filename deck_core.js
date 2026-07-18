@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - WCAG AAA 등급 명도 대비 적용 및 CSS 모듈화 리팩토링 패치
+// [시스템 분석] deck_core.js - 장비 속성 렌더링 누락 복구 및 UI 컴포넌트화 패치
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -198,67 +198,40 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
-// [핵심 로직: 다크 테마 일관성 유지 및 WCAG 가독성 충족용 CSS 중앙화]
+// [CSS 주입: 장비 속성(Equipment) 박스 디자인 클래스 추가]
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
     style.innerHTML = `
-        /* 드롭박스 전역 스타일링 (명도 대비 강화) */
+        /* 드롭박스 전역 스타일링 */
         .deck-card select {
-            background-color: #1e293b;
-            color: #f8fafc; /* 텍스트를 더 밝은 Slate 50으로 변경 */
-            border: 1px solid #475569;
-            border-radius: 4px;
-            padding: 6px 24px 6px 10px;
-            font-size: 13px;
-            appearance: none;
-            -webkit-appearance: none;
-            outline: none;
-            cursor: pointer;
+            background-color: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 4px;
+            padding: 6px 24px 6px 10px; font-size: 13px; appearance: none; -webkit-appearance: none;
+            outline: none; cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 14px;
-            transition: all 0.2s ease-in-out;
-            width: 100%;
-            box-sizing: border-box;
-            font-family: inherit;
+            background-repeat: no-repeat; background-position: right 8px center; background-size: 14px;
+            transition: all 0.2s ease-in-out; width: 100%; box-sizing: border-box; font-family: inherit;
         }
-        .deck-card select:focus, .deck-card select:hover {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
-            background-color: #0f172a;
-        }
+        .deck-card select:focus, .deck-card select:hover { border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25); background-color: #0f172a; }
         .deck-card select option { background-color: #0f172a; color: #f8fafc; padding: 8px; }
         
-        /* 전투매 추천 박스 가독성 패치 (인라인 스타일 분리 및 톤 앤 매너 통일) */
-        .hawk-recommend-box {
-            margin-top: 10px;
-            padding: 12px;
-            background-color: #1e293b; /* 메인 배경과의 이질감 해소 */
-            border-left: 4px solid #3b82f6; /* 포인트 보더 (Blue 500) */
-            border-radius: 6px;
-            font-size: 13px;
-            color: #e2e8f0; /* 메인 텍스트 명확화 (Slate 200) */
-            line-height: 1.5;
-        }
-        .hawk-recommend-box .hawk-highlight { color: #60a5fa; font-weight: bold; } /* 강조 텍스트 (Blue 400) */
-        .hawk-recommend-box .hawk-subtext { color: #94a3b8; font-size: 11px; } /* 보조 텍스트 (Slate 400) */
-        .hawk-recommend-box .hawk-detail { 
-            margin-top: 6px; 
-            padding-top: 6px; 
-            border-top: 1px dashed #334155; /* 구분선 (Slate 700) */
-            color: #cbd5e1; /* 상세 속성 텍스트 (Slate 300) */
-            font-size: 12px; 
-        }
+        /* 전투매 추천 박스 */
+        .hawk-recommend-box { margin-top: 10px; padding: 12px; background-color: #1e293b; border-left: 4px solid #3b82f6; border-radius: 6px; font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+        .hawk-recommend-box .hawk-highlight { color: #60a5fa; font-weight: bold; }
+        .hawk-recommend-box .hawk-subtext { color: #94a3b8; font-size: 11px; }
+        .hawk-recommend-box .hawk-detail { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; color: #cbd5e1; font-size: 12px; }
 
-        /* 피드백 메시지 시인성 보장 */
+        /* [복구] 장비 속성 출력 박스 디자인 (계층적 가독성 확보) */
+        .equipment-box { margin-top: 6px; padding: 6px; border: 1px solid #334155; border-radius: 4px; background-color: #0f172a; font-size: 11px; }
+        .equipment-box .eq-item { margin-bottom: 2px; color: #cbd5e1; }
+        .equipment-box .eq-item:last-child { margin-bottom: 0; }
+        .equipment-box .eq-attr { color: #64748b; font-size: 10px; margin-left: 4px; }
+
         .feedback-item.success { color: #4ade80; font-weight: 500; }
         .feedback-item.warning { color: #facc15; }
         .feedback-item.info { color: #60a5fa; }
         
-        /* 정렬 최적화 */
         .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
         .tactic-row select { margin-top: 2px; }
         .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
@@ -335,7 +308,6 @@ function renderDeckBuilder() {
                 const resolvedMetaId = match?.bestMeta?.id;
                 const hA = (resolvedMetaId && metaHawkRandomAttributesMap[resolvedMetaId]) ? metaHawkRandomAttributesMap[resolvedMetaId] : metaHawkRandomAttributesMap["custom"];
                 
-                // [모듈화 적용] 하드코딩된 인라인 스타일을 걷어내고 구조적인 클래스 설계로 대체
                 hawkHtml = `<div class="hawk-recommend-box">
                     <span class="hawk-highlight">🦅 전투매: 🥇${hk.name}</span> (${hk.skill}) 
                     <span class="hawk-subtext">[대체: 🥈${hkAlt[0]} 🥉${hkAlt[1]}]</span>
@@ -354,7 +326,14 @@ function renderDeckBuilder() {
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
-                const eqH = eq ? `<div style="margin-top:5px;font-size:10px;color:#ccc;border:1px solid #555;padding:4px;">🪖${eq.helmet.name} 🛡️${eq.armor.name} 📿${eq.accessory.name}</div>` : '';
+                
+                // [복구 완료] 장비 속성(attr1, attr2) 명시적 렌더링 코드 바인딩
+                const eqH = eq ? `
+                    <div class="equipment-box">
+                        <div class="eq-item">🪖 ${eq.helmet.name} <span class="eq-attr">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div>
+                        <div class="eq-item">🛡️ ${eq.armor.name} <span class="eq-attr">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div>
+                        <div class="eq-item">📿 ${eq.accessory.name} <span class="eq-attr">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div>
+                    </div>` : '';
                 
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${formationPositions[deck.formation]?.[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div class="tactic-status-box">${tRows}</div></div>`;
             }).join('');
