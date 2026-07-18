@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 사마의 종결(장기전 방패) 덱 엔진 통합 기동 및 매/메타 데이터 복구 완료");
+console.log("[시스템 분석] deck_core.js 사마의 종결(장기전 방패) 덱 엔진 통합 기동 및 덱 순서 변경(Swap) 기능 패치 완료");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -17,7 +17,6 @@ const internalMasterOfficerUniqueTacticMap = {
     "채문희": "비분시", "장녕": "천의난위", "동탁": "전권난정", "여포": "천하무쌍",
     "초선": "폐월", "장각": "황천당립", "화타": "청낭제세", "장보": "요풍사기",
     "좌자": "화겁생기", "우길": "태평경", "안량": "효장", "원소": "사소도",
-    // [보안 패치] 공손찬 신규 추가 (고유 전법 정보는 명확히 수집되지 않아 예외 처리), 태사자/감녕 전량 폐기
     "공손찬": "고유 전법 누락"
 };
 
@@ -27,7 +26,7 @@ const internalMasterTacticNames = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", 
     "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", 
     "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", 
-    "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "승승장구", "심모원려", // [보안 패치] 승승장구 복구 및 유지
+    "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "승승장구", "심모원려",
     "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", 
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
@@ -202,9 +201,7 @@ const systemGuideInsights = {
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
 const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙", "원소", "동탁"]);
 const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
-// [보안 패치] 태사자 삭제 및 공손찬 재편입 보장
 const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "원소", "악진", "공손찬"]);
-// [보안 패치] 감녕 삭제 및 공손찬 재편입 보장
 const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "황월영", "육항", "우길", "초선", "장보", "장녕", "손권", "노숙", "좌자", "공손찬"]);
 
 // ==========================================================================
@@ -240,7 +237,6 @@ function getOfficerDogamData(officerName) {
         const data = window.getOfficerDataFromDogam(officerName);
         if (data && data.uniqueTactic && data.uniqueTactic !== "고유 전법 누락") return data;
     }
-    // 예외 처리된 공손찬의 고유 전법 반환 로직 안전장치
     return { role: "지휘/능동/패시브", uniqueTactic: internalMasterOfficerUniqueTacticMap[officerName] || "고유 전법 누락" };
 }
 
@@ -612,6 +608,23 @@ window.autoFixDeck = function(originIdx) {
     alert(`[교정 성공] 0티어 정답 메타인 [${bestMatchDeck.name}](으)로 일괄 수정되었습니다.`);
 };
 
+// 핵심 로직 추가: 덱 위치 스왑 엔진
+window.moveDeckAction = function(currentIndex, direction) {
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= dynamicPresetDecks.length) return;
+    
+    // 배열 요소 스왑
+    const temp = dynamicPresetDecks[currentIndex];
+    dynamicPresetDecks[currentIndex] = dynamicPresetDecks[targetIndex];
+    dynamicPresetDecks[targetIndex] = temp;
+    
+    // 데이터 렌더링 무결성을 위해 originIdx 재할당
+    dynamicPresetDecks.forEach((d, idx) => d.originIdx = idx);
+    
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    renderDeckBuilder();
+};
+
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container');
     if (!container) return;
@@ -643,7 +656,8 @@ function renderDeckBuilder() {
         const sortedHeroNames = getOfficerNamesBridge();
         const globalTacticsList = getTacticListBridge();
 
-        dynamicPresetDecks.forEach((deck) => {
+        // 덱 렌더링 루프 (arrayIndex 기반)
+        dynamicPresetDecks.forEach((deck, arrayIndex) => {
             if (!deck) return;
             const deckCard = document.createElement('div');
             deckCard.className = 'deck-card';
@@ -674,7 +688,6 @@ function renderDeckBuilder() {
                     const hawkAlts = metaHawkAlternativesMap[currentBestMetaId] || ["범용 SSR 매", "범용 SR 매"];
                     const hawkAttr = metaHawkRandomAttributesMap[currentBestMetaId] || metaHawkRandomAttributesMap["custom"];
                     
-                    // [기능 통합] 동적 역할별 전투매 출력 시스템 안전하게 보존
                     hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
                         <div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 세팅</div>
                         <div style="font-size:12px; color:#ddd; line-height:1.4;">🥇1순위: <strong>${hawkData.name}</strong> (${hawkData.skill})</div>
@@ -800,9 +813,14 @@ function renderDeckBuilder() {
             }
             if (fb.insight) fbHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb.insight}</div>`;
 
+            // UI 변경 구역: 상하 이동 컨트롤러 탑재
             deckCard.innerHTML = `
                 <div class="deck-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div>
+                    <div style="display:flex; align-items:center;">
+                        <div style="display:flex; flex-direction:column; gap:2px; margin-right:12px;">
+                            <button onclick="moveDeckAction(${arrayIndex}, -1)" style="background:#444; color:#fff; border:none; border-radius:3px; padding:2px 6px; font-size:10px; cursor:pointer; visibility:${arrayIndex > 0 ? 'visible' : 'hidden'};" title="위로 이동">▲</button>
+                            <button onclick="moveDeckAction(${arrayIndex}, 1)" style="background:#444; color:#fff; border:none; border-radius:3px; padding:2px 6px; font-size:10px; cursor:pointer; visibility:${arrayIndex < dynamicPresetDecks.length - 1 ? 'visible' : 'hidden'};" title="아래로 이동">▼</button>
+                        </div>
                         <span contenteditable="true" onblur="updateDeckState(${deck.originIdx}, 'title', this.innerText.trim().replace(/\\s*\\[추천도:\\s*\\d+점\\]/g, '') || '${deck.title}')" style="outline:none;">${deck.title}</span>
                         <span style="color:#ff9f43; font-size:13px; margin-left:12px; font-weight:bold; user-select:none;">[추천도: ${currentComputedScore}점]</span>
                     </div>
