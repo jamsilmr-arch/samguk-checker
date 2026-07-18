@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 독자적 종결 덱 AI 연산 엔진 기동 (태사자, 감녕 데이터 전량 폐기 완료)");
+console.log("[시스템 분석] deck_core.js 사마의 종결(장기전 방패) 덱 엔진 통합 기동 및 매/메타 데이터 복구 완료");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -17,7 +17,8 @@ const internalMasterOfficerUniqueTacticMap = {
     "채문희": "비분시", "장녕": "천의난위", "동탁": "전권난정", "여포": "천하무쌍",
     "초선": "폐월", "장각": "황천당립", "화타": "청낭제세", "장보": "요풍사기",
     "좌자": "화겁생기", "우길": "태평경", "안량": "효장", "원소": "사소도",
-    "공손찬": "고유 전법 모름" // 태사자, 감녕 전량 폐기 조치
+    // [보안 패치] 공손찬 신규 추가 (고유 전법 정보는 명확히 수집되지 않아 예외 처리), 태사자/감녕 전량 폐기
+    "공손찬": "고유 전법 누락"
 };
 
 const internalMasterOfficerNames = Object.keys(internalMasterOfficerUniqueTacticMap).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -26,14 +27,41 @@ const internalMasterTacticNames = [
     "가정지전", "강유겸제", "견불가최", "견진연봉", "공기불비", "과하탁교", "교취호탈", "극적제승", 
     "금낭묘계", "금적금왕", "금창신", "금철교명", "기문둔갑", "낙정하석", "동구적개", "동장철벽", 
     "동촉기선", "만부막적", "만전제발", "만천과해", "문치무공", "미우주무", "반객위주", "병량촌단", 
-    "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "승승장구", "심모원려", 
+    "분성지계", "비사주석", "사면초가", "사생취의", "선등함진", "수상개화", "순수견양", "승승장구", "심모원려", // [보안 패치] 승승장구 복구 및 유지
     "안영찰채", "암전난방", "양의화생", "양초선행", "여자동포", "요사여신", "용맹무쌍", "용왕직전", 
     "운주유악", "원성재도", "위위구조", "유좌유용", "이간계", "이아환아", "이일대로", "이퇴위진", 
     "일고작기", "인세이도", "전위위안", "제곤부위", "중정기고", "지인선임", "진퇴유도", "진화타겁", 
     "질풍노도", "천리추격", "천시지리", "체천행도", "축세대발", "축호과간", "태청단경", "토적격문", 
-    "파진최견", "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식", "사소도",
-    "천하무적", "일기당천", "귀신정정"
+    "현호제세", "호령삼군", "혼수모어", "홍수첨향", "화소적벽", "횡소천군", "횡징폭렴", "휴양생식", "사소도",
+    "파진최견", "천하무적", "일기당천", "귀신정정"
 ].sort((a, b) => a.localeCompare(b, 'ko'));
+
+const tacticAlternativesMap = {
+    "횡징폭렴": ["동구적개", "동장철벽"], "이퇴위진": ["미우주무", "천시지리"],
+    "용맹무쌍": ["만부막적", "비사주석"], "질풍노도": ["암전난방", "교취호탈"],
+    "문치무공": ["양초선행", "중정기고"], "혼수모어": ["사면초가", "이간계"],
+    "반객위주": ["일고작기", "사생취의"], "유좌유용": ["휴양생식", "제곤부위"],
+    "선등함진": ["만천과해", "만전제발"], "강유겸제": ["동장철벽", "천시지리"],
+    "진퇴유도": ["위위구조", "동구적개"], "견진연봉": ["동장철벽", "순수견양"],
+    "위위구조": ["태청단경", "현호제세"], 
+    "용왕직전": ["천리추격", "암전난방"], 
+    "만부막적": ["용왕직전", "천리추격"], 
+    "전위위안": ["태청단경", "현호제세"], "안영찰채": ["위위구조", "미우주무"],
+    "일고작기": ["사생취의", "용맹무쌍"], "여자동포": ["동구적개", "천시지리"],
+    "양의화생": ["기문둔갑", "화소적벽"], "수상개화": ["요사여신", "사생취의"],
+    "요사여신": ["수상개화", "사생취의"], "견불가최": ["동장철벽", "동구적개"],
+    "분성지계": ["화소적벽", "기문둔갑"], "운주유악": ["태청단경", "미우주무"],
+    "동구적개": ["안영찰채", "위위구조"], "사생취의": ["일고작기", "용맹무쌍"],
+    "양초선행": ["문치무공", "휴양생식"], "휴양생식": ["양초선행", "현호제세"],
+    "동장철벽": ["견불가최", "천시지리"], "사면초가": ["기문둔갑", "화소적벽"],
+    "심모원려": ["사면초가", "기문둔갑"],
+    "횡소천군": ["강유겸제", "용맹무쌍"], 
+    "천리추격": ["극적제승", "암전난방"], "암전난방": ["극적제승", "질풍노도"],
+    "사소도": ["이간계", "낙정하석"],
+    "파진최견": ["천하무적", "만부막적"], "천하무적": ["파진최견", "용맹무쌍"], 
+    "일기당천": ["귀신정정", "일고작기"], "귀신정정": ["사생취의", "용맹무쌍"],
+    "미우주무": ["현호제세", "태청단경"]
+};
 
 const formationEffects = {
     "일자진": "전열: 받는 피해 감소 6.0% | 후열: -", "구행진": "전열: 받는 피해 감소 5.0% | 후열: 가하는 피해 증가 12.0%",
@@ -56,6 +84,36 @@ const unitMatchupMap = {
     "궁병": { strong: "창병", weak: "방패병" }
 };
 
+const analyzedMetaArchetypes = [
+    { id: "wei_sima_shield", name: "위나라 응시낭고 방패 덱 (추형진/방패병)", concept: "조조의 방어막과 가후의 혼란 제어기로 전반부를 버티고, 4턴 이후 사마의가 심모원려 스택을 터뜨려 전장을 지배하는 장기전 종결 덱", formation: "추형진", officers: [{ name: "사마의", chosenTactics: ["응시낭고", "심모원려", "사면초가"] }, { name: "조조", chosenTactics: ["효웅", "휴양생식", "현호제세"] }, { name: "가후", chosenTactics: ["경달권변", "혼수모어", "이간계"] }] },
+    { id: "wei_flawless_assassin", name: "위나라 무결점 암살 덱 (호도진/기병)", concept: "악진 대신 곽가를 투입하여 장료에게 2턴 통찰(제어 면역)을 부여, 적의 CC기를 무시하고 주장을 확정 암살하는 궁극의 진화형 덱", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "횡징폭렴", "진퇴유도"] }, { name: "곽가", chosenTactics: ["산무유책", "동구적개", "강유겸제"] }] },
+    { id: "wei_assassin", name: "위나라 신속 암살 덱 (호도진)", concept: "조조와 악진이 유틸리티를 전담하고 장료가 반객위주의 무용 스택을 쌓아 적 주장을 정밀 저격하는 랭커 1위/5위 조합", formation: "호도진", officers: [{ name: "장료", chosenTactics: ["함진살적", "질풍노도", "반객위주"] }, { name: "조조", chosenTactics: ["군령여산", "혼수모어", "진퇴유도"] }, { name: "악진", chosenTactics: ["분용당선", "동구적개", "강유겸제"] }] },
+    { id: "shu_combo_spear", name: "촉나라 연격 창병 덱 (구행진)", concept: "위연과 서서가 적을 교란하는 사이 구행진 후열 마초가 반객위주의 물리 스택을 쌓아 폭딜을 가하는 랭커 2위 조합", formation: "구행진", officers: [{ name: "위연", chosenTactics: ["실병제위", "진퇴유도", "이퇴위진"] }, { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] }, { name: "서서", chosenTactics: ["절절학문", "문치무공", "혼수모어"] }] },
+    { id: "shu_evasion_bangwon", name: "촉나라 황제강 디버프 덱 (방원진)", concept: "황충이 전열에서 공방을 수행하고 제갈량의 보호 속에서 후열 강유가 적의 스탯을 무한 강탈하는 랭커 3위 조합", formation: "방원진", officers: [{ name: "황충", chosenTactics: ["적혈도", "강유겸제", "진퇴유도"] }, { name: "제갈량", chosenTactics: ["초선차전", "전위위안", "안영찰채"] }, { name: "강유", chosenTactics: ["담대여두", "반객위주", "일고작기"] }] },
+    { id: "qun_cavalry", name: "군웅 돌격 기병 덱 (구행진)", concept: "원소와 동탁이 전열을 버티고 구행진 버프를 받은 여포가 완벽한 추격(돌격) 전법으로 적을 분쇄하는 랭커 조합", formation: "구행진", officers: [{ name: "원소", chosenTactics: ["사소도", "견진연봉", "위위구조"] }, { name: "여포", chosenTactics: ["천하무쌍", "용왕직전", "만부막적"] }, { name: "동탁", chosenTactics: ["전권난정", "운주유악", "횡징폭렴"] }] },
+    { id: "wu_magic_bow", name: "오나라 모략 신기루 덱 (구행진)", concept: "육항과 노숙의 극단적인 버프를 손권에게 몰아주어 후열에서 압도적인 모략/물리 복합 피해를 뿜어내는 랭커 조합", formation: "구행진", officers: [{ name: "손권", chosenTactics: ["웅거", "진퇴유도", "강유겸제"] }, { name: "육항", chosenTactics: ["청백충근", "수상개화", "요사여신"] }, { name: "노숙", chosenTactics: ["탑상책", "분성지계", "여자동포"] }] }
+];
+
+const metaDeckUnitTypeMap = {
+    "wei_sima_shield": "방패병",
+    "wei_flawless_assassin": "기병", 
+    "wei_assassin": "창병",
+    "wu_magic_bow": "궁병",
+    "shu_combo_spear": "창병",
+    "shu_evasion_bangwon": "궁병",
+    "qun_cavalry": "기병"
+};
+
+const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => {
+    let copy = JSON.parse(JSON.stringify(d));
+    copy.title = `${i + 1}군`;
+    copy.unitType = ""; 
+    copy.officers.forEach(off => {
+        if(off.chosenTactics.length === 3) off.chosenTactics = off.chosenTactics.slice(1, 3);
+    });
+    return copy;
+});
+
 const internalBondRules = [
     { name: "연환계", req: 3, heroes: ["동탁", "여포", "초선", "황충"], effect: "부대 내 인연 무장을 가하는 피해와 치유 효과 4% 증가, 해제 불가." },
     { name: "도법자연", req: 2, heroes: ["좌자", "장각", "우길"], effect: "부대 내 유대 무장의 모략과 공심 4% 상승, 해제 불가." },
@@ -68,34 +126,107 @@ const internalBondRules = [
     { name: "군신상기", req: 2, heroes: ["조조", "조조(제왕)", "사마의"], effect: "부대 내 인연 무장의 고략 및 공심이 4% 증가하며 해제 불가합니다." }
 ];
 
+const metaHawkRecommendationMap = {
+    "wei_sima_shield": { name: "호생 (SSR)", skill: "턴 시작 시 병력 최저 아군 치료 및 사마의의 장기전 생존률 200% 보장" },
+    "wei_flawless_assassin": { name: "전광 (SSR)", skill: "턴 시작 시 아군 무용/통솔 증가 및 기병 속도전의 우위 선점" },
+    "wei_assassin": { name: "삭풍 (SSR)", skill: "턴 종료 시 무용 최고 아군 물리피해 버프 및 장료의 마무리를 돕는 160% 딜" },
+    "wu_magic_bow": { name: "능소 (SSR)", skill: "전투 시작 시 아군 전체 피해 30% 감소로 후반 예열을 돕는 방벽" },
+    "shu_combo_spear": { name: "열공 (SSR)", skill: "턴 시작 시 무용/통솔 증가로 마초의 스펙 펌핑" },
+    "shu_evasion_bangwon": { name: "결운 (SSR)", skill: "턴 시작 시 병력 최저 아군 치료 및 [호생] 기믹을 통한 궁병 생존력 보완" },
+    "qun_cavalry": { name: "열공 (SSR)", skill: "턴 시작 시 아군 무용/통솔 30% 증가. 여포의 돌파력 극대화" }
+};
+
+const metaHawkAlternativesMap = {
+    "wei_sima_shield": ["감로 (SSR)", "진시 (SSR)"],
+    "wei_flawless_assassin": ["삭풍 (SSR)", "설조 (SSR)"],
+    "wei_assassin": ["전광 (SSR)", "설조 (SSR)"],
+    "wu_magic_bow": ["진시 (SSR)", "호생 (SSR)"],
+    "shu_combo_spear": ["전광 (SSR)", "설조 (SSR)"],
+    "shu_evasion_bangwon": ["감로 (SSR)", "전우 (SSR)"],
+    "qun_cavalry": ["전광 (SSR)", "설조 (SSR)"]
+};
+
+const metaHawkRandomAttributesMap = {
+    "wei_sima_shield": {
+        attr1: { rank1: "통솔 +12%", rank2: "모략 +10%", rank3: "전능 +6%" },
+        attr2: { rank1: "받는 피해 감소 +10%", rank2: "치유 효과 상승 +10%", rank3: "가하는 모략 피해 +8%" },
+        attr3: { rank1: "턴 종료 시 디버프 해제", rank2: "피격 시 10% 저항", rank3: "모면(회피) +6%" }
+    },
+    "wei_flawless_assassin": {
+        attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
+        attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "전법 발동률 +5%" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "평타 시 10% 혼란" }
+    },
+    "wei_assassin": {
+        attr1: { rank1: "속도 +25", rank2: "무용 +12%", rank3: "전능 +6%" },
+        attr2: { rank1: "파갑(방어 관통) +12%", rank2: "가하는 피해 증가 +8%", rank3: "적 주장 타격 보너스" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "첫 턴 제어 면역", rank3: "적 회피 15% 무시" }
+    },
+    "wu_magic_bow": {
+        attr1: { rank1: "모략 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "능동 전법 발동률 +5%", rank3: "받는 피해 감소 +8%" },
+        attr3: { rank1: "치유 효과 상승 +12%", rank2: "매 턴 디버프 해제", rank3: "모면(회피) +6%" }
+    },
+    "shu_combo_spear": {
+        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "전능 +6%" },
+        attr2: { rank1: "연격률 +10%", rank2: "확산 피해 +12%", rank3: "가하는 물리 피해 +10%" },
+        attr3: { rank1: "평타 3회 후 무장해제", rank2: "첫 턴 확정 선공", rank3: "무용 타격 시 15% 흡혈" }
+    },
+    "shu_evasion_bangwon": {
+        attr1: { rank1: "모략 +12%", rank2: "전능 +6%", rank3: "통솔 +10%" },
+        attr2: { rank1: "가하는 모략 피해 +10%", rank2: "받는 피해 감소 +8%", rank3: "치유 효과 상승 +12%" },
+        attr3: { rank1: "모면(회피) +6%", rank2: "매 턴 디버프 해제", rank3: "피격 시 10% 저항" }
+    },
+    "qun_cavalry": {
+        attr1: { rank1: "무용 +12%", rank2: "속도 +20", rank3: "통솔 +10%" },
+        attr2: { rank1: "파갑(방어 관통) +10%", rank2: "연격률 +8%", rank3: "가하는 물리 피해 +10%" },
+        attr3: { rank1: "첫 턴 확정 선공", rank2: "돌격 전법 데미지 +15%", rank3: "평타 시 10% 혼란" }
+    },
+    "custom": {
+        attr1: { rank1: "전능 +5%", rank2: "통솔 +10%", rank3: "무용 +10%" },
+        attr2: { rank1: "가하는 피해 증가 +6%", rank2: "받는 피해 감소 +6%", rank3: "전법 발동률 +3%" },
+        attr3: { rank1: "첫 턴 제어 면역", rank2: "첫 턴 선공", rank3: "턴 종료 시 병력 회복" }
+    }
+};
+
+const systemGuideInsights = {
+    "wei_sima_shield": "💡 <strong style='color:#a855f7;'>[장기전 종결 메타]</strong> 조조의 절대 방어막과 가후의 혼란 제어기로 전반부를 무손실로 버티고, 사마의의 후반 모략 폭딜로 적 전열을 분쇄하는 정통 0티어 방패 덱입니다.",
+    "wei_flawless_assassin": "💡 <strong style='color:#a855f7;'>[진화형 종결 메타]</strong> 악진을 제외하고 곽가를 투입하여, 장료에게 2턴간 100% 제어 면역(통찰)을 부여합니다. 적의 CC기를 무시하고 주장을 확정 타격하는 최강의 암살 덱입니다.",
+    "wei_assassin": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 호도진을 활용한 장료의 적 주장 암살 덱입니다. 물리/모략 하이브리드 패시브인 '반객위주'로 장료의 연속 타격 스택을 극한으로 쌓아올립니다.",
+    "wu_magic_bow": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 육항과 노숙이 손권에게 스탯과 크리티컬 버프를 몰아주는 구행진 기반의 강력한 대기만성 복합 캐리 덱입니다.",
+    "shu_combo_spear": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 위연과 서서가 유틸리티를 챙기고 마초가 '반객위주'의 물리 스택을 폭발시켜 구행진 확산 딜을 뿜어냅니다.",
+    "shu_evasion_bangwon": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 황충이 전열을 버티고 제갈량의 보호막 안에서 강유가 적의 스탯을 무한 강탈하는 변칙 방원진 덱입니다.",
+    "qun_cavalry": "💡 <strong style='color:#a855f7;'>[랭커 메타 분석]</strong> 여포의 평타 다단히트에 폭발적으로 반응하는 추격 전법(용왕직전/만부막적)의 시너지가 핵심인 1턴킬 덱입니다."
+};
+
 const tacticalSet = new Set(["사마의", "순욱", "정욱", "가후", "곽가", "제갈량", "서서", "강유", "황월영", "육손", "주유", "육항", "노숙", "대교", "소교", "장각", "우길", "좌자", "화타", "채문희", "초선", "장녕", "장보"]);
 const supportSet = new Set(["조조", "조조(제왕)", "유비", "유비(제왕)", "손권", "손권(제왕)", "화타", "좌자", "채문희", "노숙", "원소", "동탁"]);
 const shieldSet = new Set(["장비", "조조", "조조(제왕)", "유비", "유비(제왕)", "전위", "동탁", "장각", "사마의", "손견"]);
-// 태사자 데이터 제거, 공손찬 유지
+// [보안 패치] 태사자 삭제 및 공손찬 재편입 보장
 const cavSet = new Set(["마초", "장료", "하후돈", "하후연", "여포", "서서", "곽가", "정욱", "가후", "손상향", "원소", "악진", "공손찬"]);
-// 감녕 데이터 제거, 공손찬 유지
+// [보안 패치] 감녕 삭제 및 공손찬 재편입 보장
 const bowSet = new Set(["황충", "강유", "제갈량", "육손", "주유", "원소", "황월영", "육항", "우길", "초선", "장보", "장녕", "손권", "노숙", "좌자", "공손찬"]);
-
-// 기본 제공되는 빈 프리셋 덱
-const defaultPresetDecks = Array.from({ length: 5 }, (_, i) => ({
-    title: `${i + 1}군 (커스텀 덱)`,
-    formation: "추형진",
-    unitType: "",
-    officers: [
-        { name: "", chosenTactics: ["", ""] },
-        { name: "", chosenTactics: ["", ""] },
-        { name: "", chosenTactics: ["", ""] }
-    ]
-}));
 
 // ==========================================================================
 // LAYER 2: 스마트 분류 엔진 인터페이스
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "방패병") {
+    if (typeof window.getEquipmentRecommendationFromGuide === 'function') {
+        const extEq = window.getEquipmentRecommendationFromGuide(officerName);
+        if (extEq && extEq.helmet) return extEq;
+    }
+
     let damageAttr = "무용 피해 가함"; 
     let accAttr1 = "무용 피해 가함";   
-    if (tacticalSet.has(officerName)) { damageAttr = "모략 피해 가함"; accAttr1 = "모략 피해 가함"; }
-    if (supportSet.has(officerName)) { damageAttr = "치유 효과 상승"; accAttr1 = "치유 효과 상승"; }
+
+    if (tacticalSet.has(officerName)) {
+        damageAttr = "모략 피해 가함";
+        accAttr1 = "모략 피해 가함";
+    }
+    if (supportSet.has(officerName)) {
+        damageAttr = "치유 효과 상승";
+        accAttr1 = "치유 효과 상승";
+    }
 
     return { 
         helmet: { name: "진현관", attr1: "피해 감소", attr2: "통솔 증가" }, 
@@ -105,67 +236,111 @@ function getOfficerEquipment(officerName, deckUnitType = "방패병") {
 }
 
 function getOfficerDogamData(officerName) {
+    if (typeof window.getOfficerDataFromDogam === 'function') {
+        const data = window.getOfficerDataFromDogam(officerName);
+        if (data && data.uniqueTactic && data.uniqueTactic !== "고유 전법 누락") return data;
+    }
+    // 예외 처리된 공손찬의 고유 전법 반환 로직 안전장치
     return { role: "지휘/능동/패시브", uniqueTactic: internalMasterOfficerUniqueTacticMap[officerName] || "고유 전법 누락" };
 }
 
-function getTacticListBridge() { return [...internalMasterTacticNames]; }
-function getOfficerNamesBridge() { return [...internalMasterOfficerNames]; }
+function getTacticListBridge() {
+    if (typeof window.getAllTacticsFromDogam === 'function') {
+        const extList = window.getAllTacticsFromDogam();
+        if (extList && extList.length > 5) return extList;
+    }
+    return [...internalMasterTacticNames];
+}
+
+function getOfficerNamesBridge() {
+    if (typeof window.getAllOfficerNamesFromDogam === 'function') {
+        const extList = window.getAllOfficerNamesFromDogam();
+        if (extList && extList.length > 5) return extList.sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+    return [...internalMasterOfficerNames];
+}
 
 // ==========================================================================
-// LAYER 3: 독자적 덱 연산 엔진 (커스텀 밸런스 및 완성도 평가)
+// LAYER 3: 코어 연산 엔진 구역
 // ==========================================================================
 function calculateStrictDeckScore(deck) {
     if (!deck?.officers || !Array.isArray(deck.officers)) return 0;
-    
-    let score = 100;
-    let officerCount = 0;
-    let roles = { magic: 0, physical: 0, support: 0, shield: 0 };
-    const curNamesClean = [];
+    const curNamesClean = deck.officers.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean);
+    if (!curNamesClean.length) return 0;
 
-    // 장수 및 전법 장착 상태 평가
-    deck.officers.forEach(off => {
-        const name = off?.name?.toString().trim().replace(/\s+/g, '') || "";
-        if (!name) { 
-            score -= 25; // 빈 장수 슬롯 페널티
-            return; 
-        }
-        
-        officerCount++;
-        curNamesClean.push(name);
+    let bestMatchDeck = analyzedMetaArchetypes[0], maxMatchScore = -1;
 
-        // 역할군 판별
-        if (tacticalSet.has(name)) roles.magic++;
-        if (supportSet.has(name)) roles.support++;
-        if (shieldSet.has(name)) roles.shield++;
-        if (cavSet.has(name) && !tacticalSet.has(name)) roles.physical++;
-
-        // 전법 완성도 평가
-        off.chosenTactics?.forEach(tac => {
-            if (!tac || tac.toString().trim() === "") score -= 10; // 빈 전법 슬롯 페널티
+    analyzedMetaArchetypes.forEach(metaDeck => {
+        let matchScore = 0;
+        metaDeck.officers.forEach((mo, idx) => {
+            const mName = mo.name.replace(/\s+/g, '');
+            if (curNamesClean.includes(mName)) matchScore += 1; 
+            if (curNamesClean[idx] === mName) matchScore += 0.5;
         });
+        if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = metaDeck; }
     });
 
-    if (officerCount === 0) return 0;
+    if (maxMatchScore === 0) return 0; 
 
-    // 공방 밸런스 페널티 계산
-    const hasDamageDealer = (roles.magic > 0 || roles.physical > 0);
-    const hasSustain = (roles.support > 0 || roles.shield > 0);
-    
-    // 예외: 인연 시너지가 있거나 극단적 코어가 있다면 밸런스 페널티 완화
-    const matchedBonds = internalBondRules.filter(rule => {
-        const matchCount = curNamesClean.filter(n => rule.heroes.includes(n)).length;
-        return matchCount >= rule.req;
+    let score = 100;
+    const curFmt = deck.formation?.toString().trim() || "";
+    const idealFmt = bestMatchDeck.formation.trim();
+    if (curFmt.replace(/\s+/g, '') !== idealFmt.replace(/\s+/g, '')) score -= 10;
+
+    bestMatchDeck.officers.forEach((metaOff, metaIdx) => {
+        const mName = metaOff.name.replace(/\s+/g, '');
+        const userOffIdx = curNamesClean.indexOf(mName);
+
+        if (userOffIdx === -1) {
+            score -= 30; 
+        } else {
+            const curRow = formationPositions[curFmt]?.[userOffIdx] || "front";
+            const idealRow = formationPositions[idealFmt]?.[metaIdx] || "front";
+            if (curRow !== idealRow) score -= 10;
+
+            const userOff = deck.officers[userOffIdx];
+            const metaTacsClean = metaOff.chosenTactics.length === 3 ? [metaOff.chosenTactics[1].trim().replace(/\s+/g, ''), metaOff.chosenTactics[2].trim().replace(/\s+/g, '')] : metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
+            let unmatchTac = [...metaTacsClean];
+            
+            let emptyOrWrongCount = 0;
+            let altCount = 0;
+
+            if (Array.isArray(userOff.chosenTactics)) {
+                userOff.chosenTactics.forEach(tac => {
+                    const cleanTac = tac?.toString().trim().replace(/\s+/g, '') || "";
+                    const exactIdx = unmatchTac.indexOf(cleanTac);
+                    if (exactIdx !== -1) unmatchTac.splice(exactIdx, 1);
+                });
+
+                userOff.chosenTactics.forEach(tac => {
+                    const cleanTac = tac?.toString().trim().replace(/\s+/g, '') || "";
+                    if (cleanTac !== "" && !metaTacsClean.includes(cleanTac)) {
+                        let isAlt = false;
+                        for (let i = 0; i < unmatchTac.length; i++) {
+                            const pTac = unmatchTac[i];
+                            const alts = tacticAlternativesMap[pTac] || [];
+                            if (alts.includes(cleanTac)) {
+                                isAlt = true;
+                                unmatchTac.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (isAlt) altCount++;
+                        else emptyOrWrongCount++;
+                    } else if (cleanTac === "") {
+                        emptyOrWrongCount++;
+                    }
+                });
+            } else {
+                emptyOrWrongCount += 2;
+            }
+
+            score -= (altCount * 2);
+            score -= (emptyOrWrongCount * 5);
+        }
     });
 
-    const isExtremeMeta = curNamesClean.includes("여포") || curNamesClean.includes("장료");
-
-    if (!hasDamageDealer) score -= 15;
-    if (!hasSustain && !isExtremeMeta && matchedBonds.length === 0) score -= 15;
-
-    // 인연 시너지 보너스
-    if (matchedBonds.length > 0) score += 10;
-
-    return Math.min(100, Math.max(0, score));
+    return Math.max(score, 0);
 }
 
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
@@ -173,55 +348,151 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     if (!deck?.officers || !Array.isArray(deck.officers)) return fb;
 
     const curNames = deck.officers.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean);
-    
-    if (curNames.length === 0) {
-        fb.logs.push({ type: 'info', text: `💡 <strong>AI 덱 빌딩 시스템:</strong> 장수를 슬롯에 배치하시면, 무장의 특성에 맞춰 최적의 파트너와 전법을 시스템이 자동으로 계산하여 제안합니다.` });
+    if (!curNames.length) return fb;
+
+    let bestMatchDeck = analyzedMetaArchetypes[0], maxMatchScore = -1;
+
+    analyzedMetaArchetypes.forEach(metaDeck => {
+        let matchScore = 0;
+        metaDeck.officers.forEach((mo, idx) => {
+            const mName = mo.name.replace(/\s+/g, '');
+            if (curNames.includes(mName)) matchScore += 1; 
+            if (curNames[idx] === mName) matchScore += 0.5;
+        });
+        if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = metaDeck; }
+    });
+
+    if (maxMatchScore === 0) {
+        fb.logs.push({ type: 'info', text: `💡 <strong>분석 완료:</strong> 시스템에 등록된 0티어 정답 메타와 일치하는 무장이 없는 <strong>[창작/커스텀 덱]</strong>입니다. 압도적인 성능을 원하신다면 100점 달성을 위한 코어 장수(예: 사마의, 여포, 장료 등)를 기반으로 덱을 재설계해 보십시오.` });
+        deck.officers.forEach((off, offIdx) => {
+            if (!off?.name) return;
+            const hName = off.name.toString().trim();
+            if (!heroDataMap[hName]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다.` });
+
+            if (Array.isArray(off.chosenTactics)) {
+                off.chosenTactics.forEach((tac, tIdx) => {
+                    const rawTac = tac?.toString().trim() || "";
+                    if (rawTac !== "" && !tacticDataMap[rawTac.replace(/\s+/g, '')]?.isOwned) {
+                        fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tIdx + 2}번 슬롯 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
+                    }
+                });
+            }
+        });
         return fb;
     }
 
-    let roles = { magic: 0, physical: 0, support: 0, shield: 0 };
-    curNames.forEach(name => {
-        if (tacticalSet.has(name)) roles.magic++;
-        if (supportSet.has(name)) roles.support++;
-        if (shieldSet.has(name)) roles.shield++;
-        if (cavSet.has(name) && !tacticalSet.has(name)) roles.physical++;
+    fb.logs.push({ type: 'info', text: `🎯 <strong>메타 추적 완료:</strong> 현재 조합은 <strong>[${bestMatchDeck.name}]</strong> 기반입니다. 추천도 100점을 위해 아래의 처방을 완수하십시오. (${bestMatchDeck.concept})` });
+    
+    if (systemGuideInsights[bestMatchDeck.id]) fb.insight = systemGuideInsights[bestMatchDeck.id];
+
+    const curFmt = deck.formation?.toString().trim() || "";
+    const idealFmt = bestMatchDeck.formation.trim();
+    if (curFmt.replace(/\s+/g, '') !== idealFmt.replace(/\s+/g, '')) {
+        fb.logs.push({ type: 'warning', text: `진형 교정: [${curFmt}] ➔ <strong>[${idealFmt}]</strong> (해당 메타의 핵심 시너지 포지셔닝을 위해 변경을 권장합니다.)` });
+    }
+
+    const allEquippedTacticsInDeck = [];
+    deck.officers.forEach(o => {
+        o?.chosenTactics?.forEach(t => {
+            if (t) allEquippedTacticsInDeck.push(t.toString().trim().replace(/\s+/g, ''));
+        });
     });
 
-    fb.logs.push({ type: 'info', text: `🎯 <strong>커스텀 분석 완료:</strong> 현재 조합은 [마법 딜러 ${roles.magic}명 / 물리 딜러 ${roles.physical}명 / 지원 및 탱커 ${roles.support + roles.shield}명] 구조입니다.` });
-
-    const hasDamageDealer = (roles.magic > 0 || roles.physical > 0);
-    const hasSustain = (roles.support > 0 || roles.shield > 0);
-
-    if (!hasDamageDealer) fb.logs.push({ type: 'warning', text: `밸런스 경고: 주력 피해를 담당할 딜러(무용/모략)가 부족합니다. 화력 부족으로 장기전에서 불리해질 수 있습니다.` });
-    if (!hasSustain && !curNames.includes("여포") && !curNames.includes("장료")) fb.logs.push({ type: 'warning', text: `밸런스 경고: 아군을 보호하거나 치료할 서포터/탱커가 부족합니다. 생존력 향상을 위해 진형을 수정하십시오.` });
+    let missingMeta = bestMatchDeck.officers.filter(mo => !curNames.includes(mo.name.replace(/\s+/g, '')));
 
     deck.officers.forEach((off, offIdx) => {
         if (!off) return;
         const hName = off.name?.toString().trim() || "";
-        if (!hName) {
-            fb.logs.push({ type: 'warning', text: `장수 배치: 빈 슬롯이 존재합니다. 부대의 완성도를 위해 장수를 추가 배치하십시오.` });
+        const cleanHName = hName.replace(/\s+/g, '');
+        
+        if (!cleanHName) {
+            if (missingMeta.length) fb.logs.push({ type: 'warning', text: `장수 배치: <strong>[빈 슬롯]</strong> ➔ <strong>[${missingMeta.shift().name}]</strong> 투입 (시너지 복구를 위한 강력 추천 코어 무장)` });
             return;
         }
 
-        const heroInv = heroDataMap[hName] || { isOwned: false };
-        if (!heroInv.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다.` });
+        const heroInv = heroDataMap[hName] || { isOwned: false, star: 0 };
+        if (!heroInv.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 장수가 미보유 상태입니다. (장수 도감 확인 요망)` });
 
-        if (Array.isArray(off.chosenTactics)) {
-            off.chosenTactics.forEach((tac, tIdx) => {
-                const rawTac = tac?.toString().trim() || "";
-                if (rawTac === "") {
-                    let recommend = "일반 능동 전법";
-                    if (tacticalSet.has(hName)) recommend = "모략(지력) 비례 피해 전법 (예: 사면초가)";
-                    else if (supportSet.has(hName)) recommend = "치유 및 아군 버프 전법 (예: 휴양생식)";
-                    else recommend = "무용(물리) 비례 피해 전법 (예: 일기당천)";
-                    fb.logs.push({ type: 'warning', text: `전법 장착: [${hName}]의 ${tIdx + 2}번 슬롯이 비어있습니다. ➔ 권장: <strong>${recommend}</strong>` });
-                } else if (!tacticDataMap[rawTac.replace(/\s+/g, '')]?.isOwned) {
-                    fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 장착 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
-                }
+        const metaIdx = bestMatchDeck.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
+
+        if (metaIdx !== -1) {
+            const metaOff = bestMatchDeck.officers[metaIdx];
+            const curRow = formationPositions[curFmt]?.[offIdx] || "front";
+            const idealRow = formationPositions[idealFmt]?.[metaIdx] || "front";
+
+            if (curRow !== idealRow) {
+                fb.logs.push({ type: 'warning', text: `배치 교정: <strong>[${hName}]</strong> 장수는 메타 아키텍처상 <strong>${idealRow === 'front' ? '전열' : '후열'}</strong> 포지션이어야 하나, 현재 <strong>${curRow === 'front' ? '전열' : '후열'}</strong> 슬롯에 가 있습니다.` });
+            }
+
+            const metaTacsClean = metaOff.chosenTactics.length === 3 ? [metaOff.chosenTactics[1].trim().replace(/\s+/g, ''), metaOff.chosenTactics[2].trim().replace(/\s+/g, '')] : metaOff.chosenTactics.map(t => t.trim().replace(/\s+/g, ''));
+            
+            let unmatchTac = metaTacsClean.filter(t => {
+                const cT = t.trim().replace(/\s+/g, '');
+                return !allEquippedTacticsInDeck.includes(cT);
             });
+
+            if (Array.isArray(off.chosenTactics)) {
+                off.chosenTactics.forEach(tac => {
+                    const cleanTac = tac?.toString().trim().replace(/\s+/g, '') || "";
+                    if (unmatchTac.includes(cleanTac)) unmatchTac.splice(unmatchTac.indexOf(cleanTac), 1);
+                });
+
+                off.chosenTactics.forEach((tac, tIdx) => {
+                    const rawTac = tac?.toString().trim() || "";
+                    const cleanTac = rawTac.replace(/\s+/g, '');
+
+                    if (cleanTac === "") {
+                        if (unmatchTac.length) {
+                            const primaryTac = unmatchTac.shift();
+                            const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
+                            fb.logs.push({ 
+                                type: 'warning', 
+                                text: `전법 장착: [${hName}]의 ${tIdx + 2}번 슬롯이 비어있습니다. ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 장착 권장` 
+                            });
+                        }
+                    } else {
+                        if (!metaTacsClean.includes(cleanTac) && unmatchTac.length) {
+                            let matchedPrimaryIdx = -1;
+                            for (let i = 0; i < unmatchTac.length; i++) {
+                                const pTac = unmatchTac[i];
+                                const alts = tacticAlternativesMap[pTac] || [];
+                                if (alts.includes(cleanTac)) {
+                                    matchedPrimaryIdx = i;
+                                    break;
+                                }
+                            }
+
+                            if (matchedPrimaryIdx !== -1) {
+                                const primaryTac = unmatchTac.splice(matchedPrimaryIdx, 1)[0];
+                                fb.logs.push({ 
+                                    type: 'info', 
+                                    text: `📈 <strong>전법 빌드업:</strong> [${hName}]의 ${tIdx + 2}번 슬롯에 대체 전법 <strong>[${rawTac}]</strong>을(를) 유효하게 활용 중입니다. 훌륭한 선택이나, 100점 도달을 위해 추후 🥇1순위 <strong>[${primaryTac}]</strong>(으)로 업그레이드 하십시오.` 
+                                });
+                            } else {
+                                const primaryTac = unmatchTac.shift();
+                                const alts = tacticAlternativesMap[primaryTac] || ["유사 역할 A급 전법", "유사 역할 B급 전법"];
+                                fb.logs.push({ 
+                                    type: 'warning', 
+                                    text: `전법 튜닝: [${hName}]의 ${tIdx + 2}번 슬롯 [${rawTac}] 교체 요망 ➔ 🥇1순위: <strong>[${primaryTac}]</strong> / 🥈2순위: <strong>[${alts[0]}]</strong> / 🥉3순위: <strong>[${alts[1]}]</strong> 권장` 
+                                });
+                            }
+                        }
+
+                        if (!tacticDataMap[cleanTac]?.isOwned) {
+                            fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}]의 ${tIdx + 2}번 슬롯 전법 <strong>[${rawTac}]</strong>이 미보유 상태입니다.` });
+                        }
+                    }
+                });
+            }
+        } else {
+            if (missingMeta.length) {
+                const replaceWith = missingMeta.shift();
+                fb.logs.push({ type: 'warning', text: `🚀 <strong>100점 달성 장수 교체:</strong> 도태된 메타 무장인 [${hName}]을(를) 빼고, 최상위 코어인 <strong>[${replaceWith.name}]</strong>(을)를 투입하십시오.` });
+            } else {
+                fb.logs.push({ type: 'warning', text: `🚀 <strong>100점 달성 장수 초과:</strong> [${hName}] 장수는 100점 메타 시너지에 포함되지 않으므로 제외하십시오.` });
+            }
         }
     });
-
     return fb;
 }
 
@@ -242,7 +513,7 @@ function calculateActivatedBond(officers) {
 // ==========================================================================
 // LAYER 4: State & UI 핸들러 구역
 // ==========================================================================
-let dynamicPresetDecks = [];
+let dynamicPresetDecks = [], currentSortMode = 'default'; 
 
 function loadDeckTextData() {
     try {
@@ -253,22 +524,29 @@ function loadDeckTextData() {
                 dynamicPresetDecks = parsed.slice(0, 5);
                 while (dynamicPresetDecks.length < 5) dynamicPresetDecks.push(JSON.parse(JSON.stringify(defaultPresetDecks[dynamicPresetDecks.length])));
                 
-                dynamicPresetDecks.forEach((deck, idx) => {
+                dynamicPresetDecks.forEach((d, idx) => {
+                    if (!d || typeof d !== 'object') dynamicPresetDecks[idx] = JSON.parse(JSON.stringify(defaultPresetDecks[idx] || defaultPresetDecks[0]));
+                    const deck = dynamicPresetDecks[idx];
                     deck.originIdx = deck.originIdx ?? idx;
-                    deck.title = deck.title || `${idx + 1}군`;
-                    deck.formation = deck.formation || "추형진";
+                    deck.title = deck.title || defaultPresetDecks[idx]?.title || `${idx + 1}군`;
+                    deck.formation = deck.formation || defaultPresetDecks[idx]?.formation || "추형진";
                     deck.unitType = deck.unitType || ""; 
-                    deck.officers = deck.officers?.length ? deck.officers : JSON.parse(JSON.stringify(defaultPresetDecks[idx].officers));
+                    deck.officers = deck.officers?.length ? deck.officers : JSON.parse(JSON.stringify(defaultPresetDecks[idx]?.officers || defaultPresetDecks[0].officers));
                     
-                    deck.officers.forEach((curOff) => {
+                    deck.officers.forEach((off, oIdx) => {
+                        if (!off || typeof off !== 'object') deck.officers[oIdx] = { name: "", chosenTactics: ["", ""] };
+                        const curOff = deck.officers[oIdx];
+                        if (curOff.name === "제)조조") curOff.name = "조조(제왕)";
+                        if (curOff.name === "제)유비") curOff.name = "유비(제왕)";
                         curOff.name = curOff.name || "";
                         curOff.chosenTactics = Array.isArray(curOff.chosenTactics) ? curOff.chosenTactics : ["", ""];
                     });
                 });
+                localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
                 return;
             }
         }
-    } catch (e) { console.error("스토리지 파싱 에러:", e); }
+    } catch (e) { console.error("스토리지 복구 가동:", e); }
     
     dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
     dynamicPresetDecks.forEach((d, idx) => d.originIdx = idx);
@@ -298,31 +576,40 @@ window.autoFixDeck = function(originIdx) {
     const deck = dynamicPresetDecks.find(d => d.originIdx === originIdx);
     if (!deck) return;
 
-    let modified = false;
-    deck.officers.forEach(off => {
-        const name = off?.name?.toString().trim();
-        if (!name) return;
+    const curNamesClean = deck.officers.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean);
+    let bestMatchDeck = analyzedMetaArchetypes[0], maxMatchScore = -1;
 
-        const isMagic = tacticalSet.has(name);
-        const isSupport = supportSet.has(name);
-
-        off.chosenTactics = off.chosenTactics.map((t, i) => {
-            if (t && t.trim() !== "") return t;
-            modified = true;
-            // 역할군에 따른 1순위 범용 전법 할당
-            if (isSupport) return i === 0 ? "군령여산" : "휴양생식";
-            if (isMagic) return i === 0 ? "사면초가" : "혼수모어";
-            return i === 0 ? "일기당천" : "만부막적";
+    if (curNamesClean.length > 0) {
+        analyzedMetaArchetypes.forEach(meta => {
+            let matchScore = 0;
+            meta.officers.forEach((mo, idx) => {
+                const mName = mo.name.replace(/\s+/g, '');
+                if (curNamesClean.includes(mName)) matchScore += 1; 
+                if (curNamesClean[idx] === mName) matchScore += 0.5;
+            });
+            if (matchScore > maxMatchScore) { maxMatchScore = matchScore; bestMatchDeck = meta; }
         });
+    }
+
+    if (maxMatchScore === 0 || curNamesClean.length === 0) {
+        alert("[교정 실패] 기준이 될 코어 장수가 없습니다. 1명 이상의 메타 장수를 배치한 후 다시 시도해 주십시오.");
+        return;
+    }
+
+    deck.formation = bestMatchDeck.formation;
+    deck.unitType = metaDeckUnitTypeMap[bestMatchDeck.id] || "";
+    deck.officers = bestMatchDeck.officers.map(mo => {
+        let tacs = mo.chosenTactics;
+        if (tacs.length === 3) tacs = tacs.slice(1, 3); 
+        return {
+            name: mo.name,
+            chosenTactics: [...tacs]
+        };
     });
 
-    if (modified) {
-        localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-        renderDeckBuilder();
-        alert("[AI 최적화] 장수의 역할군(모략/물리/지원)을 분석하여 빈 슬롯에 권장 전법을 자동 배치했습니다.");
-    } else {
-        alert("[AI 진단] 이미 모든 전법 슬롯이 채워져 있어 자동 배치를 스킵합니다.");
-    }
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
+    renderDeckBuilder();
+    alert(`[교정 성공] 0티어 정답 메타인 [${bestMatchDeck.name}](으)로 일괄 수정되었습니다.`);
 };
 
 function renderDeckBuilder() {
@@ -339,12 +626,19 @@ function renderDeckBuilder() {
         if (savedData) {
             const parsed = JSON.parse(savedData);
             parsed?.heroes?.forEach(x => {
-                if (x?.name) heroDataMap[x.name.toString().trim()] = { isOwned: !!x.isOwned };
+                if (x?.name) {
+                    let name = x.name.toString().trim();
+                    if (name === "제)조조") name = "조조(제왕)";
+                    if (name === "제)유비") name = "유비(제왕)";
+                    heroDataMap[name] = { isOwned: !!x.isOwned, star: parseInt(x.star || 0), transcend: !!x.transcend };
+                }
             });
             parsed?.tactics?.forEach(x => {
-                if (x?.name) tacticDataMap[x.name.toString().trim()] = { isOwned: !!x.isOwned };
+                if (x?.name) tacticDataMap[x.name.toString().trim()] = { isOwned: !!x.isOwned, star: parseInt(x.star || 0) };
             });
         }
+
+        if (currentSortMode === 'default') dynamicPresetDecks.sort((a, b) => (a.originIdx || 0) - (b.originIdx || 0));
 
         const sortedHeroNames = getOfficerNamesBridge();
         const globalTacticsList = getTacticListBridge();
@@ -357,7 +651,96 @@ function renderDeckBuilder() {
             const currentComputedScore = calculateStrictDeckScore(deck);
             const curNamesClean = deck.officers.map(o => o?.name?.trim().replace(/\s+/g, '') || "").filter(Boolean);
             
-            let deckUnitType = deck.unitType || "창병"; 
+            let matchScoreMax = -1, currentBestMetaId = null; 
+            if (curNamesClean.length > 0) {
+                analyzedMetaArchetypes.forEach(meta => {
+                    let mScore = 0;
+                    meta.officers.forEach((mo, idx) => {
+                        const mName = mo.name.replace(/\s+/g, '');
+                        if (curNamesClean.includes(mName)) mScore += 1; 
+                        if (curNamesClean[idx] === mName) mScore += 0.5;
+                    });
+                    if (mScore > matchScoreMax) { matchScoreMax = mScore; currentBestMetaId = meta.id; }
+                });
+            }
+
+            let deckUnitType = deck.unitType; 
+            let hawkHtml = '';
+
+            if (curNamesClean.length > 0) {
+                if (matchScoreMax > 0 && currentBestMetaId) {
+                    if (!deckUnitType) deckUnitType = metaDeckUnitTypeMap[currentBestMetaId];
+                    const hawkData = metaHawkRecommendationMap[currentBestMetaId] || { name: "데이터 없음", skill: "누락" };
+                    const hawkAlts = metaHawkAlternativesMap[currentBestMetaId] || ["범용 SSR 매", "범용 SR 매"];
+                    const hawkAttr = metaHawkRandomAttributesMap[currentBestMetaId] || metaHawkRandomAttributesMap["custom"];
+                    
+                    // [기능 통합] 동적 역할별 전투매 출력 시스템 안전하게 보존
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #38bdf8; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
+                        <div style="font-size:13px; font-weight:bold; color:#38bdf8; letter-spacing:-0.5px;">🦅 메타 최적화 전투매 세팅</div>
+                        <div style="font-size:12px; color:#ddd; line-height:1.4;">🥇1순위: <strong>${hawkData.name}</strong> (${hawkData.skill})</div>
+                        <div style="font-size:11px; color:#bbb; line-height:1.4;">🥈2순위: <strong>${hawkAlts[0]}</strong> / 🥉3순위: <strong>${hawkAlts[1]}</strong> 권장</div>
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(56,189,248,0.3);">
+                            <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom: 2px;">🎲 권장 랜덤 속성 (1~3순위)</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성1/기초]</strong> 🥇${hawkAttr.attr1.rank1} / 🥈${hawkAttr.attr1.rank2} / 🥉${hawkAttr.attr1.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성2/보정]</strong> 🥇${hawkAttr.attr2.rank1} / 🥈${hawkAttr.attr2.rank2} / 🥉${hawkAttr.attr2.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성3/기믹]</strong> 🥇${hawkAttr.attr3.rank1} / 🥈${hawkAttr.attr3.rank2} / 🥉${hawkAttr.attr3.rank3}</div>
+                        </div>
+                    </div>`;
+                } else {
+                    let typeCounts = { "방패병": 0, "기병": 0, "궁병": 0, "창병": 0 };
+                    let roleCounts = { physical: 0, magic: 0, support: 0 };
+
+                    curNamesClean.forEach(name => {
+                        if (supportSet.has(name) || name === "순욱") roleCounts.support++;
+                        else if (tacticalSet.has(name)) roleCounts.magic++;
+                        else roleCounts.physical++;
+
+                        if (shieldSet.has(name)) typeCounts["방패병"]++;
+                        else if (cavSet.has(name)) typeCounts["기병"]++;
+                        else if (bowSet.has(name)) typeCounts["궁병"]++;
+                        else typeCounts["창병"]++;
+                    });
+
+                    if (!deckUnitType) {
+                        deckUnitType = Object.keys(typeCounts).reduce((a, b) => typeCounts[a] > typeCounts[b] ? a : b) || "창병";
+                    }
+
+                    let hawkData = { name: "전광 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 무용/통솔 30% 증가 (범용 무력 최적화)" };
+                    let fallbackAlts = "🥇1순위: 전광 / 🥈2순위: 설조 / 🥉3순위: 진시";
+                    let hawkAttr = metaHawkRandomAttributesMap["custom"];
+
+                    if (roleCounts.magic > roleCounts.physical) {
+                        hawkData = { name: "여천 (SSR / 열공)", skill: "턴 시작 시 아군 전체의 모략/통솔 30% 증가 (범용 모략 딜링 최적화)" };
+                        fallbackAlts = "🥇1순위: 여천 / 🥈2순위: 성모 / 🥉3순위: 감로";
+                        hawkAttr = {
+                            attr1: { rank1: "모략 +10%", rank2: "전능 +5%", rank3: "통솔 +10%" },
+                            attr2: { rank1: "모략 피해 증가 +8%", rank2: "받는 피해 감소 +6%", rank3: "전법 발동률 +3%" },
+                            attr3: { rank1: "첫 턴 제어 면역", rank2: "첫 턴 선공", rank3: "치유 효과 +10%" }
+                        };
+                    }
+                    if (roleCounts.support >= 2) {
+                        hawkData = { name: "호생 (SSR / 결운)", skill: "턴 시작 시 병력 최저 2명 치료율 220% 즉시 세이브 (유지력 생존 최적화)" };
+                        fallbackAlts = "🥇1순위: 호생 / 🥈2순위: 감로 / 🥉3순위: 진시";
+                        hawkAttr = {
+                            attr1: { rank1: "통솔 +12%", rank2: "전능 +5%", rank3: "속도 +15" },
+                            attr2: { rank1: "받는 피해 감소 +8%", rank2: "치유 효과 상승 +10%", rank3: "전법 발동률 +3%" },
+                            attr3: { rank1: "턴 종료 시 디버프 해제", rank2: "첫 턴 제어 면역", rank3: "모면(회피) +6%" }
+                        };
+                    }
+
+                    hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px; padding:12px 15px; background:linear-gradient(90deg, rgba(248, 113, 113, 0.15) 0%, rgba(20,20,20,0) 100%); border-left:4px solid #f87171; border-radius:4px; display:flex; flex-direction:column; gap:5px;">
+                        <div style="font-size:13px; font-weight:bold; color:#f87171; letter-spacing:-0.5px;">🦅 커스텀 분석 전투매 : ${hawkData.name}</div>
+                        <div style="font-size:12px; color:#ddd; line-height:1.4; margin-bottom:2px;">${hawkData.skill}</div>
+                        <div style="font-size:11px; color:#bbb; line-height:1.4;">📋 속성 대체 추천 ➔ ${fallbackAlts}</div>
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(248, 113, 113, 0.3);">
+                            <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom: 2px;">🎲 권장 랜덤 속성 (1~3순위)</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성1/기초]</strong> 🥇${hawkAttr.attr1.rank1} / 🥈${hawkAttr.attr1.rank2} / 🥉${hawkAttr.attr1.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성2/보정]</strong> 🥇${hawkAttr.attr2.rank1} / 🥈${hawkAttr.attr2.rank2} / 🥉${hawkAttr.attr2.rank3}</div>
+                            <div style="font-size:11px; color:#ddd;">▪️ <strong>[속성3/기믹]</strong> 🥇${hawkAttr.attr3.rank1} / 🥈${hawkAttr.attr3.rank2} / 🥉${hawkAttr.attr3.rank3}</div>
+                        </div>
+                    </div>`;
+                }
+            }
 
             let officersHtml = deck.officers.map((off, offIdx) => {
                 if (!off) return '';
@@ -390,7 +773,7 @@ function renderDeckBuilder() {
                 let eqHtml = '';
                 if (cleanHName) {
                     const eq = getOfficerEquipment(hName, deckUnitType);
-                    eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (속성1: <span style="color:#28a745;">${eq.helmet.attr1}</span>, 속성2: <span style="color:#17a2b8;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (속성1: <span style="color:#28a745;">${eq.armor.attr1}</span>, 속성2: <span style="color:#17a2b8;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (속성1: <span style="color:#28a745;">${eq.accessory.attr1}</span>, 속성2: <span style="color:#17a2b8;">${eq.accessory.attr2}</span>)</div></div>`;
+                    eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 시스템 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.accessory.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.accessory.attr2}</span>)</div></div>`;
                 }
 
                 return `<div class="officer-slot" style="${!cleanHName ? 'border:1px dashed #444; background-color:rgba(0,0,0,0.1);' : ''}"><div class="officer-meta"><span class="position-badge ${curPos}">${curPos==='front'?'전열':'후열'}</span><div class="officer-select-container"><select class="officer-dropdown" onchange="updateDeckState(${deck.originIdx}, 'off', this.value, ${offIdx})">${officerOptionsHtml}</select></div></div>${eqHtml}<div class="tactic-status-box" style="margin-top:8px;">${tacticRowsHtml}</div></div>`;
@@ -404,32 +787,34 @@ function renderDeckBuilder() {
 
             let matchupHtml = '';
             if (unitMatchupMap[deckUnitType]) {
-                matchupHtml = `<span style="margin-left: 15px; font-size: 12px; color: #aaa; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px;">⚔️ 상성우위: <strong style="color: #28a745;">${unitMatchupMap[deckUnitType].strong}</strong> | ⚠️ 상성열위: <strong style="color: #dc3545;">${unitMatchupMap[deckUnitType].weak}</strong></span>`;
+                matchupHtml = `<span style="margin-left: 15px; font-size: 12px; color: #aaa; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px;">⚔️ 강함: <strong style="color: #28a745;">${unitMatchupMap[deckUnitType].strong}</strong> | ⚠️ 약함: <strong style="color: #dc3545;">${unitMatchupMap[deckUnitType].weak}</strong></span>`;
             }
 
             const fb = generateStructuredFeedback(deck, heroDataMap, tacticDataMap);
             let fbHtml = '';
             
-            if (currentComputedScore === 100 && curNamesClean.length === 3) { 
-                fbHtml = `<div class="feedback-item success">★ 시스템 진단 결과: 역할군 밸런스와 시너지가 완벽한 종결 덱 구성입니다.</div>`;
+            if (currentComputedScore === 100 && fb.logs.length <= 1) { 
+                fbHtml = `<div class="feedback-item success">★ 축하합니다! 랭커 메타와 100% 일치하는 무결성 최적화 명품 군단입니다.</div>`;
             } else {
                 fbHtml = fb.logs.map(l => `<div class="feedback-item ${l.type === 'info' ? 'info' : (l.type === 'warning' ? 'warning' : 'success')}">${l.text}</div>`).join('');
             }
+            if (fb.insight) fbHtml += `<div class="feedback-item" style="background-color:rgba(168,85,247,0.15); border-left-color:#a855f7;">${fb.insight}</div>`;
 
             deckCard.innerHTML = `
                 <div class="deck-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                     <div>
-                        <span contenteditable="true" onblur="updateDeckState(${deck.originIdx}, 'title', this.innerText.trim().replace(/\\s*\\[덱 완성도:\\s*\\d+점\\]/g, '') || '${deck.title}')" style="outline:none;">${deck.title}</span>
-                        <span style="color:#38bdf8; font-size:13px; margin-left:12px; font-weight:bold; user-select:none;">[덱 완성도: ${currentComputedScore}점]</span>
+                        <span contenteditable="true" onblur="updateDeckState(${deck.originIdx}, 'title', this.innerText.trim().replace(/\\s*\\[추천도:\\s*\\d+점\\]/g, '') || '${deck.title}')" style="outline:none;">${deck.title}</span>
+                        <span style="color:#ff9f43; font-size:13px; margin-left:12px; font-weight:bold; user-select:none;">[추천도: ${currentComputedScore}점]</span>
                     </div>
                     <div>
-                        <button class="auto-fix-btn" onclick="autoFixDeck(${deck.originIdx})" style="background-color:#8b5cf6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px;">✨ AI 자동 전법 배치</button>
+                        <button class="auto-fix-btn" onclick="autoFixDeck(${deck.originIdx})" style="background-color:#8b5cf6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">✨ AI 자동 교정</button>
                         <button class="reset-deck-btn" onclick="updateDeckState(${deck.originIdx}, 'reset')" style="background-color:#c82333; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">부대 초기화</button>
                     </div>
                 </div>
                 <div class="bond-box"><span class="bond-highlight">부대 인연 효과 :</span> <span style="display:inline-block; outline:none;">${calculateActivatedBond(deck.officers)}</span></div>
+                ${hawkHtml}
                 <div class="officers-row">${officersHtml}</div>
-                <div class="feedback-container-box"><div class="feedback-header-title">📋 AI 커스텀 덱 밸런스 처방전</div><div class="feedback-list-wrapper">${fbHtml}</div></div>
+                <div class="feedback-container-box"><div class="feedback-header-title">📋 AI 메타 역추적 기반 실시간 맞춤 처방전</div><div class="feedback-list-wrapper">${fbHtml}</div></div>
                 <div class="deck-footer-bar">
                     <div class="footer-left" style="display: flex; align-items: center;">
                         <select class="formation-select" onchange="updateDeckState(${deck.originIdx}, 'formation', this.value)">${fmtOptions}</select>
@@ -443,8 +828,55 @@ function renderDeckBuilder() {
         });
     } catch(e) {
         container.style.display = 'block';
-        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; border-radius:8px; margin:20px;"><p>에러: ${e.message}</p></div>`;
+        container.innerHTML = `<div style="background-color:#ffe6e6; border:2px solid red; padding:20px; color:black; font-weight:bold; border-radius:8px; margin:20px;"><h3 style="color:red;">[시스템 에러 감지] 렌더링 중 치명적 오류가 발생했습니다.</h3><p>원인: ${e.message}</p><p style="font-size:12px; color:#555; white-space:pre-wrap;">${e.stack}</p><button onclick="localStorage.clear(); location.reload();" style="margin-top:10px; padding:10px; background:red; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:5px;">데이터 강제 초기화 및 재시작</button></div>`;
     }
 }
 
+function exportData() {
+    try {
+        const jsonString = JSON.stringify({ samguk_hobby_data: JSON.parse(localStorage.getItem('samguk_hobby_data')), samguk_deck_text: JSON.parse(localStorage.getItem('samguk_deck_text')) }, null, 2);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([jsonString], { type: "application/json;charset=utf-8" }));
+        a.download = "samguk_wangjeon_database_backup.json";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    } catch (err) { alert("백업 파일 생성 실패: " + err.message); }
+}
+
+function triggerImport() { document.getElementById('import-file-input')?.click(); }
+
+function importData(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const db = JSON.parse(e.target.result);
+            if (!db.samguk_hobby_data && !db.samguk_deck_text) return alert("유효한 데이터 백업 규격이 확인되지 않습니다.");
+            if (db.samguk_hobby_data) localStorage.setItem('samguk_hobby_data', JSON.stringify(db.samguk_hobby_data));
+            if (db.samguk_deck_text) localStorage.setItem('samguk_deck_text', JSON.stringify(db.samguk_deck_text));
+            alert("데이터 베이스 인프라 복구 완료. 동기화 스냅샷 적용을 위해 시스템을 리로드합니다.");
+            location.reload();
+        } catch (err) { alert("파일 스트림 해석 오류: 구조가 파손된 JSON 파일입니다."); }
+    };
+    reader.readAsText(input.files[0], "utf-8");
+}
+
+window.toggleSortMode = function(){}; 
+window.saveEditedText = function(){}; 
+window.changeFormation = (i, el) => updateDeckState(i, 'formation', el.value);
+window.changeOfficer = (i, oI, el) => updateDeckState(i, 'off', el.value, oI);
+window.changeTactic = (i, oI, sI, el) => updateDeckState(i, 'tac', el.value, oI, sI);
+window.resetDeck = i => updateDeckState(i, 'reset');
+window.exportData = exportData;
+window.triggerImport = triggerImport;
+window.importData = importData;
+
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    window.dispatchEvent(new CustomEvent('local-storage-update', { detail: { key: key } }));
+};
+
+window.addEventListener('local-storage-update', e => { if (e.detail.key === 'samguk_hobby_data' && document.getElementById('deck-container')) renderDeckBuilder(); });
+window.addEventListener('storage', e => { if (e.key === 'samguk_hobby_data' && document.getElementById('deck-container')) renderDeckBuilder(); });
 document.addEventListener('DOMContentLoaded', () => { loadDeckTextData(); renderDeckBuilder(); });
+window.addEventListener('load', () => { if(document.getElementById('deck-container')) renderDeckBuilder(); });
