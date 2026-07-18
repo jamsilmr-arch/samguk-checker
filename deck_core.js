@@ -1,4 +1,4 @@
-console.log("[시스템 분석] deck_core.js 사마의 종결 덱 엔진 통합 기동 및 무장 드래그 앤 드랍(Drag & Drop) 스왑 기능 패치 완료");
+console.log("[시스템 분석] deck_core.js 덱 순서 변경 시 자동 네이밍(1군~5군) 강제 동기화 패치 완료");
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -511,7 +511,6 @@ function calculateActivatedBond(officers) {
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default'; 
 
-// [신규] 무장 슬롯 드래그 앤 드랍(Drag & Drop) 전역 상태 관리 변수
 let draggedDeckOriginIdx = null;
 let draggedOfficerSlotIdx = null;
 
@@ -555,7 +554,6 @@ window.handleOfficerDrop = function(e, targetDeckOriginIdx, targetOfficerSlotIdx
 
     if (draggedDeckOriginIdx === null || draggedOfficerSlotIdx === null) return;
     
-    // 에러 방어 격벽: 동일 부대 내에서만 무장 스왑 허용
     if (draggedDeckOriginIdx !== targetDeckOriginIdx) {
         alert("데이터 무결성을 위해 동일한 부대 내에서만 무장 순서를 변경할 수 있습니다.");
         return;
@@ -565,7 +563,6 @@ window.handleOfficerDrop = function(e, targetDeckOriginIdx, targetOfficerSlotIdx
 
     const deck = dynamicPresetDecks.find(d => d.originIdx === draggedDeckOriginIdx);
     if (deck) {
-        // 인덱스 배열 데이터 맞교환 (Swap)
         const tempOfficer = deck.officers[draggedOfficerSlotIdx];
         deck.officers[draggedOfficerSlotIdx] = deck.officers[targetOfficerSlotIdx];
         deck.officers[targetOfficerSlotIdx] = tempOfficer;
@@ -682,15 +679,21 @@ window.autoFixDeck = function(originIdx) {
     alert(`[교정 성공] 0티어 정답 메타인 [${bestMatchDeck.name}](으)로 일괄 수정되었습니다.`);
 };
 
+// 핵심 로직 수정: 덱 스왑 시 N군으로 강제 초기화 동기화
 window.moveDeckAction = function(currentIndex, direction) {
     const targetIndex = currentIndex + direction;
     if (targetIndex < 0 || targetIndex >= dynamicPresetDecks.length) return;
     
+    // 배열 요소 맞교환
     const temp = dynamicPresetDecks[currentIndex];
     dynamicPresetDecks[currentIndex] = dynamicPresetDecks[targetIndex];
     dynamicPresetDecks[targetIndex] = temp;
     
-    dynamicPresetDecks.forEach((d, idx) => d.originIdx = idx);
+    // 순서 변경 후 모든 덱의 인덱스 업데이트 및 1군~5군 네이밍 강제 동기화
+    dynamicPresetDecks.forEach((d, idx) => {
+        d.originIdx = idx;
+        d.title = `${idx + 1}군`; // 사용자 요청: 순서 기반 이름 강제 재할당
+    });
     
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
@@ -859,7 +862,6 @@ function renderDeckBuilder() {
                     eqHtml = `<div class="equipment-recommendation-box" style="margin-top:8px; padding:8px 12px; background:rgba(0,0,0,0.2); border:1px solid #555; border-radius:4px; font-size:11px; text-align:left; line-height:1.6; color:#ddd;"><div style="color:#ff9f43; font-weight:bold; margin-bottom:4px;">🛠️ 시스템 권장 장비 세트</div><div>🪖 <strong>투구:</strong> <span style="color:#fff;">${eq.helmet.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.helmet.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.helmet.attr2}</span>)</div><div>🛡️ <strong>갑옷:</strong> <span style="color:#fff;">${eq.armor.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.armor.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.armor.attr2}</span>)</div><div>📿 <strong>장신구:</strong> <span style="color:#fff;">${eq.accessory.name}</span> (추가속성1: <span style="color:#28a745; font-weight:bold;">${eq.accessory.attr1}</span>, 추가속성2: <span style="color:#17a2b8; font-weight:bold;">${eq.accessory.attr2}</span>)</div></div>`;
                 }
 
-                // UI 변경 구역: 드래그 앤 드랍 이벤트 바인딩 적용
                 return `<div class="officer-slot" 
                             draggable="true" 
                             ondragstart="handleOfficerDragStart(event, ${deck.originIdx}, ${offIdx})" 
