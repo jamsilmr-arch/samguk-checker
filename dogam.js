@@ -220,7 +220,13 @@ const heroDogamData = [
         stats: { martial: 497, tactical: 491, command: 652, speed: 481 }
     },
 
-    // 군진영 (12명)
+    // 군진영 (13명)
+    { 
+        // [신규 추가] 공손찬 마스터 데이터 등재[cite: 3]
+        id: 'h_gongsonchan', name: '공손찬', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '위진새북', 
+        skillDesc: '턴 시작 시 확률적으로 무용과 속도를 증폭하고 면역을 얻으며, 액티브 타격 후 속도 차이에 비례한 확산 피해를 추가로 입힙니다.',
+        stats: { martial: 604, tactical: 527, command: 592, speed: 582 }
+    },
     { 
         id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', 
         skillDesc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.',
@@ -498,7 +504,6 @@ function renderDogamGrid() {
             `;
         }
 
-        // [구조 수정] absolute로 고정되어 겹치던 미/보유 배지를 제거하고, 우측 Flex 서브 그룹 내부로 완전히 통합 이관
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
                 <div style="font-size: 18px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; letter-spacing: 1px;">${hero.name}</div>
