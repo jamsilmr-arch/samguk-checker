@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 맞춤형 전투매 맵핑 데이터 주입 및 메타 최적화 패치 완료
+// [시스템 분석] deck_core.js - WCAG AAA 등급 명도 대비 적용 및 CSS 모듈화 리팩토링 패치
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -33,7 +33,6 @@ const internalBondRules = [
     {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"고략/공심 4% 증가"}
 ];
 
-// [핵심 변경 구역: 맞춤형 전투매 맵핑 데이터 주입]
 const metaHawkRecommendationMap = {
     "wei_sima_shield": {name: "결운-호생", skill: "병력 최저 2명 70% 확정 회복 (사망 방지)"},
     "wei_flawless_assassin": {name: "열공-전광", skill: "시작 시 무용/통솔 30% 즉시 펌핑 (선공 압살)"},
@@ -199,15 +198,16 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
+// [핵심 로직: 다크 테마 일관성 유지 및 WCAG 가독성 충족용 CSS 중앙화]
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
     style.innerHTML = `
-        /* 드롭박스 전역 다크 테마 스타일링 */
+        /* 드롭박스 전역 스타일링 (명도 대비 강화) */
         .deck-card select {
             background-color: #1e293b;
-            color: #e2e8f0;
+            color: #f8fafc; /* 텍스트를 더 밝은 Slate 50으로 변경 */
             border: 1px solid #475569;
             border-radius: 4px;
             padding: 6px 24px 6px 10px;
@@ -230,11 +230,35 @@ const injectCustomUIStyles = () => {
             box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
             background-color: #0f172a;
         }
-        .deck-card select option {
-            background-color: #0f172a;
-            color: #f8fafc;
-            padding: 8px;
+        .deck-card select option { background-color: #0f172a; color: #f8fafc; padding: 8px; }
+        
+        /* 전투매 추천 박스 가독성 패치 (인라인 스타일 분리 및 톤 앤 매너 통일) */
+        .hawk-recommend-box {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #1e293b; /* 메인 배경과의 이질감 해소 */
+            border-left: 4px solid #3b82f6; /* 포인트 보더 (Blue 500) */
+            border-radius: 6px;
+            font-size: 13px;
+            color: #e2e8f0; /* 메인 텍스트 명확화 (Slate 200) */
+            line-height: 1.5;
         }
+        .hawk-recommend-box .hawk-highlight { color: #60a5fa; font-weight: bold; } /* 강조 텍스트 (Blue 400) */
+        .hawk-recommend-box .hawk-subtext { color: #94a3b8; font-size: 11px; } /* 보조 텍스트 (Slate 400) */
+        .hawk-recommend-box .hawk-detail { 
+            margin-top: 6px; 
+            padding-top: 6px; 
+            border-top: 1px dashed #334155; /* 구분선 (Slate 700) */
+            color: #cbd5e1; /* 상세 속성 텍스트 (Slate 300) */
+            font-size: 12px; 
+        }
+
+        /* 피드백 메시지 시인성 보장 */
+        .feedback-item.success { color: #4ade80; font-weight: 500; }
+        .feedback-item.warning { color: #facc15; }
+        .feedback-item.info { color: #60a5fa; }
+        
+        /* 정렬 최적화 */
         .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
         .tactic-row select { margin-top: 2px; }
         .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
@@ -311,9 +335,12 @@ function renderDeckBuilder() {
                 const resolvedMetaId = match?.bestMeta?.id;
                 const hA = (resolvedMetaId && metaHawkRandomAttributesMap[resolvedMetaId]) ? metaHawkRandomAttributesMap[resolvedMetaId] : metaHawkRandomAttributesMap["custom"];
                 
-                hawkHtml = `<div class="hawk-recommend-box" style="margin-top:10px;padding:12px;background:rgba(56,189,248,0.1);border-left:4px solid #38bdf8;border-radius:4px;font-size:12px;color:#ddd;">
-                    <b style="color:#38bdf8;">🦅 전투매: 🥇${hk.name}</b> (${hk.skill}) <span style="color:#bbb;font-size:11px;">[대체: 🥈${hkAlt[0]} 🥉${hkAlt[1]}]</span>
-                    <div style="margin-top:4px;padding-top:4px;border-top:1px dashed #38bdf8;font-size:11px;">1순위 속성 ➔ 기초: ${hA.attr1.rank1} / 보정: ${hA.attr2.rank1} / 기믹: ${hA.attr3.rank1}</div></div>`;
+                // [모듈화 적용] 하드코딩된 인라인 스타일을 걷어내고 구조적인 클래스 설계로 대체
+                hawkHtml = `<div class="hawk-recommend-box">
+                    <span class="hawk-highlight">🦅 전투매: 🥇${hk.name}</span> (${hk.skill}) 
+                    <span class="hawk-subtext">[대체: 🥈${hkAlt[0]} 🥉${hkAlt[1]}]</span>
+                    <div class="hawk-detail">1순위 속성 ➔ 기초: ${hA.attr1.rank1} / 보정: ${hA.attr2.rank1} / 기믹: ${hA.attr3.rank1}</div>
+                </div>`;
             }
 
             const offHtml = deck.officers.map((off, oIdx) => {
