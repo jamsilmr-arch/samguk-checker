@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js 데이터 무결성 보호 및 렌더링 최적화 패치 완료
+// [시스템 분석] deck_core.js - 드롭박스(Select) UI 다크 테마 일관성 적용 및 CSS 캡슐화 패치
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -36,7 +36,6 @@ const internalBondRules = [
 const metaHawkRecommendationMap = {"wei_sima_shield":{name:"호생(SSR)",skill:"장기전 생존 200% 보장"},"wei_flawless_assassin":{name:"전광(SSR)",skill:"기병 속도전 선점"},"wei_assassin":{name:"삭풍(SSR)",skill:"마무리 160% 딜"},"wu_magic_bow":{name:"능소(SSR)",skill:"시작 시 피해 30% 감소"},"shu_combo_spear":{name:"열공(SSR)",skill:"마초 스펙 펌핑"},"shu_evasion_bangwon":{name:"결운(SSR)",skill:"궁병 생존력 보완"},"qun_cavalry":{name:"열공(SSR)",skill:"여포 돌파력 극대화"}};
 const metaHawkAlternativesMap = {"wei_sima_shield":["감로","진시"],"wei_flawless_assassin":["삭풍","설조"],"wei_assassin":["전광","설조"],"wu_magic_bow":["진시","호생"],"shu_combo_spear":["전광","설조"],"shu_evasion_bangwon":["감로","전우"],"qun_cavalry":["전광","설조"]};
 
-// [오류 수정 구역: 삭제되었던 상수 데이터 전체 복원]
 const metaHawkRandomAttributesMap = {
     "wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피감 +10%",rank2:"치유상승 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"모면 +6%"}},
     "wei_flawless_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해증가 +8%",rank3:"전법발동 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},
@@ -70,7 +69,6 @@ function getOfficerDogamData(officerName) {
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : [...internalMasterTacticNames]) : [...internalMasterTacticNames];
 const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : [...internalMasterOfficerNames]) : [...internalMasterOfficerNames];
 
-// [핵심 구조: 중복 연산 모듈화 유지]
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     let bestMeta = analyzedMetaArchetypes[0], maxScore = -1;
@@ -184,6 +182,55 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
+// [핵심 로직: 다크 테마 기반 Select UI 커스텀 스타일 주입]
+// 브라우저 기본 스타일을 덮어쓰고, 일관된 다크 테마 디자인 및 포커스 효과를 부여합니다.
+const injectCustomUIStyles = () => {
+    if (document.getElementById('deck-custom-ui-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'deck-custom-ui-styles';
+    style.innerHTML = `
+        /* 드롭박스 전역 다크 테마 스타일링 */
+        .deck-card select {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 6px 24px 6px 10px;
+            font-size: 13px;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+            cursor: pointer;
+            /* 커스텀 화살표 SVG 삽입 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        /* 포커스 및 호버 상태 시각적 피드백 */
+        .deck-card select:focus, .deck-card select:hover {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+            background-color: #0f172a;
+        }
+        /* 하위 옵션 메뉴 스타일 */
+        .deck-card select option {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 8px;
+        }
+        /* 배치 최적화를 위한 여백 조정 */
+        .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
+        .tactic-row select { margin-top: 2px; }
+        .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
+    `;
+    document.head.appendChild(style);
+};
+
 window.handleOfficerDragStart = (e, dIdx, oIdx) => { draggedDeckOriginIdx = dIdx; draggedOfficerSlotIdx = oIdx; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => { const s=e.target.closest('.officer-slot'); if(s)s.style.opacity='0.4'; }, 0); };
 window.handleOfficerDragOver = e => { e.preventDefault(); const s=e.target.closest('.officer-slot'); if(s) { s.classList.add('drag-over-highlight'); s.style.boxShadow='0 0 10px 2px #a855f7 inset'; s.style.borderColor='#a855f7'; } };
 window.handleOfficerDragLeave = e => { const s=e.target.closest('.officer-slot'); if(s) { s.classList.remove('drag-over-highlight'); s.style.boxShadow=''; s.style.borderColor=''; } };
@@ -250,8 +297,6 @@ function renderDeckBuilder() {
             if (curNames.length > 0) {
                 const hk = match?.bestMeta ? (metaHawkRecommendationMap[match.bestMeta.id] || {name:"-",skill:"-"}) : {name:"범용 SSR",skill:"기본 최적화"};
                 const hkAlt = match?.bestMeta ? (metaHawkAlternativesMap[match.bestMeta.id] || ["-","-"]) : ["전광","설조"];
-                
-                // [오류 수정 구역: 1. || 연산자 분기 오류 해결, 2. 데이터 유실 방어]
                 const resolvedMetaId = match?.bestMeta?.id;
                 const hA = (resolvedMetaId && metaHawkRandomAttributesMap[resolvedMetaId]) ? metaHawkRandomAttributesMap[resolvedMetaId] : metaHawkRandomAttributesMap["custom"];
                 
@@ -308,4 +353,10 @@ window.importData = inp => { const r=new FileReader(); r.onload=e=>{ const d=JSO
 const osi = localStorage.setItem; localStorage.setItem = function(k,v) { osi.apply(this,arguments); window.dispatchEvent(new CustomEvent('local-storage-update',{detail:{key:k}})); };
 window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk_hobby_data') renderDeckBuilder(); });
 window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
-document.addEventListener('DOMContentLoaded', () => { loadDeckTextData(); renderDeckBuilder(); });
+
+// [실행 로직: DOM 로드 시 커스텀 스타일 우선 적용]
+document.addEventListener('DOMContentLoaded', () => { 
+    injectCustomUIStyles(); 
+    loadDeckTextData(); 
+    renderDeckBuilder(); 
+});
