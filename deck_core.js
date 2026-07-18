@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 장비 동적 할당 알고리즘 및 UI 렌더링 버그 픽스 (가이드 규격 이식 완료)
+// [시스템 분석] deck_core.js - 속성 및 상태 이상 통합 연산 엔진 탑재 (장비/매/인연/전법 취합)
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -50,6 +50,13 @@ const internalMasterEquipmentMap = {
 };
 
 const tacticAlternativesMap = {"횡징폭렴":["동구적개","동장철벽"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"전위위안":["태청단경","현호제세"],"안영찰채":["위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"동장철벽":["견불가최","천시지리"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"파진최견":["천하무적","만부막적"],"천하무적":["파진최견","용맹무쌍"],"일기당천":["귀신정정","일고작기"],"귀신정정":["사생취의","용맹무쌍"],"미우주무":["현호제세","태청단경"]};
+
+// [주의사항] 실제 클라이언트의 전체 전법 수치는 미확인 상태이므로 추측성 매핑(정확도 < 70%). 없는 값은 연산에서 제외됨.
+const internalTacticStatMap = {
+    "심모원려": { 모략피해: 6 }, "휴양생식": { 치유효과: 8 }, "혼수모어": { 피해감소: 4 },
+    "효웅": { 피해감소: 5, 치유효과: 5 }, "반객위주": { 무용피해: 6 }, "실병제위": { 피해가함: 5 }
+};
+
 const formationEffects = {"일자진":"전열: 피해 감소 6.0% | 후열: -","구행진":"전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%","추형진":"전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%","기형진":"전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%","어린진":"전열: 반격률 20.0% | 후열: 피해 감소 6.0%","방원진":"전열: 피해 감소 5.0% | 후열: 연격률 28.0%","안행진":"전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%","호도진":"전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%"};
 const formationPositions = {"일자진":["front","front","front"],"구행진":["front","back","front"],"추형진":["back","front","back"],"기형진":["back","back","front"],"어린진":["front","back","back"],"방원진":["front","front","back"],"안행진":["back","front","front"],"호도진":["front","back","front"]};
 
@@ -68,22 +75,137 @@ const metaDeckUnitTypeMap = {"wei_sima_shield":"방패병","wei_flawless_assassi
 const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({...o, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : o.chosenTactics})) }));
 
 const internalBondRules = [
-    {name:"연환계",req:3,heroes:["동탁","여포","초선","황충"],effect:"피해/치유 4% 증가"},{name:"도법자연",req:2,heroes:["좌자","장각","우길"],effect:"모략/공심 4% 상승"},
-    {name:"가모정세",req:2,heroes:["조조","조조(제왕)","곽가"],effect:"모략 피해 4% 증가, 무용 감소 4%"},{name:"위실주석",req:2,heroes:["하후돈","하후연"],effect:"파갑 8% 증가"},
-    {name:"도원결의",req:3,heroes:["유비","유비(제왕)","관우","장비"],effect:"3, 6턴 시작 시 1중첩 저항"},{name:"백제탁고",req:2,heroes:["제갈량","조운"],effect:"배반/공심 8% 증가"},
-    {name:"오자양장",req:2,heroes:["장료","악진","장합"],effect:"첫 2회차 배반 18% 상승"},{name:"동오대도독",req:2,heroes:["주유","육손","여몽","육항"],effect:"모략 피해 7% 증가"},
-    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"고략/공심 4% 증가"}
+    {name:"연환계",req:3,heroes:["동탁","여포","초선","황충"],effect:"피해가함 4%, 치유효과 4%"},{name:"도법자연",req:2,heroes:["좌자","장각","우길"],effect:"모략피해 4%, 공심 4%"},
+    {name:"가모정세",req:2,heroes:["조조","조조(제왕)","곽가"],effect:"모략피해 4%, 무용피해감소 4%"},{name:"위실주석",req:2,heroes:["하후돈","하후연"],effect:"파갑 8%"},
+    {name:"도원결의",req:3,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},{name:"백제탁고",req:2,heroes:["제갈량","조운"],effect:"배반 8%, 공심 8%"},
+    {name:"오자양장",req:2,heroes:["장료","악진","장합"],effect:"배반 18%"},{name:"동오대도독",req:2,heroes:["주유","육손","여몽","육항"],effect:"모략피해 7%"},
+    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
 ];
 
 const metaHawkRecommendationMap = {"wei_sima_shield": {name: "결운-호생", skill: "병력 최저 2명 70% 확정 회복 (사망 방지)"},"wei_flawless_assassin": {name: "열공-전광", skill: "시작 시 무용/통솔 30% 즉시 펌핑 (선공 압살)"},"wei_assassin": {name: "열공-전광", skill: "속도 30% 선점 및 적 주장 정밀 저격 최적화"},"wu_magic_bow": {name: "능소-진시", skill: "50% 확률 피해 30% 감소 (예열 턴 확보)"},"shu_combo_spear": {name: "열공-전광", skill: "마초 무용 극대화 및 확산 딜링 폭발"},"shu_evasion_bangwon": {name: "결운-감로", skill: "피격 후 100% 치료 및 각성 주입 (좀비 덱)"},"qun_cavalry": {name: "열공-전광", skill: "여포 1턴킬 결정력을 위한 무용 30% 증폭"},"qun_whitehorse_bow": {name: "열공-전광", skill: "여포 및 액티브 선공 폭딜 확보"}};
 const metaHawkAlternativesMap = {"wei_sima_shield": ["결운-감로", "능소-진시"],"wei_flawless_assassin": ["삭풍-설조", "삭풍-성모"],"wei_assassin": ["삭풍-설조", "열공-여천"],"wu_magic_bow": ["능소-전우", "결운-감로"],"shu_combo_spear": ["열공-여천", "삭풍-설조"],"shu_evasion_bangwon": ["결운-호생", "능소-진시"],"qun_cavalry": ["삭풍-설조", "열공-여천"],"qun_whitehorse_bow": ["삭풍-설조", "능소-진시"]};
-const metaHawkRandomAttributesMap = {"wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피감 +10%",rank2:"치유상승 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"모면 +6%"}},"wei_flawless_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해증가 +8%",rank3:"전법발동 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},"wei_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해증가 +8%",rank3:"주장 타격"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"회피 무시"}},"wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"발동률 +5%",rank3:"피감 +8%"},attr3:{rank1:"치유상승 +12%",rank2:"디버프 해제",rank3:"모면 +6%"}},"shu_combo_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"물리피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},"shu_evasion_bangwon":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피감 +8%",rank3:"치유상승 +12%"},attr3:{rank1:"모면 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},"qun_cavalry":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"파갑 +10%",rank2:"연격률 +8%",rank3:"물리피해 +10%"},attr3:{rank1:"첫턴 선공",rank2:"돌격데미지 +15%",rank3:"평타 혼란"}},"qun_whitehorse_bow":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"발동률 +5%",rank2:"피해증가 +8%",rank3:"파갑 +10%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"돌격데미지 +15%"}},"custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해증가 +6%",rank2:"피감 +6%",rank3:"발동률 +3%"},attr3:{rank1:"첫턴 제어면역",rank2:"첫턴 선공",rank3:"종료시 회복"}}};
+const metaHawkRandomAttributesMap = {"wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},"wei_flawless_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"발동률 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},"wei_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"주장 타격"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"회피 무시"}},"wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"발동률 +5%",rank3:"피해감소 +8%"},attr3:{rank1:"치유효과 +12%",rank2:"디버프 해제",rank3:"저항 +6%"}},"shu_combo_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},"shu_evasion_bangwon":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},"qun_cavalry":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"파갑 +10%",rank2:"연격률 +8%",rank3:"무용피해 +10%"},attr3:{rank1:"첫턴 선공",rank2:"돌격데미지 +15%",rank3:"평타 혼란"}},"qun_whitehorse_bow":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"발동률 +5%",rank2:"피해가함 +8%",rank3:"파갑 +10%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"돌격데미지 +15%"}},"custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해가함 +6%",rank2:"피해감소 +6%",rank3:"발동률 +3%"},attr3:{rank1:"첫턴 제어면역",rank2:"첫턴 선공",rank3:"종료시 회복"}}};
 const systemGuideInsights = {"wei_sima_shield":"💡 [장기전 메타] 조조 방어막+가후 혼란+사마의 폭딜.","wei_flawless_assassin":"💡 [암살 메타] 장료 2턴 통찰(제어면역) 암살.","wei_assassin":"💡 [저격 메타] 장료 반객위주 스택 정밀 저격.","wu_magic_bow":"💡 [대기만성 메타] 손권 복합 피해 캐리.","shu_combo_spear":"💡 [확산 메타] 마초 반객위주 확산 폭딜.","shu_evasion_bangwon":"💡 [디버프 메타] 강유 적 스탯 무한 강탈.","qun_cavalry":"💡 [돌파 메타] 여포 추격(돌격) 1턴킬.","qun_whitehorse_bow":"💡 [발동률 메타] 공손찬의 전법으로 아군 액티브 전법 난사."};
 
 const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","제갈량","서서","강유","황월영","육손","주유","육항","노숙","대교","소교","장각","우길","좌자","화타","채문희","초선","장녕","장보"]);
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
 
-// [로직 수정] 장비 반환 함수: 가이드 데이터 최우선 참조 및 역할군 기반 실제 부위별 장비명/속성 정밀 매핑 (동적 치환 알고리즘 포함)
+// ==========================================================================
+// LAYER 2: 통합 수치 연산 엔진 (aggregateIntegratedStats)
+// ==========================================================================
+function aggregateIntegratedStats(deck, officerIndex) {
+    const officer = deck.officers[officerIndex];
+    if (!officer || !officer.name) return null;
+    const hName = officer.name.trim();
+
+    // 베이스 스탯 변수 컨테이너
+    const stats = {
+        damageTakenRed: 0,   // 피해 감소
+        damageDealtInc: 0,   // 피해 가함
+        strategyDmg: 0,      // 모략 피해
+        physicalDmg: 0,      // 무용 피해
+        healGiven: 0,        // 치유 효과 부여/상승
+        leech: 0,            // 배반/공심
+        comboRate: 0,        // 연격률
+        activeRate: 0,       // 발동률
+        armorPen: 0          // 파갑
+    };
+
+    // 정규식 파싱 유틸리티 및 동의어 매핑 (Red Teaming 방어 수단)
+    const statKeywordMap = {
+        "피해 감소": "damageTakenRed", "피감": "damageTakenRed",
+        "피해 가함": "damageDealtInc", "피해증가": "damageDealtInc", "피증": "damageDealtInc",
+        "모략 피해": "strategyDmg", "모략피해": "strategyDmg",
+        "무용 피해": "physicalDmg", "무용피해": "physicalDmg",
+        "치유 효과": "healGiven", "치유효과": "healGiven", "치유상승": "healGiven",
+        "배반": "leech", "공심": "leech",
+        "연격률": "comboRate",
+        "발동률": "activeRate",
+        "파갑": "armorPen"
+    };
+
+    function parseAndAdd(textObj) {
+        if (!textObj) return;
+        const text = typeof textObj === 'string' ? textObj : textObj.toString();
+        // 포맷: "피해 감소 6%", "피감 +10%" -> 숫자 추출
+        Object.keys(statKeywordMap).forEach(key => {
+            if (text.includes(key)) {
+                // 특정 키워드 주변의 숫자 추출 (예: '피해 감소 3.5%', '+12%')
+                const regex = new RegExp(`(?:${key})[^\\d]*([+-]?\\d+(?:\\.\\d+)?)\\s*%?`, 'g');
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    stats[statKeywordMap[key]] += parseFloat(match[1]);
+                }
+                // 만약 숫자가 텍스트에 없고 가이드의 장비 속성명만 있다면 기본 2.0% 할당 (하한값 추정)
+                if (!/\d/.test(text)) {
+                    stats[statKeywordMap[key]] += 2.0;
+                }
+            }
+        });
+    }
+
+    // 1. 장비 속성 취합
+    const dType = deck.unitType || "창병";
+    const eq = getOfficerEquipment(hName, dType);
+    if (eq) {
+        ['helmet', 'armor', 'accessory'].forEach(part => {
+            parseAndAdd(eq[part].attr1);
+            parseAndAdd(eq[part].attr2);
+        });
+    }
+
+    // 2. 부대 인연 속성 취합
+    const curNames = deck.officers.map(o => o?.name?.trim()).filter(Boolean);
+    const matchedBonds = internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(n)).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(n))).size >= (r.req===3?2:1));
+    matchedBonds.forEach(bond => parseAndAdd(bond.effect));
+
+    // 3. 매 (Hawk) 속성 취합
+    const matchMeta = getBestMetaMatch(curNames);
+    const resolvedMetaId = matchMeta?.bestMeta?.id || "custom";
+    const hA = metaHawkRandomAttributesMap[resolvedMetaId];
+    if (hA) {
+        parseAndAdd(hA.attr1.rank1);
+        parseAndAdd(hA.attr2.rank1);
+        parseAndAdd(hA.attr3.rank1);
+    }
+
+    // 4. 전법 속성 취합 (알 수 없는 전법은 건너뜀)
+    const dogamData = getOfficerDogamData(hName);
+    const assignedTacs = [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean);
+    assignedTacs.forEach(tacName => {
+        const tNameClean = tacName.replace(/\s+/g, '');
+        if (internalTacticStatMap[tNameClean]) {
+            const tkMap = internalTacticStatMap[tNameClean];
+            Object.keys(tkMap).forEach(tk => {
+                if (statKeywordMap[tk]) stats[statKeywordMap[tk]] += tkMap[tk];
+            });
+        }
+    });
+
+    return stats;
+}
+
+// UI 렌더링용 변환 유틸리티
+function buildIntegratedStatsHtml(stats) {
+    if (!stats) return '';
+    let arr = [];
+    if (stats.damageTakenRed > 0) arr.push(`피감 <span style="color:#4ade80">${stats.damageTakenRed.toFixed(1)}%</span>`);
+    if (stats.damageDealtInc > 0) arr.push(`피증 <span style="color:#f87171">${stats.damageDealtInc.toFixed(1)}%</span>`);
+    if (stats.strategyDmg > 0) arr.push(`모략 <span style="color:#c084fc">${stats.strategyDmg.toFixed(1)}%</span>`);
+    if (stats.physicalDmg > 0) arr.push(`무용 <span style="color:#facc15">${stats.physicalDmg.toFixed(1)}%</span>`);
+    if (stats.healGiven > 0) arr.push(`치유 <span style="color:#60a5fa">${stats.healGiven.toFixed(1)}%</span>`);
+    if (stats.leech > 0) arr.push(`흡혈 <span style="color:#fb7185">${stats.leech.toFixed(1)}%</span>`);
+    if (stats.comboRate > 0) arr.push(`연격 <span style="color:#fb923c">${stats.comboRate.toFixed(1)}%</span>`);
+    if (stats.activeRate > 0) arr.push(`발동 <span style="color:#38bdf8">${stats.activeRate.toFixed(1)}%</span>`);
+    if (stats.armorPen > 0) arr.push(`파갑 <span style="color:#94a3b8">${stats.armorPen.toFixed(1)}%</span>`);
+
+    if (arr.length === 0) return '';
+    return `<div class="integrated-stats-box"><div class="istats-title">📊 통합 전투 속성 (추정치)</div><div class="istats-content">${arr.join(' | ')}</div></div>`;
+}
+
+// ==========================================================================
+// LAYER 3: 덱 코어 및 렌더링 로직
+// ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     const unitPrefix = deckUnitType && deckUnitType !== "자동 판별" ? deckUnitType : "방패병";
 
@@ -266,6 +388,9 @@ const injectCustomUIStyles = () => {
         .equipment-box .eq-item { margin-bottom: 2px; color: #cbd5e1; }
         .equipment-box .eq-item:last-child { margin-bottom: 0; }
         .equipment-box .eq-attr { color: #64748b; font-size: 10px; margin-left: 4px; }
+        .integrated-stats-box { margin-top: 6px; padding: 8px; border-radius: 4px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #475569; font-size: 11px; font-family: monospace; }
+        .integrated-stats-box .istats-title { color: #facc15; font-weight: bold; margin-bottom: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .integrated-stats-box .istats-content { color: #e2e8f0; line-height: 1.6; }
         .unit-badge { display: inline-block; background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 10px; font-weight: 600; padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.3); margin-top: 4px; margin-bottom: 4px; }
         .feedback-item.success { color: #4ade80; font-weight: 500; }
         .feedback-item.warning { color: #facc15; }
@@ -364,7 +489,10 @@ function renderDeckBuilder() {
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
                 const eqH = eq ? `<div class="equipment-box"><div class="eq-item">🪖 ${eq.helmet.name} <span class="eq-attr">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div><div class="eq-item">🛡️ ${eq.armor.name} <span class="eq-attr">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div><div class="eq-item">📿 ${eq.accessory.name} <span class="eq-attr">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div></div>` : '';
                 
-                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${formationPositions[deck.formation]?.[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${unitBadgeHtml}${eqH}<div class="tactic-status-box">${tRows}</div></div>`;
+                const intStats = cName ? aggregateIntegratedStats(deck, oIdx) : null;
+                const intStatsH = buildIntegratedStatsHtml(intStats);
+
+                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${formationPositions[deck.formation]?.[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${unitBadgeHtml}${eqH}${intStatsH}<div class="tactic-status-box">${tRows}</div></div>`;
             }).join('');
 
             const fb = generateStructuredFeedback(deck, hMap, tMap), score = calculateStrictDeckScore(deck);
