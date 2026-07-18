@@ -52,7 +52,9 @@ const heroList = [
     { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0, transcend: false },
     { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0, transcend: false },
     
-    // 군진영 (12명)
+    // 군진영 (13명) - 데이터 확장 반영
+    // [신규 로직] 공손찬 데이터 인벤토리 배열 최상단 삽입 (자음 ㄱ 기준 정렬)
+    { id: 'h_gongsonchan', name: '공손찬', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 0, transcend: false },
@@ -98,6 +100,10 @@ const tacticList = [
     { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
+    
+    // [신규 로직] 승승장구 전법 자음 배열 순서에 맞추어 인벤토리 등재
+    { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
+    
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
