@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 드롭박스(Select) UI 다크 테마 일관성 적용 및 CSS 캡슐화 패치
+// [시스템 분석] deck_core.js - 맞춤형 전투매 맵핑 데이터 주입 및 메타 최적화 패치 완료
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기 
@@ -33,8 +33,25 @@ const internalBondRules = [
     {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"고략/공심 4% 증가"}
 ];
 
-const metaHawkRecommendationMap = {"wei_sima_shield":{name:"호생(SSR)",skill:"장기전 생존 200% 보장"},"wei_flawless_assassin":{name:"전광(SSR)",skill:"기병 속도전 선점"},"wei_assassin":{name:"삭풍(SSR)",skill:"마무리 160% 딜"},"wu_magic_bow":{name:"능소(SSR)",skill:"시작 시 피해 30% 감소"},"shu_combo_spear":{name:"열공(SSR)",skill:"마초 스펙 펌핑"},"shu_evasion_bangwon":{name:"결운(SSR)",skill:"궁병 생존력 보완"},"qun_cavalry":{name:"열공(SSR)",skill:"여포 돌파력 극대화"}};
-const metaHawkAlternativesMap = {"wei_sima_shield":["감로","진시"],"wei_flawless_assassin":["삭풍","설조"],"wei_assassin":["전광","설조"],"wu_magic_bow":["진시","호생"],"shu_combo_spear":["전광","설조"],"shu_evasion_bangwon":["감로","전우"],"qun_cavalry":["전광","설조"]};
+// [핵심 변경 구역: 맞춤형 전투매 맵핑 데이터 주입]
+const metaHawkRecommendationMap = {
+    "wei_sima_shield": {name: "결운-호생", skill: "병력 최저 2명 70% 확정 회복 (사망 방지)"},
+    "wei_flawless_assassin": {name: "열공-전광", skill: "시작 시 무용/통솔 30% 즉시 펌핑 (선공 압살)"},
+    "wei_assassin": {name: "열공-전광", skill: "속도 30% 선점 및 적 주장 정밀 저격 최적화"},
+    "wu_magic_bow": {name: "능소-진시", skill: "50% 확률 피해 30% 감소 (예열 턴 확보)"},
+    "shu_combo_spear": {name: "열공-전광", skill: "마초 무용 극대화 및 확산 딜링 폭발"},
+    "shu_evasion_bangwon": {name: "결운-감로", skill: "피격 후 100% 치료 및 각성 주입 (좀비 덱)"},
+    "qun_cavalry": {name: "열공-전광", skill: "여포 1턴킬 결정력을 위한 무용 30% 증폭"}
+};
+const metaHawkAlternativesMap = {
+    "wei_sima_shield": ["결운-감로", "능소-진시"],
+    "wei_flawless_assassin": ["삭풍-설조", "삭풍-성모"],
+    "wei_assassin": ["삭풍-설조", "열공-여천"],
+    "wu_magic_bow": ["능소-전우", "결운-감로"],
+    "shu_combo_spear": ["열공-여천", "삭풍-설조"],
+    "shu_evasion_bangwon": ["결운-호생", "능소-진시"],
+    "qun_cavalry": ["삭풍-설조", "열공-여천"]
+};
 
 const metaHawkRandomAttributesMap = {
     "wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피감 +10%",rank2:"치유상승 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"모면 +6%"}},
@@ -182,8 +199,6 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
-// [핵심 로직: 다크 테마 기반 Select UI 커스텀 스타일 주입]
-// 브라우저 기본 스타일을 덮어쓰고, 일관된 다크 테마 디자인 및 포커스 효과를 부여합니다.
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
@@ -201,7 +216,6 @@ const injectCustomUIStyles = () => {
             -webkit-appearance: none;
             outline: none;
             cursor: pointer;
-            /* 커스텀 화살표 SVG 삽입 */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 8px center;
@@ -211,19 +225,16 @@ const injectCustomUIStyles = () => {
             box-sizing: border-box;
             font-family: inherit;
         }
-        /* 포커스 및 호버 상태 시각적 피드백 */
         .deck-card select:focus, .deck-card select:hover {
             border-color: #8b5cf6;
             box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
             background-color: #0f172a;
         }
-        /* 하위 옵션 메뉴 스타일 */
         .deck-card select option {
             background-color: #0f172a;
             color: #f8fafc;
             padding: 8px;
         }
-        /* 배치 최적화를 위한 여백 조정 */
         .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
         .tactic-row select { margin-top: 2px; }
         .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
@@ -296,7 +307,7 @@ function renderDeckBuilder() {
 
             if (curNames.length > 0) {
                 const hk = match?.bestMeta ? (metaHawkRecommendationMap[match.bestMeta.id] || {name:"-",skill:"-"}) : {name:"범용 SSR",skill:"기본 최적화"};
-                const hkAlt = match?.bestMeta ? (metaHawkAlternativesMap[match.bestMeta.id] || ["-","-"]) : ["전광","설조"];
+                const hkAlt = match?.bestMeta ? (metaHawkAlternativesMap[match.bestMeta.id] || ["-","-"]) : ["열공-전광","결운-호생"];
                 const resolvedMetaId = match?.bestMeta?.id;
                 const hA = (resolvedMetaId && metaHawkRandomAttributesMap[resolvedMetaId]) ? metaHawkRandomAttributesMap[resolvedMetaId] : metaHawkRandomAttributesMap["custom"];
                 
@@ -354,7 +365,6 @@ const osi = localStorage.setItem; localStorage.setItem = function(k,v) { osi.app
 window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk_hobby_data') renderDeckBuilder(); });
 window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
 
-// [실행 로직: DOM 로드 시 커스텀 스타일 우선 적용]
 document.addEventListener('DOMContentLoaded', () => { 
     injectCustomUIStyles(); 
     loadDeckTextData(); 
