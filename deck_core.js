@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 보유 자원 실시간 대조 기반 맞춤형 대체 추천(Arrow Curation) 엔진 탑재
+// [시스템 분석] deck_core.js - 전투매 20/30/40Lv 공식 용어 및 전투 효과 명세 전면 동기화 엔진
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기
@@ -17,7 +17,6 @@ const internalMasterOfficerUnitMap = {
     "공손찬":"기병/창병"
 };
 
-// [신규 주입] 장수 진영(국가) 정밀 매핑 테이블 (대체 추천 시너지 계산용)
 const officerFactionMap = {
     "가후":"wei","곽가":"wei","사마의":"wei","순욱":"wei","악진":"wei","전위":"wei","정욱":"wei","조조(제왕)":"wei","조조":"wei","장료":"wei","장합":"wei","하후돈":"wei","하후연":"wei",
     "관우":"shu","강유":"shu","마대":"shu","마초":"shu","서서":"shu","사마가":"shu","위연":"shu","유비":"shu","유비(제왕)":"shu","장비":"shu","제갈량":"shu","조운":"shu","황충":"shu","황월영":"shu",
@@ -119,6 +118,7 @@ const internalBondRules = [
     {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
 ];
 
+// [전투매 시스템 속성 공식 인게임 체계(20Lv/30Lv/40Lv) 정밀 동기화]
 const metaHawkRecommendationMap = {
     "wei_sima_sp_jojo": {name: "결운-호생", skill: "사마의 모략 폭딜 예열 턴 확보"},
     "wei_assassin_sp": {name: "열공-전광", skill: "장료 무용/속도 30% 확정 펌핑 및 1턴킬 지원"},
@@ -143,18 +143,18 @@ const metaHawkAlternativesMap = {
 };
 
 const metaHawkRandomAttributesMap = {
-    "wei_sima_sp_jojo":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
-    "wei_assassin_sp":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"발동률 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},
-    "shu_dowon_spear":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"무용피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
-    "shu_hwangchung_shield":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"무용피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
-    "shu_gangyu_bangwon_2":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},
-    "shu_gangyu_cav":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},
-    "shu_macho_spear_2":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},
-    "shu_xushu_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},
-    "wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"발동률 +5%",rank3:"피해감소 +8%"},attr3:{rank1:"치유효과 +12%",rank2:"디버프 해제",rank3:"저항 +6%"}},
-    "qun_cavalry":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"파갑 +10%",rank2:"연격률 +8%",rank3:"무용피해 +10%"},attr3:{rank1:"첫턴 선공",rank2:"돌격데미지 +15%",rank3:"평타 혼란"}},
-    "qun_whitehorse_bow":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"발동률 +5%",rank2:"피해가함 +8%",rank3:"파갑 +10%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"돌격데미지 +15%"}},
-    "custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해가함 +6%",rank2:"피해감소 +6%",rank3:"발동률 +3%"},attr3:{rank1:"첫턴 제어면역",rank2:"첫턴 선공",rank3:"종료시 회복"}}
+    "wei_sima_sp_jojo":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해 감소 +10%",rank2:"치유 효과 +10%",rank3:"모략 피해 +8%"},attr3:{rank1:"행동 시 디버프 1개 해제",rank2:"피격 시 50% 확률 저항 1중첩",rank3:"저항 획득률 +6%"}},
+    "wei_assassin_sp":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해 가함 +8%",rank3:"발동률 +5%"},attr3:{rank1:"첫 턴 선공 부여",rank2:"전투 첫 턴 제어 면역(통찰)",rank3:"일반 공격 시 대상 혼란(1턴)"}},
+    "shu_dowon_spear":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해 감소 +10%",rank2:"치유 효과 +10%",rank3:"무용 피해 +8%"},attr3:{rank1:"행동 시 디버프 1개 해제",rank2:"피격 시 50% 확률 저항 1중첩",rank3:"저항 획득률 +6%"}},
+    "shu_hwangchung_shield":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해 감소 +10%",rank2:"치유 효과 +10%",rank3:"무용 피해 +8%"},attr3:{rank1:"행동 시 디버프 1개 해제",rank2:"피격 시 50% 확률 저항 1중첩",rank3:"저항 획득률 +6%"}},
+    "shu_gangyu_bangwon_2":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략 피해 +10%",rank2:"피해 감소 +8%",rank3:"치유 효과 +12%"},attr3:{rank1:"저항 획득률 +6%",rank2:"행동 시 디버프 1개 해제",rank3:"피격 시 50% 확률 저항 1중첩"}},
+    "shu_gangyu_cav":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략 피해 +10%",rank2:"피해 감소 +8%",rank3:"치유 효과 +12%"},attr3:{rank1:"저항 획득률 +6%",rank2:"행동 시 디버프 1개 해제",rank3:"피격 시 50% 확률 저항 1중첩"}},
+    "shu_macho_spear_2":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산 피해 +12%",rank3:"무용 피해 +10%"},attr3:{rank1:"일반 공격 3회 시 대상 무장해제(1턴)",rank2:"첫 턴 선공 부여",rank3:"피해 가한 후 병력 10% 흡혈"}},
+    "shu_xushu_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산 피해 +12%",rank3:"무용 피해 +10%"},attr3:{rank1:"일반 공격 3회 시 대상 무장해제(1턴)",rank2:"첫 턴 선공 부여",rank3:"피해 가한 후 병력 10% 흡혈"}},
+    "wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략 피해 +10%",rank2:"발동률 +5%",rank3:"피해 감소 +8%"},attr3:{rank1:"치유 효과 +12%",rank2:"행동 시 디버프 1개 해제",rank3:"저항 획득률 +6%"}},
+    "qun_cavalry":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"파갑 +10%",rank2:"연격률 +8%",rank3:"무용 피해 +10%"},attr3:{rank1:"첫 턴 선공 부여",rank2:"추격(돌격) 전법 피해 +15%",rank3:"일반 공격 시 대상 혼란(1턴)"}},
+    "qun_whitehorse_bow":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"발동률 +5%",rank2:"피해 가함 +8%",rank3:"파갑 +10%"},attr3:{rank1:"첫 턴 선공 부여",rank2:"전투 첫 턴 제어 면역(통찰)",rank3:"추격(돌격) 전법 피해 +15%"}},
+    "custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해 가함 +6%",rank2:"피해 감소 +6%",rank3:"발동률 +3%"},attr3:{rank1:"전투 첫 턴 제어 면역(통찰)",rank2:"첫 턴 선공 부여",rank3:"턴 종료 시 병력 회복"}}
 };
 
 const systemGuideInsights = {
@@ -290,7 +290,69 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 덱 코어 및 렌더링 로직 (팝업 모달 엔진 포함)
+// LAYER 3: 보유 자원 실시간 대조 기반 맞춤형 대체 추천(Arrow Curation) 엔진
+// ==========================================================================
+function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
+    const isMissingTac = tacticalSet.has(missingName);
+    const isMissingSup = supportSet.has(missingName);
+    const missingFaction = officerFactionMap[missingName] || "";
+    const missingUnits = (internalMasterOfficerUnitMap[missingName] || "").split("/");
+
+    let candidates = [];
+    Object.keys(heroDataMap).forEach(hName => {
+        if (!heroDataMap[hName].isOwned || curNames.includes(hName) || hName === missingName) return;
+
+        let score = 0;
+        const isTac = tacticalSet.has(hName);
+        const isSup = supportSet.has(hName);
+        const faction = officerFactionMap[hName] || "";
+        const units = (internalMasterOfficerUnitMap[hName] || "").split("/");
+
+        // 역할군 1순위 대조 (+5점)
+        if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) {
+            score += 5;
+        }
+        // 진영 2순위 대조 (+3점)
+        if (missingFaction && faction === missingFaction) {
+            score += 3;
+        }
+        // 병종 3순위 대조 (+2점)
+        if (deckUnitType && units.includes(deckUnitType)) {
+            score += 4;
+        } else if (missingUnits.some(u => units.includes(u))) {
+            score += 2;
+        }
+
+        if (score > 0) candidates.push({ name: hName, score: score });
+    });
+
+    candidates.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ko'));
+    return candidates.length > 0 ? candidates[0].name : null;
+}
+
+function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap) {
+    const alts = tacticAlternativesMap[missingTacName] || [];
+    for (let t of alts) {
+        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t)) {
+            return t;
+        }
+    }
+    const targetStats = internalTacticStatMap[missingTacName];
+    if (targetStats) {
+        const targetKeys = Object.keys(targetStats);
+        for (let tName of Object.keys(tacticDataMap)) {
+            if (!tacticDataMap[tName].isOwned || allEquipTacs.includes(tName)) continue;
+            const candStats = internalTacticStatMap[tName];
+            if (candStats && targetKeys.some(k => candStats[k] !== undefined)) {
+                return tName;
+            }
+        }
+    }
+    return null;
+}
+
+// ==========================================================================
+// LAYER 4: 덱 코어 및 렌더링 로직 (팝업 모달 엔진 포함)
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     const unitPrefix = deckUnitType && deckUnitType !== "자동 판별" ? deckUnitType : "방패병";
@@ -396,8 +458,22 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
     deck.officers.forEach((off, offIdx) => {
         const hName = off?.name?.toString().trim() || "", cleanHName = hName.replace(/\s+/g, '');
-        if (!cleanHName) return missingMeta.length ? fb.logs.push({ type: 'warning', text: `빈 슬롯 ➔ <strong>[${missingMeta.shift().name}]</strong> 권장` }) : null;
-        if (!heroDataMap[hName]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 미보유` });
+        if (!cleanHName) {
+            if (missingMeta.length) {
+                const targetMissing = missingMeta.shift().name;
+                const altHero = getOwnedAlternativeOfficer(targetMissing, curNames, heroDataMap, deck.unitType);
+                const recText = altHero ? `➔ <strong>[${targetMissing}]</strong> (대체: <span style="color:#38bdf8;">${altHero}</span>)` : `➔ <strong>[${targetMissing}]</strong> <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                fb.logs.push({ type: 'warning', text: `빈 슬롯 ${recText} 권장` });
+            }
+            return;
+        }
+        
+        // [화살표 대체 추천 반영] 미보유 장수 감지 시 보유 창고 실시간 스크래핑 대조
+        if (!heroDataMap[hName]?.isOwned) {
+            const altHero = getOwnedAlternativeOfficer(hName, curNames, heroDataMap, deck.unitType);
+            const recText = altHero ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${altHero}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+            fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 미보유 ${recText}` });
+        }
 
         const metaIdx = meta.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
         if (metaIdx !== -1) {
@@ -408,14 +484,28 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             (off.chosenTactics || []).forEach((t, i) => {
                 const cT = t?.toString().trim().replace(/\s+/g, '') || "";
                 if (!cT && unmatchTac.length) {
-                    const pTac = unmatchTac.shift(), alts = tacticAlternativesMap[pTac] || ["범용 대체 전법", "서브 전법"];
-                    fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 [${alts[0]}] 권장` });
+                    const pTac = unmatchTac.shift();
+                    const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap);
+                    const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                    fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
                 } else if (cT) {
-                    if (!tacticDataMap[cT]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유` });
+                    // [화살표 대체 추천 반영] 미보유 전법 감지 시 보유 창고 실시간 스크래핑 대조
+                    if (!tacticDataMap[cT]?.isOwned) {
+                        const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap);
+                        const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                        fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
+                    }
                 }
             });
         } else {
-            fb.logs.push({ type: 'warning', text: `장수 교체: [${hName}] 제외 ${missingMeta.length ? `➔ [${missingMeta.shift().name}] 투입` : '요망'}` });
+            if (missingMeta.length) {
+                const targetMissing = missingMeta.shift().name;
+                const altHero = getOwnedAlternativeOfficer(targetMissing, curNames, heroDataMap, deck.unitType);
+                const recText = altHero ? `➔ <strong>[${targetMissing}]</strong> 투입 (대체: <span style="color:#38bdf8;">${altHero}</span>)` : `➔ <strong>[${targetMissing}]</strong> 투입 <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                fb.logs.push({ type: 'warning', text: `장수 교체: [${hName}] 제외 ${recText}` });
+            } else {
+                fb.logs.push({ type: 'warning', text: `장수 교체: [${hName}] 제외 요망` });
+            }
         }
     });
     return fb;
