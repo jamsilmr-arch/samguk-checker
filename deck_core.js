@@ -326,7 +326,8 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             (off.chosenTactics || []).forEach((t, i) => {
                 const cT = t?.toString().trim().replace(/\s+/g, '') || "";
                 if (!cT && unmatchTac.length) {
-                    const pTac = unmatchTac.shift(), alts = tacticAlternativesMap[pTac] || ["A급", "B급"];
+                    // [성급/등급 추천 삭제 및 수정 반영] A급/B급 등 성급을 연상시키는 표기를 배제하고 기능적 명칭으로 치환
+                    const pTac = unmatchTac.shift(), alts = tacticAlternativesMap[pTac] || ["범용 대체 전법", "서브 전법"];
                     fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 [${alts[0]}] 권장` });
                 } else if (cT) {
                     if (!tacticDataMap[cT]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유` });
@@ -508,7 +509,8 @@ function renderDeckBuilder() {
             let dType = deck.unitType || (match?.bestMeta ? metaDeckUnitTypeMap[match.bestMeta.id] : "창병"), hawkHtml = '';
 
             if (curNames.length > 0) {
-                const hk = match?.bestMeta ? (metaHawkRecommendationMap[match.bestMeta.id] || {name:"-",skill:"-"}) : {name:"범용 SSR",skill:"기본 최적화"};
+                // [성급/등급 추천 삭제 및 수정 반영] SSR 등 성급/희귀도를 연상시키는 표기를 삭제하고 '범용 전투매'로 변경
+                const hk = match?.bestMeta ? (metaHawkRecommendationMap[match.bestMeta.id] || {name:"-",skill:"-"}) : {name:"범용 전투매",skill:"기본 최적화"};
                 const hkAlt = match?.bestMeta ? (metaHawkAlternativesMap[match.bestMeta.id] || ["-","-"]) : ["열공-전광","결운-호생"];
                 const resolvedMetaId = match?.bestMeta?.id;
                 const hA = (resolvedMetaId && metaHawkRandomAttributesMap[resolvedMetaId]) ? metaHawkRandomAttributesMap[resolvedMetaId] : metaHawkRandomAttributesMap["custom"];
