@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 통합 연산 기반 Perfect Recommendation (완벽 추천/검증) 엔진 탑재
+// [시스템 분석] deck_core.js - 공식 가이드 신규 4종 통합 및 AI 독자 시너지 검증 엔진 탑재
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기
@@ -54,26 +54,56 @@ const internalMasterEquipmentMap = {
 const tacticAlternativesMap = {"횡징폭렴":["동구적개","동장철벽"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"전위위안":["태청단경","현호제세"],"안영찰채":["위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"동장철벽":["견불가최","천시지리"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"]};
 
 const internalTacticStatMap = {
-    "심모원려": { strategyDmg: 6 }, "휴양생식": { healGiven: 8 }, "혼수모어": { damageTakenRed: 4 },
+    "심모원려": { strategyDmg: 6 }, "휴양생식": { healGiven: 8 }, "혼수모어": { damageTakenRed: 4, healGiven: 6 },
     "효웅": { damageTakenRed: 5, healGiven: 5 }, "반객위주": { physicalDmg: 6 }, "실병제위": { damageDealtInc: 5 },
-    "초선차전": { healGiven: 10 }
+    "초선차전": { healGiven: 10 }, "동구적개": { damageTakenRed: 8 }, "강유겸제": { damageTakenRed: 6 }, 
+    "횡징폭렴": { damageTakenRed: 6, healGiven: 5 }, "동장철벽": { damageTakenRed: 5 }, "천시지리": { damageTakenRed: 5 }, 
+    "진퇴유도": { damageTakenRed: 4, damageDealtInc: 4 }, "사생취의": { damageDealtInc: 8, physicalDmg: 4 }, 
+    "일고작기": { damageDealtInc: 6, comboRate: 10 }, "용맹무쌍": { physicalDmg: 6 }, "만부막적": { physicalDmg: 5 }, 
+    "용왕직전": { physicalDmg: 5 }, "태청단경": { healGiven: 8 }, "현호제세": { healGiven: 8 }, 
+    "홍수첨향": { healGiven: 8, damageTakenRed: 6 }, "위위구조": { healGiven: 5, damageTakenRed: 4 }, 
+    "안영찰채": { damageTakenRed: 4, healGiven: 4 }, "이간계": { damageTakenRed: 4, strategyDmg: 5 },
+    "군령여산": { damageDealtInc: 5, damageTakenRed: 5 }, "함진살적": { physicalDmg: 5, armorPen: 5 }, 
+    "분용당선": { physicalDmg: 5 }, "출수법": { physicalDmg: 5, armorPen: 5 }, "적혈도": { strategyDmg: 5, healGiven: 5 },
+    "전권난정": { physicalDmg: 5, damageTakenRed: 4 }, "천하무쌍": { physicalDmg: 8, comboRate: 5 },
+    "수상개화": { activeRate: 12, damageDealtInc: 8 }, "요사여신": { strategyDmg: 10 }, "만천과해": { damageTakenRed: 6, healGiven: 6 },
+    "화소적벽": { strategyDmg: 8 }, "이퇴위진": { damageTakenRed: 6, damageDealtInc: 6 }, "금낭묘계": { healGiven: 6 },
+    "제곤부위": { healGiven: 6 }, "이아환아": { physicalDmg: 6 }, "만전제발": { physicalDmg: 6 },
+    "선등함진": { physicalDmg: 5 }, "축세대발": { physicalDmg: 6, damageDealtInc: 6 }, "인세이도": { damageTakenRed: 8, healGiven: 5 },
+    "유좌유용": { healGiven: 6 }, "견진연봉": { comboRate: 10 }, "전위위안": { healGiven: 6, damageTakenRed: 4 },
+    "천리추격": { strategyDmg: 6, activeRate: 3 }, "분성지계": { strategyDmg: 5, damageTakenRed: 4 }, "여자동포": { healGiven: 6, damageTakenRed: 4 },
+    "질풍노도": { physicalDmg: 6, armorPen: 8 }, "절절학문": { strategyDmg: 6, damageDealtInc: 5 }, "문치무공": { physicalDmg: 5, strategyDmg: 5, healGiven: 6 },
+    "담대여두": { strategyDmg: 6, physicalDmg: 6 }, "인정": { healGiven: 8, damageTakenRed: 4 }
 };
 
 const formationEffects = {"일자진":"전열: 피해 감소 6.0% | 후열: -","구행진":"전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%","추형진":"전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%","기형진":"전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%","어린진":"전열: 반격률 20.0% | 후열: 피해 감소 6.0%","방원진":"전열: 피해 감소 5.0% | 후열: 연격률 28.0%","안행진":"전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%","호도진":"전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%"};
 const formationPositions = {"일자진":["front","front","front"],"구행진":["front","back","front"],"추형진":["back","front","back"],"기형진":["back","back","front"],"어린진":["front","back","back"],"방원진":["front","front","back"],"안행진":["back","front","front"],"호도진":["front","back","front"]};
 
+// [공식 가이드 13종 메타 덱 데이터베이스 전면 확충 및 포지션 동기화]
 const analyzedMetaArchetypes = [
-    {id:"wei_sima_shield",name:"위나라 응시낭고 방패 덱",concept:"장기전 종결",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","심모원려","사면초가"]},{name:"조조",chosenTactics:["효웅","휴양생식","현호제세"]},{name:"가후",chosenTactics:["경달권변","혼수모어","이간계"]}]},
-    {id:"wei_flawless_assassin",name:"위나라 무결점 암살 덱",concept:"제어 면역 확정 암살",formation:"호도진",officers:[{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]},{name:"조조",chosenTactics:["군령여산","횡징폭렴","진퇴유도"]},{name:"곽가",chosenTactics:["산무유책","동구적개","강유겸제"]}]},
-    {id:"wei_assassin",name:"위나라 신속 암살 덱",concept:"적 주장 정밀 저격",formation:"호도진",officers:[{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]},{name:"조조",chosenTactics:["군령여산","혼수모어","진퇴유도"]},{name:"악진",chosenTactics:["분용당선","동구적개","강유겸제"]}]},
-    {id:"shu_combo_spear",name:"촉나라 연격 창병 덱",concept:"마초 확산 폭딜",formation:"구행진",officers:[{name:"위연",chosenTactics:["실병제위","진퇴유도","이퇴위진"]},{name:"마초",chosenTactics:["출수법","용맹무쌍","반객위주"]},{name:"서서",chosenTactics:["절절학문","문치무공","혼수모어"]}]},
-    {id:"shu_evasion_bangwon",name:"촉나라 황제강 덱",concept:"스탯 무한 강탈",formation:"방원진",officers:[{name:"황충",chosenTactics:["적혈도","강유겸제","진퇴유도"]},{name:"제갈량",chosenTactics:["초선차전","전위위안","안영찰채"]},{name:"강유",chosenTactics:["담대여두","반객위주","일고작기"]}]},
-    {id:"qun_cavalry",name:"군웅 돌격 기병 덱",concept:"여포 1턴 분쇄",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","견진연봉","위위구조"]},{name:"여포",chosenTactics:["천하무쌍","용왕직전","만부막적"]},{name:"동탁",chosenTactics:["전권난정","운주유악","횡징폭렴"]}]},
-    {id:"wu_magic_bow",name:"오나라 모략 신기루 덱",concept:"손권 복합 피해 캐리",formation:"구행진",officers:[{name:"손권",chosenTactics:["웅거","진퇴유도","강유겸제"]},{name:"육항",chosenTactics:["청백충근","수상개화","요사여신"]},{name:"노숙",chosenTactics:["탑상책","분성지계","여자동포"]}]},
-    {id:"qun_whitehorse_bow",name:"군웅 백마의종 궁병 덱",concept:"공손찬 발동률 버프 응용 (2.5군)",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","승승장구","화소적벽"]},{name:"공손찬",chosenTactics:["위진새북","극적제승","암전난방"]},{name:"여포",chosenTactics:["천하무쌍","만부막적","용왕직전"]}]}
+    {id:"wei_sima_shield",name:"위나라 가후 방패 덱",concept:"[공식] 가후 방패·고급·2",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","요사여신"]},{name:"조조",chosenTactics:["효웅","홍수첨향","강유겸제"]},{name:"가후",chosenTactics:["경달권변","만천과해","혼수모어"]}]},
+    {id:"wei_sima_janghap",name:"위나라 사마의 장합 방패 덱",concept:"[공식] 가후 방패·고급",formation:"안행진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","요사여신"]},{name:"장합",chosenTactics:["교변병기","만천과해","강유겸제"]},{name:"가후",chosenTactics:["경달권변","만천과해","혼수모어"]}]},
+    {id:"wei_sima_sp_jojo",name:"위나라 사마의 제왕조조 방패 덱",concept:"[공식] 사마의 방패·고급·2",formation:"안행진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","화소적벽"]},{name:"장합",chosenTactics:["교변병기","횡징폭렴","강유겸제"]},{name:"조조(제왕)",chosenTactics:["군령여산","이퇴위진","혼수모어"]}]},
+    {id:"wei_assassin_sp",name:"위나라 신속 암살 창병 덱",concept:"[공식] 신속창·2",formation:"호도진",officers:[{name:"장료",chosenTactics:["함진살적","만전제발","사면초가"]},{name:"조조(제왕)",chosenTactics:["군령여산","횡징폭렴","동장철벽"]},{name:"악진",chosenTactics:["분용당선","기문둔갑","선등함진"]}]},
+    {id:"shu_dowon_spear",name:"촉나라 도원 결의 창병 덱",concept:"[공식] 도원창·2",formation:"추형진",officers:[{name:"유비(제왕)",chosenTactics:["재주복주","금낭묘계","동장철벽"]},{name:"장비",chosenTactics:["연인노호","제곤부위","이아환아"]},{name:"관우",chosenTactics:["무성","만전제발","선등함진"]}]},
+    {id:"shu_hwangchung_shield",name:"촉나라 황충 방패 덱",concept:"[공식] 황충 방패·고급·2",formation:"추형진",officers:[{name:"황충",chosenTactics:["적혈도","축세대발","인세이도"]},{name:"조운",chosenTactics:["칠진칠출","이아환아","횡징폭렴"]},{name:"유비(제왕)",chosenTactics:["재주복주","혼수모어","강유겸제"]}]},
+    {id:"shu_combo_spear",name:"촉나라 마초 연격 창병 덱",concept:"[공식] 마초 창·고급",formation:"추형진",officers:[{name:"유비(제왕)",chosenTactics:["재주복주","혼수모어","유좌유용"]},{name:"위연",chosenTactics:["실병제위","횡징폭렴","강유겸제"]},{name:"마초",chosenTactics:["출수법","용맹무쌍","축세대발"]}]},
+    {id:"shu_gangyu_shield",name:"촉나라 강유 방패 덱",concept:"[공식] 강유 방패·고급",formation:"추형진",officers:[{name:"유비(제왕)",chosenTactics:["재주복주","견진연봉","위위구조"]},{name:"황충",chosenTactics:["적혈도","강유겸제","전위위안"]},{name:"강유",chosenTactics:["담대여두","천리추격","반객위주"]}]},
+    {id:"wu_magic_bow",name:"오나라 노숙 궁병 덱",concept:"[공식] 노숙 궁·고급",formation:"구행진",officers:[{name:"손권(제왕)",chosenTactics:["겸권상계","이퇴위진","강유겸제"]},{name:"주유",chosenTactics:["봉화연천","화소적벽","요사여신"]},{name:"노숙",chosenTactics:["탑상책","분성지계","여자동포"]}]},
+    // [신규 4종 공식 덱 추가]
+    {id:"shu_gangyu_bangwon_2",name:"촉나라 강유 방원 방패 덱",concept:"[공식] 강유 방패·고급·2",formation:"방원진",officers:[{name:"제갈량",chosenTactics:["초선차전","전위위안","여자동포"]},{name:"황충",chosenTactics:["적혈도","견진연봉","위위구조"]},{name:"강유",chosenTactics:["담대여두","천리추격","반객위주"]}]},
+    {id:"shu_gangyu_cav",name:"촉나라 강유 기병 덱",concept:"[공식] 강유 기병·고급",formation:"방원진",officers:[{name:"황충",chosenTactics:["적혈도","견진연봉","위위구조"]},{name:"유비",chosenTactics:["인정","강유겸제","이퇴위진"]},{name:"강유",chosenTactics:["담대여두","천리추격","반객위주"]}]},
+    {id:"shu_macho_spear_2",name:"촉나라 마초 안행 창병 덱",concept:"[공식] 마초 창·고급·2",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","만전제발"]},{name:"위연",chosenTactics:["실병제위","이아환아","홍수첨향"]},{name:"유비",chosenTactics:["인정","혼수모어","이퇴위진"]}]},
+    {id:"shu_xushu_spear",name:"촉나라 서서 창병 덱",concept:"[공식] 서서·창 고급",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"위연",chosenTactics:["실병제위","이퇴위진","강유겸제"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]}
 ];
 
-const metaDeckUnitTypeMap = {"wei_sima_shield":"방패병","wei_flawless_assassin":"기병","wei_assassin":"창병","wu_magic_bow":"궁병","shu_combo_spear":"창병","shu_evasion_bangwon":"궁병","qun_cavalry":"기병","qun_whitehorse_bow":"궁병"};
+const metaDeckUnitTypeMap = {
+    "wei_sima_shield":"방패병", "wei_sima_janghap":"방패병", "wei_sima_sp_jojo":"방패병",
+    "wei_assassin_sp":"창병", "shu_dowon_spear":"창병", "shu_hwangchung_shield":"방패병",
+    "shu_combo_spear":"창병", "shu_gangyu_shield":"방패병", "wu_magic_bow":"궁병",
+    "shu_gangyu_bangwon_2":"방패병", "shu_gangyu_cav":"기병", "shu_macho_spear_2":"창병", "shu_xushu_spear":"창병"
+};
+
 const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({...o, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : o.chosenTactics})) }));
 
 const internalBondRules = [
@@ -84,10 +114,64 @@ const internalBondRules = [
     {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
 ];
 
-const metaHawkRecommendationMap = {"wei_sima_shield": {name: "결운-호생", skill: "병력 최저 2명 70% 확정 회복 (사망 방지)"},"wei_flawless_assassin": {name: "열공-전광", skill: "시작 시 무용/통솔 30% 즉시 펌핑 (선공 압살)"},"wei_assassin": {name: "열공-전광", skill: "속도 30% 선점 및 적 주장 정밀 저격 최적화"},"wu_magic_bow": {name: "능소-진시", skill: "50% 확률 피해 30% 감소 (예열 턴 확보)"},"shu_combo_spear": {name: "열공-전광", skill: "마초 무용 극대화 및 확산 딜링 폭발"},"shu_evasion_bangwon": {name: "결운-감로", skill: "피격 후 100% 치료 및 각성 주입 (좀비 덱)"},"qun_cavalry": {name: "열공-전광", skill: "여포 1턴킬 결정력을 위한 무용 30% 증폭"},"qun_whitehorse_bow": {name: "열공-전광", skill: "여포 및 액티브 선공 폭딜 확보"}};
-const metaHawkAlternativesMap = {"wei_sima_shield": ["결운-감로", "능소-진시"],"wei_flawless_assassin": ["삭풍-설조", "삭풍-성모"],"wei_assassin": ["삭풍-설조", "열공-여천"],"wu_magic_bow": ["능소-전우", "결운-감로"],"shu_combo_spear": ["열공-여천", "삭풍-설조"],"shu_evasion_bangwon": ["결운-호생", "능소-진시"],"qun_cavalry": ["삭풍-설조", "열공-여천"],"qun_whitehorse_bow": ["삭풍-설조", "능소-진시"]};
-const metaHawkRandomAttributesMap = {"wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},"wei_flawless_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"발동률 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},"wei_assassin":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"주장 타격"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"회피 무시"}},"wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"발동률 +5%",rank3:"피해감소 +8%"},attr3:{rank1:"치유효과 +12%",rank2:"디버프 해제",rank3:"저항 +6%"}},"shu_combo_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},"shu_evasion_bangwon":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},"qun_cavalry":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"파갑 +10%",rank2:"연격률 +8%",rank3:"무용피해 +10%"},attr3:{rank1:"첫턴 선공",rank2:"돌격데미지 +15%",rank3:"평타 혼란"}},"qun_whitehorse_bow":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"발동률 +5%",rank2:"피해가함 +8%",rank3:"파갑 +10%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"돌격데미지 +15%"}},"custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해가함 +6%",rank2:"피해감소 +6%",rank3:"발동률 +3%"},attr3:{rank1:"첫턴 제어면역",rank2:"첫턴 선공",rank3:"종료시 회복"}}};
-const systemGuideInsights = {"wei_sima_shield":"💡 [장기전 메타] 조조 방어막+가후 혼란+사마의 폭딜.","wei_flawless_assassin":"💡 [암살 메타] 장료 2턴 통찰(제어면역) 암살.","wei_assassin":"💡 [저격 메타] 장료 반객위주 스택 정밀 저격.","wu_magic_bow":"💡 [대기만성 메타] 손권 복합 피해 캐리.","shu_combo_spear":"💡 [확산 메타] 마초 반객위주 확산 폭딜.","shu_evasion_bangwon":"💡 [디버프 메타] 강유 적 스탯 무한 강탈.","qun_cavalry":"💡 [돌파 메타] 여포 추격(돌격) 1턴킬.","qun_whitehorse_bow":"💡 [발동률 메타] 공손찬의 전법으로 아군 액티브 전법 난사."};
+const metaHawkRecommendationMap = {
+    "wei_sima_shield": {name: "결운-호생", skill: "병력 최저 2명 70% 확정 회복 (사망 방지)"},
+    "wei_sima_janghap": {name: "결운-호생", skill: "병력 회복 및 안행진 지속 케어"},
+    "wei_sima_sp_jojo": {name: "결운-호생", skill: "사마의 모략 폭딜 예열 턴 확보"},
+    "wei_assassin_sp": {name: "열공-전광", skill: "장료 무용/속도 30% 확정 펌핑 및 1턴킬 지원"},
+    "shu_dowon_spear": {name: "결운-감로", skill: "피격 시 확정 치료 및 저항 버프 매칭"},
+    "shu_hwangchung_shield": {name: "결운-호생", skill: "황충 크리티컬 폭딜 안정성 확보"},
+    "shu_combo_spear": {name: "열공-전광", skill: "마초 무용 극대화 및 확산 딜링 폭발"},
+    "shu_gangyu_shield": {name: "결운-감로", skill: "강유 스탯 무한 강탈 예열 보호"},
+    "wu_magic_bow": {name: "능소-진시", skill: "50% 확률 피해 30% 감소 (예열 턴 확보)"},
+    "shu_gangyu_bangwon_2": {name: "결운-감로", skill: "제갈량/유비 케어 극대화 및 강유 스탯 강탈 보호"},
+    "shu_gangyu_cav": {name: "결운-호생", skill: "기병 낮은 내구도를 유비 인정+호생으로 극복"},
+    "shu_macho_spear_2": {name: "열공-전광", skill: "안행진 후열 마초 폭딜 및 어그로 제어 연계"},
+    "shu_xushu_spear": {name: "열공-전광", skill: "서서 절절학문 버프와 마초 파갑 돌파 극대화"}
+};
+
+const metaHawkAlternativesMap = {
+    "wei_sima_shield": ["결운-감로", "능소-진시"], "wei_sima_janghap": ["결운-감로", "능소-진시"],
+    "wei_sima_sp_jojo": ["결운-감로", "능소-진시"], "wei_assassin_sp": ["삭풍-설조", "열공-여천"],
+    "shu_dowon_spear": ["결운-호생", "능소-진시"], "shu_hwangchung_shield": ["결운-감로", "능소-진시"],
+    "shu_combo_spear": ["열공-여천", "삭풍-설조"], "shu_gangyu_shield": ["결운-호생", "능소-진시"],
+    "wu_magic_bow": ["능소-전우", "결운-감로"], "shu_gangyu_bangwon_2": ["결운-호생", "능소-진시"],
+    "shu_gangyu_cav": ["결운-감로", "능소-진시"], "shu_macho_spear_2": ["열공-여천", "삭풍-설조"],
+    "shu_xushu_spear": ["열공-여천", "삭풍-설조"]
+};
+
+const metaHawkRandomAttributesMap = {
+    "wei_sima_shield":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
+    "wei_sima_janghap":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
+    "wei_sima_sp_jojo":{attr1:{rank1:"통솔 +12%",rank2:"모략 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"모략피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
+    "wei_assassin_sp":{attr1:{rank1:"속도 +25",rank2:"무용 +12%",rank3:"전능 +6%"},attr2:{rank1:"파갑 +12%",rank2:"피해가함 +8%",rank3:"발동률 +5%"},attr3:{rank1:"첫턴 선공",rank2:"제어 면역",rank3:"평타 혼란"}},
+    "shu_dowon_spear":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"무용피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
+    "shu_hwangchung_shield":{attr1:{rank1:"통솔 +12%",rank2:"무용 +10%",rank3:"전능 +6%"},attr2:{rank1:"피해감소 +10%",rank2:"치유효과 +10%",rank3:"무용피해 +8%"},attr3:{rank1:"디버프 해제",rank2:"피격시 저항",rank3:"저항 +6%"}},
+    "shu_combo_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},
+    "shu_gangyu_shield":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},
+    "wu_magic_bow":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"발동률 +5%",rank3:"피해감소 +8%"},attr3:{rank1:"치유효과 +12%",rank2:"디버프 해제",rank3:"저항 +6%"}},
+    "shu_gangyu_bangwon_2":{attr1:{rank1:"모략 +12%",rank2:"전능 +6%",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},
+    "shu_gangyu_cav":{attr1:{rank1:"모략 +12%",rank2:"속도 +20",rank3:"통솔 +10%"},attr2:{rank1:"모략피해 +10%",rank2:"피해감소 +8%",rank3:"치유효과 +12%"},attr3:{rank1:"저항 +6%",rank2:"디버프 해제",rank3:"피격시 저항"}},
+    "shu_macho_spear_2":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},
+    "shu_xushu_spear":{attr1:{rank1:"무용 +12%",rank2:"속도 +20",rank3:"전능 +6%"},attr2:{rank1:"연격률 +10%",rank2:"확산피해 +12%",rank3:"무용피해 +10%"},attr3:{rank1:"3회후 무장해제",rank2:"첫턴 선공",rank3:"타격시 흡혈"}},
+    "custom":{attr1:{rank1:"전능 +5%",rank2:"통솔 +10%",rank3:"무용 +10%"},attr2:{rank1:"피해가함 +6%",rank2:"피해감소 +6%",rank3:"발동률 +3%"},attr3:{rank1:"첫턴 제어면역",rank2:"첫턴 선공",rank3:"종료시 회복"}}
+};
+
+const systemGuideInsights = {
+    "wei_sima_shield":"💡 [공식 메타] 사마의 폭딜 + 조조/가후 장기전 케어.",
+    "wei_sima_janghap":"💡 [공식 메타] 안행진 진형 기반 사마의 캐리.",
+    "wei_sima_sp_jojo":"💡 [공식 메타] 제왕조조 군령여산 기반 피해 증폭 극대화.",
+    "wei_assassin_sp":"💡 [공식 메타] 장료 정밀 타격 및 적 주장 저격.",
+    "shu_dowon_spear":"💡 [공식 메타] 유비/장비/관우 인연 및 방어 시너지.",
+    "shu_hwangchung_shield":"💡 [공식 메타] 조운/유비의 단단한 방어선 뒤 황충 폭딜.",
+    "shu_combo_spear":"💡 [공식 메타] 마초 출수법 확산 폭딜.",
+    "shu_gangyu_shield":"💡 [공식 메타] 강유 적 스탯 강탈 및 장기전 방어.",
+    "wu_magic_bow":"💡 [공식 메타] 손권/주유/노숙 모략 신기루 연계.",
+    "shu_gangyu_bangwon_2":"💡 [공식 메타] 방원진 강유 스탯 강탈 + 제갈량 저항 부여.",
+    "shu_gangyu_cav":"💡 [공식 메타] 일반 유비 인정 힐량으로 기병 내구도 보강.",
+    "shu_macho_spear_2":"💡 [공식 메타] 안행진 후열 마초 격리 및 위연 반격 어그로.",
+    "shu_xushu_spear":"💡 [공식 메타] 서서 절절학문 버프 트리거 및 마초 파갑 돌파."
+};
 
 const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","제갈량","서서","강유","황월영","육손","주유","육항","노숙","대교","소교","장각","우길","좌자","화타","채문희","초선","장녕","장보"]);
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
@@ -162,8 +246,8 @@ function evaluateDeckPerfection(deck, metaId) {
 
     if (!isComplete) return "";
 
-    const isLongBattle = (metaId === 'wei_sima_shield' || metaId === 'shu_evasion_bangwon');
-    const isBurstDmg = (metaId === 'wei_flawless_assassin' || metaId === 'qun_cavalry' || metaId === 'qun_whitehorse_bow');
+    const isLongBattle = (metaId.includes('shield') || metaId.includes('sima') || metaId.includes('dowon') || metaId.includes('gangyu'));
+    const isBurstDmg = (metaId.includes('assassin') || metaId.includes('combo') || metaId.includes('macho') || metaId.includes('xushu'));
 
     if (totalDmgRed < 25) {
         recLogs.push(`⚠️ <strong>[생존력 취약]</strong> 부대 총합 피해 감소(${totalDmgRed.toFixed(1)}%)가 25% 미만입니다. '동구적개', '횡징폭렴', '강유겸제' 등의 채용을 강력히 추천합니다.`);
@@ -180,7 +264,7 @@ function evaluateDeckPerfection(deck, metaId) {
     const allTacticsFilled = deck.officers.every(o => o.chosenTactics && o.chosenTactics.length === 2 && o.chosenTactics[0] && o.chosenTactics[1]);
 
     if (recLogs.length === 0 && allTacticsFilled) {
-        return `<div class="feedback-item success" style="border: 1px solid #4ade80; background: rgba(74, 222, 128, 0.1); padding: 8px; margin-top: 10px;">✨ <strong>[최종 검증 완료: Perfect Synergy]</strong> 공방 밸런스와 필수 스탯 임계치를 완벽하게 달성한 종결 세팅입니다. 실전에 즉시 투입하십시오.</div>`;
+        return `<div class="feedback-item success" style="border: 1px solid #4ade80; background: rgba(74, 222, 128, 0.1); padding: 8px; margin-top: 10px;">✨ <strong>[최종 검증 완료: Perfect Synergy]</strong> 공방 밸런스 및 공식 가이드 사양을 완전 달성한 종결 세팅입니다. 실전에 즉시 투입하십시오.</div>`;
     }
 
     if (recLogs.length > 0) {
@@ -326,7 +410,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             (off.chosenTactics || []).forEach((t, i) => {
                 const cT = t?.toString().trim().replace(/\s+/g, '') || "";
                 if (!cT && unmatchTac.length) {
-                    // [성급/등급 추천 삭제 및 수정 반영] A급/B급 등 성급을 연상시키는 표기를 배제하고 기능적 명칭으로 치환
                     const pTac = unmatchTac.shift(), alts = tacticAlternativesMap[pTac] || ["범용 대체 전법", "서브 전법"];
                     fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 [${alts[0]}] 권장` });
                 } else if (cT) {
@@ -350,11 +433,8 @@ function calculateActivatedBond(officers) {
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
-// [팝업 UI 추가 설계] 렌더링을 위한 전역 스크립트 모달 엔진
 window.showTacticPopup = function(e, tacticName) {
     if(!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
-    
-    // Select 드롭다운 동작 중 팝업 발생을 방지 (Event Interceptor)
     if(e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
 
     let popup = document.getElementById('tactic-popup-modal');
@@ -363,7 +443,6 @@ window.showTacticPopup = function(e, tacticName) {
         popup.id = 'tactic-popup-modal';
         document.body.appendChild(popup);
         
-        // 배경 클릭 시 팝업 닫기 (비명시적 아웃포커싱 UX)
         document.addEventListener('click', (evt) => {
             if(!evt.target.closest('.tactic-row') && !evt.target.closest('#tactic-popup-modal')) {
                 popup.style.display = 'none';
@@ -371,7 +450,6 @@ window.showTacticPopup = function(e, tacticName) {
         });
     }
 
-    // 도감 DOM 실시간 데이터 스크래핑(Scraping) 엔진 - 하드코딩 회피용
     let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
     const grid = document.getElementById('tactic-card-grid');
     if(grid) {
@@ -394,7 +472,6 @@ window.showTacticPopup = function(e, tacticName) {
     `;
     popup.style.display = 'block';
 
-    // 팝업 반응형 동적 레이아웃 보정 로직 (화면 짤림 방지)
     const rect = e.currentTarget.getBoundingClientRect();
     let top = rect.top + window.scrollY - 10;
     let left = rect.right + window.scrollX + 10;
@@ -434,7 +511,6 @@ const injectCustomUIStyles = () => {
         .tactic-row select { margin-top: 2px; }
         .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
         
-        /* 팝업 모달 전용 CSS 속성 추가 */
         #tactic-popup-modal { display:none; position:absolute; z-index:9999; background:rgba(15,23,42,0.98); border:1px solid #a855f7; padding:12px; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.6); width:280px; color:#f8fafc; font-size:12px; backdrop-filter:blur(4px); pointer-events:none; }
         #tactic-popup-modal .p-title { font-size:14px; font-weight:700; color:#facc15; margin-bottom:6px; border-bottom:1px solid #334155; padding-bottom:6px; letter-spacing:0.5px; }
         #tactic-popup-modal .p-meta { color:#38bdf8; font-size:11px; margin-bottom:8px; font-weight:600; }
@@ -509,7 +585,6 @@ function renderDeckBuilder() {
             let dType = deck.unitType || (match?.bestMeta ? metaDeckUnitTypeMap[match.bestMeta.id] : "창병"), hawkHtml = '';
 
             if (curNames.length > 0) {
-                // [성급/등급 추천 삭제 및 수정 반영] SSR 등 성급/희귀도를 연상시키는 표기를 삭제하고 '범용 전투매'로 변경
                 const hk = match?.bestMeta ? (metaHawkRecommendationMap[match.bestMeta.id] || {name:"-",skill:"-"}) : {name:"범용 전투매",skill:"기본 최적화"};
                 const hkAlt = match?.bestMeta ? (metaHawkAlternativesMap[match.bestMeta.id] || ["-","-"]) : ["열공-전광","결운-호생"];
                 const resolvedMetaId = match?.bestMeta?.id;
@@ -524,12 +599,10 @@ function renderDeckBuilder() {
                 
                 const unitBadgeHtml = cName && dg?.unitSuitability ? `<div class="unit-badge">🎖️ ${dg.unitSuitability}</div>` : '';
 
-                // [클릭 이벤트 탑재] 고유 전법 행에 클릭 시 팝업 띄우는 함수 연결
                 let tRows = `<div class="tactic-row ${cName&&(hMap[hName]?.isOwned||tMap[dg?.uniqueTactic?.replace(/\s+/g,'')]?.isOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT=t?.trim()||"", isOwn=tMap[cT.replace(/\s+/g,'')]?.isOwned;
-                    // [클릭 이벤트 탑재] 일반 선택 전법 행에 팝업 엔진 연결 (자식 Select value 연동)
                     tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
