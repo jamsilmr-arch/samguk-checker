@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 보유 자원 실시간 대조 기반 맞춤형 대체 추천(Arrow Curation) 엔진 탑재
+// [시스템 분석] deck_core.js - 부대 내 중복 추천 방지(In-Deck Lock) 및 역할군 격리 큐레이션 탑재
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기
@@ -289,7 +289,7 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 보유 자원 실시간 대조 기반 맞춤형 대체 추천(Arrow Curation) 엔진
+// LAYER 3: 부대 내 중복 방지 & 역할군 격리 기반 화살표 큐레이션 엔진
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const isMissingTac = tacticalSet.has(missingName);
@@ -319,18 +319,37 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap) {
+// [로직 교정] 부대 내 중복 추천 방지(recommendedTacs) 및 공격/지원 역할군 엄격 격리
+function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
-        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t)) return t;
+        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) {
+            recommendedTacs.add(t);
+            return t;
+        }
     }
     const targetStats = internalTacticStatMap[missingTacName];
     if (targetStats) {
         const targetKeys = Object.keys(targetStats);
+        const isAttack = targetKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k));
+        const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
+
         for (let tName of Object.keys(tacticDataMap)) {
-            if (!tacticDataMap[tName]?.isOwned || allEquipTacs.includes(tName)) continue;
+            if (!tacticDataMap[tName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || tName === missingTacName) continue;
+            
             const candStats = internalTacticStatMap[tName];
-            if (candStats && targetKeys.some(k => candStats[k] !== undefined)) return tName;
+            if (!candStats) continue;
+            
+            const candKeys = Object.keys(candStats);
+            const candIsAttack = candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k));
+            const candIsSupport = candKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
+
+            if ((isAttack && !candIsAttack) || (isSupport && !candIsSupport)) continue;
+
+            if (targetKeys.some(k => candStats[k] !== undefined)) {
+                recommendedTacs.add(tName);
+                return tName;
+            }
         }
     }
     return null;
@@ -440,6 +459,9 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
     const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => t?.toString().trim().replace(/\s+/g, ''))).filter(Boolean);
     let missingMeta = meta.officers.filter(mo => !curNames.includes(mo.name.replace(/\s+/g, '')));
+    
+    // [로직 연결] 부대 평가 내 추천 전법 중복 방지용 락(Lock) Set 생성
+    const recommendedTacs = new Set();
 
     deck.officers.forEach((off, offIdx) => {
         const hName = off?.name?.toString().trim() || "", cleanHName = hName.replace(/\s+/g, '');
@@ -469,12 +491,14 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 const cT = t?.toString().trim().replace(/\s+/g, '') || "";
                 if (!cT && unmatchTac.length) {
                     const pTac = unmatchTac.shift();
-                    const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap);
+                    // [로직 연결] 중복 방지 락 매개변수 전달
+                    const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
                     const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                     fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
                 } else if (cT) {
                     if (!tacticDataMap[cT]?.isOwned) {
-                        const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap);
+                        // [로직 연결] 중복 방지 락 매개변수 전달
+                        const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs);
                         const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                         fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
                     }
