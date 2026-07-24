@@ -1,4 +1,4 @@
-console.log("[시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 엔진 기동");
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 엔진 및 신규 전법 등재
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -52,8 +52,7 @@ const heroList = [
     { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0, transcend: false },
     { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0, transcend: false },
     
-    // 군진영 (13명) - 데이터 확장 반영
-    // [신규 로직] 공손찬 데이터 인벤토리 배열 최상단 삽입 (자음 ㄱ 기준 정렬)
+    // 군진영 (13명)
     { id: 'h_gongsonchan', name: '공손찬', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0, transcend: false },
@@ -70,6 +69,8 @@ const heroList = [
 ];
 
 const tacticList = [
+    // [신규 전법 등재] 간담상조 ㄱ열 최상단 배치
+    { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 0 },
@@ -100,10 +101,7 @@ const tacticList = [
     { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
-    
-    // [신규 로직] 승승장구 전법 자음 배열 순서에 맞추어 인벤토리 등재
     { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
-    
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
@@ -216,7 +214,6 @@ function renderButtons() {
 function toggleState(id, type) {
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
-    
     if (target) {
         target.isOwned = !target.isOwned;
         renderButtons();
@@ -284,7 +281,6 @@ function loadSavedData() {
 // ==========================================================================
 function exportData() {
     try {
-        // [핵심 패치]: 로컬 스토리지 대신 현재 메모리(Live memory)의 초월/성급 객체를 즉시 빌드하여 누락 전면 방어
         const liveHobbyData = { heroes: heroList, tactics: tacticList };
         var deckData = localStorage.getItem('samguk_deck_text');
         
@@ -331,7 +327,6 @@ function importData(input) {
                 return;
             }
             
-            // [하위 호환 패치]: 구버전 백업 파일 로드 시 꼬임 방지를 위해 transcend/star 누락분 복구 튜닝 사전 연산
             if (importedDatabase.samguk_hobby_data && importedDatabase.samguk_hobby_data.heroes) {
                 importedDatabase.samguk_hobby_data.heroes.forEach(h => {
                     if (h && h.transcend === undefined) h.transcend = false;
@@ -361,7 +356,6 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
-// 전역 윈도우 인라인 맵핑 바인딩
 window.toggleSortMode = function() {};
 window.toggleState = toggleState;
 window.saveData = saveData;
@@ -369,7 +363,6 @@ window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
 
-// 강제 실행 돔 생명주기 엔진
 function initAppEngine() {
     loadSavedData();
     renderButtons();
