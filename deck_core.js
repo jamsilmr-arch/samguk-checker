@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 주조소 규격 일치 장비 정밀 매핑 및 AI 시너지 검증 엔진 탑재
+// [시스템 분석] deck_core.js - 관우/황충/위연 물리 능동 캐리 장비 정밀 교정 및 AI 시너지 검증 엔진
 
 // ==========================================================================
 // LAYER 1: 독립형 마스터 자원 데이터베이스 및 전역 Set 분류기
@@ -24,10 +24,11 @@ const officerFactionMap = {
     "공손찬":"qun","동탁":"qun","안량":"qun","여포":"qun","우길":"qun","원소":"qun","장각":"qun","장녕":"qun","장보":"qun","좌자":"qun","채문희":"qun","초선":"qun","화타":"qun"
 };
 
-// [장비 매핑 전면 정밀 교정] 장비, 하후돈, 전위, 동탁 등 통솔/물리 탱커들의 투구(연함규) 및 갑옷(청등갑) 정상화
+// [장비 매핑 전면 정밀 교정] 관우, 황충, 위연 등 순수 무용 능동 캐리의 투구(호분관), 갑옷(명광갑), 장신구(치룡패) 정상화
 const internalMasterEquipmentMap = {
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" } },
-    "위연": { helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "창병 피해 감소" } },
+    // [위연 교정] 무용 +3 호분관 / 무용 +4 명광갑 / 무용 +3 치룡패 매핑
+    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
     "서서": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 배반, 공심 상승" } },
     "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" } },
     "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 받음" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
@@ -44,7 +45,8 @@ const internalMasterEquipmentMap = {
     "원소": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
     "여포": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "방패병 배반, 공심 상승" } },
     "제갈량": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" }, armor: { name: "명재복", attr1: "치유 효과 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" } },
-    "황충": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "강공, 기습 상승", attr2: "궁병 피해 감소" } },
+    // [황충 교정] 무용 +3 호분관 / 무용 +4 명광갑 / 무용 +3 치룡패 매핑
+    "황충": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 피해 감소" } },
     "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" } },
     "좌자": { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "창병 피해 감소" } },
     "장녕": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 상승" } },
@@ -55,8 +57,8 @@ const internalMasterEquipmentMap = {
     "노숙": { helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "궁병 피해 감소" } },
     "유비(제왕)": { helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
     "유비": { helmet: { name: "진현관", attr1: "치유 효과 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "관우": { helmet: { name: "백옥잠", attr1: "강공, 기습 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "방패병 피해 감소" } },
-    // [장비 교정 완료] 통솔 +3 연함규 / 통솔 +4 청등갑 / 통솔 +3 사남패 매핑
+    // [관우 교정] 무용 +3 호분관 / 무용 +4 명광갑 / 무용 +3 치룡패 매핑
+    "관우": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
     "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
