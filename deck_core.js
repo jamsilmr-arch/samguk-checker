@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 간담상조 4대 종결 메타 덱 코어 편입 및 1대1 대체 매핑 고도화 엔진
+// [시스템 분석] deck_core.js - 불리언 오타 정상화 및 공백 무시 절대 매핑 엔진 탑재
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 동적 마스터 바인딩
@@ -25,50 +25,7 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","지력 상승","치유 효과 상승","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 상승","UNIT_DMG_RED"]
 };
 
-// [간담상조 쌍방향 매핑] 방어·치유 전법군 간의 실시간 1대1 대체 추천 체계 구축
-const tacticAlternativesMap = {
-    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조"],
-    "횡징폭렴":["간담상조","동구적개","동장철벽"],
-    "동장철벽":["간담상조","견불가최","천시지리","동구적개"],
-    "전위위안":["간담상조","태청단경","현호제세","제곤부위"],
-    "이퇴위진":["미우주무","천시지리"],
-    "용맹무쌍":["만부막적","비사주석"],
-    "질풍노도":["암전난방","교취호탈"],
-    "문치무공":["양초선행","중정기고"],
-    "혼수모어":["사면초가","이간계"],
-    "반객위주":["일고작기","사생취의"],
-    "유좌유용":["휴양생식","제곤부위"],
-    "선등함진":["만천과해","만전제발"],
-    "강유겸제":["동장철벽","천시지리"],
-    "진퇴유도":["위위구조","동구적개"],
-    "견진연봉":["동장철벽","순수견양"],
-    "위위구조":["간담상조","태청단경","현호제세"],
-    "용왕직전":["천리추격","암전난방"],
-    "만부막적":["용왕직전","천리추격"],
-    "안영찰채":["간담상조","위위구조","미우주무"],
-    "일고작기":["사생취의","용맹무쌍"],
-    "여자동포":["동구적개","천시지리"],
-    "양의화생":["기문둔갑","화소적벽"],
-    "수상개화":["요사여신","사생취의"],
-    "요사여신":["수상개화","사생취의"],
-    "견불가최":["동장철벽","동구적개"],
-    "분성지계":["화소적벽","기문둔갑"],
-    "운주유악":["태청단경","미우주무"],
-    "동구적개":["안영찰채","위위구조"],
-    "사생취의":["일고작기","용맹무쌍"],
-    "양초선행":["문치무공","휴양생식"],
-    "휴양생식":["양초선행","현호제세"],
-    "사면초가":["기문둔갑","화소적벽"],
-    "심모원려":["사면초가","기문둔갑"],
-    "횡소천군":["강유겸제","용맹무쌍"],
-    "천리추격":["극적제승","암전난방"],
-    "암전난방":["극적제승","질풍노도"],
-    "사소도":["이간계","낙정하석"],
-    "미우주무":["현호제세","태청단경"],
-    "이아환아":["금철교명","동장철벽"],
-    "제곤부위":["태청단경","현호제세"],
-    "금낭묘계":["만천과해","태청단경"]
-};
+const tacticAlternativesMap = {"간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조"],"횡징폭렴":["간담상조","동구적개","동장철벽"],"동장철벽":["간담상조","견불가최","천시지리","동구적개"],"전위위안":["간담상조","태청단경","현호제세","제곤부위"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["간담상조","태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"안영찰채":["간담상조","위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"],"이아환아":["금철교명","동장철벽"],"제곤부위":["태청단경","현호제세"],"금낭묘계":["만천과해","태청단경"]};
 
 const internalTacticStatMap = {
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"초선차전":{healGiven:10},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"함진살적":{physicalDmg:5,armorPen:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6}
@@ -77,7 +34,6 @@ const internalTacticStatMap = {
 const formationEffects = {"일자진":"전열: 피해 감소 6.0% | 후열: -","구행진":"전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%","추형진":"전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%","기형진":"전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%","어린진":"전열: 반격률 20.0% | 후열: 피해 감소 6.0%","방원진":"전열: 피해 감소 5.0% | 후열: 연격률 28.0%","안행진":"전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%","호도진":"전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%"};
 const formationPositions = {"일자진":["front","front","front"],"구행진":["front","back","front"],"추형진":["back","front","back"],"기형진":["back","back","front"],"어린진":["front","back","back"],"방원진":["front","front","back"],"안행진":["back","front","front"],"호도진":["front","back","front"]};
 
-// [4대 종결 덱 코어 격상] 위나라 방패(장합), 도원창(제왕유비), 강유 방패(제갈량), 군웅 기병(원소)에 '간담상조' 1순위 탑재
 const analyzedMetaArchetypes = [
     {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·제왕조조 종결 방패 덱",concept:"[공식] 사마의 방패·고급·2",formation:"안행진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","화소적벽"]},{name:"장합",chosenTactics:["교변병기","간담상조","강유겸제"]},{name:"조조(제왕)",chosenTactics:["군령여산","이퇴위진","혼수모어"]}]},
     {id:"wei_assassin_sp",name:"[위나라] 장료 무결점 신속 암살 덱",concept:"[공식] 신속창·2",formation:"호도진",officers:[{name:"장료",chosenTactics:["함진살적","만전제발","사면초가"]},{name:"조조(제왕)",chosenTactics:["군령여산","횡징폭렴","동장철벽"]},{name:"악진",chosenTactics:["분용당선","기문둔갑","선등함진"]}]},
@@ -210,13 +166,16 @@ function buildIntegratedStatsHtml(stats) {
 // ==========================================================================
 // LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 검증 엔진
 // ==========================================================================
+// [로직 교정] 공백 무시 절대 일치 조회 적용
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
+    const cleanMissing = missingName.toString().trim().replace(/\s+/g, '');
     const isMissingTac = tacticalSet.has(missingName), isMissingSup = supportSet.has(missingName);
     const missingFaction = officerFactionMap[missingName] || "", missingUnits = (internalMasterOfficerUnitMap[missingName] || "").split("/");
 
     let candidates = [];
     Object.keys(heroDataMap).forEach(hName => {
-        if (!heroDataMap[hName]?.isOwned || curNames.includes(hName) || hName === missingName) return;
+        const cleanCand = hName.toString().trim().replace(/\s+/g, '');
+        if (!heroDataMap[cleanCand]?.isOwned || curNames.includes(hName) || cleanCand === cleanMissing) return;
         let score = 0;
         const isTac = tacticalSet.has(hName), isSup = supportSet.has(hName), faction = officerFactionMap[hName] || "", units = (internalMasterOfficerUnitMap[hName] || "").split("/");
         if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) score += 5;
@@ -228,10 +187,13 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
+// [로직 교정] 공백 무시 절대 일치 조회 적용
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
+    const cleanMissing = missingTacName.toString().trim().replace(/\s+/g, '');
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
-        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
+        const cleanT = t.toString().trim().replace(/\s+/g, '');
+        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
     }
     const targetStats = internalTacticStatMap[missingTacName];
     if (targetStats) {
@@ -240,7 +202,8 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
 
         for (let tName of Object.keys(tacticDataMap)) {
-            if (!tacticDataMap[tName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || tName === missingTacName) continue;
+            const cleanTName = tName.toString().trim().replace(/\s+/g, '');
+            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || cleanTName === cleanMissing) continue;
             const candStats = internalTacticStatMap[tName]; if (!candStats) continue;
             const candKeys = Object.keys(candStats);
             if ((isAttack && !candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k))) || 
@@ -306,9 +269,13 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     if (!match || match.maxScore === 0) {
         if(curNames.length) fb.logs.push({ type: 'info', text: `💡 <strong>[커스텀 덱]</strong> 코어 장수를 기반으로 재설계해 보십시오.` });
         deck?.officers?.forEach((off, idx) => {
-            const hName = off?.name?.toString().trim();
-            if (hName && !heroDataMap[hName]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}] 미보유` });
-            off?.chosenTactics?.forEach((t, i) => { if(t && !tacticDataMap[t.replace(/\s+/g,'')]?.isOwned) fb.logs.push({ type:'warning', text:`전법 누락: ${i+2}번 슬롯 [${t}] 미보유` }); });
+            const hName = off?.name?.toString().trim() || "";
+            const cleanH = hName.replace(/\s+/g, '');
+            if (hName && !heroDataMap[cleanH]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}] 미보유` });
+            off?.chosenTactics?.forEach((t, i) => { 
+                const cleanT = t?.toString().trim().replace(/\s+/g, '') || "";
+                if(t && !tacticDataMap[cleanT]?.isOwned) fb.logs.push({ type:'warning', text:`전법 누락: ${i+2}번 슬롯 [${t}] 미보유` }); 
+            });
         });
         return fb;
     }
@@ -336,7 +303,8 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             return;
         }
         
-        if (!heroDataMap[hName]?.isOwned) {
+        // [로직 교정] 공백 제거 후 판독하여 오탐 100% 방지
+        if (!heroDataMap[cleanHName]?.isOwned) {
             const altHero = getOwnedAlternativeOfficer(hName, curNames, heroDataMap, deck.unitType);
             const recText = altHero ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${altHero}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
             fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 미보유 ${recText}` });
@@ -356,6 +324,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                     const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                     fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
                 } else if (cT) {
+                    // [로직 교정] 공백 제거 후 판독하여 오탐 100% 방지
                     if (!tacticDataMap[cT]?.isOwned) {
                         const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs);
                         const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
@@ -510,14 +479,26 @@ window.moveDeckAction = (cIdx, dir) => {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 };
 
+// [로직 교정] 공백 무시 절대 일치 매핑 및 불리언 이중 부정(!!) 적용
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container'); if (!container) return;
     try {
         container.style.display = 'block'; container.innerHTML = '';
         const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
         const hMap = {}, tMap = {};
-        saved.heroes?.forEach(x => { if(x?.name) hMap[x.name.trim()] = { isOwned: !!x.isOwned }; });
-        saved.tactics?.forEach(x => { if(x?.name) tMap[x.name.trim()] = { isOwned: !x.isOwned }; });
+        
+        saved.heroes?.forEach(x => { 
+            if(x && x.name) {
+                const cleanKey = x.name.toString().trim().replace(/\s+/g, '');
+                hMap[cleanKey] = { isOwned: !!x.isOwned };
+            }
+        });
+        saved.tactics?.forEach(x => { 
+            if(x && x.name) {
+                const cleanKey = x.name.toString().trim().replace(/\s+/g, '');
+                tMap[cleanKey] = { isOwned: !!x.isOwned };
+            }
+        });
 
         dynamicPresetDecks.sort((a,b) => (a.originIdx||0) - (b.originIdx||0)).forEach((deck, aIdx) => {
             const curNames = deck.officers.map(o => o?.name?.trim().replace(/\s+/g,'')).filter(Boolean);
@@ -536,10 +517,15 @@ function renderDeckBuilder() {
                 const hName = off?.name?.trim() || "", cName = hName.replace(/\s+/g,'');
                 const dg = cName ? getOfficerDogamData(hName) : null;
                 const unitBadgeHtml = cName && dg?.unitSuitability ? `<div class="unit-badge">🎖️ ${dg.unitSuitability}</div>` : '';
-                let tRows = `<div class="tactic-row ${cName&&(hMap[hName]?.isOwned||tMap[dg?.uniqueTactic?.replace(/\s+/g,'')]?.isOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
+                
+                const isHeroOwned = cName && !!hMap[cName]?.isOwned;
+                const isUniqueOwned = dg?.uniqueTactic && !!tMap[dg.uniqueTactic.toString().trim().replace(/\s+/g,'')]?.isOwned;
+                
+                let tRows = `<div class="tactic-row ${cName&&(isHeroOwned||isUniqueOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
-                    const cT=t?.trim()||"", isOwn=tMap[cT.replace(/\s+/g,'')]?.isOwned;
+                    const cT = t?.toString().trim() || "";
+                    const isOwn = cT ? !!tMap[cT.replace(/\s+/g,'')]?.isOwned : false;
                     tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
