@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 엔진 및 신규 전법 등재
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 공백 무시 절대 매핑 엔진
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -69,7 +69,6 @@ const heroList = [
 ];
 
 const tacticList = [
-    // [신규 전법 등재] 간담상조 ㄱ열 최상단 배치
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
@@ -244,6 +243,7 @@ function saveData() {
     alert('체크 현황이 안전하게 저장되었습니다.');
 }
 
+// [로직 교정] 공백 무시 절대 일치 매핑 및 불리언 이중 부정(!!) 적용
 function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
@@ -252,8 +252,9 @@ function loadSavedData() {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.heroes && Array.isArray(parsed.heroes)) {
             parsed.heroes.forEach(sh => {
-                if (!sh) return;
-                const h = heroList.find(x => x.id === sh.id);
+                if (!sh || !sh.name) return;
+                const cleanName = sh.name.toString().trim().replace(/\s+/g, '');
+                const h = heroList.find(x => x.name.trim().replace(/\s+/g, '') === cleanName);
                 if (h) {
                     h.isOwned = !!sh.isOwned;
                     h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star) : 0;
@@ -263,8 +264,9 @@ function loadSavedData() {
         }
         if (parsed && parsed.tactics && Array.isArray(parsed.tactics)) {
             parsed.tactics.forEach(st => {
-                if (!st) return;
-                const t = tacticList.find(x => x.id === st.id);
+                if (!st || !st.name) return;
+                const cleanName = st.name.toString().trim().replace(/\s+/g, '');
+                const t = tacticList.find(x => x.name.trim().replace(/\s+/g, '') === cleanName);
                 if (t) {
                     t.isOwned = !!st.isOwned;
                     t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star) : 0;
@@ -277,7 +279,7 @@ function loadSavedData() {
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진 (초월 및 실시간 상태 동기화)
+// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진
 // ==========================================================================
 function exportData() {
     try {
