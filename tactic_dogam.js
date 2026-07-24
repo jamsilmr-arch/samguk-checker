@@ -1,9 +1,11 @@
-console.log("[시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동");
+// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
 // ==========================================================================
 const tacticDogamData = [
+    // [신규 전법 등재] 간담상조 ㄱ열 최상단 배치
+    { id: 't_gandam', name: '간담상조', type: '지휘 (100%)', target: '적군 전체, 아군 2팀', desc: '매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을(를) 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음).' },
     { id: 't_gajeong', name: '가정지전', type: '추격 (35%)', target: '적군 1팀', desc: '일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다.' },
     { id: 't_gajeong_t', name: '강유겸제', type: '지휘 (50%)', target: '아군 전체', desc: '턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고, 아군 중 무용이 가장 높은 목표가 받는 모략 피해를 17%, 모략이 가장 높은 목표가 받는 무용 피해를 17% 감소시킵니다(턴 종료시까지 지속).' },
     { id: 't_gyeonbul', name: '견불가최', type: '패시브 (100%)', target: '자신', desc: '자신이 받는 피해가 35% 감소합니다. 해제 불가. 일반 공격을 받은 후 35%의 확률로 아군 목표 1명의 디버프 상태를 1종류 해제합니다.' },
@@ -34,10 +36,7 @@ const tacticDogamData = [
     { id: 't_sasaeng', name: '사생취의', type: '패시브 (100%)', target: '자신', desc: '내가 받는 피해가 10% 상승하고 가하는 피해가 45% 상승하며 해제 불가입니다.' },
     { id: 't_seondeung', name: '선등함진', type: '능동 (50%)', target: '적군 전체', desc: '적 전체에게 100%의 무용 피해를 입히고, 35%의 확률로 겁전 부여, 1턴 지속합니다. 각 목표별 확률은 독립적으로 계산됩니다.' },
     { id: 't_susang', name: '수상개화', type: '패시브 (100%)', target: '자신', desc: '무장 고유의 능동 전법 발동 확률이 12% 증가하며 해제 불가합니다. 매 턴 시작 시, 자신이 가하는 피해가 12% 증가하며, 최대 4회 중첩되고 해제 불가합니다.' },
-    
-    // [신규 추가] 승승장구 데이터베이스 등재[cite: 4]
     { id: 't_seungseung', name: '승승장구', type: '능동 (50%)', target: '자신, 적군 2팀', desc: '자신에게 용맹 및 신속을 부여하며 2턴 간 지속됩니다. 적군 대상 2명에게 140% 무용 피해를 입히며, 만약 속도가 대상보다 높을 경우 피해 계수가 40% 상승합니다.' },
-    
     { id: 't_sunsu', name: '순수견양', type: '능동 (50%)', target: '적군 2팀, 아군 2팀', desc: '2턴 동안 적군 2명이 가하는 피해를 15% 감소(모략의 영향을 받음)시키고, 50% 확률로 무장 해제를 부여하여 1턴간 지속시킵니다. 이후 아군 2명의 병력을 회복시킵니다(치료율 90%, 모략의 영향을 받음).' },
     { id: 't_simmo', name: '심모원려', type: '추격 (50%)', target: '자신, 적군 1팀', desc: '일반 공격 후 자신의 모략 피해가 5% 상승하며 최대 4중첩, 해제 불가이며 일반 공격 대상에게 240% 모략 피해 가합니다.' },
     { id: 't_anyoung', name: '안영찰채', type: '지휘 (100%)', target: '적군 2팀, 아군 전체', desc: '매 턴 시작 시 70% 확률로 아군 전체의 병력을 회복시키고(치료율 80%, 모략의 영향 받음), 아군 전체가 행동하기 전 받는 피해를 20% 감소시킵니다(대상의 모략이 무용보다 높을 경우 계수 30% 상승). 이후 30% 확률(모략의 영향 받음)로 적군 전열에 피곤을 부여합니다(턴 종료 시까지 지속).' }, 
@@ -154,7 +153,6 @@ function renderTacticDogamUI() {
         container = document.createElement('div');
         container.id = 'tactic-dogam-wrapper';
         
-        // [해결 조치] 컨테이너에 강제 폭 확장 스타일(important) 주입
         container.style.setProperty('width', '100%', 'important');
         container.style.setProperty('flex', '1 1 100%', 'important');
         container.style.setProperty('align-self', 'stretch', 'important');
@@ -163,7 +161,6 @@ function renderTacticDogamUI() {
         container.style.padding = '10px 0';
         
         if (nativeContainer) {
-            // [해결 조치] 상위 부모 요소의 Flex 압축 현상 타파
             nativeContainer.style.setProperty('width', '100%', 'important');
             nativeContainer.style.setProperty('flex', '1 1 100%', 'important');
             nativeContainer.style.setProperty('align-self', 'stretch', 'important');
