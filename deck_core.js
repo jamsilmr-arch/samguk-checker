@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 보유 전법 오배치(Misplaced Tactic) 및 역시너지 실시간 감지 엔진
+// [시스템 분석] deck_core.js - '지력 상승' 표기 100% 소멸 및 '모략 상승' 표준 규격 정밀 통합 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 동적 마스터 바인딩
@@ -16,13 +16,49 @@ for(let [k,v] of Object.entries(OFFICER_MASTER)){ internalMasterOfficerUniqueTac
 
 const internalMasterTacticNames = ["가정지전","간담상조","강유겸제","견불가최","견진연봉","공기불비","과하탁교","교취호탈","극적제승","금낭묘계","금적금왕","금창신","금철교명","기문둔갑","낙정하석","동구적개","동장철벽","동촉기선","만부막적","만전제발","만천과해","문치무공","미우주무","반객위주","병량촌단","분성지계","비사주석","사면초가","사생취의","선등함진","수상개화","순수견양","승승장구","심모원려","안영찰채","암전난방","양의화생","양초선행","여자동포","요사여신","용맹무쌍","용왕직전","운주유악","원성재도","위위구조","유좌유용","이간계","이아환아","이일대로","이퇴위진","일고작기","인세이도","전위위안","제곤부위","중정기고","지인선임","진퇴유도","진화타겁","질풍노도","천리추격","천시지리","체천행도","축세대발","축호과간","태청단경","토적격문","현호제세","호령삼군","혼수모어","홍수첨향","화소적벽","횡소천군","횡징폭렴","휴양생식"].sort((a,b)=>a.localeCompare(b,'ko'));
 
+// [로직 교정] SUPPORT_STR 프로필 내 '지력 상승'을 '모략 상승'으로 100% 표준 규격화
 const EQ_PRESETS = {
     PHYS_CARRY: ["호분관","무용 상승","액티브 피해 가함","명광갑","무용 상승","무용 피해 가함","치룡패","회심률 상승","무용 피해 가함"],
     PHYS_COMBO: ["백옥잠","연격률 상승","강공, 기습 상승","세린갑","무용 상승","무용 피해 가함","쌍호뉴","연격률 상승","UNIT_DMG_RED"],
     STR_CARRY:  ["진현관","모략 상승","액티브 피해 가함","명재복","모략 상승","모략 피해 가함","박산로","신산률 상승","모략 피해 가함"],
     TANK_COUNTER:["연함규","통솔 상승","반격 피해 가함","청등갑","통솔 상승","피해 감소","사남패","반격 피해 가함","UNIT_DMG_RED"],
     SUPPORT_HEAL:["연함규","통솔 상승","치유 효과 상승","청등갑","피해 감소","치유 효과 받음","사남패","치유 효과 상승","UNIT_DMG_RED"],
-    SUPPORT_STR: ["진현관","지력 상승","치유 효과 상승","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 상승","UNIT_DMG_RED"]
+    SUPPORT_STR: ["진현관","모략 상승","치유 효과 상승","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 상승","UNIT_DMG_RED"]
+};
+
+// [로직 교정] 가후, 제갈량, 좌자, 우길, 육항, 노숙 등 6인 개별 매핑의 '지력 상승' 전면 '모략 상승' 교체
+const internalMasterEquipmentMap = {
+    "마초": { helmet: { name: "백옥잠", attr1: "연격률 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "무용 상승", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률 상승", attr2: "창병 피해 감소" } },
+    "위연": { helmet: { name: "호분관", attr1: "무용 상승", attr2: "액티브 피해 가함" }, armor: { name: "명광갑", attr1: "무용 상승", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "회심률 상승", attr2: "무용 피해 가함" } },
+    "서서": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "장료": { helmet: { name: "백옥잠", attr1: "연격률 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "속도 상승", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률 상승", attr2: "파갑 상승" } },
+    "조조(제왕)": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "피해 감소" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "조조": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "장합": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "피해 감소" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "하후돈": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "반격 피해 가함" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "피해 감소" }, accessory: { name: "사남패", attr1: "반격 피해 가함", attr2: "방패병 피해 감소" } },
+    "악진": { helmet: { name: "호분관", attr1: "무용 상승", attr2: "액티브 피해 가함" }, armor: { name: "명광갑", attr1: "무용 상승", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "회심률 상승", attr2: "무용 피해 가함" } },
+    "전위": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "반격 피해 가함" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "피해 감소" }, accessory: { name: "사남패", attr1: "반격 피해 가함", attr2: "방패병 피해 감소" } },
+    "정욱": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "사마의": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "신산률 상승" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "하후연": { helmet: { name: "백옥잠", attr1: "연격률 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "속도 상승", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "파갑 상승" } },
+    "가후": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "피해 감소" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "모략 상승", attr2: "방패병 피해 감소" } },
+    "동탁": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "반격 피해 가함" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+    "원소": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "무용 피해 가함" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "피해 감소" }, accessory: { name: "사남패", attr1: "통솔 상승", attr2: "방패병 피해 감소" } },
+    "여포": { helmet: { name: "백옥잠", attr1: "연격률 상승", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "무용 상승", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률 상승", attr2: "파갑 상승" } },
+    "제갈량": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "피해 감소" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "치유 효과 상승" }, accessory: { name: "박산로", attr1: "모략 상승", attr2: "궁병 피해 감소" } },
+    "황충": { helmet: { name: "호분관", attr1: "무용 상승", attr2: "회심률 상승" }, armor: { name: "명광갑", attr1: "무용 상승", attr2: "회심 피해 상승" }, accessory: { name: "치룡패", attr1: "회심률 상승", attr2: "무용 피해 가함" } },
+    "강유": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "좌자": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "창병 피해 감소" } },
+    "장녕": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "우길": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "피해 감소" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "모략 상승", attr2: "치유 효과 상승" } },
+    "손권": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "손권(제왕)": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "액티브 피해 가함" }, armor: { name: "명재복", attr1: "모략 상승", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "신산률 상승", attr2: "모략 피해 가함" } },
+    "육항": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "궁병 피해 감소" } },
+    "노숙": { helmet: { name: "진현관", attr1: "모략 상승", attr2: "치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 상승", attr2: "궁병 피해 감소" } },
+    "유비(제왕)": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 상승", attr2: "방패병 피해 감소" } },
+    "유비": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 상승", attr2: "방패병 피해 감소" } },
+    "관우": { helmet: { name: "호분관", attr1: "무용 상승", attr2: "액티브 피해 가함" }, armor: { name: "명광갑", attr1: "무용 상승", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "회심률 상승", attr2: "무용 피해 가함" } },
+    "장비": { helmet: { name: "연함규", attr1: "통솔 상승", attr2: "반격 피해 가함" }, armor: { name: "청등갑", attr1: "통솔 상승", attr2: "피해 감소" }, accessory: { name: "사남패", attr1: "반격 피해 가함", attr2: "방패병 피해 감소" } }
 };
 
 const tacticAlternativesMap = {"간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조"],"횡징폭렴":["간담상조","동구적개","동장철벽"],"동장철벽":["간담상조","견불가최","천시지리","동구적개"],"전위위안":["간담상조","태청단경","현호제세","제곤부위"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["간담상조","태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"안영찰채":["간담상조","위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"],"이아환아":["금철교명","동장철벽"],"제곤부위":["태청단경","현호제세"],"금낭묘계":["만천과해","태청단경"]};
@@ -167,27 +203,31 @@ function buildIntegratedStatsHtml(stats) {
 // LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 검증 엔진
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
+    const cleanMissing = missingName.toString().trim().replace(/\s+/g, '');
     const isMissingTac = tacticalSet.has(missingName), isMissingSup = supportSet.has(missingName);
     const missingFaction = officerFactionMap[missingName] || "", missingUnits = (internalMasterOfficerUnitMap[missingName] || "").split("/");
 
     let candidates = [];
-    Object.keys(heroDataMap).forEach(hName => {
-        if (!heroDataMap[hName]?.isOwned || curNames.includes(hName) || hName === missingName) return;
+    Object.keys(heroDataMap).forEach(cleanCand => {
+        if (!heroDataMap[cleanCand]?.isOwned || curNames.some(cn => cn.replace(/\s+/g, '') === cleanCand) || cleanCand === cleanMissing) return;
+        const originName = internalMasterOfficerNames.find(n => n.replace(/\s+/g, '') === cleanCand) || cleanCand;
         let score = 0;
-        const isTac = tacticalSet.has(hName), isSup = supportSet.has(hName), faction = officerFactionMap[hName] || "", units = (internalMasterOfficerUnitMap[hName] || "").split("/");
+        const isTac = tacticalSet.has(originName), isSup = supportSet.has(originName), faction = officerFactionMap[originName] || "", units = (internalMasterOfficerUnitMap[originName] || "").split("/");
         if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) score += 5;
         if (missingFaction && faction === missingFaction) score += 3;
         if (deckUnitType && units.includes(deckUnitType)) score += 4; else if (missingUnits.some(u => units.includes(u))) score += 2;
-        if (score > 0) candidates.push({ name: hName, score: score });
+        if (score > 0) candidates.push({ name: originName, score: score });
     });
     candidates.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ko'));
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
+    const cleanMissing = missingTacName.toString().trim().replace(/\s+/g, '');
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
-        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
+        const cleanT = t.toString().trim().replace(/\s+/g, '');
+        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
     }
     const targetStats = internalTacticStatMap[missingTacName];
     if (targetStats) {
@@ -195,14 +235,15 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         const isAttack = targetKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k));
         const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
 
-        for (let tName of Object.keys(tacticDataMap)) {
-            if (!tacticDataMap[tName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || tName === missingTacName) continue;
-            const candStats = internalTacticStatMap[tName]; if (!candStats) continue;
+        for (let cleanTName of Object.keys(tacticDataMap)) {
+            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.some(et => et.replace(/\s+/g, '') === cleanTName) || recommendedTacs.has(cleanTName) || cleanTName === cleanMissing) continue;
+            const originTName = internalMasterTacticNames.find(n => n.replace(/\s+/g, '') === cleanTName) || cleanTName;
+            const candStats = internalTacticStatMap[originTName]; if (!candStats) continue;
             const candKeys = Object.keys(candStats);
             if ((isAttack && !candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k))) || 
                 (isSupport && !candKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k)))) continue;
 
-            if (targetKeys.some(k => candStats[k] !== undefined)) { recommendedTacs.add(tName); return tName; }
+            if (targetKeys.some(k => candStats[k] !== undefined)) { recommendedTacs.add(originTName); return originTName; }
         }
     }
     return null;
@@ -254,7 +295,6 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-// [로직 개편] 보유 전법 오배치(Misplaced Tactic) 및 역시너지 실시간 감지 엔진
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean) || [];
@@ -263,8 +303,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     if (!match || match.maxScore === 0) {
         if(curNames.length) fb.logs.push({ type: 'info', text: `💡 <strong>[커스텀 덱]</strong> 코어 장수를 기반으로 재설계해 보십시오.` });
         deck?.officers?.forEach((off, idx) => {
-            const hName = off?.name?.toString().trim() || "";
-            const cleanH = hName.replace(/\s+/g, '');
+            const hName = off?.name?.toString().trim() || "", cleanH = hName.replace(/\s+/g, '');
             if (hName && !heroDataMap[cleanH]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}] 미보유` });
             off?.chosenTactics?.forEach((t, i) => { 
                 const cleanT = t?.toString().trim().replace(/\s+/g, '') || "";
@@ -327,7 +366,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                     const isAlt = targetMetaTacs.some(mTac => (tacticAlternativesMap[mTac] || []).map(x => x.replace(/\s+/g, '')).includes(cT));
 
                     if (!isMeta && !isAlt) {
-                        // [오배치 판독 방벽 가동] 보유 전법이라도 메타/대체가 아니면 오배치(역시너지)로 강제 규정
                         const pTac = unmatchTac.length > 0 ? unmatchTac.shift() : targetMetaTacs[i] || "정석 전법";
                         const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
                         const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
@@ -488,6 +526,7 @@ window.moveDeckAction = (cIdx, dir) => {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 };
 
+// [로직 교정] 불리언 이중 부정(!!) 및 공백 제거 정밀 대조를 통한 오탐 방지
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container'); if (!container) return;
     try {
