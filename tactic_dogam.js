@@ -1,10 +1,9 @@
-// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 렌더링 엔진 기동
+// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 및 공백 무시 매핑 엔진
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
 // ==========================================================================
 const tacticDogamData = [
-    // [신규 전법 등재] 간담상조 ㄱ열 최상단 배치
     { id: 't_gandam', name: '간담상조', type: '지휘 (100%)', target: '적군 전체, 아군 2팀', desc: '매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을(를) 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음).' },
     { id: 't_gajeong', name: '가정지전', type: '추격 (35%)', target: '적군 1팀', desc: '일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다.' },
     { id: 't_gajeong_t', name: '강유겸제', type: '지휘 (50%)', target: '아군 전체', desc: '턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고, 아군 중 무용이 가장 높은 목표가 받는 모략 피해를 17%, 모략이 가장 높은 목표가 받는 무용 피해를 17% 감소시킵니다(턴 종료시까지 지속).' },
@@ -93,6 +92,7 @@ window.getAllTacticsFromDogam = function() {
 // ==========================================================================
 let currentTacticState = [];
 
+// [로직 교정] 공백 무시 절대 매핑 및 불리언 이중 부정(!!) 적용
 function loadTacticData() {
     const defaultNames = tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
     let savedTactics = [];
@@ -110,8 +110,9 @@ function loadTacticData() {
     }
 
     currentTacticState = defaultNames.map(name => {
-        const found = savedTactics.find(t => t.name === name);
-        const originData = tacticDogamData.find(t => t.name === name);
+        const cleanName = name.toString().trim().replace(/\s+/g, '');
+        const found = savedTactics.find(t => t && t.name && t.name.toString().trim().replace(/\s+/g, '') === cleanName);
+        const originData = tacticDogamData.find(t => t.name.toString().trim().replace(/\s+/g, '') === cleanName);
         return {
             name: name,
             desc: originData ? originData.desc : "전법 설명 누락",
@@ -137,7 +138,8 @@ function saveTacticData() {
 }
 
 function toggleTacticOwnership(tacticName) {
-    const target = currentTacticState.find(t => t.name === tacticName);
+    const cleanName = tacticName.toString().trim().replace(/\s+/g, '');
+    const target = currentTacticState.find(t => t.name.toString().trim().replace(/\s+/g, '') === cleanName);
     if (target) {
         target.isOwned = !target.isOwned;
         saveTacticData();
