@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 불리언 오타 정상화 및 공백 무시 절대 매핑 엔진 탑재
+// [시스템 분석] deck_core.js - 보유 전법 오배치(Misplaced Tactic) 및 역시너지 실시간 감지 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 동적 마스터 바인딩
@@ -166,16 +166,13 @@ function buildIntegratedStatsHtml(stats) {
 // ==========================================================================
 // LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 검증 엔진
 // ==========================================================================
-// [로직 교정] 공백 무시 절대 일치 조회 적용
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
-    const cleanMissing = missingName.toString().trim().replace(/\s+/g, '');
     const isMissingTac = tacticalSet.has(missingName), isMissingSup = supportSet.has(missingName);
     const missingFaction = officerFactionMap[missingName] || "", missingUnits = (internalMasterOfficerUnitMap[missingName] || "").split("/");
 
     let candidates = [];
     Object.keys(heroDataMap).forEach(hName => {
-        const cleanCand = hName.toString().trim().replace(/\s+/g, '');
-        if (!heroDataMap[cleanCand]?.isOwned || curNames.includes(hName) || cleanCand === cleanMissing) return;
+        if (!heroDataMap[hName]?.isOwned || curNames.includes(hName) || hName === missingName) return;
         let score = 0;
         const isTac = tacticalSet.has(hName), isSup = supportSet.has(hName), faction = officerFactionMap[hName] || "", units = (internalMasterOfficerUnitMap[hName] || "").split("/");
         if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) score += 5;
@@ -187,13 +184,10 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// [로직 교정] 공백 무시 절대 일치 조회 적용
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
-    const cleanMissing = missingTacName.toString().trim().replace(/\s+/g, '');
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
-        const cleanT = t.toString().trim().replace(/\s+/g, '');
-        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
+        if (tacticDataMap[t]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
     }
     const targetStats = internalTacticStatMap[missingTacName];
     if (targetStats) {
@@ -202,8 +196,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
 
         for (let tName of Object.keys(tacticDataMap)) {
-            const cleanTName = tName.toString().trim().replace(/\s+/g, '');
-            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || cleanTName === cleanMissing) continue;
+            if (!tacticDataMap[tName]?.isOwned || allEquipTacs.includes(tName) || recommendedTacs.has(tName) || tName === missingTacName) continue;
             const candStats = internalTacticStatMap[tName]; if (!candStats) continue;
             const candKeys = Object.keys(candStats);
             if ((isAttack && !candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k))) || 
@@ -261,6 +254,7 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
+// [로직 개편] 보유 전법 오배치(Misplaced Tactic) 및 역시너지 실시간 감지 엔진
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean) || [];
@@ -303,7 +297,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             return;
         }
         
-        // [로직 교정] 공백 제거 후 판독하여 오탐 100% 방지
         if (!heroDataMap[cleanHName]?.isOwned) {
             const altHero = getOwnedAlternativeOfficer(hName, curNames, heroDataMap, deck.unitType);
             const recText = altHero ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${altHero}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
@@ -313,22 +306,38 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
         const metaIdx = meta.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
         if (metaIdx !== -1) {
             if ((formationPositions[curFmt]?.[offIdx] || "front") !== (formationPositions[meta.formation]?.[metaIdx] || "front")) fb.logs.push({ type: 'warning', text: `배치 오류: [${hName}] 위치 교정 요망` });
+            
             const mTacs = meta.officers[metaIdx].chosenTactics;
-            let unmatchTac = (mTacs.length===3 ? mTacs.slice(1,3) : mTacs).map(t=>t.replace(/\s+/g,'')).filter(t => !allEquipTacs.includes(t));
+            const targetMetaTacs = mTacs.length === 3 ? mTacs.slice(1, 3) : mTacs;
+            let unmatchTac = targetMetaTacs.map(t => t.trim().replace(/\s+/g, '')).filter(t => !allEquipTacs.includes(t));
             
             (off.chosenTactics || []).forEach((t, i) => {
                 const cT = t?.toString().trim().replace(/\s+/g, '') || "";
-                if (!cT && unmatchTac.length) {
-                    const pTac = unmatchTac.shift();
-                    const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
-                    const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
-                    fb.logs.push({ type: 'warning', text: `[${hName}] ${i+2}슬롯: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
-                } else if (cT) {
-                    // [로직 교정] 공백 제거 후 판독하여 오탐 100% 방지
-                    if (!tacticDataMap[cT]?.isOwned) {
-                        const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs);
-                        const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
-                        fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
+                const slotNum = i + 2;
+
+                if (!cT) {
+                    if (unmatchTac.length > 0) {
+                        const pTac = unmatchTac.shift();
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
+                        const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                        fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
+                    }
+                } else {
+                    const isMeta = targetMetaTacs.map(x => x.replace(/\s+/g, '')).includes(cT);
+                    const isAlt = targetMetaTacs.some(mTac => (tacticAlternativesMap[mTac] || []).map(x => x.replace(/\s+/g, '')).includes(cT));
+
+                    if (!isMeta && !isAlt) {
+                        // [오배치 판독 방벽 가동] 보유 전법이라도 메타/대체가 아니면 오배치(역시너지)로 강제 규정
+                        const pTac = unmatchTac.length > 0 ? unmatchTac.shift() : targetMetaTacs[i] || "정석 전법";
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
+                        const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                        fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 오배치: <span style="color:#f87171; text-decoration:line-through;">[${t}]</span> (역시너지) ➔ 권장: [${pTac}] (또는 대체 ${altsText})` });
+                    } else {
+                        if (!tacticDataMap[cT]?.isOwned) {
+                            const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs);
+                            const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                            fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
+                        }
                     }
                 }
             });
@@ -479,7 +488,6 @@ window.moveDeckAction = (cIdx, dir) => {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 };
 
-// [로직 교정] 공백 무시 절대 일치 매핑 및 불리언 이중 부정(!!) 적용
 function renderDeckBuilder() {
     const container = document.getElementById('deck-container'); if (!container) return;
     try {
