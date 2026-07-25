@@ -1,7 +1,7 @@
-// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 및 고속 이벤트 위임 종결 엔진
+console.log("[시스템 분석] tactic_dogam.js 고속 해시 맵 렌더러 및 스타일 위임 엔진 기동");
 
 // ==========================================================================
-// LAYER 1: 전법 마스터 데이터베이스 구역
+// LAYER 1: 전법 마스터 데이터베이스 구역 (70여 종 전체 데이터 보존)
 // ==========================================================================
 const tacticDogamData = [
     { id: 't_gandam', name: '간담상조', type: '지휘 (100%)', target: '적군 전체, 아군 2팀', desc: '매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을(를) 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음).' },
@@ -80,18 +80,37 @@ const tacticDogamData = [
     { id: 't_huyang', name: '휴양생식', type: '능동 (35%)', target: '아군 2팀', desc: '아군 2개 대상의 병력을 회복(치료율 165%, 모략 영향)하고 해당 대상에게 통찰을 부여하며 1턴 지속합니다.' }
 ];
 
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
+const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+
+// [경량화] 인라인 스타일 철거 및 동적 CSS 클래스 단일 주입 엔진
+const injectTacticStyles = () => {
+    if (document.getElementById('tactic-dogam-custom-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'tactic-dogam-custom-styles';
+    style.innerHTML = `
+        .tactic-card-item { background-color: #111; border: 1px solid #2d2d2d; border-top: 5px solid #7b2cb0; border-radius: 6px; padding: 15px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: flex-start; box-sizing: border-box; min-height: 130px; opacity: 0.4; filter: grayscale(100%); }
+        .tactic-card-item.owned { background-color: #1c1c1c; border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.15); opacity: 1; filter: grayscale(0%); }
+        .tactic-card-item .t-name { font-size: 18px; font-weight: bold; color: #888; margin-bottom: 8px; letter-spacing: 1px; }
+        .tactic-card-item.owned .t-name { color: #fff; }
+        .tactic-card-item .t-meta { font-size: 11px; margin-bottom: 8px; color: #bbb; }
+        .tactic-card-item .t-desc { background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 10px; font-size: 11px; color: #ddd; text-align: left; line-height: 1.5; word-break: keep-all; margin-top: auto; }
+        .tactic-card-item .t-badge { position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: #333; color: #777; font-weight: bold; }
+        .tactic-card-item.owned .t-badge { background-color: #a855f7; color: #fff; }
+    `;
+    document.head.appendChild(style);
+};
+
 // ==========================================================================
-// LAYER 2: API 브릿지 개방 구역 (이름 목록 및 상세 데이터 직접 조회 브릿지 신설)
+// LAYER 2: API 브릿지 개방 구역 (이름 목록 및 상세 데이터 직접 조회 브릿지)
 // ==========================================================================
 window.getAllTacticsFromDogam = function() {
     return tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
-// [신설] deck_core.js의 모달 팝업 엔진이 DOM 스크래핑 없이 정확한 전법 정보를 즉시 참조하는 API
 window.getTacticDataFromDogam = function(tacticName) {
     if (!tacticName) return null;
-    const cleanName = tacticName.toString().trim().replace(/\s+/g, '');
-    return tacticDogamData.find(t => t && t.name && t.name.toString().trim().replace(/\s+/g, '') === cleanName) || null;
+    return tacticDogamData.find(t => cStr(t?.name) === cStr(tacticName)) || null;
 };
 
 // ==========================================================================
@@ -107,7 +126,7 @@ function loadTacticData() {
         const rawData = localStorage.getItem('samguk_hobby_data');
         if (rawData) {
             const parsed = JSON.parse(rawData);
-            if (parsed && Array.isArray(parsed.tactics)) {
+            if (parsed?.tactics && Array.isArray(parsed.tactics)) {
                 savedTactics = parsed.tactics;
             }
         }
@@ -115,17 +134,28 @@ function loadTacticData() {
         console.error("전법 도감 데이터 로드 실패:", e);
     }
 
+    // [경량화] O(N^2) 탐색 부하를 O(1) 해시 맵으로 압축
+    const tMap = savedTactics.reduce((acc, st) => {
+        if (st?.name) acc[cStr(st.name)] = st;
+        return acc;
+    }, {});
+
+    const originMap = tacticDogamData.reduce((acc, ot) => {
+        if (ot?.name) acc[cStr(ot.name)] = ot;
+        return acc;
+    }, {});
+
     currentTacticState = defaultNames.map(name => {
-        const cleanName = name.toString().trim().replace(/\s+/g, '');
-        const found = savedTactics.find(t => t && t.name && t.name.toString().trim().replace(/\s+/g, '') === cleanName);
-        const originData = tacticDogamData.find(t => t.name.toString().trim().replace(/\s+/g, '') === cleanName);
+        const cleanName = cStr(name);
+        const found = tMap[cleanName];
+        const originData = originMap[cleanName];
         return {
             name: name,
             desc: originData ? originData.desc : "전법 설명 누락",
             type: originData ? originData.type : "-",
             target: originData ? originData.target : "-",
             isOwned: found ? !!found.isOwned : false,
-            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star) : 0
+            star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star, 10) : 0
         };
     });
 }
@@ -144,8 +174,8 @@ function saveTacticData() {
 }
 
 function toggleTacticOwnership(tacticName) {
-    const cleanName = tacticName.toString().trim().replace(/\s+/g, '');
-    const target = currentTacticState.find(t => t.name.toString().trim().replace(/\s+/g, '') === cleanName);
+    const cleanName = cStr(tacticName);
+    const target = currentTacticState.find(t => cStr(t.name) === cleanName);
     if (target) {
         target.isOwned = !target.isOwned;
         saveTacticData();
@@ -160,19 +190,10 @@ function renderTacticDogamUI() {
     if (!container) {
         container = document.createElement('div');
         container.id = 'tactic-dogam-wrapper';
-        
-        container.style.setProperty('width', '100%', 'important');
-        container.style.setProperty('flex', '1 1 100%', 'important');
-        container.style.setProperty('align-self', 'stretch', 'important');
-        container.style.setProperty('display', 'block', 'important');
-        container.style.boxSizing = 'border-box';
-        container.style.padding = '10px 0';
+        container.style.cssText = 'width: 100%; flex: 1 1 100%; align-self: stretch; display: block; box-sizing: border-box; padding: 10px 0;';
         
         if (nativeContainer) {
-            nativeContainer.style.setProperty('width', '100%', 'important');
-            nativeContainer.style.setProperty('flex', '1 1 100%', 'important');
-            nativeContainer.style.setProperty('align-self', 'stretch', 'important');
-            nativeContainer.style.setProperty('display', 'block', 'important');
+            nativeContainer.style.cssText = 'width: 100%; flex: 1 1 100%; align-self: stretch; display: block;';
             nativeContainer.appendChild(container);
         } else {
             document.body.appendChild(container);
@@ -190,7 +211,7 @@ function renderTacticDogamUI() {
     renderTacticGrid();
 }
 
-// [경량화] DOM 노드 생성 반복문 제거 및 map().join('') 고속 체이닝 렌더러 적용
+// [경량화] 인라인 스타일 소거 및 map().join('') 고속 체이닝 렌더러 적용
 // [이벤트 위임] 개별 카드 리스너 대신 #tactic-card-grid 단일 이벤트 위임 적용
 function renderTacticGrid() {
     const gridContainer = document.getElementById('tactic-card-grid');
@@ -205,33 +226,13 @@ function renderTacticGrid() {
     }
 
     gridContainer.innerHTML = currentTacticState.map(tactic => `
-        <div class="tactic-card-item" data-tactic-name="${tactic.name}" style="
-            background-color: ${tactic.isOwned ? '#1c1c1c' : '#111'};
-            border: 1px solid ${tactic.isOwned ? '#a855f7' : '#2d2d2d'};
-            border-top: 5px solid #7b2cb0;
-            border-radius: 6px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            box-sizing: border-box;
-            min-height: 130px;
-            box-shadow: ${tactic.isOwned ? '0 0 12px rgba(168, 85, 247, 0.15)' : 'none'};
-            ${!tactic.isOwned ? 'opacity: 0.4; filter: grayscale(100%);' : ''}
-        ">
-            <div style="font-size: 18px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'}; margin-bottom: 8px; letter-spacing: 1px;">${tactic.name}</div>
-            <div style="font-size: 11px; margin-bottom: 8px; color: #bbb;">
+        <div class="tactic-card-item ${tactic.isOwned ? 'owned' : ''}" data-tactic-name="${tactic.name}">
+            <div class="t-name">${tactic.name}</div>
+            <div class="t-meta">
                 <span style="color: #feca57; font-weight: bold;">역할:</span> ${tactic.type} &nbsp;|&nbsp; <span style="color: #feca57; font-weight: bold;">대상:</span> ${tactic.target}
             </div>
-            <div style="background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 10px; font-size: 11px; color: #ddd; text-align: left; line-height: 1.5; word-break: keep-all; margin-top: auto;">
-                ${tactic.desc}
-            </div>
-            <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${tactic.isOwned ? '#a855f7' : '#333'}; color: ${tactic.isOwned ? '#fff' : '#777'}; font-weight: bold;">
-                ${tactic.isOwned ? '보유' : '미보유'}
-            </div>
+            <div class="t-desc">${tactic.desc}</div>
+            <div class="t-badge">${tactic.isOwned ? '보유' : '미보유'}</div>
         </div>
     `).join('');
 
@@ -245,9 +246,11 @@ function renderTacticGrid() {
     };
 }
 
+// [동기화] setTimeout 지연 철거 및 DOMContentLoaded 동기식 즉시 결선
 function initTacticDogamEngine() {
+    injectTacticStyles();
     loadTacticData();
-    setTimeout(renderTacticDogamUI, 100);
+    renderTacticDogamUI();
 }
 
 if (document.readyState === 'loading') {
