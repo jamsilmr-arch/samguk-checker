@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 공백 무시 절대 매핑 엔진
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 고속 체이닝 경량화 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -80,7 +80,7 @@ const tacticList = [
     { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geum창', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false, star: 0 },
@@ -145,69 +145,56 @@ const tacticList = [
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
 ];
 
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
+const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+
+// [경량화] 인라인 스타일을 소거하기 위한 동적 스타일시트 주입
+const injectAppStyles = () => {
+    if (document.getElementById('app-custom-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'app-custom-styles';
+    style.innerHTML = `
+        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; }
+        .card-btn .card-name { font-weight: bold; pointer-events: none; font-size: 13px; }
+        .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
+        .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: rgba(255,255,255,0.1); color: #888888; border: 1px solid #444444; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
+        .card-btn .trans-btn.active { background: #00b0ff; color: #ffffff; border-color: #00b0ff; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(0,176,255,0.4); }
+    `;
+    document.head.appendChild(style);
+};
+
 // ==========================================================================
 // LAYER 2: 비즈니스 렌더링 및 보유 상향 체크 다이렉트 컨트롤러
 // ==========================================================================
+// [경량화] map().join('') 고속 체이닝 렌더러 (구식 createElement 루프 철거)
 function renderButtons() {
-    const containers = {
-        wei: document.getElementById('hero-container-wei'),
-        shu: document.getElementById('hero-container-shu'),
-        wu: document.getElementById('hero-container-wu'),
-        qun: document.getElementById('hero-container-qun')
+    const buildCardHtml = (item, isHero) => {
+        const isTrans = isHero && !!item.transcend;
+        const selectHtml = item.isOwned ? `
+            <select onclick="event.stopPropagation();" onchange="window.updateStar(event, '${item.id}', '${isHero ? 'hero' : 'tactic'}', this.value)">
+                ${[0, 1, 2, 3, 4, 5].map(s => `<option value="${s}" ${item.star === s ? 'selected' : ''}>${s}성</option>`).join('')}
+            </select>` : '';
+        const transHtml = (item.isOwned && isHero) ? `
+            <button onclick="event.stopPropagation(); window.toggleTranscend(event, '${item.id}')" class="trans-btn ${isTrans ? 'active' : ''}">
+                초월
+            </button>` : '';
+        
+        return `
+            <div id="${item.id}" class="card-btn ${item.group} ${item.isOwned ? 'owned' : ''}" onclick="window.toggleState('${item.id}', '${isHero ? 'hero' : 'tactic'}')">
+                <span class="card-name">${item.name}</span>
+                ${selectHtml}
+                ${transHtml}
+            </div>`;
     };
-    const tacticContainer = document.getElementById('tactic-container');
 
-    Object.keys(containers).forEach(key => {
-        if (containers[key]) containers[key].innerHTML = '';
+    const heroGroups = { wei: 'hero-container-wei', shu: 'hero-container-shu', wu: 'hero-container-wu', qun: 'hero-container-qun' };
+    Object.entries(heroGroups).forEach(([group, containerId]) => {
+        const el = document.getElementById(containerId);
+        if (el) el.innerHTML = heroList.filter(h => h.group === group).map(h => buildCardHtml(h, true)).join('');
     });
-    if (tacticContainer) tacticContainer.innerHTML = '';
 
-    const createCard = (item, type, container) => {
-        const cardNode = document.createElement('div');
-        cardNode.id = item.id;
-        cardNode.className = `card-btn ${item.group} ${item.isOwned ? 'owned' : ''}`;
-        cardNode.style.display = 'flex';
-        cardNode.style.flexDirection = 'column';
-        cardNode.style.alignItems = 'center';
-        cardNode.style.justifyContent = 'center';
-        cardNode.style.gap = '5px';
-        cardNode.style.minHeight = '55px'; 
-        cardNode.style.cursor = 'pointer';
-        cardNode.style.padding = '6px 4px';
-        cardNode.style.boxSizing = 'border-box';
-        
-        cardNode.onclick = function() { toggleState(item.id, type); };
-
-        let innerHtml = `<span style="font-weight: bold; pointer-events: none; font-size: 13px;">${item.name}</span>`;
-        
-        if (item.isOwned) {
-            innerHtml += `
-                <select onclick="event.stopPropagation();" onchange="updateStar(event, '${item.id}', '${type}', this.value)" style="width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center;">
-                    <option value="0" ${item.star === 0 ? 'selected' : ''}>0성</option>
-                    <option value="1" ${item.star === 1 ? 'selected' : ''}>1성</option>
-                    <option value="2" ${item.star === 2 ? 'selected' : ''}>2성</option>
-                    <option value="3" ${item.star === 3 ? 'selected' : ''}>3성</option>
-                    <option value="4" ${item.star === 4 ? 'selected' : ''}>4성</option>
-                    <option value="5" ${item.star === 5 ? 'selected' : ''}>5성</option>
-                </select>
-            `;
-            
-            if (type === 'hero') {
-                const isTrans = !!item.transcend;
-                innerHtml += `
-                    <button onclick="event.stopPropagation(); window.toggleTranscend(event, '${item.id}')" style="width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: ${isTrans ? '#00b0ff' : 'rgba(255,255,255,0.1)'}; color: ${isTrans ? '#ffffff' : '#888888'}; border: 1px solid ${isTrans ? '#00b0ff' : '#444444'}; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; text-shadow: ${isTrans ? '0 0 3px rgba(0,0,0,0.5)' : 'none'}; box-shadow: ${isTrans ? '0 0 5px rgba(0,176,255,0.4)' : 'none'}; transition: all 0.15s ease;">
-                        ${isTrans ? '초월' : '초월'}
-                    </button>
-                `;
-            }
-        }
-        
-        cardNode.innerHTML = innerHtml;
-        if (container) container.appendChild(cardNode);
-    };
-
-    heroList.forEach(hero => createCard(hero, 'hero', containers[hero.group]));
-    tacticList.forEach(tactic => createCard(tactic, 'tactic', tacticContainer));
+    const tacticEl = document.getElementById('tactic-container');
+    if (tacticEl) tacticEl.innerHTML = tacticList.map(t => buildCardHtml(t, false)).join('');
 }
 
 function toggleState(id, type) {
@@ -224,7 +211,7 @@ window.updateStar = function(event, id, type, value) {
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
     if (target) {
-        target.star = parseInt(value);
+        target.star = parseInt(value, 10);
     }
 };
 
@@ -243,33 +230,37 @@ function saveData() {
     alert('체크 현황이 안전하게 저장되었습니다.');
 }
 
-// [로직 교정] 공백 무시 절대 일치 매핑 및 불리언 이중 부정(!!) 적용
+// [로직 교정] cStr 고속 정규화 및 옵셔널 체이닝 방어 엔진 적용
 function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
         if (!saved) return;
         
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.heroes && Array.isArray(parsed.heroes)) {
-            parsed.heroes.forEach(sh => {
-                if (!sh || !sh.name) return;
-                const cleanName = sh.name.toString().trim().replace(/\s+/g, '');
-                const h = heroList.find(x => x.name.trim().replace(/\s+/g, '') === cleanName);
-                if (h) {
+        if (parsed?.heroes && Array.isArray(parsed.heroes)) {
+            const hMap = parsed.heroes.reduce((acc, sh) => {
+                if (sh?.name) acc[cStr(sh.name)] = sh;
+                return acc;
+            }, {});
+            heroList.forEach(h => {
+                const sh = hMap[cStr(h.name)];
+                if (sh) {
                     h.isOwned = !!sh.isOwned;
-                    h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star) : 0;
-                    h.transcend = !!sh.transcend; 
+                    h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0;
+                    h.transcend = !!sh.transcend;
                 }
             });
         }
-        if (parsed && parsed.tactics && Array.isArray(parsed.tactics)) {
-            parsed.tactics.forEach(st => {
-                if (!st || !st.name) return;
-                const cleanName = st.name.toString().trim().replace(/\s+/g, '');
-                const t = tacticList.find(x => x.name.trim().replace(/\s+/g, '') === cleanName);
-                if (t) {
+        if (parsed?.tactics && Array.isArray(parsed.tactics)) {
+            const tMap = parsed.tactics.reduce((acc, st) => {
+                if (st?.name) acc[cStr(st.name)] = st;
+                return acc;
+            }, {});
+            tacticList.forEach(t => {
+                const st = tMap[cStr(t.name)];
+                if (st) {
                     t.isOwned = !!st.isOwned;
-                    t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star) : 0;
+                    t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0;
                 }
             });
         }
@@ -279,22 +270,22 @@ function loadSavedData() {
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진
+// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진 (ES6+ 모던화)
 // ==========================================================================
 function exportData() {
     try {
         const liveHobbyData = { heroes: heroList, tactics: tacticList };
-        var deckData = localStorage.getItem('samguk_deck_text');
+        const deckData = localStorage.getItem('samguk_deck_text');
         
-        var backupObject = {
+        const backupObject = {
             samguk_hobby_data: liveHobbyData,
             samguk_deck_text: deckData ? JSON.parse(deckData) : null
         };
         
-        var jsonString = JSON.stringify(backupObject, null, 2);
-        var blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+        const jsonString = JSON.stringify(backupObject, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
         
-        var downloadAnchor = document.createElement('a');
+        const downloadAnchor = document.createElement('a');
         downloadAnchor.href = URL.createObjectURL(blob);
         downloadAnchor.download = "samguk_wangjeon_database_backup.json";
         
@@ -309,33 +300,31 @@ function exportData() {
 }
 
 function triggerImport() {
-    var fileInput = document.getElementById('import-file-input');
-    if (fileInput) {
-        fileInput.click();
-    }
+    const fileInput = document.getElementById('import-file-input');
+    if (fileInput) fileInput.click();
 }
 
 function importData(input) {
-    var file = input.files[0];
+    const file = input.files[0];
     if (!file) return;
     
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            var importedDatabase = JSON.parse(e.target.result);
+            const importedDatabase = JSON.parse(e.target.result);
             
             if (!importedDatabase.samguk_hobby_data && !importedDatabase.samguk_deck_text) {
                 alert("삼국지 왕전의 정식 백업 스냅샷 파일이 아닙니다.");
                 return;
             }
             
-            if (importedDatabase.samguk_hobby_data && importedDatabase.samguk_hobby_data.heroes) {
+            if (importedDatabase?.samguk_hobby_data?.heroes) {
                 importedDatabase.samguk_hobby_data.heroes.forEach(h => {
                     if (h && h.transcend === undefined) h.transcend = false;
                     if (h && h.star === undefined) h.star = 0;
                 });
             }
-            if (importedDatabase.samguk_hobby_data && importedDatabase.samguk_hobby_data.tactics) {
+            if (importedDatabase?.samguk_hobby_data?.tactics) {
                 importedDatabase.samguk_hobby_data.tactics.forEach(t => {
                     if (t && t.star === undefined) t.star = 0;
                 });
@@ -358,7 +347,7 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
-window.toggleSortMode = function() {};
+window.toggleSortMode = () => {};
 window.toggleState = toggleState;
 window.saveData = saveData;
 window.exportData = exportData;
@@ -366,6 +355,7 @@ window.triggerImport = triggerImport;
 window.importData = importData;
 
 function initAppEngine() {
+    injectAppStyles();
     loadSavedData();
     renderButtons();
 }
