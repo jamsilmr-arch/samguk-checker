@@ -1,219 +1,366 @@
-console.log("[시스템 분석] dogam.js 추천 장비 및 종결 전법 1·2차 속성 전수 주입 엔진 기동");
+console.log("[시스템 분석] dogam.js 장비·전법 통합 마스터 데이터베이스 및 고속 해시 렌더러 기동");
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼 (TDZ 호이스팅 방지를 위해 최상단 선언)
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
-// LAYER 1: 무장 마스터 데이터베이스 (55명 전체 병종 데이터 100% 보존)
+// LAYER 1: 무장 통합 마스터 데이터베이스 (55명 스탯, 병종, 추천 장비, 종결 전법 100% 엠베딩)
 // ==========================================================================
 const heroDogamData = [
     // 위나라 (13명)
-    { id: 'h_gahu', name: '가후', group: 'wei', role: '능동 (65%)', location: '후열', skill: '경달권변', skillDesc: '적군 단체에 혼란 효과를 부여하고 모략 피해를 가합니다.', stats: { martial: 437, tactical: 634, command: 503, speed: 469 }, unit: '궁병/방패병' },
-    { id: 'h_gwa_ga', name: '곽가', group: 'wei', role: '능동 (50%)', location: '후열', skill: '산무유책', skillDesc: '적군 전체에 모략 피해를 가하고 가하는 피해를 감소시킵니다.', stats: { martial: 378, tactical: 634, command: 539, speed: 362 }, unit: '궁병/방패병' },
-    { id: 'h_samy', name: '사마의', group: 'wei', role: '능동 (60%)', location: '후열', skill: '응시낭고', skillDesc: '턴이 진행될수록 가하는 모략 피해가 점진적으로 폭발 상승합니다.', stats: { martial: 414, tactical: 664, command: 652, speed: 332 }, unit: '방패병/궁병' },
-    { id: 'h_sunuk', name: '순욱', group: 'wei', role: '능동 (50%)', location: '후열', skill: '거중지중', skillDesc: '아군 전체가 받는 피해를 상시 억제하고 병력을 지속 회복시킵니다.', stats: { martial: 408, tactical: 646, command: 467, speed: 374 }, unit: '궁병/창병' },
-    { id: 'h_akjin', name: '악진', group: 'wei', role: '능동 (70%)', location: '전열', skill: '분용당선', skillDesc: '적군 전열에 강력한 무용 피해를 가하고 자신에게 허약을 부여합니다.', stats: { martial: 568, tactical: 461, command: 586, speed: 618 }, unit: '창병/궁병' },
-    { id: 'h_jeonwi', name: '전위', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '축호과간', skillDesc: '아군 주장이 일반 공격을 받을 시 대신 매서운 반격을 가합니다.', stats: { martial: 658, tactical: 402, command: 598, speed: 367 }, unit: '창병/방패병' },
-    { id: 'h_jeonguk', name: '정욱', group: 'wei', role: '추격 (50%)', location: '후열', skill: '십면매복', skillDesc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해를 입립니다.', stats: { martial: 402, tactical: 592, command: 503, speed: 487 }, unit: '방패병/궁병' },
-    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '군령여산', skillDesc: '아군 전체의 가하는 피해를 통솔에 비례하여 영구 증폭시킵니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '창병/방패병' },
-    { id: 'h_jojo', name: '조조', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '효웅', skillDesc: '부대 내 아군이 가하는 모든 피해의 일정 비율을 흡수하여 치료합니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '방패병/기병' },
-    { id: 'h_jangryo', name: '장료', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '함진살적', skillDesc: '자신의 일반 공격이 적군 주장을 정밀 저격하도록 타겟을 고정합니다.', stats: { martial: 622, tactical: 467, command: 586, speed: 612 }, unit: '창병/기병' },
-    { id: 'h_janghap', name: '장합', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '교변병기', skillDesc: '전투 시작 시 아군 전체의 전법 발동 확률을 유의미하게 끌어올립니다.', stats: { martial: 580, tactical: 426, command: 592, speed: 463 }, unit: '방패병/창병' },
-    { id: 'h_hahoudon', name: '하후돈', group: 'wei', role: '패시브 (50%)', location: '전열', skill: '발시담정', skillDesc: '피해를 입을 때마다 일정 확률로 적군 전체에 즉각 반격을 가합니다.', stats: { martial: 604, tactical: 396, command: 622, speed: 427 }, unit: '창병/방패병' },
-    { id: 'h_hahouyeon', name: '하후연', group: 'wei', role: '능동 (50%)', location: '후열', skill: '충용', skillDesc: '적군 전체에 무용 피해를 입히고 확률적으로 제어 불가를 부여합니다.', stats: { martial: 592, tactical: 408, command: 562, speed: 641 }, unit: '창병/기병' },
+    { 
+        id: 'h_gahu', name: '가후', group: 'wei', role: '능동 (65%)', location: '후열', skill: '경달권변', 
+        skillDesc: '적군 단체에 혼란 효과를 부여하고 모략 피해를 가합니다.', stats: { martial: 437, tactical: 634, command: 503, speed: 469 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["혼수모어", "위위구조"]
+    },
+    { 
+        id: 'h_gwa_ga', name: '곽가', group: 'wei', role: '능동 (50%)', location: '후열', skill: '산무유책', 
+        skillDesc: '적군 전체에 모략 피해를 가하고 가하는 피해를 감소시킵니다.', stats: { martial: 378, tactical: 634, command: 539, speed: 362 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "강유겸제"]
+    },
+    { 
+        id: 'h_samy', name: '사마의', group: 'wei', role: '능동 (60%)', location: '후열', skill: '응시낭고', 
+        skillDesc: '턴이 진행될수록 가하는 모략 피해가 점진적으로 폭발 상승합니다.', stats: { martial: 414, tactical: 664, command: 652, speed: 332 }, unit: '방패병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["수상개화", "화소적벽"]
+    },
+    { 
+        id: 'h_sunuk', name: '순욱', group: 'wei', role: '능동 (50%)', location: '후열', skill: '거중지중', 
+        skillDesc: '아군 전체가 받는 피해를 상시 억제하고 병력을 지속 회복시킵니다.', stats: { martial: 408, tactical: 646, command: 467, speed: 374 }, unit: '궁병/창병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "강유겸제"]
+    },
+    { 
+        id: 'h_akjin', name: '악진', group: 'wei', role: '능동 (70%)', location: '전열', skill: '분용당선', 
+        skillDesc: '적군 전열에 강력한 무용 피해를 가하고 자신에게 허약을 부여합니다.', stats: { martial: 568, tactical: 461, command: 586, speed: 618 }, unit: '창병/궁병',
+        equip: { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "기병 피해 감소" } },
+        tactics: ["기문둔갑", "선등함진"]
+    },
+    { 
+        id: 'h_jeonwi', name: '전위', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '축호과간', 
+        skillDesc: '아군 주장이 일반 공격을 받을 시 대신 매서운 반격을 가합니다.', stats: { martial: 658, tactical: 402, command: 598, speed: 367 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+        tactics: ["이아환아", "동장철벽"]
+    },
+    { 
+        id: 'h_jeonguk', name: '정욱', group: 'wei', role: '추격 (50%)', location: '후열', skill: '십면매복', 
+        skillDesc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해를 입립니다.', stats: { martial: 402, tactical: 592, command: 503, speed: 487 }, unit: '방패병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["사면초가", "심모원려"]
+    },
+    { 
+        id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '군령여산', 
+        skillDesc: '아군 전체의 가하는 피해를 통솔에 비례하여 영구 증폭시킵니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+        tactics: ["이퇴위진", "혼수모어"]
+    },
+    { 
+        id: 'h_jojo', name: '조조', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '효웅', 
+        skillDesc: '부대 내 아군이 가하는 모든 피해의 일정 비율을 흡수하여 치료합니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '방패병/기병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "강유겸제"]
+    },
+    { 
+        id: 'h_jangryo', name: '장료', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '함진살적', 
+        skillDesc: '자신의 일반 공격이 적군 주장을 정밀 저격하도록 타겟을 고정합니다.', stats: { martial: 622, tactical: 467, command: 586, speed: 612 }, unit: '창병/기병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
+        tactics: ["만전제발", "사면초가"]
+    },
+    { 
+        id: 'h_janghap', name: '장합', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '교변병기', 
+        skillDesc: '전투 시작 시 아군 전체의 전법 발동 확률을 유의미하게 끌어올립니다.', stats: { martial: 580, tactical: 426, command: 592, speed: 463 }, unit: '방패병/창병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "강유겸제"]
+    },
+    { 
+        id: 'h_hahoudon', name: '하후돈', group: 'wei', role: '패시브 (50%)', location: '전열', skill: '발시담정', 
+        skillDesc: '피해를 입을 때마다 일정 확률로 적군 전체에 즉각 반격을 가합니다.', stats: { martial: 604, tactical: 396, command: 622, speed: 427 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["이아환아", "동장철벽"]
+    },
+    { 
+        id: 'h_hahouyeon', name: '하후연', group: 'wei', role: '능동 (50%)', location: '후열', skill: '충용', 
+        skillDesc: '적군 전체에 무용 피해를 입히고 확률적으로 제어 불가를 부여합니다.', stats: { martial: 592, tactical: 408, command: 562, speed: 641 }, unit: '창병/기병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
+        tactics: ["일고작기", "암전난방"]
+    },
 
     // 촉나라 (14명)
-    { id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', skillDesc: '1턴 준비 후 적군 전체에 치명적인 무용 피해를 가하고 무장 해제를 겁니다.', stats: { martial: 658, tactical: 503, command: 628, speed: 558 }, unit: '창병/기병' },
-    { id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', skillDesc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.', stats: { martial: 556, tactical: 622, command: 574, speed: 475 }, unit: '방패병/기병' },
-    { id: 'h_madae', name: '마대', group: 'shu', role: '능동 (35%)', location: '전열', skill: '습참', skillDesc: '적군 단체에 피해를 입히고 가하는 피해량을 일정 비율 차단합니다.', stats: { martial: 485, tactical: 485, command: 568, speed: 552 }, unit: '창병/방패병' },
-    { id: 'h_macho', name: '마초', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '출수법', skillDesc: '자신의 일반 공격 피해를 주위 적들에게 확산 전이시킵니다.', stats: { martial: 646, tactical: 414, command: 539, speed: 564 }, unit: '창병/기병' },
-    { id: 'h_seoseo', name: '서서', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '절절학문', skillDesc: '아군이 능동 전법을 발동할 때마다 아군 전체의 공격력을 증폭합니다.', stats: { martial: 545, tactical: 598, command: 503, speed: 570 }, unit: '창병/궁병' },
-    { id: 'h_samaga', name: '사마가', group: 'shu', role: '추격 (35%)', location: '전열', skill: '만왕', skillDesc: '일반 공격 후 대상을 변칙적인 공황 및 약화 상태로 빠뜨립니다.', stats: { martial: 556, tactical: 372, command: 461, speed: 487 }, unit: '창병/방패병' },
-    { id: 'h_wuyeon', name: '위연', group: 'shu', role: '패시브 (70%)', location: '전열', skill: '실병제위', skillDesc: '준비 턴이 필요한 능동 전법의 대기 시간을 확률적으로 즉시 삭제합니다.', stats: { martial: 604, tactical: 503, command: 622, speed: 362 }, unit: '창병/궁병' },
-    { id: 'h_yubi', name: '유비', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '인정', skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.', stats: { martial: 509, tactical: 568, command: 652, speed: 368 }, unit: '창병/기병' },
-    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.', stats: { martial: 509, tactical: 568, command: 652, speed: 368 }, unit: '창병/방패병' },
-    { id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.', stats: { martial: 652, tactical: 414, command: 545, speed: 487 }, unit: '창병/방패병' },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.', stats: { martial: 402, tactical: 681, command: 634, speed: 362 }, unit: '궁병/방패병' },
-    { id: 'h_joun', name: '조운', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '칠진칠출', skillDesc: '자신에게 상시 영구 통찰 상태를 부여하고 모든 고유 스탯을 폭증시킵니다.', stats: { martial: 658, tactical: 473, command: 622, speed: 487 }, unit: '창병/방패병' },
-    { id: 'h_hwangchung', name: '황충', group: 'shu', role: '패시브 (100%)', location: '후열', skill: '적혈도', skillDesc: '자신의 전법 크리티컬(회심) 확률을 상시 임계점 이상으로 유지합니다.', stats: { martial: 622, tactical: 503, command: 521, speed: 481 }, unit: '창병/방패병' },
-    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.', stats: { martial: 432, tactical: 628, command: 521, speed: 522 }, unit: '궁병/방패병' },
+    { 
+        id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', 
+        skillDesc: '1턴 준비 후 적군 전체에 치명적인 무용 피해를 가하고 무장 해제를 겁니다.', stats: { martial: 658, tactical: 503, command: 628, speed: 558 }, unit: '창병/기병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["만전제발", "선등함진"]
+    },
+    { 
+        id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', 
+        skillDesc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.', stats: { martial: 556, tactical: 622, command: 574, speed: 475 }, unit: '방패병/기병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["천리추격", "반객위주"]
+    },
+    { 
+        id: 'h_madae', name: '마대', group: 'shu', role: '능동 (35%)', location: '전열', skill: '습참', 
+        skillDesc: '적군 단체에 피해를 입히고 가하는 피해량을 일정 비율 차단합니다.', stats: { martial: 485, tactical: 485, command: 568, speed: 552 }, unit: '창병/방패병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["일고작기", "만전제발"]
+    },
+    { 
+        id: 'h_macho', name: '마초', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '출수법', 
+        skillDesc: '자신의 일반 공격 피해를 주위 적들에게 확산 전이시킵니다.', stats: { martial: 646, tactical: 414, command: 539, speed: 564 }, unit: '창병/기병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["용맹무쌍", "만전제발"]
+    },
+    { 
+        id: 'h_seoseo', name: '서서', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '절절학문', 
+        skillDesc: '아군이 능동 전법을 발동할 때마다 아군 전체의 공격력을 증폭합니다.', stats: { martial: 545, tactical: 598, command: 503, speed: 570 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" } },
+        tactics: ["문치무공", "전위위안"]
+    },
+    { 
+        id: 'h_samaga', name: '사마가', group: 'shu', role: '추격 (35%)', location: '전열', skill: '만왕', 
+        skillDesc: '일반 공격 후 대상을 변칙적인 공황 및 약화 상태로 빠뜨립니다.', stats: { martial: 556, tactical: 372, command: 461, speed: 487 }, unit: '창병/방패병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
+        tactics: ["만전제발", "용왕직전"]
+    },
+    { 
+        id: 'h_wuyeon', name: '위연', group: 'shu', role: '패시브 (70%)', location: '전열', skill: '실병제위', 
+        skillDesc: '준비 턴이 필요한 능동 전법의 대기 시간을 확률적으로 즉시 삭제합니다.', stats: { martial: 604, tactical: 503, command: 622, speed: 362 }, unit: '창병/궁병',
+        equip: { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
+        tactics: ["이아환아", "홍수첨향"]
+    },
+    { 
+        id: 'h_yubi', name: '유비', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '인정', 
+        skillDesc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.', stats: { martial: 509, tactical: 568, command: 652, speed: 368 }, unit: '창병/기병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+        tactics: ["혼수모어", "이퇴위진"]
+    },
+    { 
+        id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '재주복주', 
+        skillDesc: '부대 전체의 방어력을 극대화하고 치명적인 디버프를 아군 대신 상쇄합니다.', stats: { martial: 509, tactical: 568, command: 652, speed: 368 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "금낭묘계"]
+    },
+    { 
+        id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', 
+        skillDesc: '2, 4턴 시작 시 적군 전체의 방어 스탯을 붕괴시키고 공포를 겁니다.', stats: { martial: 652, tactical: 414, command: 545, speed: 487 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+        tactics: ["제곤부위", "이아환아"]
+    },
+    { 
+        id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', 
+        skillDesc: '적군이 능동 전법을 시도할 시 높은 확률로 차단하고 역피해를 줍니다.', stats: { martial: 402, tactical: 681, command: 634, speed: 362 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["간담상조", "여자동포"]
+    },
+    { 
+        id: 'h_joun', name: '조운', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '칠진칠출', 
+        skillDesc: '자신에게 상시 영구 통찰 상태를 부여하고 모든 고유 스탯을 폭증시킵니다.', stats: { martial: 658, tactical: 473, command: 622, speed: 487 }, unit: '창병/방패병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["이아환아", "횡징폭렴"]
+    },
+    { 
+        id: 'h_hwangchung', name: '황충', group: 'shu', role: '패시브 (100%)', location: '후열', skill: '적혈도', 
+        skillDesc: '자신의 전법 크리티컬(회심) 확률을 상시 임계점 이상으로 유지합니다.', stats: { martial: 622, tactical: 503, command: 521, speed: 481 }, unit: '창병/방패병',
+        equip: { helmet: { name: "호분관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["축세대발", "인세이도"]
+    },
+    { 
+        id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', 
+        skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.', stats: { martial: 432, tactical: 628, command: 521, speed: 522 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "혼수모어"]
+    },
 
     // 오나라 (15명)
-    { id: 'h_daegyo', name: '대교', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '정수유심', skillDesc: '아군 전체가 받는 피해의 일부를 적 시전자에게 즉각 반사 유도합니다.', stats: { martial: 372, tactical: 562, command: 562, speed: 368 }, unit: '창병/궁병' },
-    { id: 'h_nosuk', name: '노숙', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '탑상책', skillDesc: '자신의 속성 절반을 아군에게 양도하고 병력이 낮은 아군을 집중 보호합니다.', stats: { martial: 443, tactical: 580, command: 515, speed: 528 }, unit: '궁병/기병' },
-    { id: 'h_sogyo', name: '소교', group: 'wu', role: '능동 (70%)', location: '후열', skill: '화용욕모', skillDesc: '적군 단체의 방어선을 완전 해제하고 아군의 전법 발동률을 보정합니다.', stats: { martial: 437, tactical: 568, command: 539, speed: 552 }, unit: '궁병/기병' },
-    { id: 'h_songyeon', name: '손견', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '강동맹호', skillDesc: '적군 전체에 도발을 시전하여 모든 일반 공격을 자신에게 강제 집중시킵니다.', stats: { martial: 568, tactical: 414, command: 658, speed: 427 }, unit: '창병/방패병' },
-    { id: 'h_songwon', name: '손권', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '웅거', skillDesc: '아군이 일반 공격을 행할 때마다 자신에게 연격, 통찰 등의 영웅 버프를 중첩합니다.', stats: { martial: 568, tactical: 568, command: 598, speed: 528 }, unit: '궁병/기병' },
-    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', role: '능동 (50%)', location: '후열', skill: '효희', skillDesc: '자신에게 걸린 버프 개수에 비례하여 무용 타격 횟수와 화력이 증가합니다.', stats: { martial: 574, tactical: 408, command: 539, speed: 558 }, unit: '궁병/기병' },
-    { id: 'h_sonchaek', name: '손책', group: 'wu', role: '능동 (50%)', location: '전열', skill: '강동패주', skillDesc: '일반 공격 시 확률적으로 파괴적인 연타 피해를 입히고 병력을 흡혈합니다.', stats: { martial: 616, tactical: 437, command: 634, speed: 546 }, unit: '창병/방패병' },
-    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '겸권상계', skillDesc: '오나라 진영 무장들과 결선 시 아군 전체의 전술 스탯을 최대치로 개방합니다.', stats: { martial: 568, tactical: 568, command: 598, speed: 528 }, unit: '창병/궁병' },
-    { id: 'h_yeomong', name: '여몽', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '백의도강', skillDesc: '전투 첫 턴에 아군 전체에 도피를 부여하고 무용/모략 차단 제어를 독립 연산합니다.', stats: { martial: 527, tactical: 568, command: 556, speed: 534 }, unit: '방패병/궁병' },
-    { id: 'h_yukson', name: '육손', group: 'wu', role: '추격 (50%)', location: '후열', skill: '지변규려', skillDesc: '일반 공격 후 대상에게 화상을 입히고 이미 화상 상태면 폭발 확산 피해를 줍니다.', stats: { martial: 443, tactical: 658, command: 592, speed: 368 }, unit: '창병/기병' },
-    { id: 'h_yukhang', name: '육항', group: 'wu', role: '능동 (60%)', location: '후열', skill: '청백충근', skillDesc: '아군 주장의 모략 크리티컬 확률을 증폭하고 피해를 대신 숄더링합니다.', stats: { martial: 509, tactical: 628, command: 574, speed: 439 }, unit: '창병/궁병' },
-    { id: 'h_juyu', name: '주유', group: 'wu', role: '패시브 (80%)', location: '후열', skill: '봉화연천', skillDesc: '자신이 신산 버프를 획득할 때마다 적 전체에 광역 신성 모략 불화살을 투하합니다.', stats: { martial: 443, tactical: 646, command: 580, speed: 403 }, unit: '창병/궁병' },
-    { id: 'h_jutae', name: '주태', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '청라산개', skillDesc: '아군 주장이 입는 치명상을 대신 유기적으로 흡수하고 주장의 공격력을 높입니다.', stats: { martial: 562, tactical: 479, command: 622, speed: 481 }, unit: '기병/방패병' },
-    { id: 'h_jeongbo', name: '정보', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '칠척사모', skillDesc: '피해를 입으면 자신에게 걸린 디버프를 세척하고 적 전체 중 1명에게 공포를 부여합니다.', stats: { martial: 503, tactical: 503, command: 610, speed: 433 }, unit: '기병/방패병' },
-    { id: 'h_hwanggae', name: '황개', group: 'wu', role: '능동 (50%)', location: '전열', skill: '요원지화', skillDesc: '자신의 병력을 일정량 소모하여 적군 전체에 확정적 강한 화상 피해를 가합니다.', stats: { martial: 497, tactical: 491, command: 652, speed: 481 }, unit: '방패병/궁병' },
+    { 
+        id: 'h_daegyo', name: '대교', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '정수유심', 
+        skillDesc: '아군 전체가 받는 피해의 일부를 적 시전자에게 즉각 반사 유도합니다.', stats: { martial: 372, tactical: 562, command: 562, speed: 368 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "동장철벽"]
+    },
+    { 
+        id: 'h_nosuk', name: '노숙', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '탑상책', 
+        skillDesc: '자신의 속성 절반을 아군에게 양도하고 병력이 낮은 아군을 집중 보호합니다.', stats: { martial: 443, tactical: 580, command: 515, speed: 528 }, unit: '궁병/기병',
+        equip: { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["분성지계", "여자동포"]
+    },
+    { 
+        id: 'h_sogyo', name: '소교', group: 'wu', role: '능동 (70%)', location: '후열', skill: '화용욕모', 
+        skillDesc: '적군 단체의 방어선을 완전 해제하고 아군의 전법 발동률을 보정합니다.', stats: { martial: 437, tactical: 568, command: 539, speed: 552 }, unit: '궁병/기병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "위위구조"]
+    },
+    { 
+        id: 'h_songyeon', name: '손견', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '강동맹호', 
+        skillDesc: '적군 전체에 도발을 시전하여 모든 일반 공격을 자신에게 강제 집중시킵니다.', stats: { martial: 568, tactical: 414, command: 658, speed: 427 }, unit: '창병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승" } },
+        tactics: ["이아환아", "동장철벽"]
+    },
+    { 
+        id: 'h_songwon', name: '손권', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '웅거', 
+        skillDesc: '아군이 일반 공격을 행할 때마다 자신에게 연격, 통찰 등의 영웅 버프를 중첩합니다.', stats: { martial: 568, tactical: 568, command: 598, speed: 528 }, unit: '궁병/기병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["일고작기", "용왕직전"]
+    },
+    { 
+        id: 'h_sonsanghyang', name: '손상향', group: 'wu', role: '능동 (50%)', location: '후열', skill: '효희', 
+        skillDesc: '자신에게 걸린 버프 개수에 비례하여 무용 타격 횟수와 화력이 증가합니다.', stats: { martial: 574, tactical: 408, command: 539, speed: 558 }, unit: '궁병/기병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "무용 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["일고작기", "천리추격"]
+    },
+    { 
+        id: 'h_sonchaek', name: '손책', group: 'wu', role: '능동 (50%)', location: '전열', skill: '강동패주', 
+        skillDesc: '일반 공격 시 확률적으로 파괴적인 연타 피해를 입히고 병력을 흡혈합니다.', stats: { martial: 616, tactical: 437, command: 634, speed: 546 }, unit: '창병/방패병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["용맹무쌍", "일고작기"]
+    },
+    { 
+        id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', role: '지휘 (100%)', location: '후열', skill: '겸권상계', 
+        skillDesc: '오나라 진영 무장들과 결선 시 아군 전체의 전술 스탯을 최대치로 개방합니다.', stats: { martial: 568, tactical: 568, command: 598, speed: 528 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["이퇴위진", "강유겸제"]
+    },
+    { 
+        id: 'h_yeomong', name: '여몽', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '백의도강', 
+        skillDesc: '전투 첫 턴에 아군 전체에 도피를 부여하고 무용/모략 차단 제어를 독립 연산합니다.', stats: { martial: 527, tactical: 568, command: 556, speed: 534 }, unit: '방패병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" } },
+        tactics: ["화소적벽", "기문둔갑"]
+    },
+    { 
+        id: 'h_yukson', name: '육손', group: 'wu', role: '추격 (50%)', location: '후열', skill: '지변규려', 
+        skillDesc: '일반 공격 후 대상에게 화상을 입히고 이미 화상 상태면 폭발 확산 피해를 줍니다.', stats: { martial: 443, tactical: 658, command: 592, speed: 368 }, unit: '창병/기병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["화소적벽", "사면초가"]
+    },
+    { 
+        id: 'h_yukhang', name: '육항', group: 'wu', role: '능동 (60%)', location: '후열', skill: '청백충근', 
+        skillDesc: '아군 주장의 모략 크리티컬 확률을 증폭하고 피해를 대신 숄더링합니다.', stats: { martial: 509, tactical: 628, command: 574, speed: 439 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "위위구조"]
+    },
+    { 
+        id: 'h_juyu', name: '주유', group: 'wu', role: '패시브 (80%)', location: '후열', skill: '봉화연천', 
+        skillDesc: '자신이 신산 버프를 획득할 때마다 적 전체에 광역 신성 모략 불화살을 투하합니다.', stats: { martial: 443, tactical: 646, command: 580, speed: 403 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["화소적벽", "요사여신"]
+    },
+    { 
+        id: 'h_jutae', name: '주태', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '청라산개', 
+        skillDesc: '아군 주장이 입는 치명상을 대신 유기적으로 흡수하고 주장의 공격력을 높입니다.', stats: { martial: 562, tactical: 479, command: 622, speed: 481 }, unit: '기병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+        tactics: ["이아환아", "동장철벽"]
+    },
+    { 
+        id: 'h_jeongbo', name: '정보', group: 'wu', role: '지휘 (100%)', location: '전열', skill: '칠척사모', 
+        skillDesc: '피해를 입으면 자신에게 걸린 디버프를 세척하고 적 전체 중 1명에게 공포를 부여합니다.', stats: { martial: 503, tactical: 503, command: 610, speed: 433 }, unit: '기병/방패병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "동구적개"]
+    },
+    { 
+        id: 'h_hwanggae', name: '황개', group: 'wu', role: '능동 (50%)', location: '전열', skill: '요원지화', 
+        skillDesc: '자신의 병력을 일정량 소모하여 적군 전체에 확정적 강한 화상 피해를 가합니다.', stats: { martial: 497, tactical: 491, command: 652, speed: 481 }, unit: '방패병/궁병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 피해 감소" } },
+        tactics: ["화소적벽", "횡소천군"]
+    },
 
     // 군진영 (13명)
-    { id: 'h_gongsonchan', name: '공손찬', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '위진새북', skillDesc: '턴 시작 시 확률적으로 무용과 속도를 증폭하고 액티브 타격 후 속도 비례 확산 피해를 입힙니다.', stats: { martial: 604, tactical: 527, command: 592, speed: 582 }, unit: '기병/창병' },
-    { id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', skillDesc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.', stats: { martial: 556, tactical: 491, command: 646, speed: 481 }, unit: '방패병/기병' },
-    { id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.', stats: { martial: 598, tactical: 384, command: 515, speed: 534 }, unit: '창병/기병' },
-    { id: 'h_yeopo', name: '여포', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '천하무쌍', skillDesc: '일반 공격 시 높은 확률로 대상과 3회 연속 확정 일기토 평타 연격을 주고받습니다.', stats: { martial: 675, tactical: 378, command: 556, speed: 546 }, unit: '궁병/기병' },
-    { id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.', stats: { martial: 443, tactical: 592, command: 527, speed: 516 }, unit: '창병/궁병' },
-    { id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.', stats: { martial: 515, tactical: 521, command: 634, speed: 493 }, unit: '방패병/기병' },
-    { id: 'h_janggak', name: '장각', group: 'qun', role: '능동 (50%)', location: '후열', skill: '황천당립', skillDesc: '1턴 준비 후 적 전체에 강력한 천벌 벼락 모략 타격을 5회 연쇄적으로 내리꽂습니다.', stats: { martial: 473, tactical: 610, command: 616, speed: 368 }, unit: '궁병/기병' },
-    { id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.', stats: { martial: 461, tactical: 598, command: 556, speed: 457 }, unit: '궁병/방패병' },
-    { id: 'h_jangbo', name: '장보', group: 'qun', role: '능동 (50%)', location: '후열', skill: '요풍사기', skillDesc: '적 전체에 강한 모래바람 결계를 치고 아군 전체에게 장벽 수치를 중첩 부여합니다.', stats: { martial: 414, tactical: 562, command: 551, speed: 433 }, unit: '궁병/방패병' },
-    { id: 'h_jwaja', name: '좌자', group: 'qun', role: '패시브 (100%)', location: '후열', skill: '화겁생기', skillDesc: '부대 아군 전체에게 상시 신기루 도피 버프를 부여하여 전법 및 평타 회피율을 극대화합니다.', stats: { martial: 437, tactical: 658, command: 497, speed: 403 }, unit: '궁병/방패병' },
-    { id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.', stats: { martial: 372, tactical: 598, command: 509, speed: 558 }, unit: '궁병/기병' },
-    { id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.', stats: { martial: 372, tactical: 592, command: 556, speed: 433 }, unit: '창병/기병' },
-    { id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.', stats: { martial: 372, tactical: 598, command: 432, speed: 362 }, unit: '궁병/방패병' }
+    { 
+        id: 'h_gongsonchan', name: '공손찬', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '위진새북', 
+        skillDesc: '턴 시작 시 확률적으로 무용과 속도를 증폭하고 액티브 타격 후 속도 비례 확산 피해를 입힙니다.', stats: { martial: 604, tactical: 527, command: 592, speed: 582 }, unit: '기병/창병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["극적제승", "암전난방"]
+    },
+    { 
+        id: 'h_dongtak', name: '동탁', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '전권난정', 
+        skillDesc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.', stats: { martial: 556, tactical: 491, command: 646, speed: 481 }, unit: '방패병/기병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+        tactics: ["횡징폭렴", "운주유악"]
+    },
+    { 
+        id: 'h_anryang', name: '안량', group: 'qun', role: '능동 (50%)', location: '전열', skill: '효장', 
+        skillDesc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.', stats: { martial: 598, tactical: 384, command: 515, speed: 534 }, unit: '창병/기병',
+        equip: { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+        tactics: ["만전제발", "용왕직전"]
+    },
+    { 
+        id: 'h_yeopo', name: '여포', group: 'qun', role: '패시브 (100%)', location: '전열', skill: '천하무쌍', 
+        skillDesc: '일반 공격 시 높은 확률로 대상과 3회 연속 확정 일기토 평타 연격을 주고받습니다.', stats: { martial: 675, tactical: 378, command: 556, speed: 546 }, unit: '궁병/기병',
+        equip: { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["만부막적", "용왕직전"]
+    },
+    { 
+        id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', 
+        skillDesc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.', stats: { martial: 443, tactical: 592, command: 527, speed: 516 }, unit: '창병/궁병',
+        equip: { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
+        tactics: ["사면초가", "심모원려"]
+    },
+    { 
+        id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', 
+        skillDesc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.', stats: { martial: 515, tactical: 521, command: 634, speed: 493 }, unit: '방패병/기병',
+        equip: { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "위위구조"]
+    },
+    { 
+        id: 'h_janggak', name: '장각', group: 'qun', role: '능동 (50%)', location: '후열', skill: '황천당립', 
+        skillDesc: '1턴 준비 후 적 전체에 강력한 천벌 벼락 모략 타격을 5회 연쇄적으로 내리꽂습니다.', stats: { martial: 473, tactical: 610, command: 616, speed: 368 }, unit: '궁병/기병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
+        tactics: ["사면초가", "화소적벽"]
+    },
+    { 
+        id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', 
+        skillDesc: '적군의 속성을 흡수하여 아군에게 공유하고 모략 피해를 줍니다.', stats: { martial: 461, tactical: 598, command: 556, speed: 457 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
+        tactics: ["사면초가", "기문둔갑"]
+    },
+    { 
+        id: 'h_jangbo', name: '장보', group: 'qun', role: '능동 (50%)', location: '후열', skill: '요풍사기', 
+        skillDesc: '적 전체에 강한 모래바람 결계를 치고 아군 전체에게 장벽 수치를 중첩 부여합니다.', stats: { martial: 414, tactical: 562, command: 551, speed: 433 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+        tactics: ["화소적벽", "요사여신"]
+    },
+    { 
+        id: 'h_jwaja', name: '좌자', group: 'qun', role: '패시브 (100%)', location: '후열', skill: '화겁생기', 
+        skillDesc: '부대 아군 전체에게 상시 신기루 도피 버프를 부여하여 전법 및 평타 회피율을 극대화합니다.', stats: { martial: 437, tactical: 658, command: 497, speed: 403 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" } },
+        tactics: ["간담상조", "혼수모어"]
+    },
+    { 
+        id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', 
+        skillDesc: '아군 단체의 병력을 회복시키고 가하는 피해를 증가시킵니다.', stats: { martial: 372, tactical: 598, command: 509, speed: 558 }, unit: '궁병/기병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "강유겸제"]
+    },
+    { 
+        id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', 
+        skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.', stats: { martial: 372, tactical: 592, command: 556, speed: 433 }, unit: '창병/기병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["혼수모어", "위위구조"]
+    },
+    { 
+        id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', 
+        skillDesc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.', stats: { martial: 372, tactical: 598, command: 432, speed: 362 }, unit: '궁병/방패병',
+        equip: { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+        tactics: ["간담상조", "휴양생식"]
+    }
 ];
 
-// ==========================================================================
-// LAYER 2: 55명 전체 무장 추천 장비(1·2차 속성) 및 종결 추천 전법(2~3번 슬롯) 사전
-// ==========================================================================
-const officerEquipmentMasterMap = {
-    // 위나라 (13명 전수)
-    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 배반, 공심 상승" } },
-    "곽가": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "사마의": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" } },
-    "순욱": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "악진": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "기병 피해 감소" } },
-    "전위": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "정욱": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
-    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
-    "장합": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "하후돈": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승" } },
-    "하후연": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
-
-    // 촉나라 (14명 전수)
-    "관우": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
-    "마대": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" } },
-    "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" } },
-    "사마가": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
-    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
-    "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "제갈량": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "조운": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "황충": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 배반, 공심 상승" } },
-    "황월영": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-
-    // 오나라 (15명 전수)
-    "대교": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "노숙": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "소교": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "손견": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승" } },
-    "손권": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "손상향": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "무용 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "궁병 배반, 공심 상승" } },
-    "손책": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "손권(제왕)": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "여몽": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" } },
-    "육손": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 배반, 공심 상승" } },
-    "육항": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "주유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "주태": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "정보": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "황개": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 피해 감소" } },
-
-    // 군진영 (13명 전수)
-    "공손찬": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "궁병 배반, 공심 상승" } },
-    "동탁": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
-    "안량": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "여포": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "궁병 배반, 공심 상승" } },
-    "우길": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
-    "원소": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
-    "장각": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "장녕": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
-    "장보": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
-    "좌자": { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" } },
-    "채문희": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "초선": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "화타": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } }
-};
-
-// [신설] 55명 전체 무장 추천 종결 전법 2개씩(2~3번 슬롯) 마스터 딕셔너리
-const officerTacticMasterMap = {
-    // 위나라 (13명)
-    "가후": ["혼수모어", "위위구조"],
-    "곽가": ["간담상조", "강유겸제"],
-    "사마의": ["수상개화", "화소적벽"],
-    "순욱": ["간담상조", "강유겸제"],
-    "악진": ["기문둔갑", "선등함진"],
-    "전위": ["이아환아", "동장철벽"],
-    "정욱": ["사면초가", "심모원려"],
-    "조조(제왕)": ["이퇴위진", "혼수모어"],
-    "조조": ["간담상조", "강유겸제"],
-    "장료": ["만전제발", "사면초가"],
-    "장합": ["간담상조", "강유겸제"],
-    "하후돈": ["이아환아", "동장철벽"],
-    "하후연": ["일고작기", "암전난방"],
-
-    // 촉나라 (14명)
-    "관우": ["만전제발", "선등함진"],
-    "강유": ["천리추격", "반객위주"],
-    "마대": ["일고작기", "만전제발"],
-    "마초": ["용맹무쌍", "만전제발"],
-    "서서": ["문치무공", "전위위안"],
-    "사마가": ["만전제발", "용왕직전"],
-    "위연": ["이아환아", "홍수첨향"],
-    "유비": ["혼수모어", "이퇴위진"],
-    "유비(제왕)": ["간담상조", "금낭묘계"],
-    "장비": ["제곤부위", "이아환아"],
-    "제갈량": ["간담상조", "여자동포"],
-    "조운": ["이아환아", "횡징폭렴"],
-    "황충": ["축세대발", "인세이도"],
-    "황월영": ["간담상조", "혼수모어"],
-
-    // 오나라 (15명)
-    "대교": ["간담상조", "동장철벽"],
-    "노숙": ["분성지계", "여자동포"],
-    "소교": ["간담상조", "위위구조"],
-    "손견": ["이아환아", "동장철벽"],
-    "손권": ["일고작기", "용왕직전"],
-    "손상향": ["일고작기", "천리추격"],
-    "손책": ["용맹무쌍", "일고작기"],
-    "손권(제왕)": ["이퇴위진", "강유겸제"],
-    "여몽": ["화소적벽", "기문둔갑"],
-    "육손": ["화소적벽", "사면초가"],
-    "육항": ["간담상조", "위위구조"],
-    "주유": ["화소적벽", "요사여신"],
-    "주태": ["이아환아", "동장철벽"],
-    "정보": ["간담상조", "동구적개"],
-    "황개": ["화소적벽", "횡소천군"],
-
-    // 군진영 (13명)
-    "공손찬": ["극적제승", "암전난방"],
-    "동탁": ["횡징폭렴", "운주유악"],
-    "안량": ["만전제발", "용왕직전"],
-    "여포": ["만부막적", "용왕직전"],
-    "우길": ["사면초가", "심모원려"],
-    "원소": ["간담상조", "위위구조"],
-    "장각": ["사면초가", "화소적벽"],
-    "장녕": ["사면초가", "기문둔갑"],
-    "장보": ["화소적벽", "요사여신"],
-    "좌자": ["간담상조", "혼수모어"],
-    "채문희": ["간담상조", "강유겸제"],
-    "초선": ["혼수모어", "위위구조"],
-    "화타": ["간담상조", "휴양생식"]
-};
+// [경량화] O(N) 선형 탐색을 O(1) 해시 테이블로 압축한 마스터 조회 딕셔너리 바인딩
+const masterHeroLookupMap = {};
+heroDogamData.forEach(h => {
+    if (h?.name) masterHeroLookupMap[cStr(h.name)] = h;
+});
 
 // ==========================================================================
-// LAYER 3: API 브릿지 개방 구역 (deck_core.js 100% 동기화 및 전법 추천 브릿지 신설)
+// LAYER 2: API 브릿지 개방 구역 (O(1) 단일 해시 맵 즉시 조회 브릿지)
 // ==========================================================================
 window.getAllOfficerNamesFromDogam = function() {
     return heroDogamData.map(h => h.name).sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 window.getOfficerDataFromDogam = function(officerName) {
-    const target = heroDogamData.find(h => cStr(h.name) === cStr(officerName));
+    const target = masterHeroLookupMap[cStr(officerName)];
     return {
         role: target ? target.role : "보조, 버퍼",
         uniqueTactic: target ? target.skill : "고유 전법 누락",
@@ -223,17 +370,16 @@ window.getOfficerDataFromDogam = function(officerName) {
 
 window.getOfficerEquipmentFromDogam = function(officerName) {
     if (!officerName) return null;
-    return officerEquipmentMasterMap[cStr(officerName)] || officerEquipmentMasterMap[officerName] || null;
+    return masterHeroLookupMap[cStr(officerName)]?.equip || null;
 };
 
-// [신설] 무장별 추천 종결 전법 2개를 즉시 반환하는 O(1) 해시 브릿지
 window.getOfficerRecommendedTacticsFromDogam = function(officerName) {
     if (!officerName) return ["간담상조", "동장철벽"];
-    return officerTacticMasterMap[cStr(officerName)] || officerTacticMasterMap[officerName] || ["간담상조", "동장철벽"];
+    return masterHeroLookupMap[cStr(officerName)]?.tactics || ["간담상조", "동장철벽"];
 };
 
 // ==========================================================================
-// LAYER 4: 도감 와이드 렌더링 및 백데이터 보존 파이프라인
+// LAYER 3: 도감 와이드 렌더링 및 필터 결선 파이프라인
 // ==========================================================================
 let currentDogamState = [];
 let currentFactionFilter = 'all';
@@ -259,7 +405,7 @@ function loadDogamData() {
 
     currentDogamState = defaultNames.map(name => {
         const found = hMap[cStr(name)];
-        const originData = heroDogamData.find(h => h.name === name);
+        const originData = masterHeroLookupMap[cStr(name)];
         return {
             name: name,
             faction: originData ? originData.group : "qun",
@@ -270,7 +416,9 @@ function loadDogamData() {
             skill: originData ? originData.skill : "-",
             skillDesc: originData ? originData.skillDesc : "-",
             stats: originData ? originData.stats : null,
-            unit: originData?.unit ? originData.unit : "-"
+            unit: originData?.unit ? originData.unit : "-",
+            equip: originData?.equip || null,
+            tactics: originData?.tactics || ["간담상조", "동장철벽"]
         };
     });
 }
@@ -355,6 +503,17 @@ function getGroupNameKorean(group) {
     return '전체';
 }
 
+// [GC 부하 제로화] 깊은 복사(JSON.parse) 없이 병종 문자열만 즉석 포매팅하는 헬퍼 함수
+function formatEqAttr(val, unitPrefix) {
+    if (!val) return "-";
+    let formatted = val;
+    if (formatted.match(/(창병|기병|궁병|방패병)/)) {
+        formatted = formatted.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
+        formatted = formatted.replace(unitPrefix === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", unitPrefix === "창병" ? "강공, 기습 상승" : "강공, 기습 증가");
+    }
+    return formatted.trim();
+}
+
 function renderDogamGrid() {
     const gridContainer = document.getElementById('dogam-card-grid');
     const countBadge = document.getElementById('dogam-count-badge');
@@ -380,36 +539,26 @@ function renderDogamGrid() {
                 <div><span style="color: #a855f7; margin-right: 4px;">⚡ 속도:</span><span style="color: #fff; font-weight:bold;">${hero.stats.speed}</span></div>
             </div>` : '';
 
-        // [장비 연산] 무장 적성 병종 기반 추천 장비 동적 정규화 파싱
+        // [장비 연산] 객체 복사 없는 고속 포매팅 연산 적용
         const primaryUnit = hero.unit && hero.unit !== "-" ? hero.unit.split('/')[0] : "방패병";
-        const rawEq = officerEquipmentMasterMap[hero.name] || officerEquipmentMasterMap[cStr(hero.name)] || {
+        const eq = hero.equip || {
             helmet: { name: "진현관", attr1: "피해 감소", attr2: `${primaryUnit} 피해 가함` },
             armor: { name: "명재복", attr1: "피해 감소", attr2: `${primaryUnit} 피해 감소` },
             accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: `${primaryUnit} 피해 감소` }
         };
-        const eq = JSON.parse(JSON.stringify(rawEq));
-        ['helmet', 'armor', 'accessory'].forEach(part => {
-            ['attr1', 'attr2'].forEach(attr => {
-                let val = eq[part][attr];
-                if (val && val.match(/(창병|기병|궁병|방패병)/)) {
-                    val = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${primaryUnit} `);
-                    eq[part][attr] = val.replace(primaryUnit === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", primaryUnit === "창병" ? "강공, 기습 상승" : "강공, 기습 증가").trim();
-                }
-            });
-        });
 
         const equipHtml = `
             <div style="background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 11px;">
                 <div style="color: #feca57; font-weight: bold; margin-bottom: 4px;">🛠️ 추천 장비 및 세련 속성</div>
                 <div style="display: flex; flex-direction: column; gap: 3px; color: #ccc;">
-                    <div>🪖 <span style="color: #fff; font-weight:bold;">${eq.helmet.name}</span> <span style="color: #38bdf8;">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div>
-                    <div>🛡️ <span style="color: #fff; font-weight:bold;">${eq.armor.name}</span> <span style="color: #38bdf8;">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div>
-                    <div>📿 <span style="color: #fff; font-weight:bold;">${eq.accessory.name}</span> <span style="color: #38bdf8;">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div>
+                    <div>🪖 <span style="color: #fff; font-weight:bold;">${eq.helmet.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.helmet.attr1, primaryUnit)} / ${formatEqAttr(eq.helmet.attr2, primaryUnit)}]</span></div>
+                    <div>🛡️ <span style="color: #fff; font-weight:bold;">${eq.armor.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.armor.attr1, primaryUnit)} / ${formatEqAttr(eq.armor.attr2, primaryUnit)}]</span></div>
+                    <div>📿 <span style="color: #fff; font-weight:bold;">${eq.accessory.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.accessory.attr1, primaryUnit)} / ${formatEqAttr(eq.accessory.attr2, primaryUnit)}]</span></div>
                 </div>
             </div>`;
 
-        // [신설] 무장별 추천 종결 전법 2개(2~3번 슬롯) 매핑 및 터치 팝업 연동 뷰어 박스
-        const recTacs = officerTacticMasterMap[hero.name] || officerTacticMasterMap[cStr(hero.name)] || ["간담상조", "동장철벽"];
+        // [전법 연산] 추천 종결 전법 2개 매핑 및 터치 팝업 연동 뷰어 박스
+        const recTacs = hero.tactics || ["간담상조", "동장철벽"];
         const tacticHtml = `
             <div style="background-color: rgba(168,85,247,0.08); border: 1px solid #44315f; border-left: 3px solid #a855f7; border-radius: 4px; padding: 8px; margin-bottom: 10px; font-size: 11px;">
                 <div style="color: #c084fc; font-weight: bold; margin-bottom: 4px;">📜 추천 전법 (2~3번 슬롯)</div>
