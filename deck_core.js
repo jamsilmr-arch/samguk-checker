@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 다중 인연/크리티컬 연산 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 장비 속성 명세(스크린샷 검증 완료) 및 무결성 연산 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 속성 마스터 사전 바인딩
@@ -136,7 +136,6 @@ const analyzedMetaArchetypes = [
 const metaDeckUnitTypeMap = {"wei_sima_sp_jojo":"방패병","wei_assassin_sp":"창병","shu_dowon_spear":"창병","shu_hwangchung_shield":"방패병","shu_gangyu_bangwon_2":"방패병","shu_gangyu_cav":"기병","shu_macho_spear_2":"창병","shu_xushu_spear":"창병","wu_magic_bow":"궁병","qun_cavalry":"기병","qun_whitehorse_bow":"궁병"};
 const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
 
-// [인연 마스터 사전 고도화] 2인 조건 부대 인연 전수 등록 및 오호상장 추가
 const internalBondRules = [
     {name:"도원결의",req:2,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},
     {name:"오호상장",req:2,heroes:["관우","장비","조운","황충","마초"],effect:"강공 8%"},
@@ -197,7 +196,7 @@ function getOfficerDogamData(officerName) {
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : [...internalMasterTacticNames]) : [...internalMasterTacticNames];
 const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : [...internalMasterOfficerNames]) : [...internalMasterOfficerNames];
 
-// [고도화] 무장별 인연 효과 정밀 타겟팅 및 크리티컬(critRate) 합산 엔진
+// [고도화] statKeywordMap 복구 및 정규화
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
     if (!officer || !officer.name) return null;
@@ -207,6 +206,20 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const curNames = deck.officers.map(o => o?.name?.trim()).filter(Boolean);
     const matchMeta = getBestMetaMatch(curNames);
     const currentDeckUnit = (deck.unitType && deck.unitType !== "자동 판별") ? deck.unitType : (matchMeta?.bestMeta ? metaDeckUnitTypeMap[matchMeta.bestMeta.id] : "창병");
+
+    const statKeywordMap = { 
+        "피해 감소": "damageTakenRed", "피감": "damageTakenRed", "피해감소": "damageTakenRed", "저항": "damageTakenRed",
+        "피해 가함": "damageDealtInc", "피해증가": "damageDealtInc", "피증": "damageDealtInc", "피해가함": "damageDealtInc",
+        "모략 피해 가함": "strategyDmg", "모략피해가함": "strategyDmg", "모략 피해 상승": "strategyDmg", "모략피해상승": "strategyDmg",
+        "무용 피해 가함": "physicalDmg", "무용피해가함": "physicalDmg", "무용 피해 상승": "physicalDmg", "무용피해상승": "physicalDmg",
+        "치유 효과 부여": "healGiven", "치유 효과 받음": "healGiven", "치유 효과 상승": "healGiven", "치유": "healGiven", "회복": "healGiven", "보급": "healGiven",
+        "배반": "leech", "공심": "leech", "흡혈": "leech",
+        "연격률": "comboRate", "연격": "comboRate",
+        "발동률": "activeRate", "발동": "activeRate",
+        "강공": "critRate", "기습": "critRate", "크리": "critRate",
+        "파갑": "armorPen", "간파": "armorPen",
+        "glassCannonDmg": "damageDealtInc", "stackingDmg": "damageDealtInc", "counterDmg": "physicalDmg"
+    };
 
     function parseAndAdd(textObj) {
         if (!textObj) return;
@@ -252,7 +265,6 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const eq = getOfficerEquipment(hName, currentDeckUnit);
     if (eq) { ['helmet', 'armor', 'accessory'].forEach(part => { parseAndAdd(eq[part].attr1); parseAndAdd(eq[part].attr2); }); }
 
-    // 부대 내 인연 무장 본인에게만 해당 인연 스탯 정밀 적용
     internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(n)).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(n))).size >= r.req)
         .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
@@ -262,7 +274,15 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const dogamData = getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
         const tkMap = internalTacticStatMap[tacName.replace(/\s+/g, '')];
-        if (tkMap) { Object.keys(tkMap).forEach(tk => { if (stats[tk] !== undefined) stats[tk] += tkMap[tk]; else if (statKeywordMap[tk]) stats[statKeywordMap[tk]] += tkMap[tk]; }); }
+        if (tkMap) {
+            Object.keys(tkMap).forEach(tk => {
+                if (stats[tk] !== undefined) {
+                    stats[tk] += tkMap[tk];
+                } else if (statKeywordMap[tk] && stats[statKeywordMap[tk]] !== undefined) {
+                    stats[statKeywordMap[tk]] += tkMap[tk];
+                }
+            });
+        }
     });
     return stats;
 }
@@ -498,7 +518,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     return fb;
 }
 
-// [고도화] 다중 인연 효과 슬래시(/) 구분 전수 표출 엔진
 function calculateActivatedBond(officers) {
     const curNames = officers?.map(o => o?.name?.toString().trim()).filter(Boolean) || [];
     if (!curNames.length) return "활성화 효과 없음";
@@ -661,7 +680,7 @@ function renderDeckBuilder() {
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT = t?.toString().trim() || "";
                     const isOwn = cT ? !!tMap[cT.replace(/\s+/g,'')]?.isOwned : false;
-                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
+                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>.).join('')}</select></div>`;
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
