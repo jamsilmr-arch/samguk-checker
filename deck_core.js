@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 인게임 공식 장비 속성 명세(스크린샷 1~7번 검증 완료) 및 무결성 연산 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 고속 연산 경량화 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 속성 마스터 사전 바인딩
@@ -48,13 +48,17 @@ const OFFICER_MASTER = {
     "공손찬":["위진새북","qun","기병/창병","PHYS_COMBO"],"동탁":["전권난정","qun","방패병/기병","TANK_COUNTER"],"안량":["효장","qun","창병/기병","PHYS_CARRY"],"여포":["천하무쌍","qun","궁병/기병","PHYS_COMBO"],"우길":["태평경","qun","창병/궁병","STR_CARRY"],"원소":["사소도","qun","방패병/기병","TANK_COUNTER"],"장각":["황천당립","qun","궁병/기병","STR_CARRY"],"장녕":["천의난위","qun","궁병/방패병","STR_CARRY"],"장보":["요풍사기","qun","궁병/방패병","STR_CARRY"],"좌자":["화겁생기","qun","궁병/방패병","SUPPORT_STR"],"채문희":["비분시","qun","궁병/기병","SUPPORT_STR"],"초선":["폐월","qun","창병/기병","SUPPORT_STR"],"화타":["청낭제세","qun","궁병/방패병","SUPPORT_STR"]
 };
 
-const internalMasterOfficerUniqueTacticMap={}, internalMasterOfficerUnitMap={}, officerFactionMap={};
+// [경량화] 중복 딕셔너리 생성을 단일 루프로 통합
+const internalMasterOfficerUniqueTacticMap = {}, internalMasterOfficerUnitMap = {}, officerFactionMap = {};
 const internalMasterOfficerNames = Object.keys(OFFICER_MASTER).sort((a,b)=>a.localeCompare(b,'ko'));
-for(let [k,v] of Object.entries(OFFICER_MASTER)){ internalMasterOfficerUniqueTacticMap[k]=v[0]; officerFactionMap[k]=v[1]; internalMasterOfficerUnitMap[k]=v[2]; }
+for (let [k,v] of Object.entries(OFFICER_MASTER)) {
+    internalMasterOfficerUniqueTacticMap[k] = v[0];
+    officerFactionMap[k] = v[1];
+    internalMasterOfficerUnitMap[k] = v[2];
+}
 
 const internalMasterTacticNames = ["가정지전","간담상조","강유겸제","견불가최","견진연봉","공기불비","과하탁교","교취호탈","극적제승","금낭묘계","금적금왕","금창신","금철교명","기문둔갑","낙정하석","동구적개","동장철벽","동촉기선","만부막적","만전제발","만천과해","문치무공","미우주무","반객위주","병량촌단","분성지계","비사주석","사면초가","사생취의","선등함진","수상개화","순수견양","승승장구","심모원려","안영찰채","암전난방","양의화생","양초선행","여자동포","요사여신","용맹무쌍","용왕직전","운주유악","원성재도","위위구조","유좌유용","이간계","이아환아","이일대로","이퇴위진","일고작기","인세이도","전위위안","제곤부위","중정기고","지인선임","진퇴유도","진화타겁","질풍노도","천리추격","천시지리","체천행도","축세대발","축호과간","태청단경","토적격문","현호제세","호령삼군","혼수모어","홍수첨향","화소적벽","횡소천군","횡징폭렴","휴양생식"].sort((a,b)=>a.localeCompare(b,'ko'));
 
-// [스크린샷 검증] 공식 명세 일치 장비 프리셋 (메인 딜러 극딜/흡혈 종결 사양 유지)
 const EQ_PRESETS = {
     PHYS_CARRY: ["호분관","피해 가함","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
     PHYS_COMBO: ["백옥잠","연격률","창병 피해 가함","세린갑","무용 피해 가함","창병 배반, 공심 상승","쌍호뉴","연격률","창병 배반, 공심 상승"],
@@ -64,7 +68,6 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 부여","UNIT_DMG_RED"]
 };
 
-// [스크린샷 검증 완료] 관우 단일 마스터 매핑 및 병종 전용 속성 규칙 정규화
 const internalMasterEquipmentMap = {
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "무용 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 피해 감소" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
@@ -105,8 +108,17 @@ const internalTacticStatMap = {
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"초선차전":{healGiven:10},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"함진살적":{physicalDmg:5,armorPen:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6}
 };
 
-const formationEffects = {"일자진":"전열: 피해 감소 6.0% | 후열: -","구행진":"전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%","추형진":"전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%","기형진":"전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%","어린진":"전열: 반격률 20.0% | 후열: 피해 감소 6.0%","방원진":"전열: 피해 감소 5.0% | 후열: 연격률 28.0%","안행진":"전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%","호도진":"전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%"};
-const formationPositions = {"일자진":["front","front","front"],"구행진":["front","back","front"],"추형진":["back","front","back"],"기형진":["back","back","front"],"어린진":["front","back","back"],"방원진":["front","front","back"],"안행진":["back","front","front"],"호도진":["front","back","front"]};
+// [경량화] 파편화된 진형 효과 및 배치 위치 정보를 단일 FORMATIONS 마스터 객체로 압축
+const FORMATIONS = {
+    "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
+    "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
+    "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
+    "기형진": { eff: "전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%", pos: ["back","back","front"] },
+    "어린진": { eff: "전열: 반격률 20.0% | 후열: 피해 감소 6.0%", pos: ["front","back","back"] },
+    "방원진": { eff: "전열: 피해 감소 5.0% | 후열: 연격률 28.0%", pos: ["front","front","back"] },
+    "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] },
+    "호도진": { eff: "전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%", pos: ["front","back","front"] }
+};
 
 const analyzedMetaArchetypes = [
     {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·제왕조조 종결 방패 덱",concept:"[공식] 사마의 방패·고급·2",formation:"안행진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","화소적벽"]},{name:"장합",chosenTactics:["교변병기","간담상조","강유겸제"]},{name:"조조(제왕)",chosenTactics:["군령여산","이퇴위진","혼수모어"]}]},
@@ -123,7 +135,8 @@ const analyzedMetaArchetypes = [
 ];
 
 const metaDeckUnitTypeMap = {"wei_sima_sp_jojo":"방패병","wei_assassin_sp":"창병","shu_dowon_spear":"창병","shu_hwangchung_shield":"방패병","shu_gangyu_bangwon_2":"방패병","shu_gangyu_cav":"기병","shu_macho_spear_2":"창병","shu_xushu_spear":"창병","wu_magic_bow":"궁병","qun_cavalry":"기병","qun_whitehorse_bow":"궁병"};
-const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...JSON.parse(JSON.stringify(d)), title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({...o, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : o.chosenTactics})) }));
+// [경량화] 무거운 JSON 직렬화 깊은 복사 대신 고속 얕은 복사 매핑 적용
+const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
 
 const internalBondRules = [
     {name:"연환계",req:3,heroes:["동탁","여포","초선","황충"],effect:"피해가함 4%, 치유효과 4%"},{name:"도법자연",req:2,heroes:["좌자","장각","우길"],effect:"모략피해 4%, 공심 4%"},{name:"가모정세",req:2,heroes:["조조","조조(제왕)","곽가"],effect:"모략피해 4%, 무용피해감소 4%"},{name:"위실주석",req:2,heroes:["하후돈","하후연"],effect:"파갑 8%"},{name:"도원결의",req:3,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},{name:"백제탁고",req:2,heroes:["제갈량","조운"],effect:"배반 8%, 공심 8%"},{name:"오자양장",req:2,heroes:["장료","악진","장합"],effect:"배반 18%"},{name:"동오대도독",req:2,heroes:["주유","육손","여몽","육항"],effect:"모략피해 7%"},{name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
@@ -142,19 +155,16 @@ const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)",
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
-    if (internalMasterEquipmentMap[officerName]) {
-        const eq = JSON.parse(JSON.stringify(internalMasterEquipmentMap[officerName]));
+    const rawEq = internalMasterEquipmentMap[officerName];
+    if (rawEq) {
+        // [경량화] 무거운 JSON 직렬화 대신 객체 구조 분해 할당으로 고속 복사
+        const eq = { helmet: { ...rawEq.helmet }, armor: { ...rawEq.armor }, accessory: { ...rawEq.accessory } };
         ['helmet', 'armor', 'accessory'].forEach(part => {
             ['attr1', 'attr2'].forEach(attr => {
                 let val = eq[part][attr];
                 if (val.match(/(창병|기병|궁병|방패병)/)) {
                     val = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
-                    if (unitPrefix === "창병") {
-                        val = val.replace("강공, 기습 증가", "강공, 기습 상승");
-                    } else {
-                        val = val.replace("강공, 기습 상승", "강공, 기습 증가");
-                    }
-                    eq[part][attr] = val.trim();
+                    eq[part][attr] = val.replace(unitPrefix === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", unitPrefix === "창병" ? "강공, 기습 상승" : "강공, 기습 증가").trim();
                 }
             });
         });
@@ -162,11 +172,10 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
     }
     const profileId = OFFICER_MASTER[officerName]?.[3] || "PHYS_CARRY";
     const p = EQ_PRESETS[profileId];
-    let attr8 = p[8] === "UNIT_DMG_RED" ? `${unitPrefix} 피해 감소` : p[8];
     return {
         helmet: { name: p[0], attr1: p[1], attr2: p[2] },
         armor:  { name: p[3], attr1: p[4], attr2: p[5] },
-        accessory: { name: p[6], attr1: p[7], attr2: attr8 }
+        accessory: { name: p[6], attr1: p[7], attr2: p[8] === "UNIT_DMG_RED" ? `${unitPrefix} 피해 감소` : p[8] }
     };
 }
 
@@ -207,11 +216,8 @@ function aggregateIntegratedStats(deck, officerIndex) {
         const text = typeof textObj === 'string' ? textObj : textObj.toString();
         
         const unitMatch = text.match(/(창병|궁병|방패병|기병)/);
-        if (unitMatch) {
-            const requiredUnit = unitMatch[1];
-            if (requiredUnit !== currentDeckUnit && currentDeckUnit !== "자동 판별") {
-                return;
-            }
+        if (unitMatch && unitMatch[1] !== currentDeckUnit && currentDeckUnit !== "자동 판별") {
+            return;
         }
 
         for (let key of Object.keys(statKeywordMap)) {
@@ -350,7 +356,7 @@ function calculateStrictDeckScore(deck) {
         const userOffIdx = curNamesClean.indexOf(mName);
         if (userOffIdx === -1) score -= 30;
         else {
-            if ((formationPositions[curFmt]?.[userOffIdx] || "front") !== (formationPositions[idealFmt]?.[metaIdx] || "front")) score -= 10;
+            if ((FORMATIONS[curFmt]?.pos[userOffIdx] || "front") !== (FORMATIONS[idealFmt]?.pos[metaIdx] || "front")) score -= 10;
             const userOff = deck.officers[userOffIdx];
             const metaTacs = metaOff.chosenTactics.length === 3 ? metaOff.chosenTactics.slice(1,3) : metaOff.chosenTactics;
             let unmatchTac = metaTacs.map(t => t.trim().replace(/\s+/g, '')), emptyOrWrong = 0, altCount = 0;
@@ -421,7 +427,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
         const metaIdx = meta.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
         if (metaIdx !== -1) {
-            if ((formationPositions[curFmt]?.[offIdx] || "front") !== (formationPositions[meta.formation]?.[metaIdx] || "front")) fb.logs.push({ type: 'warning', text: `배치 오류: [${hName}] 위치 교정 요망` });
+            if ((FORMATIONS[curFmt]?.pos[offIdx] || "front") !== (FORMATIONS[meta.formation]?.pos[metaIdx] || "front")) fb.logs.push({ type: 'warning', text: `배치 오류: [${hName}] 위치 교정 요망` });
             
             const mTacs = meta.officers[metaIdx].chosenTactics;
             const targetMetaTacs = mTacs.length === 3 ? mTacs.slice(1, 3) : mTacs;
@@ -478,116 +484,63 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (장비 공식 설명 팝업 엔진 연동)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (경량화 단일 통합 팝업 엔진)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
-window.showTacticPopup = function(e, tacticName) {
-    if(!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
-    if(e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
+// [경량화] DOM 노드 재사용 및 단일 모달 렌더러
+let modalPopupEl = null;
+function openModalPopup(e, title, meta1, desc1, meta2 = null, desc2 = null) {
     e.stopPropagation();
-
-    let popup = document.getElementById('tactic-popup-modal');
-    if(!popup) {
-        popup = document.createElement('div');
-        popup.id = 'tactic-popup-modal';
-        document.body.appendChild(popup);
+    if (!modalPopupEl) {
+        modalPopupEl = document.createElement('div');
+        modalPopupEl.id = 'tactic-popup-modal';
+        document.body.appendChild(modalPopupEl);
         document.addEventListener('click', (evt) => {
-            if(!evt.target.closest('.tactic-row') && !evt.target.closest('.eq-attr') && !evt.target.closest('#tactic-popup-modal')) popup.style.display = 'none';
+            if (!evt.target.closest('.tactic-row') && !evt.target.closest('.eq-attr') && !evt.target.closest('#tactic-popup-modal')) {
+                modalPopupEl.style.display = 'none';
+            }
         });
     }
+    let html = `<div class="p-title" style="color:#38bdf8;">${title}</div><div class="p-meta" style="color:#facc15;margin-top:6px;">${meta1}</div><div class="p-desc" style="margin-bottom:8px;">${desc1}</div>`;
+    if (meta2 && desc2) html += `<div class="p-meta" style="color:#facc15;">${meta2}</div><div class="p-desc">${desc2}</div>`;
+    modalPopupEl.innerHTML = html;
+    modalPopupEl.style.display = 'block';
+    const rect = e.currentTarget.getBoundingClientRect();
+    let top = rect.top + window.scrollY - 10, left = rect.right + window.scrollX + 10;
+    if (left + 280 > window.innerWidth) left = rect.left + window.scrollX - 290;
+    modalPopupEl.style.top = `${top}px`;
+    modalPopupEl.style.left = `${left}px`;
+}
 
+window.showTacticPopup = function(e, tacticName) {
+    if (!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
     let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
     const grid = document.getElementById('tactic-card-grid');
-    if(grid) {
+    if (grid) {
         const targetCard = Array.from(grid.children).find(c => c.querySelector('div:first-child')?.innerText.trim() === tacticName);
-        if(targetCard) {
+        if (targetCard) {
             const metaText = targetCard.querySelector('div:nth-child(2)')?.innerText || "";
             const rM = metaText.match(/역할:\s*(.*?)\s*\|/), tM = metaText.match(/대상:\s*(.*)/);
             pRole = rM ? rM[1] : "-"; pTarget = tM ? tM[1] : "-";
             pDesc = targetCard.querySelector('div:nth-child(3)')?.innerText || pDesc;
         }
     }
-
-    popup.innerHTML = `<div class="p-title">⭐ ${tacticName}</div><div class="p-meta">타입: ${pRole} | 대상: ${pTarget}</div><div class="p-desc">${pDesc}</div>`;
-    popup.style.display = 'block';
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    let top = rect.top + window.scrollY - 10, left = rect.right + window.scrollX + 10;
-    if (left + 280 > window.innerWidth) left = rect.left + window.scrollX - 290;
-    popup.style.top = top + 'px'; popup.style.left = left + 'px';
+    openModalPopup(e, `⭐ ${tacticName}`, `타입: ${pRole} | 대상: ${pTarget}`, pDesc);
 };
 
-// [신설] 장비 옵션 클릭 시 EQUIP_ATTR_DESCRIPTIONS 공식 사전 즉시 모달 렌더링
 window.showEquipPopup = function(e, attr1, attr2) {
-    e.stopPropagation();
-    let popup = document.getElementById('tactic-popup-modal');
-    if(!popup) {
-        popup = document.createElement('div');
-        popup.id = 'tactic-popup-modal';
-        document.body.appendChild(popup);
-        document.addEventListener('click', (evt) => {
-            if(!evt.target.closest('.tactic-row') && !evt.target.closest('.eq-attr') && !evt.target.closest('#tactic-popup-modal')) popup.style.display = 'none';
-        });
-    }
-
-    const getDesc = attr => {
-        if (EQUIP_ATTR_DESCRIPTIONS[attr]) return EQUIP_ATTR_DESCRIPTIONS[attr];
-        const alt1 = attr.replace("상승", "증가");
-        if (EQUIP_ATTR_DESCRIPTIONS[alt1]) return EQUIP_ATTR_DESCRIPTIONS[alt1];
-        const alt2 = attr.replace("증가", "상승");
-        if (EQUIP_ATTR_DESCRIPTIONS[alt2]) return EQUIP_ATTR_DESCRIPTIONS[alt2];
-        return "상세 데이터 미등록 (도감 연동 필요)";
-    };
-
-    popup.innerHTML = `<div class="p-title" style="color:#38bdf8;">⚒️ 장비 추가 속성 설명</div>
-        <div class="p-meta" style="color:#facc15; margin-top:6px;">🔹 1차: ${attr1}</div>
-        <div class="p-desc" style="margin-bottom:8px;">${getDesc(attr1)}</div>
-        <div class="p-meta" style="color:#facc15;">🔹 2차: ${attr2}</div>
-        <div class="p-desc">${getDesc(attr2)}</div>`;
-    popup.style.display = 'block';
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    let top = rect.top + window.scrollY - 10, left = rect.right + window.scrollX + 10;
-    if (left + 280 > window.innerWidth) left = rect.left + window.scrollX - 290;
-    popup.style.top = top + 'px'; popup.style.left = left + 'px';
+    const getDesc = attr => EQUIP_ATTR_DESCRIPTIONS[attr] || EQUIP_ATTR_DESCRIPTIONS[attr.replace("상승", "증가")] || EQUIP_ATTR_DESCRIPTIONS[attr.replace("증가", "상승")] || "상세 데이터 미등록 (도감 연동 필요)";
+    openModalPopup(e, "⚒️ 장비 추가 속성 설명", `🔹 1차: ${attr1}`, getDesc(attr1), `🔹 2차: ${attr2}`, getDesc(attr2));
 };
 
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
-    style.innerHTML = `
-        .deck-card select { background-color: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 4px; padding: 6px 24px 6px 10px; font-size: 13px; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; transition: all 0.2s ease-in-out; width: 100%; box-sizing: border-box; font-family: inherit; }
-        .deck-card select:focus, .deck-card select:hover { border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25); background-color: #0f172a; }
-        .deck-card select option { background-color: #0f172a; color: #f8fafc; padding: 8px; }
-        .hawk-recommend-box { margin-top: 10px; padding: 12px; background-color: #1e293b; border-left: 4px solid #3b82f6; border-radius: 6px; font-size: 13px; color: #e2e8f0; line-height: 1.5; }
-        .hawk-recommend-box .hawk-highlight { color: #60a5fa; font-weight: bold; }
-        .hawk-recommend-box .hawk-subtext { color: #94a3b8; font-size: 11px; }
-        .hawk-recommend-box .hawk-detail { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; color: #cbd5e1; font-size: 12px; }
-        .equipment-box { margin-top: 6px; padding: 6px; border: 1px solid #334155; border-radius: 4px; background-color: #0f172a; font-size: 11px; }
-        .equipment-box .eq-item { margin-bottom: 2px; color: #cbd5e1; }
-        .equipment-box .eq-item:last-child { margin-bottom: 0; }
-        .equipment-box .eq-attr { color: #38bdf8; font-size: 10px; margin-left: 4px; cursor: pointer; transition: color 0.2s; }
-        .equipment-box .eq-attr:hover { color: #facc15; }
-        .integrated-stats-box { margin-top: 6px; padding: 8px; border-radius: 4px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #475569; font-size: 11px; font-family: monospace; }
-        .integrated-stats-box .istats-title { color: #facc15; font-weight: bold; margin-bottom: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .integrated-stats-box .istats-content { color: #e2e8f0; line-height: 1.6; }
-        .unit-badge { display: inline-block; background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 10px; font-weight: 600; padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.3); margin-top: 4px; margin-bottom: 4px; }
-        .feedback-item.success { color: #4ade80; font-weight: 500; }
-        .feedback-item.warning { color: #facc15; }
-        .feedback-item.info { color: #60a5fa; }
-        .officer-meta select { margin-top: 4px; margin-bottom: 4px; }
-        .tactic-row select { margin-top: 2px; }
-        .deck-footer-bar select { width: auto; min-width: 120px; margin-right: 12px; }
-        #tactic-popup-modal { display:none; position:absolute; z-index:9999; background:rgba(15,23,42,0.98); border:1px solid #a855f7; padding:12px; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.6); width:280px; color:#f8fafc; font-size:12px; backdrop-filter:blur(4px); pointer-events:none; }
-        #tactic-popup-modal .p-title { font-size:14px; font-weight:700; color:#facc15; margin-bottom:6px; border-bottom:1px solid #334155; padding-bottom:6px; letter-spacing:0.5px; }
-        #tactic-popup-modal .p-meta { color:#38bdf8; font-size:11px; margin-bottom:8px; font-weight:600; }
-        #tactic-popup-modal .p-desc { line-height:1.6; color:#cbd5e1; word-break:keep-all; }
-        .tactic-row { cursor: pointer; position: relative; transition: background 0.2s; }
-        .tactic-row:hover { background-color: rgba(255,255,255,0.05); }
-    `;
+    style.innerHTML = `.deck-card select{background-color:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:4px;padding:6px 24px 6px 10px;font-size:13px;appearance:none;-webkit-appearance:none;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:14px;transition:all 0.2s ease-in-out;width:100%;box-sizing:border-box;font-family:inherit}.deck-card select:focus,.deck-card select:hover{border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,0.25);background-color:#0f172a}.deck-card select option{background-color:#0f172a;color:#f8fafc;padding:8px}.hawk-recommend-box{margin-top:10px;padding:12px;background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:6px;font-size:13px;color:#e2e8f0;line-height:1.5}.hawk-recommend-box .hawk-highlight{color:#60a5fa;font-weight:bold}.hawk-recommend-box .hawk-subtext{color:#94a3b8;font-size:11px}.hawk-recommend-box .hawk-detail{margin-top:6px;padding-top:6px;border-top:1px dashed #334155;color:#cbd5e1;font-size:12px}.equipment-box{margin-top:6px;padding:6px;border:1px solid #334155;border-radius:4px;background-color:#0f172a;font-size:11px}.equipment-box .eq-item{margin-bottom:2px;color:#cbd5e1}.equipment-box .eq-item:last-child{margin-bottom:0}.equipment-box .eq-attr{color:#38bdf8;font-size:10px;margin-left:4px;cursor:pointer;transition:color 0.2s}.equipment-box .eq-attr:hover{color:#facc15}.integrated-stats-box{margin-top:6px;padding:8px;border-radius:4px;background:linear-gradient(145deg,#1e293b,#0f172a);border:1px solid #475569;font-size:11px;font-family:monospace}.integrated-stats-box .istats-title{color:#facc15;font-weight:bold;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}.integrated-stats-box .istats-content{color:#e2e8f0;line-height:1.6}.unit-badge{display:inline-block;background-color:rgba(245,158,11,0.15);color:#fbbf24;font-size:10px;font-weight:600;padding:3px 6px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);margin-top:4px;margin-bottom:4px}.feedback-item.success{color:#4ade80;font-weight:500}.feedback-item.warning{color:#facc15}.feedback-item.info{color:#60a5fa}.officer-meta select{margin-top:4px;margin-bottom:4px}.tactic-row select{margin-top:2px}.deck-footer-bar select{width:auto;min-width:120px;margin-right:12px}#tactic-popup-modal{display:none;position:absolute;z-index:9999;background:rgba(15,23,42,0.98);border:1px solid #a855f7;padding:12px;border-radius:6px;box-shadow:0 4px 15px rgba(0,0,0,0.6);width:280px;color:#f8fafc;font-size:12px;backdrop-filter:blur(4px);pointer-events:none}#tactic-popup-modal .p-title{font-size:14px;font-weight:700;color:#facc15;margin-bottom:6px;border-bottom:1px solid #334155;padding-bottom:6px;letter-spacing:0.5px}#tactic-popup-modal .p-meta{color:#38bdf8;font-size:11px;margin-bottom:8px;font-weight:600}#tactic-popup-modal .p-desc{line-height:1.6;color:#cbd5e1;word-break:keep-all}.tactic-row{cursor:pointer;position:relative;transition:background 0.2s}.tactic-row:hover{background-color:rgba(255,255,255,0.05)}`;
     document.head.appendChild(style);
 };
 
@@ -612,7 +565,7 @@ function loadDeckTextData() {
             return localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
         }
     } catch (e) {}
-    dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks)); dynamicPresetDecks.forEach((d, i) => d.originIdx = i);
+    dynamicPresetDecks = defaultPresetDecks.map((d, i) => ({ ...d, originIdx: i, officers: d.officers.map(o => ({ ...o, chosenTactics: [...o.chosenTactics] })) }));
 }
 
 function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
@@ -698,7 +651,7 @@ function renderDeckBuilder() {
                 const intStats = cName ? aggregateIntegratedStats(deck, oIdx) : null;
                 const intStatsH = buildIntegratedStatsHtml(intStats);
 
-                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${formationPositions[deck.formation]?.[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${unitBadgeHtml}${eqH}${intStatsH}<div class="tactic-status-box">${tRows}</div></div>`;
+                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${unitBadgeHtml}${eqH}${intStatsH}<div class="tactic-status-box">${tRows}</div></div>`;
             }).join('');
 
             const fb = generateStructuredFeedback(deck, hMap, tMap), score = calculateStrictDeckScore(deck);
@@ -718,9 +671,9 @@ function renderDeckBuilder() {
                 <div class="bond-box">부대 인연: ${calculateActivatedBond(deck.officers)}</div>${hawkHtml}<div class="officers-row">${offHtml}</div>
                 <div class="feedback-container-box">${fbH}</div>
                 <div class="deck-footer-bar">
-                    <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)">${Object.keys(formationEffects).map(f=>`<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('')}</select>
+                    <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)">${Object.keys(FORMATIONS).map(f=>`<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('')}</select>
                     <select onchange="updateDeckState(${deck.originIdx},'unitType',this.value)">${["","창병","기병","궁병","방패병"].map(u=>`<option value="${u}" ${deck.unitType===u?'selected':''}>${u||'자동 판별'}</option>`).join('')}</select>
-                    <span style="font-size:11px;margin-left:10px;">${formationEffects[deck.formation]||''}</span>
+                    <span style="font-size:11px;margin-left:10px;">${FORMATIONS[deck.formation]?.eff||''}</span>
                 </div>
             </div>`);
         });
