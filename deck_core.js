@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - guide.js 규격 100% 무결성 동기화 및 비공식 속성/명칭 완전 철거 엔진
+// [시스템 분석] deck_core.js - guide.js 규격 100% 무결성 동기화 및 마초·위연·서서 최적화 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 동적 마스터 바인딩 (guide.js 표준 규격 준수)
@@ -26,11 +26,11 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 부여","UNIT_DMG_RED"]
 };
 
-// [guide.js 표 1, 2, 3 엄격 동기화] 결운갑 삭제 및 치유 효과 부여/받음, '대상' 키워드 정상 적용
+// [guide.js 표 1, 2, 3 엄격 동기화] 마초·위연·서서 최적화 교정 및 전역 '대상' 키워드 100% 반영
 const internalMasterEquipmentMap = {
-    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 대상 배반, 공심 상승" } },
+    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "무용 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 대상 피해 감소" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 대상 피해 감소" } },
-    "서서": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 대상 배반, 공심 상승" } },
+    "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "모략 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 대상 피해 감소" } },
     "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 대상 피해 감소" } },
     "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 대상 피해 감소" } },
     "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 대상 피해 감소" } },
