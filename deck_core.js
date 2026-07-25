@@ -5,7 +5,6 @@ const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
 // LAYER 1: 초경량 자가 치유(Self-Healing) 폴백 마스터 사전
-// (dogam.js 미연동 시에도 드롭다운, 고유 전법, 적성 병종이 100% 정상 작동하도록 방어)
 // ==========================================================================
 const FB_OFFICERS = "가후,곽가,사마의,순욱,악진,전위,정욱,조조(제왕),조조,장료,장합,하후돈,하후연,관우,강유,마대,마초,서서,사마가,위연,유비,유비(제왕),장비,제갈량,조운,황충,황월영,대교,노숙,소교,손견,손권,손상향,손책,손권(제왕),여몽,육손,육항,주유,주태,정보,황개,공손찬,동탁,안량,여포,우길,원소,장각,장녕,장보,좌자,채문희,초선,화타".split(',');
 const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
@@ -80,7 +79,7 @@ const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","�
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
 
 // ==========================================================================
-// LAYER 2: 하이브리드 도감 동적 바인딩 및 적성 연산 엔진
+// LAYER 2: 하이브리드 도감 동적 바인딩 및 스마트 적성 연산 엔진
 // ==========================================================================
 function getOfficerDogamData(officerName) {
     if (window.getOfficerDataFromDogam) { 
@@ -129,7 +128,15 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
         });
         return eq;
     }
-    const p = EQ_PRESETS["PHYS_CARRY"];
+
+    // [고도화] 스마트 스탯 기반 폴백 (무지성 PHYS_CARRY 방지)
+    const stats = dogamInfo.stats || { martial: 500, tactical: 500, command: 500 };
+    let profileId = "PHYS_CARRY";
+    if (stats.tactical > stats.martial && stats.tactical > 550) profileId = "STR_CARRY";
+    else if (stats.command > 600 || dogamInfo.role?.includes("지휘") || dogamInfo.role?.includes("보조")) profileId = "SUPPORT_HEAL";
+    else if (dogamInfo.role?.includes("패시브") && stats.command > 550) profileId = "TANK_COUNTER";
+
+    const p = EQ_PRESETS[profileId] || EQ_PRESETS["PHYS_CARRY"];
     return {
         helmet: { name: p[0], attr1: p[1], attr2: p[2] },
         armor:  { name: p[3], attr1: p[4], attr2: p[5] },
