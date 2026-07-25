@@ -1,4 +1,4 @@
-// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 및 공백 무시 매핑 엔진
+// [시스템 분석] tactic_dogam.js 강제 가로 확장 반응형 그리드 및 고속 이벤트 위임 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 전법 마스터 데이터베이스 구역
@@ -81,10 +81,17 @@ const tacticDogamData = [
 ];
 
 // ==========================================================================
-// LAYER 2: API 브릿지 개방 구역
+// LAYER 2: API 브릿지 개방 구역 (이름 목록 및 상세 데이터 직접 조회 브릿지 신설)
 // ==========================================================================
 window.getAllTacticsFromDogam = function() {
     return tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
+};
+
+// [신설] deck_core.js의 모달 팝업 엔진이 DOM 스크래핑 없이 정확한 전법 정보를 즉시 참조하는 API
+window.getTacticDataFromDogam = function(tacticName) {
+    if (!tacticName) return null;
+    const cleanName = tacticName.toString().trim().replace(/\s+/g, '');
+    return tacticDogamData.find(t => t && t.name && t.name.toString().trim().replace(/\s+/g, '') === cleanName) || null;
 };
 
 // ==========================================================================
@@ -92,7 +99,6 @@ window.getAllTacticsFromDogam = function() {
 // ==========================================================================
 let currentTacticState = [];
 
-// [로직 교정] 공백 무시 절대 매핑 및 불리언 이중 부정(!!) 적용
 function loadTacticData() {
     const defaultNames = tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
     let savedTactics = [];
@@ -184,23 +190,22 @@ function renderTacticDogamUI() {
     renderTacticGrid();
 }
 
+// [경량화] DOM 노드 생성 반복문 제거 및 map().join('') 고속 체이닝 렌더러 적용
+// [이벤트 위임] 개별 카드 리스너 대신 #tactic-card-grid 단일 이벤트 위임 적용
 function renderTacticGrid() {
     const gridContainer = document.getElementById('tactic-card-grid');
     const countBadge = document.getElementById('tactic-count-badge');
-    if(!gridContainer) return;
+    if (!gridContainer) return;
 
-    gridContainer.innerHTML = '';
-    
     const ownedCount = currentTacticState.filter(t => t.isOwned).length;
     const totalCount = currentTacticState.length;
     
-    if(countBadge) {
+    if (countBadge) {
         countBadge.innerHTML = `보유율: <span style="color: #38bdf8; font-size: 18px;">${ownedCount}</span> / ${totalCount}`;
     }
 
-    currentTacticState.forEach(tactic => {
-        const card = document.createElement('div');
-        card.style.cssText = `
+    gridContainer.innerHTML = currentTacticState.map(tactic => `
+        <div class="tactic-card-item" data-tactic-name="${tactic.name}" style="
             background-color: ${tactic.isOwned ? '#1c1c1c' : '#111'};
             border: 1px solid ${tactic.isOwned ? '#a855f7' : '#2d2d2d'};
             border-top: 5px solid #7b2cb0;
@@ -215,14 +220,8 @@ function renderTacticGrid() {
             box-sizing: border-box;
             min-height: 130px;
             box-shadow: ${tactic.isOwned ? '0 0 12px rgba(168, 85, 247, 0.15)' : 'none'};
-        `;
-        
-        if (!tactic.isOwned) {
-            card.style.opacity = '0.4';
-            card.style.filter = 'grayscale(100%)';
-        }
-
-        card.innerHTML = `
+            ${!tactic.isOwned ? 'opacity: 0.4; filter: grayscale(100%);' : ''}
+        ">
             <div style="font-size: 18px; font-weight: bold; color: ${tactic.isOwned ? '#fff' : '#888'}; margin-bottom: 8px; letter-spacing: 1px;">${tactic.name}</div>
             <div style="font-size: 11px; margin-bottom: 8px; color: #bbb;">
                 <span style="color: #feca57; font-weight: bold;">역할:</span> ${tactic.type} &nbsp;|&nbsp; <span style="color: #feca57; font-weight: bold;">대상:</span> ${tactic.target}
@@ -233,11 +232,17 @@ function renderTacticGrid() {
             <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${tactic.isOwned ? '#a855f7' : '#333'}; color: ${tactic.isOwned ? '#fff' : '#777'}; font-weight: bold;">
                 ${tactic.isOwned ? '보유' : '미보유'}
             </div>
-        `;
-        
-        card.addEventListener('click', () => toggleTacticOwnership(tactic.name));
-        gridContainer.appendChild(card);
-    });
+        </div>
+    `).join('');
+
+    // 상위 그리드 컨테이너에 단 1개의 이벤트 리스너를 위임하여 GC 부하 소거
+    gridContainer.onclick = function(e) {
+        const card = e.target.closest('.tactic-card-item');
+        if (card) {
+            const name = card.getAttribute('data-tactic-name');
+            if (name) toggleTacticOwnership(name);
+        }
+    };
 }
 
 function initTacticDogamEngine() {
