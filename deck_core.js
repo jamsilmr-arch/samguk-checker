@@ -64,7 +64,7 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","모략 피해 감소","박산로","치유 효과 부여","UNIT_DMG_RED"]
 };
 
-// [스크린샷 공식 명세 100% 동기화] 병종 편성 시 발동 규칙으로 정규화 (대상 단어 삭제)
+// [스크린샷 공식 명세 100% 동기화] 병종 편성 시 발동 규칙으로 정규화
 const internalMasterEquipmentMap = {
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "무용 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 피해 감소" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
@@ -140,16 +140,21 @@ const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)",
 // ==========================================================================
 // LAYER 2: 통합 수치 연산 엔진 (스크린샷 공식 명세 100% 매칭 및 연동)
 // ==========================================================================
-function getOfficerEquipment(officerName, deckUnitType = "방패병") {
-    const unitPrefix = deckUnitType && deckUnitType !== "자동 판별" ? deckUnitType : "방패병";
+function getOfficerEquipment(officerName, deckUnitType = "") {
+    const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
     if (internalMasterEquipmentMap[officerName]) {
         const eq = JSON.parse(JSON.stringify(internalMasterEquipmentMap[officerName]));
         ['helmet', 'armor', 'accessory'].forEach(part => {
             ['attr1', 'attr2'].forEach(attr => {
-                if (eq[part][attr].includes(" 피해 ")) {
-                    eq[part][attr] = eq[part][attr].replace(/(창병|기병|궁병|방패병)\s+피해\s+/, `${unitPrefix} 피해 `);
-                } else if (eq[part][attr].includes("병 ")) {
-                    eq[part][attr] = eq[part][attr].replace(/(창병|기병|궁병|방패병)\s*/, `${unitPrefix} `);
+                let val = eq[part][attr];
+                if (val.match(/(창병|기병|궁병|방패병)/)) {
+                    val = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
+                    if (unitPrefix === "창병") {
+                        val = val.replace("강공, 기습 증가", "강공, 기습 상승");
+                    } else {
+                        val = val.replace("강공, 기습 상승", "강공, 기습 증가");
+                    }
+                    eq[part][attr] = val.trim();
                 }
             });
         });
@@ -157,10 +162,11 @@ function getOfficerEquipment(officerName, deckUnitType = "방패병") {
     }
     const profileId = OFFICER_MASTER[officerName]?.[3] || "PHYS_CARRY";
     const p = EQ_PRESETS[profileId];
+    let attr8 = p[8] === "UNIT_DMG_RED" ? `${unitPrefix} 피해 감소` : p[8];
     return {
         helmet: { name: p[0], attr1: p[1], attr2: p[2] },
         armor:  { name: p[3], attr1: p[4], attr2: p[5] },
-        accessory: { name: p[6], attr1: p[7], attr2: p[8] === "UNIT_DMG_RED" ? `${unitPrefix} 피해 감소` : p[8] }
+        accessory: { name: p[6], attr1: p[7], attr2: attr8 }
     };
 }
 
@@ -175,13 +181,17 @@ function getOfficerDogamData(officerName) {
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : [...internalMasterTacticNames]) : [...internalMasterTacticNames];
 const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : [...internalMasterOfficerNames]) : [...internalMasterOfficerNames];
 
-// [핵심 교정] 스크린샷 산식 반영: 출정 병종과 장비 옵션 병종이 일치할 때만 스탯 가산
+// [핵심 교정] AI 메타 아키텍처 기반 동적 출정 병종 연동 및 스탯 가산 엔진
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
     if (!officer || !officer.name) return null;
     const hName = officer.name.trim();
     const stats = { damageTakenRed: 0, damageDealtInc: 0, strategyDmg: 0, physicalDmg: 0, healGiven: 0, leech: 0, comboRate: 0, activeRate: 0, armorPen: 0 };
     
+    const curNames = deck.officers.map(o => o?.name?.trim()).filter(Boolean);
+    const matchMeta = getBestMetaMatch(curNames);
+    const currentDeckUnit = (deck.unitType && deck.unitType !== "자동 판별") ? deck.unitType : (matchMeta?.bestMeta ? metaDeckUnitTypeMap[matchMeta.bestMeta.id] : "창병");
+
     const statKeywordMap = { 
         "피해 감소": "damageTakenRed", "피감": "damageTakenRed", 
         "피해 가함": "damageDealtInc", "피해증가": "damageDealtInc", "피증": "damageDealtInc", 
@@ -196,13 +206,11 @@ function aggregateIntegratedStats(deck, officerIndex) {
         if (!textObj) return;
         const text = typeof textObj === 'string' ? textObj : textObj.toString();
         
-        // 병종 전용 속성 필터링 (예: '창병 피해 감소')
         const unitMatch = text.match(/(창병|궁병|방패병|기병)/);
         if (unitMatch) {
             const requiredUnit = unitMatch[1];
-            const currentDeckUnit = deck.unitType || "창병";
             if (requiredUnit !== currentDeckUnit && currentDeckUnit !== "자동 판별") {
-                return; // 부대 출정 병종과 불일치 시 0% 처리
+                return;
             }
         }
 
@@ -216,14 +224,11 @@ function aggregateIntegratedStats(deck, officerIndex) {
         }
     }
 
-    const dType = deck.unitType || "창병";
-    const eq = getOfficerEquipment(hName, dType);
+    const eq = getOfficerEquipment(hName, currentDeckUnit);
     if (eq) { ['helmet', 'armor', 'accessory'].forEach(part => { parseAndAdd(eq[part].attr1); parseAndAdd(eq[part].attr2); }); }
 
-    const curNames = deck.officers.map(o => o?.name?.trim()).filter(Boolean);
     internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(n)).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(n))).size >= (r.req===3?2:1)).forEach(bond => parseAndAdd(bond.effect));
 
-    const matchMeta = getBestMetaMatch(curNames);
     const hA = metaHawkRandomAttributesMap[matchMeta?.bestMeta?.id || "custom"];
     if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
@@ -473,7 +478,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (장비 공식 설명 팝업 엔진 연동)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -481,6 +486,7 @@ let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 window.showTacticPopup = function(e, tacticName) {
     if(!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
     if(e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
+    e.stopPropagation();
 
     let popup = document.getElementById('tactic-popup-modal');
     if(!popup) {
@@ -488,7 +494,7 @@ window.showTacticPopup = function(e, tacticName) {
         popup.id = 'tactic-popup-modal';
         document.body.appendChild(popup);
         document.addEventListener('click', (evt) => {
-            if(!evt.target.closest('.tactic-row') && !evt.target.closest('#tactic-popup-modal')) popup.style.display = 'none';
+            if(!evt.target.closest('.tactic-row') && !evt.target.closest('.eq-attr') && !evt.target.closest('#tactic-popup-modal')) popup.style.display = 'none';
         });
     }
 
@@ -513,6 +519,41 @@ window.showTacticPopup = function(e, tacticName) {
     popup.style.top = top + 'px'; popup.style.left = left + 'px';
 };
 
+// [신설] 장비 옵션 클릭 시 EQUIP_ATTR_DESCRIPTIONS 공식 사전 즉시 모달 렌더링
+window.showEquipPopup = function(e, attr1, attr2) {
+    e.stopPropagation();
+    let popup = document.getElementById('tactic-popup-modal');
+    if(!popup) {
+        popup = document.createElement('div');
+        popup.id = 'tactic-popup-modal';
+        document.body.appendChild(popup);
+        document.addEventListener('click', (evt) => {
+            if(!evt.target.closest('.tactic-row') && !evt.target.closest('.eq-attr') && !evt.target.closest('#tactic-popup-modal')) popup.style.display = 'none';
+        });
+    }
+
+    const getDesc = attr => {
+        if (EQUIP_ATTR_DESCRIPTIONS[attr]) return EQUIP_ATTR_DESCRIPTIONS[attr];
+        const alt1 = attr.replace("상승", "증가");
+        if (EQUIP_ATTR_DESCRIPTIONS[alt1]) return EQUIP_ATTR_DESCRIPTIONS[alt1];
+        const alt2 = attr.replace("증가", "상승");
+        if (EQUIP_ATTR_DESCRIPTIONS[alt2]) return EQUIP_ATTR_DESCRIPTIONS[alt2];
+        return "상세 데이터 미등록 (도감 연동 필요)";
+    };
+
+    popup.innerHTML = `<div class="p-title" style="color:#38bdf8;">⚒️ 장비 추가 속성 설명</div>
+        <div class="p-meta" style="color:#facc15; margin-top:6px;">🔹 1차: ${attr1}</div>
+        <div class="p-desc" style="margin-bottom:8px;">${getDesc(attr1)}</div>
+        <div class="p-meta" style="color:#facc15;">🔹 2차: ${attr2}</div>
+        <div class="p-desc">${getDesc(attr2)}</div>`;
+    popup.style.display = 'block';
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    let top = rect.top + window.scrollY - 10, left = rect.right + window.scrollX + 10;
+    if (left + 280 > window.innerWidth) left = rect.left + window.scrollX - 290;
+    popup.style.top = top + 'px'; popup.style.left = left + 'px';
+};
+
 const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
@@ -528,7 +569,8 @@ const injectCustomUIStyles = () => {
         .equipment-box { margin-top: 6px; padding: 6px; border: 1px solid #334155; border-radius: 4px; background-color: #0f172a; font-size: 11px; }
         .equipment-box .eq-item { margin-bottom: 2px; color: #cbd5e1; }
         .equipment-box .eq-item:last-child { margin-bottom: 0; }
-        .equipment-box .eq-attr { color: #64748b; font-size: 10px; margin-left: 4px; }
+        .equipment-box .eq-attr { color: #38bdf8; font-size: 10px; margin-left: 4px; cursor: pointer; transition: color 0.2s; }
+        .equipment-box .eq-attr:hover { color: #facc15; }
         .integrated-stats-box { margin-top: 6px; padding: 8px; border-radius: 4px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #475569; font-size: 11px; font-family: monospace; }
         .integrated-stats-box .istats-title { color: #facc15; font-weight: bold; margin-bottom: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .integrated-stats-box .istats-content { color: #e2e8f0; line-height: 1.6; }
@@ -648,7 +690,11 @@ function renderDeckBuilder() {
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
-                const eqH = eq ? `<div class="equipment-box"><div class="eq-item">🪖 ${eq.helmet.name} <span class="eq-attr">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div><div class="eq-item">🛡️ ${eq.armor.name} <span class="eq-attr">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div><div class="eq-item">📿 ${eq.accessory.name} <span class="eq-attr">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div></div>` : '';
+                const eqH = eq ? `<div class="equipment-box">
+                    <div class="eq-item">🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}')" style="cursor:pointer; text-decoration:underline; text-underline-offset:2px;" title="클릭하여 공식 명세 보기">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div>
+                    <div class="eq-item">🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}')" style="cursor:pointer; text-decoration:underline; text-underline-offset:2px;" title="클릭하여 공식 명세 보기">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div>
+                    <div class="eq-item">📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}')" style="cursor:pointer; text-decoration:underline; text-underline-offset:2px;" title="클릭하여 공식 명세 보기">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div>
+                </div>` : '';
                 const intStats = cName ? aggregateIntegratedStats(deck, oIdx) : null;
                 const intStatsH = buildIntegratedStatsHtml(intStats);
 
