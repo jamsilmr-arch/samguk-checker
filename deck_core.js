@@ -1,9 +1,9 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 연동 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 3단 폴백 연동 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 전법 마스터 사전 바인딩
 // ==========================================================================
-// [이관 완료] TACTIC_MASTER_DESC 사전은 tactic_dogam.js로 통합 이전되어 약 70줄 압축되었습니다.
+// [이관 완료] EQUIP_ATTR_DESCRIPTIONS 및 internalMasterEquipmentMap 사전은 guide.js와 dogam.js로 각각 통합 이전되었습니다.
 
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -32,40 +32,6 @@ const EQ_PRESETS = {
     TANK_COUNTER:["연함규","피해 감소","창병 피해 가함","청등갑","피해 감소","창병 피해 감소","사남패","피해 감소","창병 배반, 공심 상승"],
     SUPPORT_HEAL:["연함규","피해 감소","치유 효과 부여","청등갑","피해 감소","창병 치유 효과 상승","사남패","치유 효과 받음","창병 피해 감소"],
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
-};
-
-const internalMasterEquipmentMap = {
-    "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" } },
-    "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
-    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "장합": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
-    "하후돈": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승" } },
-    "악진": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "기병 피해 감소" } },
-    "전위": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "정욱": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
-    "사마의": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" } },
-    "하후연": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승" } },
-    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 배반, 공심 상승" } },
-    "동탁": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
-    "원소": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
-    "여포": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "궁병 배반, 공심 상승" } },
-    "제갈량": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "황충": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 배반, 공심 상승" } },
-    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승" } },
-    "좌자": { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" } },
-    "장녕": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
-    "우길": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
-    "손권": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "손권(제왕)": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승" } },
-    "육항": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "노숙": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
-    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "관우": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
-    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" } },
-    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
-    "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
 const tacticAlternativesMap = {"간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조"],"횡징폭렴":["간담상조","동구적개","동장철벽"],"동장철벽":["간담상조","견불가최","천시지리","동구적개"],"전위위안":["간담상조","태청단경","현호제세","제곤부위"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["간담상조","태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"안영찰채":["간담상조","위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"],"이아환아":["금철교명","동장철벽"],"제곤부위":["태청단경","현호제세"],"금낭묘계":["만천과해","태청단경"]};
@@ -127,15 +93,21 @@ const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)",
 // ==========================================================================
 // LAYER 2: 통합 수치 연산 엔진 (방어/공격 키워드 충돌 100% 소거 및 정규화)
 // ==========================================================================
+// [고도화] 장비 매핑 3단 폴백(Dogam -> Guide -> Presets) 파이프라인
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
-    const rawEq = internalMasterEquipmentMap[officerName];
+    
+    let rawEq = window.getOfficerEquipmentFromDogam ? window.getOfficerEquipmentFromDogam(officerName) : null;
+    if (!rawEq && window.getEquipmentRecommendationFromGuide) {
+        rawEq = window.getEquipmentRecommendationFromGuide(officerName);
+    }
+
     if (rawEq) {
         const eq = { helmet: { ...rawEq.helmet }, armor: { ...rawEq.armor }, accessory: { ...rawEq.accessory } };
         ['helmet', 'armor', 'accessory'].forEach(part => {
             ['attr1', 'attr2'].forEach(attr => {
                 let val = eq[part][attr];
-                if (val.match(/(창병|기병|궁병|방패병)/)) {
+                if (val && val.match(/(창병|기병|궁병|방패병)/)) {
                     val = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
                     eq[part][attr] = val.replace(unitPrefix === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", unitPrefix === "창병" ? "강공, 기습 상승" : "강공, 기습 증가").trim();
                 }
@@ -492,7 +464,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (도감 3단 폴백 연계 종결 엔진)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (3단 다중 도감 폴백 연계 종결 팝업)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -521,7 +493,7 @@ function openModalPopup(e, title, meta1, desc1, meta2 = null, desc2 = null) {
     modalPopupEl.style.left = `${left}px`;
 }
 
-// [고도화] DOM 스크래핑 철거 -> 3단 다중 폴백(전법 도감 -> 장수 도감 -> 내장 사전) 동기식 연계
+// [고도화] 전법 도감 -> 장수 도감 -> 연산 추정치 3단 폴백 파이프라인 결선
 window.showTacticPopup = function(e, tacticName) {
     if (!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
@@ -529,10 +501,10 @@ window.showTacticPopup = function(e, tacticName) {
     const cleanName = cStr(tacticName);
     let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
 
-    // 1차: 일반 전법 도감 API 조회
+    // 1차: 전법 도감 API 조회 (일반 전법 및 이관된 고유 전법 사전 커버)
     let tData = window.getTacticDataFromDogam ? window.getTacticDataFromDogam(tacticName) : null;
     
-    // 2차: 장수 도감 API 조회 (무장 고유 전법인 경우 대응)
+    // 2차: 장수 도감 API 조회 (미등록된 고유 전법 동적 탐색)
     if (!tData && window.getAllOfficerNamesFromDogam && window.getOfficerDataFromDogam) {
         const allOfficers = window.getAllOfficerNamesFromDogam();
         for (let offName of allOfficers) {
@@ -565,8 +537,9 @@ window.showTacticPopup = function(e, tacticName) {
     openModalPopup(e, `⭐ ${tacticName}`, `타입: ${pRole} | 대상: ${pTarget}`, pDesc);
 };
 
+// [고도화] 장비 사전 가이드 연동 폴백 엔진 바인딩
 window.showEquipPopup = function(e, attr1, attr2) {
-    const getDesc = attr => EQUIP_ATTR_DESCRIPTIONS[attr] || EQUIP_ATTR_DESCRIPTIONS[attr.replace("상승", "증가")] || EQUIP_ATTR_DESCRIPTIONS[attr.replace("증가", "상승")] || "상세 데이터 미등록 (도감 연동 필요)";
+    const getDesc = attr => window.getEquipDescFromGuide ? window.getEquipDescFromGuide(attr) : "상세 데이터 미등록 (가이드 연동 필요)";
     openModalPopup(e, "⚒️ 장비 추가 속성 설명", `🔹 1차: ${attr1}`, getDesc(attr1), `🔹 2차: ${attr2}`, getDesc(attr2));
 };
 
