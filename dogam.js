@@ -1,6 +1,6 @@
-console.log("[시스템 분석] dogam.js 추천 장비 1·2차 속성 전수 주입 및 전용 뷰어 엔진 기동");
+console.log("[시스템 분석] dogam.js 추천 장비 및 종결 전법 1·2차 속성 전수 주입 엔진 기동");
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼 (TDZ 호이스팅 방지를 위해 최상단 선언)
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
@@ -72,7 +72,7 @@ const heroDogamData = [
 ];
 
 // ==========================================================================
-// LAYER 2: 55명 전체 무장 추천 장비 및 1·2차 속성 마스터 딕셔너리
+// LAYER 2: 55명 전체 무장 추천 장비(1·2차 속성) 및 종결 추천 전법(2~3번 슬롯) 사전
 // ==========================================================================
 const officerEquipmentMasterMap = {
     // 위나라 (13명 전수)
@@ -139,8 +139,74 @@ const officerEquipmentMasterMap = {
     "화타": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } }
 };
 
+// [신설] 55명 전체 무장 추천 종결 전법 2개씩(2~3번 슬롯) 마스터 딕셔너리
+const officerTacticMasterMap = {
+    // 위나라 (13명)
+    "가후": ["혼수모어", "위위구조"],
+    "곽가": ["간담상조", "강유겸제"],
+    "사마의": ["수상개화", "화소적벽"],
+    "순욱": ["간담상조", "강유겸제"],
+    "악진": ["기문둔갑", "선등함진"],
+    "전위": ["이아환아", "동장철벽"],
+    "정욱": ["사면초가", "심모원려"],
+    "조조(제왕)": ["이퇴위진", "혼수모어"],
+    "조조": ["간담상조", "강유겸제"],
+    "장료": ["만전제발", "사면초가"],
+    "장합": ["간담상조", "강유겸제"],
+    "하후돈": ["이아환아", "동장철벽"],
+    "하후연": ["일고작기", "암전난방"],
+
+    // 촉나라 (14명)
+    "관우": ["만전제발", "선등함진"],
+    "강유": ["천리추격", "반객위주"],
+    "마대": ["일고작기", "만전제발"],
+    "마초": ["용맹무쌍", "만전제발"],
+    "서서": ["문치무공", "전위위안"],
+    "사마가": ["만전제발", "용왕직전"],
+    "위연": ["이아환아", "홍수첨향"],
+    "유비": ["혼수모어", "이퇴위진"],
+    "유비(제왕)": ["간담상조", "금낭묘계"],
+    "장비": ["제곤부위", "이아환아"],
+    "제갈량": ["간담상조", "여자동포"],
+    "조운": ["이아환아", "횡징폭렴"],
+    "황충": ["축세대발", "인세이도"],
+    "황월영": ["간담상조", "혼수모어"],
+
+    // 오나라 (15명)
+    "대교": ["간담상조", "동장철벽"],
+    "노숙": ["분성지계", "여자동포"],
+    "소교": ["간담상조", "위위구조"],
+    "손견": ["이아환아", "동장철벽"],
+    "손권": ["일고작기", "용왕직전"],
+    "손상향": ["일고작기", "천리추격"],
+    "손책": ["용맹무쌍", "일고작기"],
+    "손권(제왕)": ["이퇴위진", "강유겸제"],
+    "여몽": ["화소적벽", "기문둔갑"],
+    "육손": ["화소적벽", "사면초가"],
+    "육항": ["간담상조", "위위구조"],
+    "주유": ["화소적벽", "요사여신"],
+    "주태": ["이아환아", "동장철벽"],
+    "정보": ["간담상조", "동구적개"],
+    "황개": ["화소적벽", "횡소천군"],
+
+    // 군진영 (13명)
+    "공손찬": ["극적제승", "암전난방"],
+    "동탁": ["횡징폭렴", "운주유악"],
+    "안량": ["만전제발", "용왕직전"],
+    "여포": ["만부막적", "용왕직전"],
+    "우길": ["사면초가", "심모원려"],
+    "원소": ["간담상조", "위위구조"],
+    "장각": ["사면초가", "화소적벽"],
+    "장녕": ["사면초가", "기문둔갑"],
+    "장보": ["화소적벽", "요사여신"],
+    "좌자": ["간담상조", "혼수모어"],
+    "채문희": ["간담상조", "강유겸제"],
+    "초선": ["혼수모어", "위위구조"],
+    "화타": ["간담상조", "휴양생식"]
+};
+
 // ==========================================================================
-// LAYER 3: API 브릿지 개방 구역 (deck_core.js 100% 동기화)
+// LAYER 3: API 브릿지 개방 구역 (deck_core.js 100% 동기화 및 전법 추천 브릿지 신설)
 // ==========================================================================
 window.getAllOfficerNamesFromDogam = function() {
     return heroDogamData.map(h => h.name).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -158,6 +224,12 @@ window.getOfficerDataFromDogam = function(officerName) {
 window.getOfficerEquipmentFromDogam = function(officerName) {
     if (!officerName) return null;
     return officerEquipmentMasterMap[cStr(officerName)] || officerEquipmentMasterMap[officerName] || null;
+};
+
+// [신설] 무장별 추천 종결 전법 2개를 즉시 반환하는 O(1) 해시 브릿지
+window.getOfficerRecommendedTacticsFromDogam = function(officerName) {
+    if (!officerName) return ["간담상조", "동장철벽"];
+    return officerTacticMasterMap[cStr(officerName)] || officerTacticMasterMap[officerName] || ["간담상조", "동장철벽"];
 };
 
 // ==========================================================================
@@ -308,7 +380,7 @@ function renderDogamGrid() {
                 <div><span style="color: #a855f7; margin-right: 4px;">⚡ 속도:</span><span style="color: #fff; font-weight:bold;">${hero.stats.speed}</span></div>
             </div>` : '';
 
-        // [신설] 무장 적성 병종 기반 추천 장비 동적 정규화 파싱 및 뷰어 박스 렌더링
+        // [장비 연산] 무장 적성 병종 기반 추천 장비 동적 정규화 파싱
         const primaryUnit = hero.unit && hero.unit !== "-" ? hero.unit.split('/')[0] : "방패병";
         const rawEq = officerEquipmentMasterMap[hero.name] || officerEquipmentMasterMap[cStr(hero.name)] || {
             helmet: { name: "진현관", attr1: "피해 감소", attr2: `${primaryUnit} 피해 가함` },
@@ -327,12 +399,27 @@ function renderDogamGrid() {
         });
 
         const equipHtml = `
-            <div style="background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 4px; padding: 8px; margin-bottom: 10px; font-size: 11px;">
+            <div style="background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 11px;">
                 <div style="color: #feca57; font-weight: bold; margin-bottom: 4px;">🛠️ 추천 장비 및 세련 속성</div>
                 <div style="display: flex; flex-direction: column; gap: 3px; color: #ccc;">
                     <div>🪖 <span style="color: #fff; font-weight:bold;">${eq.helmet.name}</span> <span style="color: #38bdf8;">[${eq.helmet.attr1} / ${eq.helmet.attr2}]</span></div>
                     <div>🛡️ <span style="color: #fff; font-weight:bold;">${eq.armor.name}</span> <span style="color: #38bdf8;">[${eq.armor.attr1} / ${eq.armor.attr2}]</span></div>
                     <div>📿 <span style="color: #fff; font-weight:bold;">${eq.accessory.name}</span> <span style="color: #38bdf8;">[${eq.accessory.attr1} / ${eq.accessory.attr2}]</span></div>
+                </div>
+            </div>`;
+
+        // [신설] 무장별 추천 종결 전법 2개(2~3번 슬롯) 매핑 및 터치 팝업 연동 뷰어 박스
+        const recTacs = officerTacticMasterMap[hero.name] || officerTacticMasterMap[cStr(hero.name)] || ["간담상조", "동장철벽"];
+        const tacticHtml = `
+            <div style="background-color: rgba(168,85,247,0.08); border: 1px solid #44315f; border-left: 3px solid #a855f7; border-radius: 4px; padding: 8px; margin-bottom: 10px; font-size: 11px;">
+                <div style="color: #c084fc; font-weight: bold; margin-bottom: 4px;">📜 추천 전법 (2~3번 슬롯)</div>
+                <div style="display: flex; flex-direction: column; gap: 3px; color: #ccc;">
+                    <div style="cursor:pointer;" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[0]}')" title="클릭하여 전법 설명 보기">
+                        🔸 2번 슬롯: <span style="color: #fff; font-weight:bold; text-decoration:underline; text-underline-offset:2px;">${recTacs[0]}</span>
+                    </div>
+                    <div style="cursor:pointer;" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[1]}')" title="클릭하여 전법 설명 보기">
+                        🔸 3번 슬롯: <span style="color: #fff; font-weight:bold; text-decoration:underline; text-underline-offset:2px;">${recTacs[1]}</span>
+                    </div>
                 </div>
             </div>`;
 
@@ -350,7 +437,7 @@ function renderDogamGrid() {
                 flex-direction: column;
                 justify-content: flex-start;
                 box-sizing: border-box;
-                min-height: 160px;
+                min-height: 180px;
                 box-shadow: ${hero.isOwned ? '0 0 12px rgba(74, 222, 128, 0.15)' : 'none'};
                 ${!hero.isOwned ? 'opacity: 0.4; filter: grayscale(100%);' : ''}
             ">
@@ -372,6 +459,7 @@ function renderDogamGrid() {
                 
                 ${statsHtml}
                 ${equipHtml}
+                ${tacticHtml}
 
                 <div style="background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 8px; font-size: 11px; line-height: 1.5; margin-top: auto;">
                     <div style="color: #38bdf8; font-weight: bold; margin-bottom: 3px;">고유: ${hero.skill}</div>
