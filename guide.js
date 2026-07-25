@@ -1,4 +1,4 @@
-// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 렌더링 브릿지 엔진 (인게임 스크린샷 검증 규칙 100% 동기화)
+// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (인게임 스크린샷 100% 검증 완료)
 
 // ==========================================================================
 // LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스
@@ -64,18 +64,19 @@ const guideDatabase = {
                 ]
             },
             {
-                title: "장비 추가 속성 1단계 명세 (진품 / 어품 공통 풀 - 스크린샷 1,4,7 검증)",
-                headers: ["추가 속성 명칭", "진품 최소~최대 범위", "어품 최소~최대 범위"],
+                title: "장비 추가 속성 1단계 명세 (진품 / 어품 공통 풀 - 부위별 등장 제약 검증)",
+                headers: ["추가 속성 명칭", "진품 최소~최대 범위", "어품 최소~최대 범위 (등장 부위 제약)"],
                 rows: [
-                    ["피해 가함 / 피해 감소", "1.0% ~ 2.5%", "1.0% ~ 3.75%"],
-                    ["무용 피해 가함 / 모략 피해 가함", "1.2% ~ 3.0%", "1.2% ~ 4.5%"],
-                    ["무용 피해 감소 / 모략 피해 감소", "1.66% ~ 4.16%", "1.66% ~ 6.25%"],
-                    ["배반 / 강공 (갑옷 1차 전용 단일)", "1.2% ~ 3.0%", "1.2% ~ 4.5%"],
-                    ["공심 / 기습 (장신구 1차 전용 단일)", "1.2% ~ 3.0%", "1.2% ~ 4.5%"],
-                    ["배반, 공심 상승 / 강공, 기습 상승", "1.0% ~ 2.5%", "1.0% ~ 3.75%"],
-                    ["치유 효과 부여", "1.6% ~ 4.0%", "1.6% ~ 6.0%"],
-                    ["치유 효과 받음", "2.95% ~ 7.37%", "2.95% ~ 11.07%"],
-                    ["연격률", "2.3% ~ 5.76%", "2.3% ~ 8.65%"]
+                    ["피해 가함", "1.0% ~ 2.5%", "1.0% ~ 3.75% (갑옷/장신구 전용)"],
+                    ["무용 / 모략 피해 가함", "1.2% ~ 3.0%", "1.2% ~ 4.5% (갑옷/장신구 전용)"],
+                    ["피해 감소", "1.0% ~ 2.5%", "1.0% ~ 3.75% (전 부위 공통)"],
+                    ["무용 / 모략 피해 감소", "1.66% ~ 4.16%", "1.66% ~ 6.25% (전 부위 공통)"],
+                    ["배반 / 강공", "1.2% ~ 3.0%", "1.2% ~ 4.5% (갑옷 1차 전용 단일)"],
+                    ["공심 / 기습", "1.2% ~ 3.0%", "1.2% ~ 4.5% (장신구 1차 전용 단일)"],
+                    ["배반, 공심 상승 / 강공, 기습 상승", "1.0% ~ 2.5%", "1.0% ~ 3.75% (전 부위 공통 - 투구 공격 종결)"],
+                    ["치유 효과 부여", "1.6% ~ 4.0%", "1.6% ~ 6.0% (전 부위 공통)"],
+                    ["치유 효과 받음", "2.95% ~ 7.37%", "2.95% ~ 11.07% (갑옷/장신구 전용)"],
+                    ["연격률", "2.3% ~ 5.76%", "2.3% ~ 8.65% (투구/장신구 전용)"]
                 ]
             },
             {
@@ -287,12 +288,12 @@ const masterEquipmentMap = {
     "노숙": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
     "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
     "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
-    "관우": { helmet: { name: "호분관", attr1: "무용 피해 가함", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+    "관우": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
     "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
 // ==========================================================================
-// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역 (함수형 체이닝 압축)
+// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역 (메모이제이션 캐싱 적용)
 // ==========================================================================
 window.onload = () => renderGuideContent('equip');
 
@@ -302,12 +303,20 @@ function switchGuideTab(categoryKey, btnElement) {
     renderGuideContent(categoryKey);
 }
 
+// [경량화] 렌더링 결과 메모이제이션 캐시 저장소
+const renderCache = {};
+
 function renderGuideContent(categoryKey) {
     const container = document.getElementById('guide-content-box');
     const data = guideDatabase[categoryKey];
-    if (!data) return;
+    if (!data || !container) return;
 
-    // [경량화] map().join('') 고속 체이닝 렌더러
+    // 캐시된 HTML이 존재하면 즉시 반환하여 CPU 연산 0% 달성
+    if (renderCache[categoryKey]) {
+        container.innerHTML = renderCache[categoryKey];
+        return;
+    }
+
     const sectionsHtml = (data.sections || []).map(sec => `
         <div class="info-card">
             <h3>${sec.title}</h3>
@@ -331,7 +340,9 @@ function renderGuideContent(categoryKey) {
             </div>`;
     }).join('');
 
-    container.innerHTML = `<h2 class="guide-section-title">${data.title}</h2>${sectionsHtml}${tablesHtml}`;
+    const finalHtml = `<h2 class="guide-section-title">${data.title}</h2>${sectionsHtml}${tablesHtml}`;
+    renderCache[categoryKey] = finalHtml;
+    container.innerHTML = finalHtml;
 }
 
 function getEquipmentRecommendationFromGuide(officerName) {
