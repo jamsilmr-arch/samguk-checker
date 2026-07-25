@@ -1,6 +1,6 @@
-console.log("[시스템 분석] dogam.js 장비·전법 통합 마스터 데이터베이스 및 고속 해시 렌더러 기동");
+console.log("[시스템 분석] dogam.js 통합 마스터 데이터베이스 및 고속 해시 렌더러 기동");
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼 (TDZ 호이스팅 방지를 위해 최상단 선언)
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
@@ -352,6 +352,46 @@ heroDogamData.forEach(h => {
     if (h?.name) masterHeroLookupMap[cStr(h.name)] = h;
 });
 
+// [경량화] 인라인 스타일 철거 및 동적 CSS 클래스 단일 주입 엔진
+const injectDogamStyles = () => {
+    if (document.getElementById('dogam-custom-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'dogam-custom-styles';
+    style.innerHTML = `
+        .dogam-card-item { background-color: #111; border: 1px solid #2d2d2d; border-radius: 6px; padding: 15px 20px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: flex-start; box-sizing: border-box; min-height: 180px; opacity: 0.4; filter: grayscale(100%); }
+        .dogam-card-item.owned { background-color: #1c1c1c; border-color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.15); opacity: 1; filter: grayscale(0%); }
+        .dogam-card-item.wei { border-top: 5px solid #2270b5; }
+        .dogam-card-item.shu { border-top: 5px solid #b82d2d; }
+        .dogam-card-item.wu { border-top: 5px solid #2a9d8f; }
+        .dogam-card-item.qun { border-top: 5px solid #cd9b33; }
+        .dogam-card-item .d-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .dogam-card-item .d-name { font-size: 18px; font-weight: bold; color: #888; letter-spacing: 1px; }
+        .dogam-card-item.owned .d-name { color: #fff; }
+        .dogam-card-item .d-faction { font-size: 11px; font-weight: bold; }
+        .dogam-card-item.wei .d-faction { color: #2270b5; }
+        .dogam-card-item.shu .d-faction { color: #b82d2d; }
+        .dogam-card-item.wu .d-faction { color: #2a9d8f; }
+        .dogam-card-item.qun .d-faction { color: #cd9b33; }
+        .dogam-card-item .d-status { font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: #333; color: #777; font-weight: bold; white-space: nowrap; }
+        .dogam-card-item.owned .d-status { background-color: #28a745; color: #fff; }
+        .dogam-card-item .d-meta { display: flex; gap: 12px; font-size: 11px; color: #bbb; margin-bottom: 4px; }
+        .dogam-card-item .d-meta span { color: #feca57; font-weight: bold; }
+        .dogam-card-item .d-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background-color: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 4px; padding: 8px; margin: 10px 0; font-size: 11px; }
+        .dogam-card-item .d-equip { background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 11px; }
+        .dogam-card-item .d-equip-title { color: #feca57; font-weight: bold; margin-bottom: 4px; }
+        .dogam-card-item .d-equip-list { display: flex; flex-direction: column; gap: 3px; color: #ccc; }
+        .dogam-card-item .d-tactic { background-color: rgba(168,85,247,0.08); border: 1px solid #44315f; border-left: 3px solid #a855f7; border-radius: 4px; padding: 8px; margin-bottom: 10px; font-size: 11px; }
+        .dogam-card-item .d-tactic-title { color: #c084fc; font-weight: bold; margin-bottom: 4px; }
+        .dogam-card-item .d-tactic-list { display: flex; flex-direction: column; gap: 3px; color: #ccc; }
+        .dogam-card-item .d-tactic-item { cursor: pointer; }
+        .dogam-card-item .d-tactic-item span { color: #fff; font-weight: bold; text-decoration: underline; text-underline-offset: 2px; }
+        .dogam-card-item .d-desc { background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 8px; font-size: 11px; line-height: 1.5; margin-top: auto; }
+        .dogam-card-item .d-desc-title { color: #38bdf8; font-weight: bold; margin-bottom: 3px; }
+        .dogam-card-item .d-desc-text { color: #ddd; word-break: keep-all; }
+    `;
+    document.head.appendChild(style);
+};
+
 // ==========================================================================
 // LAYER 2: API 브릿지 개방 구역 (O(1) 단일 해시 맵 즉시 조회 브릿지)
 // ==========================================================================
@@ -528,11 +568,9 @@ function renderDogamGrid() {
         countBadge.innerHTML = `[${filterName}] 보유율: <span style="color: #38bdf8; font-size: 18px;">${ownedCount}</span> / ${totalCount}`;
     }
 
-    const groupColors = { wei: '#2270b5', shu: '#b82d2d', wu: '#2a9d8f', qun: '#cd9b33' };
-
     gridContainer.innerHTML = filteredHeroes.map(hero => {
         const statsHtml = hero.stats ? `
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background-color: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 4px; padding: 8px; margin: 10px 0; font-size: 11px;">
+            <div class="d-stats">
                 <div><span style="color: #ff9f43; margin-right: 4px;">⚔️ 무용:</span><span style="color: #fff; font-weight:bold;">${hero.stats.martial}</span></div>
                 <div><span style="color: #38bdf8; margin-right: 4px;">🔮 모략:</span><span style="color: #fff; font-weight:bold;">${hero.stats.tactical}</span></div>
                 <div><span style="color: #2ec4b6; margin-right: 4px;">🛡️ 통솔:</span><span style="color: #fff; font-weight:bold;">${hero.stats.command}</span></div>
@@ -548,71 +586,53 @@ function renderDogamGrid() {
         };
 
         const equipHtml = `
-            <div style="background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 11px;">
-                <div style="color: #feca57; font-weight: bold; margin-bottom: 4px;">🛠️ 추천 장비 및 세련 속성</div>
-                <div style="display: flex; flex-direction: column; gap: 3px; color: #ccc;">
-                    <div>🪖 <span style="color: #fff; font-weight:bold;">${eq.helmet.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.helmet.attr1, primaryUnit)} / ${formatEqAttr(eq.helmet.attr2, primaryUnit)}]</span></div>
-                    <div>🛡️ <span style="color: #fff; font-weight:bold;">${eq.armor.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.armor.attr1, primaryUnit)} / ${formatEqAttr(eq.armor.attr2, primaryUnit)}]</span></div>
-                    <div>📿 <span style="color: #fff; font-weight:bold;">${eq.accessory.name}</span> <span style="color: #38bdf8;">[${formatEqAttr(eq.accessory.attr1, primaryUnit)} / ${formatEqAttr(eq.accessory.attr2, primaryUnit)}]</span></div>
+            <div class="d-equip">
+                <div class="d-equip-title">🛠️ 추천 장비 및 세련 속성</div>
+                <div class="d-equip-list">
+                    <div>🪖 <span style="color:#fff;font-weight:bold;">${eq.helmet.name}</span> <span style="color:#38bdf8;">[${formatEqAttr(eq.helmet.attr1, primaryUnit)} / ${formatEqAttr(eq.helmet.attr2, primaryUnit)}]</span></div>
+                    <div>🛡️ <span style="color:#fff;font-weight:bold;">${eq.armor.name}</span> <span style="color:#38bdf8;">[${formatEqAttr(eq.armor.attr1, primaryUnit)} / ${formatEqAttr(eq.armor.attr2, primaryUnit)}]</span></div>
+                    <div>📿 <span style="color:#fff;font-weight:bold;">${eq.accessory.name}</span> <span style="color:#38bdf8;">[${formatEqAttr(eq.accessory.attr1, primaryUnit)} / ${formatEqAttr(eq.accessory.attr2, primaryUnit)}]</span></div>
                 </div>
             </div>`;
 
         // [전법 연산] 추천 종결 전법 2개 매핑 및 터치 팝업 연동 뷰어 박스
         const recTacs = hero.tactics || ["간담상조", "동장철벽"];
         const tacticHtml = `
-            <div style="background-color: rgba(168,85,247,0.08); border: 1px solid #44315f; border-left: 3px solid #a855f7; border-radius: 4px; padding: 8px; margin-bottom: 10px; font-size: 11px;">
-                <div style="color: #c084fc; font-weight: bold; margin-bottom: 4px;">📜 추천 전법 (2~3번 슬롯)</div>
-                <div style="display: flex; flex-direction: column; gap: 3px; color: #ccc;">
-                    <div style="cursor:pointer;" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[0]}')" title="클릭하여 전법 설명 보기">
-                        🔸 2번 슬롯: <span style="color: #fff; font-weight:bold; text-decoration:underline; text-underline-offset:2px;">${recTacs[0]}</span>
+            <div class="d-tactic">
+                <div class="d-tactic-title">📜 추천 전법 (2~3번 슬롯)</div>
+                <div class="d-tactic-list">
+                    <div class="d-tactic-item" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[0]}')" title="클릭하여 전법 설명 보기">
+                        🔸 2번 슬롯: <span>${recTacs[0]}</span>
                     </div>
-                    <div style="cursor:pointer;" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[1]}')" title="클릭하여 전법 설명 보기">
-                        🔸 3번 슬롯: <span style="color: #fff; font-weight:bold; text-decoration:underline; text-underline-offset:2px;">${recTacs[1]}</span>
+                    <div class="d-tactic-item" onclick="event.stopPropagation(); window.showTacticPopup && window.showTacticPopup(event, '${recTacs[1]}')" title="클릭하여 전법 설명 보기">
+                        🔸 3번 슬롯: <span>${recTacs[1]}</span>
                     </div>
                 </div>
             </div>`;
 
         return `
-            <div class="dogam-card-item" data-hero-name="${hero.name}" style="
-                background-color: ${hero.isOwned ? '#1c1c1c' : '#111'};
-                border: 1px solid ${hero.isOwned ? '#4ade80' : '#2d2d2d'};
-                border-top: 5px solid ${groupColors[hero.faction] || '#444'};
-                border-radius: 6px;
-                padding: 15px 20px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                box-sizing: border-box;
-                min-height: 180px;
-                box-shadow: ${hero.isOwned ? '0 0 12px rgba(74, 222, 128, 0.15)' : 'none'};
-                ${!hero.isOwned ? 'opacity: 0.4; filter: grayscale(100%);' : ''}
-            ">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
-                    <div style="font-size: 18px; font-weight: bold; color: ${hero.isOwned ? '#fff' : '#888'}; letter-spacing: 1px;">${hero.name}</div>
+            <div class="dogam-card-item ${hero.isOwned ? 'owned' : ''} ${hero.faction}" data-hero-name="${hero.name}">
+                <div class="d-header">
+                    <div class="d-name">${hero.name}</div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 11px; font-weight: bold; color: ${groupColors[hero.faction]};">${getGroupNameKorean(hero.faction)}</span>
-                        <div style="font-size: 10px; padding: 3px 6px; border-radius: 4px; background-color: ${hero.isOwned ? '#28a745' : '#333'}; color: ${hero.isOwned ? '#fff' : '#777'}; font-weight: bold; white-space: nowrap;">
-                            ${hero.isOwned ? '보유' : '미보유'}
-                        </div>
+                        <span class="d-faction">${getGroupNameKorean(hero.faction)}</span>
+                        <div class="d-status">${hero.isOwned ? '보유' : '미보유'}</div>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 12px; font-size: 11px; color: #bbb; margin-bottom: 4px;">
-                    <div><span style="color: #feca57; font-weight: bold;">역할:</span> ${hero.role}</div>
-                    <div><span style="color: #feca57; font-weight: bold;">배치:</span> ${hero.location}</div>
-                    ${hero.unit && hero.unit !== "-" ? `<div><span style="color: #feca57; font-weight: bold;">병종:</span> ${hero.unit}</div>` : ''}
+                <div class="d-meta">
+                    <div><span>역할:</span> ${hero.role}</div>
+                    <div><span>배치:</span> ${hero.location}</div>
+                    ${hero.unit && hero.unit !== "-" ? `<div><span>병종:</span> ${hero.unit}</div>` : ''}
                 </div>
                 
                 ${statsHtml}
                 ${equipHtml}
                 ${tacticHtml}
 
-                <div style="background-color: rgba(20,20,20,0.6); border: 1px solid #2a2a2a; border-radius: 4px; padding: 8px; font-size: 11px; line-height: 1.5; margin-top: auto;">
-                    <div style="color: #38bdf8; font-weight: bold; margin-bottom: 3px;">고유: ${hero.skill}</div>
-                    <div style="color: #ddd; word-break: keep-all;">${hero.skillDesc}</div>
+                <div class="d-desc">
+                    <div class="d-desc-title">고유: ${hero.skill}</div>
+                    <div class="d-desc-text">${hero.skillDesc}</div>
                 </div>
             </div>`;
     }).join('');
@@ -627,6 +647,7 @@ function renderDogamGrid() {
 }
 
 function initDogamEngine() {
+    injectDogamStyles();
     loadDogamData();
     renderDogamUI(); 
 }
