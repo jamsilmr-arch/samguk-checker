@@ -2,29 +2,28 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>삼국지 왕전 - 시스템 가이드</title>
     <link rel="stylesheet" href="guide.css">
 </head>
 <body>
-    <!-- 글로벌 상단 타이틀 헤더 -->
     <header class="top-title-header">
         <h1>삼국지 왕전</h1>
         <span class="author-text">by JHP</span>
     </header>
 
-    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 (배너 종료 직후 정위치 결선) -->
+    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 (동기식 정위치 결선) -->
     <script src="navbar.js"></script>
 
-    <!-- 시스템 가이드 메인 레이아웃 (사이드바 + 콘텐츠) -->
-    <main class="guide-main-container" style="margin-top: 25px;">
-        <aside class="guide-sidebar">
-            <button class="guide-tab-btn active" onclick="switchGuideTab('equip', this)">장비 시스템</button>
-            <button class="guide-tab-btn" onclick="switchGuideTab('hawk', this)">매 시스템</button>
-            <button class="guide-tab-btn" onclick="switchGuideTab('officer', this)">무장 시스템</button>
-            <button class="guide-tab-btn" onclick="switchGuideTab('status', this)">속성 및 상태 이상</button>
+    <main class="guide-main-container">
+        <aside class="guide-sidebar" role="tablist" aria-label="가이드 카테고리">
+            <button class="guide-tab-btn active" role="tab" onclick="switchGuideTab('equip', this)">장비 시스템</button>
+            <button class="guide-tab-btn" role="tab" onclick="switchGuideTab('hawk', this)">매 시스템</button>
+            <button class="guide-tab-btn" role="tab" onclick="switchGuideTab('officer', this)">무장 시스템</button>
+            <button class="guide-tab-btn" role="tab" onclick="switchGuideTab('status', this)">속성 및 상태 이상</button>
         </aside>
         
-        <section class="guide-content-area" id="guide-content-box">
+        <section class="guide-content-area" id="guide-content-box" role="tabpanel">
             <!-- guide.js 엔진이 실시간 동적 데이터를 주입하는 연산 공간 -->
         </section>
     </main>
