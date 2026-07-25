@@ -1,13 +1,18 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 동적 조합 연산 종결 엔진
-
-// ==========================================================================
-// LAYER 1: 데이터 정규화 및 인게임 공식 전법 마스터 사전 바인딩
-// ==========================================================================
-// [이관 완료] EQUIP_ATTR_DESCRIPTIONS, internalMasterEquipmentMap, TACTIC_MASTER_DESC, 
-// OFFICER_MASTER, internalMasterTacticNames 등의 중복 정적 사전은 guide.js, dogam.js, tactic_dogam.js로 전면 이관되어 약 60줄 압축되었습니다.
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 하이브리드 자가 치유 종결 엔진
 
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+
+// ==========================================================================
+// LAYER 1: 초경량 자가 치유(Self-Healing) 폴백 마스터 사전
+// (dogam.js 미연동 시에도 드롭다운, 고유 전법, 적성 병종이 100% 정상 작동하도록 방어)
+// ==========================================================================
+const FB_OFFICERS = "가후,곽가,사마의,순욱,악진,전위,정욱,조조(제왕),조조,장료,장합,하후돈,하후연,관우,강유,마대,마초,서서,사마가,위연,유비,유비(제왕),장비,제갈량,조운,황충,황월영,대교,노숙,소교,손견,손권,손상향,손책,손권(제왕),여몽,육손,육항,주유,주태,정보,황개,공손찬,동탁,안량,여포,우길,원소,장각,장녕,장보,좌자,채문희,초선,화타".split(',');
+const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
+
+const FB_UNIQUE_MAP = {"가후":"경달권변","곽가":"산무유책","사마의":"응시낭고","순욱":"거중지중","악진":"분용당선","전위":"축호과간","정욱":"십면매복","조조(제왕)":"군령여산","조조":"효웅","장료":"함진살적","장합":"교변병기","하후돈":"발시담정","하후연":"충용","관우":"무성","강유":"담대여두","마대":"습참","마초":"출수법","서서":"절절학문","사마가":"만왕","위연":"실병제위","유비":"인정","유비(제왕)":"재주복주","장비":"연인노호","제갈량":"초선차전","조운":"칠진칠출","황충":"적혈도","황월영":"묘산천기","대교":"정수유심","노숙":"탑상책","소교":"화용욕모","손견":"강동맹호","손권":"웅거","손상향":"효희","손책":"강동패주","손권(제왕)":"겸권상계","여몽":"백의도강","육손":"지변규려","육항":"청백충근","주유":"봉화연천","주태":"청라산개","정보":"칠척사모","황개":"요원지화","공손찬":"위진새북","동탁":"전권난정","안량":"효장","여포":"천하무쌍","우길":"태평경","원소":"사소도","장각":"황천당립","장녕":"천의난위","장보":"요풍사기","좌자":"화겁생기","채문희":"비분시","초선":"폐월","화타":"청낭제세"};
+const FB_UNIT_MAP = {"가후":"궁병/방패병","곽가":"궁병/방패병","사마의":"방패병/궁병","순욱":"궁병/창병","악진":"창병/궁병","전위":"창병/방패병","정욱":"방패병/궁병","조조(제왕)":"창병/방패병","조조":"방패병/기병","장료":"창병/기병","장합":"방패병/창병","하후돈":"창병/방패병","하후연":"창병/기병","관우":"창병/기병","강유":"방패병/기병","마대":"창병/방패병","마초":"창병/기병","서서":"창병/궁병","사마가":"창병/방패병","위연":"창병/궁병","유비":"창병/기병","유비(제왕)":"창병/방패병","장비":"창병/방패병","제갈량":"궁병/방패병","조운":"창병/방패병","황충":"창병/방패병","황월영":"궁병/방패병","대교":"창병/궁병","노숙":"궁병/기병","소교":"궁병/기병","손견":"창병/방패병","손권":"궁병/기병","손상향":"궁병/기병","손책":"창병/방패병","손권(제왕)":"창병/궁병","여몽":"방패병/궁병","육손":"창병/기병","육항":"창병/궁병","주유":"창병/궁병","주태":"기병/방패병","정보":"기병/방패병","황개":"방패병/궁병","공손찬":"기병/창병","동탁":"방패병/기병","안량":"창병/기병","여포":"궁병/기병","우길":"창병/궁병","원소":"방패병/기병","장각":"궁병/기병","장녕":"궁병/방패병","장보":"궁병/방패병","좌자":"궁병/방패병","채문희":"궁병/기병","초선":"창병/기병","화타":"궁병/방패병"};
+const FB_FACTION_MAP = {"가후":"wei","곽가":"wei","사마의":"wei","순욱":"wei","악진":"wei","전위":"wei","정욱":"wei","조조(제왕)":"wei","조조":"wei","장료":"wei","장합":"wei","하후돈":"wei","하후연":"wei","관우":"shu","강유":"shu","마대":"shu","마초":"shu","서서":"shu","사마가":"shu","위연":"shu","유비":"shu","유비(제왕)":"shu","장비":"shu","제갈량":"shu","조운":"shu","황충":"shu","황월영":"shu","대교":"wu","노숙":"wu","소교":"wu","손견":"wu","손권":"wu","손상향":"wu","손책":"wu","손권(제왕)":"wu","여몽":"wu","육손":"wu","육항":"wu","주유":"wu","주태":"wu","정보":"wu","황개":"wu","공손찬":"qun","동탁":"qun","안량":"qun","여포":"qun","우길":"qun","원소":"qun","장각":"qun","장녕":"qun","장보":"qun","좌자":"qun","채문희":"qun","초선":"qun","화타":"qun"};
 
 const EQ_PRESETS = {
     PHYS_CARRY: ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -71,30 +76,37 @@ const metaHawkAlternativesMap = {"wei_sima_sp_jojo":["결운-감로","능소-진
 const metaHawkRandomAttributesMap = {"wei_sima_sp_jojo":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 모략 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 모략 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"wei_assassin_sp":{attr1:{rank1:"[20Lv] 속도 +25",rank2:"[20Lv] 무용 +12%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 발동률 +5%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},"shu_dowon_spear":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"shu_hwangchung_shield":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"shu_gangyu_bangwon_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +12%"},attr3:{rank1:"[40Lv 특성] 저항 획득률 +6%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩"}},"shu_gangyu_cav":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +12%"},attr3:{rank1:"[40Lv 특성] 저항 획득률 +6%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩"}},"shu_macho_spear_2":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 일반 공격 3회 시 대상 무장해제(1턴)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},"shu_xushu_spear":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 일반 공격 3회 시 대상 무장해제(1턴)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},"wu_magic_bow":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 치유 효과 부여 +12%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"qun_cavalry":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},"qun_whitehorse_bow":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 발동률 +5%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 파갑 +10%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 추격(돌격) 전법 피해 +15%"}},"custom":{attr1:{rank1:"[20Lv] 전능 +5%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 무용 +10%"},attr2:{rank1:"[30Lv] 피해 가함 +6%",rank2:"[30Lv] 피해 감소 +6%",rank3:"[30Lv] 발동률 +3%"},attr3:{rank1:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 턴 종료 시 병력 회복"}}};
 const systemGuideInsights = {"wei_sima_sp_jojo":"💡 [공식 메타] 제왕조조 군령여산 기반 피해 증폭 극대화.","wei_assassin_sp":"💡 [공식 메타] 장료 정밀 타격 및 적 주장 저격.","shu_dowon_spear":"💡 [공식 메타] 유비/장비/관우 인연 및 방어 시너지.","shu_hwangchung_shield":"💡 [공식 메타] 조운/유비의 단단한 방어선 뒤 황충 폭딜.","shu_gangyu_bangwon_2":"💡 [공식 메타] 방원진 강유 스탯 강탈 + 제갈량 저항 부여.","shu_gangyu_cav":"💡 [공식 메타] 일반 유비 인정 힐량으로 기병 내구도 보강.","shu_macho_spear_2":"💡 [공식 메타] 안행진 후열 마초 격리 및 위연 반격 어그로.","shu_xushu_spear":"💡 [공식 메타] 서서 절절학문 버프 트리거 및 마초 파갑 돌파.","wu_magic_bow":"💡 [공식 메타] 손권/주유/노숙 모략 신기루 연계.","qun_cavalry":"💡 [종결 메타] 여포 일기토 연타 1턴 분쇄 기병.","qun_whitehorse_bow":"💡 [종결 메타] 공손찬 위진새북 기반 액티브 난사 궁병."};
 
+const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","제갈량","서서","강유","황월영","육손","주유","육항","노숙","대교","소교","장각","우길","좌자","화타","채문희","초선","장녕","장보"]);
+const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
+
 // ==========================================================================
-// LAYER 2: 도감 100% 바인딩 브릿지 및 조합 맞춤형 동적 연산 엔진
+// LAYER 2: 하이브리드 도감 동적 바인딩 및 적성 연산 엔진
 // ==========================================================================
-// [고도화] 무장 데이터 조회 시 dogam.js 브릿지를 1차 참조하는 단일 엔진
 function getOfficerDogamData(officerName) {
     if (window.getOfficerDataFromDogam) { 
         const d = window.getOfficerDataFromDogam(officerName); 
         if (d && (d.uniqueTactic || d.skill)) {
             return {
                 role: d.role || "보조, 버퍼",
-                uniqueTactic: d.uniqueTactic || d.skill || "고유 전법 누락",
-                unitSuitability: d.unitSuitability || d.unit || "방패병",
-                faction: d.faction || d.group || "qun",
+                uniqueTactic: d.uniqueTactic || d.skill || FB_UNIQUE_MAP[officerName] || "고유 전법 누락",
+                unitSuitability: d.unitSuitability || d.unit || FB_UNIT_MAP[officerName] || "방패병",
+                faction: d.faction || d.group || FB_FACTION_MAP[officerName] || "qun",
                 stats: d.stats || { martial: 500, tactical: 500, command: 500, speed: 400 }
             };
         }
     }
-    return { role: "보조, 버퍼", uniqueTactic: "고유 전법 누락", unitSuitability: "방패병", faction: "qun", stats: { martial: 500, tactical: 500, command: 500, speed: 400 } };
+    return { 
+        role: "보조, 버퍼", 
+        uniqueTactic: FB_UNIQUE_MAP[officerName] || "고유 전법 누락", 
+        unitSuitability: FB_UNIT_MAP[officerName] || "방패병", 
+        faction: FB_FACTION_MAP[officerName] || "qun", 
+        stats: { martial: 500, tactical: 500, command: 500, speed: 400 } 
+    };
 }
 
-const getTacticListBridge = () => window.getAllTacticsFromDogam ? window.getAllTacticsFromDogam() : [];
-const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? window.getAllOfficerNamesFromDogam() : [];
+const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : FB_TACTICS) : FB_TACTICS;
+const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : FB_OFFICERS) : FB_OFFICERS;
 
-// [고도화] 장비 매핑 3단 폴백(Dogam -> Guide -> Presets) 파이프라인
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const dogamInfo = getOfficerDogamData(officerName);
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (dogamInfo.unitSuitability?.split('/')[0] || "방패병");
@@ -253,9 +265,8 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 조합 맞춤형 동적 대체 추천(Arrow Curation) 및 검증 엔진
+// LAYER 3: 조합 맞춤형 동적 대체 추천(Arrow Curation) 및 도감 API 동적 바인딩 엔진
 // ==========================================================================
-// [고도화] 도감 실시간 스탯 및 국가 데이터를 분석하는 대체 장수 연산 알고리즘
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const missingInfo = getOfficerDogamData(missingName);
@@ -296,7 +307,6 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// [고도화] 무장 전투 아키타입 및 도감 스탯 스케일링을 분석하는 대체 전법 연산 알고리즘
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "") {
     const cleanMissing = cStr(missingTacName);
     const alts = tacticAlternativesMap[missingTacName] || [];
