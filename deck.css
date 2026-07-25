@@ -1,329 +1,131 @@
-/* 글로벌 다크 스타일 테마 설정 */
+/* ==========================================================================
+   LAYER 1: 전역 테마 변수 및 글로벌 리셋
+   ========================================================================== */
+:root {
+    --bg-main: #141414;
+    --bg-header: #111;
+    --bg-nav: #2b1a1a;
+    --bg-card: #1c1c1c;
+    --bg-slot: #14213d;
+    --bg-panel: #0b132b;
+    --point-gold: #cd9b33;
+    --point-yellow: #feca57;
+    --text-main: #e0e0e0;
+    --text-sub: #aaaaaa;
+    --border-dark: #2d2d2d;
+    --border-blue: #24355a;
+}
+
 body {
-    background-color: #141414;
-    color: #e0e0e0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     font-family: 'Malgun Gothic', sans-serif;
     margin: 0;
     padding: 0 0 50px 0;
 }
 
-/* 글로벌 헤더 및 메뉴 바 스타일 */
+/* ==========================================================================
+   LAYER 2: 글로벌 헤더 및 내비게이션 바
+   ========================================================================== */
 .top-title-header {
-    background-color: #111111;
+    background-color: var(--bg-header);
     padding: 20px 30px;
     display: flex;
     align-items: baseline;
 }
-.top-title-header h1 {
-    color: #cd9b33;
-    font-size: 26px;
-    margin: 0;
-    font-weight: bold;
-    letter-spacing: -0.5px;
-}
-.top-title-header .author-text {
-    color: #777777;
-    font-size: 13px;
-    margin-left: 12px;
-    font-weight: bold;
-}
+.top-title-header h1 { color: var(--point-gold); font-size: 26px; margin: 0; font-weight: bold; letter-spacing: -0.5px; }
+.top-title-header .author-text { color: #777; font-size: 13px; margin-left: 12px; font-weight: bold; }
 
-.global-nav-bar {
-    background-color: #2b1a1a;
-    border-bottom: 2px solid #cd9b33;
-    display: flex;
-    justify-content: flex-end;
-    padding: 0 30px;
-}
+.global-nav-bar { background-color: var(--bg-nav); border-bottom: 2px solid var(--point-gold); display: flex; justify-content: flex-end; padding: 0 30px; }
 .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; }
-.nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; }
-.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
+.nav-menu-item a { display: block; color: #bbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; }
+.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid var(--point-gold); margin-bottom: -2px; }
 .nav-menu-item.active a { color: #ffcc00; }
 
-/* 신규 수동 정렬 인터페이스 전용 버튼 스킨 */
+/* ==========================================================================
+   LAYER 3: 공통 컴포넌트 (버튼, 배지, 드롭다운 공통 리셋)
+   ========================================================================== */
 .control-sort-btn {
-    background-color: #262626;
-    color: #aaaaaa;
-    border: 1px solid #444444;
-    padding: 8px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 12px;
-    transition: all 0.15s ease-in-out;
+    background-color: #262626; color: var(--text-sub); border: 1px solid #444;
+    padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold;
+    font-size: 12px; transition: all 0.15s ease-in-out;
 }
-.control-sort-btn:hover {
-    background-color: #333333;
-    color: #ffffff;
-    border-color: #666666;
-}
-.control-sort-btn.active {
-    background-color: #ffffff;
-    color: #121212;
-    border-color: #ffffff;
-}
+.control-sort-btn:hover { background-color: #333; color: #fff; border-color: #666; }
+.control-sort-btn.active { background-color: #fff; color: #121212; border-color: #fff; }
 
-/* 덱 빌더 메인 컨테이너 레이아웃 */
-.deck-main-container {
-    max-width: 1300px;
-    margin: 30px auto;
-    padding: 0 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 35px;
+/* 드롭다운 공통 마스터 리셋 (코드 중복 70% 소거) */
+.officer-dropdown, .tactic-dropdown, .formation-select {
+    background-color: var(--bg-panel); color: #fff; font-family: inherit; font-weight: bold;
+    cursor: pointer; outline: none; border-radius: 4px; appearance: none; -webkit-appearance: none;
+    background-repeat: no-repeat; background-position: right 8px center;
 }
+.officer-dropdown option, .tactic-dropdown option, .formation-select option { background-color: var(--bg-panel); color: #fff; }
 
-/* 부대 전체 카드 외곽 프레임 */
-.deck-card {
-    background-color: #1c1c1c;
-    border: 1px solid #2d2d2d;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
-}
+/* ==========================================================================
+   LAYER 4: 덱 빌더 메인 컨테이너 및 장수 슬롯
+   ========================================================================== */
+.deck-main-container { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 35px; }
+.deck-card { background-color: var(--bg-card); border: 1px solid var(--border-dark); border-radius: 8px; padding: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.6); }
+.deck-title { font-size: 18px; font-weight: bold; color: var(--point-yellow); margin-bottom: 12px; display: flex; align-items: center; }
 
-/* 부대 타이틀 텍스트 */
-.deck-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #feca57;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-}
+.bond-box { background-color: rgba(205,155,51,0.05); border: 1px solid rgba(205,155,51,0.3); border-radius: 4px; padding: 10px 15px; font-size: 12px; line-height: 1.6; margin-bottom: 20px; color: #ddd; }
+.bond-highlight { color: #ff9f43; font-weight: bold; }
 
-/* 인연 전법 보드 영역 스타일 */
-.bond-box {
-    background-color: rgba(205, 155, 51, 0.05);
-    border: 1px solid rgba(205, 155, 51, 0.3);
-    border-radius: 4px;
-    padding: 10px 15px;
-    font-size: 12px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    color: #dddddd;
-}
-.bond-highlight {
-    color: #ff9f43;
-    font-weight: bold;
-}
+.officers-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+.officer-slot { flex: 1; min-width: 280px; background-color: var(--bg-slot); border: 1px solid var(--border-blue); border-radius: 6px; padding: 15px; text-align: center; }
+.officer-meta { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 12px; }
+.officer-select-container { width: 90%; max-width: 200px; }
 
-/* 무장 3인 슬롯 레이아웃 플렉스 그리드 */
-.officers-row {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-/* 무장 개별 상세 정보 카드 */
-.officer-slot {
-    flex: 1;
-    min-width: 280px;
-    background-color: #14213d;
-    border: 1px solid #24355a;
-    border-radius: 6px;
-    padding: 15px;
-    text-align: center;
-}
-
-/* 무장 상단 라인 배치 요소 */
-.officer-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-/* 포지션 인디케이터 배지 */
-.position-badge {
-    font-size: 11px;
-    font-weight: bold;
-    color: #ffffff;
-    padding: 2px 8px;
-    border-radius: 3px;
-}
+/* 상태 배지 통합 모듈 */
+.position-badge { font-size: 11px; font-weight: bold; color: #fff; padding: 2px 8px; border-radius: 3px; }
 .position-badge.front { background-color: #b82d2d; }
 .position-badge.back { background-color: #2270b5; }
 
-/* 무장 선택 드롭다운용 래퍼 컨테이너 스타일 */
-.officer-select-container {
-    width: 90%;
-    max-width: 200px;
-}
+.officer-role-label { font-size: 11px; color: var(--text-sub); background-color: var(--bg-panel); padding: 3px 8px; border-radius: 3px; display: inline-block; margin-bottom: 12px; border: 1px solid #1a2744; }
 
-/* 무장 선택 고유 오리지널 드롭다운 인프라 */
+/* ==========================================================================
+   LAYER 5: 개별 커스텀 드롭다운 SVG 인프라
+   ========================================================================== */
 .officer-dropdown {
-    width: 100%;
-    background-color: #0b132b;
-    color: #ffffff;
-    border: 1px solid #44587a;
-    border-radius: 4px;
-    padding: 5px 24px 5px 10px;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    width: 100%; border: 1px solid #44587a; padding: 5px 24px 5px 10px; font-size: 14px; text-align: center;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
 }
 .officer-dropdown:hover { border-color: #ff9f43; }
-.officer-dropdown option { background-color: #14213d; color: #ffffff; }
 
-/* 역할군 명세서 라벨 테두리 */
-.officer-role-label {
-    font-size: 11px;
-    color: #aaaaaa;
-    background-color: #0b132b;
-    padding: 3px 8px;
-    border-radius: 3px;
-    display: inline-block;
-    margin-bottom: 12px;
-    border: 1px solid #1a2744;
-}
+.tactic-status-box { display: flex; flex-direction: column; gap: 6px; }
+.tactic-row { font-size: 12px; font-weight: bold; padding: 8px 12px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
+.tactic-row.owned { background-color: rgba(34,153,68,0.15); border-color: #229944; color: #229944; }
+.tactic-row.missing { background-color: rgba(217,119,6,0.15); border-color: #d97706; color: #f3a63b; }
 
-/* 추천 전법 탑재 상태 바 인프라 스타일 */
-.tactic-status-box {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.tactic-row {
-    font-size: 12px;
-    font-weight: bold;
-    padding: 8px 12px;
-    border-radius: 4px;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.tactic-row.owned {
-    background-color: rgba(34, 153, 68, 0.15);
-    border: 1px solid #229944;
-    color: #229944;
-}
-.tactic-row.missing {
-    background-color: rgba(217, 119, 6, 0.15);
-    border: 1px solid #d97706;
-    color: #f3a63b;
-}
-
-/* 다크 테마 일체형 전법 전용 드롭다운 스킨 스타일링 */
 .tactic-dropdown {
-    width: 65%;
-    background: transparent;
-    border: none;
-    color: inherit;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    outline: none;
-    font-family: 'Malgun Gothic', sans-serif;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    width: 65%; background: transparent; border: none; font-size: 12px; padding-right: 15px; background-position: right 2px center;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f3a63b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-    background-repeat: no-repeat;
-    background-position: right 2px center;
-    padding-right: 15px;
 }
 .tactic-row.owned .tactic-dropdown {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12' viewBox='0 0 24 24' fill='none' stroke='%23229944' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
 }
-.tactic-dropdown option {
-    background-color: #14213d;
-    color: #ffffff;
-}
-.tactic-status-text {
-    font-size: 11px;
-    font-weight: bold;
-}
+.tactic-status-text { font-size: 11px; font-weight: bold; }
 
-/* 신규 수동 피드백 판넬 통합 인프라 스펙 */
-.feedback-container-box {
-    background-color: #0b132b;
-    border: 1px solid #1c2d42;
-    border-radius: 6px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
-    text-align: left;
-}
-.feedback-header-title {
-    font-size: 13px;
-    font-weight: bold;
-    color: #8da2bb;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #1c2d42;
-    padding-bottom: 6px;
-}
-.feedback-list-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.feedback-item {
-    font-size: 12px;
-    line-height: 1.5;
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-.feedback-item.success {
-    background-color: rgba(34, 153, 68, 0.12);
-    color: #2ec4b6;
-    border: 1px solid rgba(34, 153, 68, 0.25);
-}
-.feedback-item.info {
-    background-color: rgba(34, 112, 181, 0.12);
-    color: #38bdf8;
-    border: 1px solid rgba(34, 112, 181, 0.25);
-}
-.feedback-item.warning {
-    background-color: rgba(217, 119, 6, 0.12);
-    color: #ff9f43;
-    border: 1px solid rgba(217, 119, 6, 0.25);
-}
+/* ==========================================================================
+   LAYER 6: 피드백 패널 및 푸터 진형 바
+   ========================================================================== */
+.feedback-container-box { background-color: var(--bg-panel); border: 1px solid #1c2d42; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; text-align: left; }
+.feedback-header-title { font-size: 13px; font-weight: bold; color: #8da2bb; margin-bottom: 10px; border-bottom: 1px solid #1c2d42; padding-bottom: 6px; }
+.feedback-list-wrapper { display: flex; flex-direction: column; gap: 6px; }
 
-/* 최하단 부대 특성 진형 요약 스탯 바 */
-.deck-footer-bar {
-    background-color: #0f0f0f;
-    border: 1px solid #222222;
-    border-radius: 4px;
-    padding: 12px 20px;
-    font-size: 12px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
+/* 피드백 아이템 통합 모듈 */
+.feedback-item { font-size: 12px; line-height: 1.5; padding: 5px 10px; border-radius: 4px; border: 1px solid transparent; }
+.feedback-item.success { background-color: rgba(34,153,68,0.12); color: #2ec4b6; border-color: rgba(34,153,68,0.25); }
+.feedback-item.info { background-color: rgba(34,112,181,0.12); color: #38bdf8; border-color: rgba(34,112,181,0.25); }
+.feedback-item.warning { background-color: rgba(217,119,6,0.12); color: #ff9f43; border-color: rgba(217,119,6,0.25); }
 
-/* 글로벌 브라운/골드 테마에 최적화된 드롭다운 셀렉터 디자인 */
+.deck-footer-bar { background-color: #0f0f0f; border: 1px solid #222; border-radius: 4px; padding: 12px 20px; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
 .formation-select {
-    background-color: #111111;
-    color: #ff9f43; 
-    border: 1px solid #cd9b33; 
-    border-radius: 4px;
-    padding: 3px 24px 3px 8px; 
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    outline: none;
-    font-family: 'Malgun Gothic', sans-serif;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    background-color: #111; color: #ff9f43; border: 1px solid var(--point-gold); padding: 3px 24px 3px 8px; font-size: 12px;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cd9b33' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
 }
-.formation-select:hover { background-color: #1a1a1a; border-color: #ffffff; }
-.formation-select option { background-color: #111111; color: #ffffff; }
+.formation-select:hover { background-color: #1a1a1a; border-color: #fff; }
 
 .footer-left { display: flex; align-items: center; }
-.footer-right { color: #888888; font-size: 12px; font-weight: bold; }
+.footer-right { color: #888; font-size: 12px; font-weight: bold; }
