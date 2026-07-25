@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 100% 바인딩 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 동적 조합 연산 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 전법 마스터 사전 바인딩
@@ -71,11 +71,8 @@ const metaHawkAlternativesMap = {"wei_sima_sp_jojo":["결운-감로","능소-진
 const metaHawkRandomAttributesMap = {"wei_sima_sp_jojo":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 모략 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 모략 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"wei_assassin_sp":{attr1:{rank1:"[20Lv] 속도 +25",rank2:"[20Lv] 무용 +12%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 발동률 +5%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},"shu_dowon_spear":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"shu_hwangchung_shield":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"shu_gangyu_bangwon_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +12%"},attr3:{rank1:"[40Lv 특성] 저항 획득률 +6%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩"}},"shu_gangyu_cav":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +12%"},attr3:{rank1:"[40Lv 특성] 저항 획득률 +6%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩"}},"shu_macho_spear_2":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 일반 공격 3회 시 대상 무장해제(1턴)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},"shu_xushu_spear":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 일반 공격 3회 시 대상 무장해제(1턴)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},"wu_magic_bow":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 치유 효과 부여 +12%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},"qun_cavalry":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},"qun_whitehorse_bow":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 발동률 +5%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 파갑 +10%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 추격(돌격) 전법 피해 +15%"}},"custom":{attr1:{rank1:"[20Lv] 전능 +5%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 무용 +10%"},attr2:{rank1:"[30Lv] 피해 가함 +6%",rank2:"[30Lv] 피해 감소 +6%",rank3:"[30Lv] 발동률 +3%"},attr3:{rank1:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 턴 종료 시 병력 회복"}}};
 const systemGuideInsights = {"wei_sima_sp_jojo":"💡 [공식 메타] 제왕조조 군령여산 기반 피해 증폭 극대화.","wei_assassin_sp":"💡 [공식 메타] 장료 정밀 타격 및 적 주장 저격.","shu_dowon_spear":"💡 [공식 메타] 유비/장비/관우 인연 및 방어 시너지.","shu_hwangchung_shield":"💡 [공식 메타] 조운/유비의 단단한 방어선 뒤 황충 폭딜.","shu_gangyu_bangwon_2":"💡 [공식 메타] 방원진 강유 스탯 강탈 + 제갈량 저항 부여.","shu_gangyu_cav":"💡 [공식 메타] 일반 유비 인정 힐량으로 기병 내구도 보강.","shu_macho_spear_2":"💡 [공식 메타] 안행진 후열 마초 격리 및 위연 반격 어그로.","shu_xushu_spear":"💡 [공식 메타] 서서 절절학문 버프 트리거 및 마초 파갑 돌파.","wu_magic_bow":"💡 [공식 메타] 손권/주유/노숙 모략 신기루 연계.","qun_cavalry":"💡 [종결 메타] 여포 일기토 연타 1턴 분쇄 기병.","qun_whitehorse_bow":"💡 [종결 메타] 공손찬 위진새북 기반 액티브 난사 궁병."};
 
-const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","제갈량","서서","강유","황월영","육손","주유","육항","노숙","대교","소교","장각","우길","좌자","화타","채문희","초선","장녕","장보"]);
-const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
-
 // ==========================================================================
-// LAYER 2: 도감 100% 바인딩 브릿지 및 연산 엔진
+// LAYER 2: 도감 100% 바인딩 브릿지 및 조합 맞춤형 동적 연산 엔진
 // ==========================================================================
 // [고도화] 무장 데이터 조회 시 dogam.js 브릿지를 1차 참조하는 단일 엔진
 function getOfficerDogamData(officerName) {
@@ -87,11 +84,11 @@ function getOfficerDogamData(officerName) {
                 uniqueTactic: d.uniqueTactic || d.skill || "고유 전법 누락",
                 unitSuitability: d.unitSuitability || d.unit || "방패병",
                 faction: d.faction || d.group || "qun",
-                stats: d.stats || null
+                stats: d.stats || { martial: 500, tactical: 500, command: 500, speed: 400 }
             };
         }
     }
-    return { role: "보조, 버퍼", uniqueTactic: "고유 전법 누락", unitSuitability: "방패병", faction: "qun", stats: null };
+    return { role: "보조, 버퍼", uniqueTactic: "고유 전법 누락", unitSuitability: "방패병", faction: "qun", stats: { martial: 500, tactical: 500, command: 500, speed: 400 } };
 }
 
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? window.getAllTacticsFromDogam() : [];
@@ -256,57 +253,109 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 도감 API 동적 바인딩 엔진
+// LAYER 3: 조합 맞춤형 동적 대체 추천(Arrow Curation) 및 검증 엔진
 // ==========================================================================
+// [고도화] 도감 실시간 스탯 및 국가 데이터를 분석하는 대체 장수 연산 알고리즘
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const missingInfo = getOfficerDogamData(missingName);
-    const isMissingTac = tacticalSet.has(missingName), isMissingSup = supportSet.has(missingName);
-    const missingFaction = missingInfo.faction || "", missingUnits = (missingInfo.unitSuitability || "").split("/");
+    const missingFaction = missingInfo.faction || "";
+    const missingUnits = (missingInfo.unitSuitability || "").split("/");
+    const missingStats = missingInfo.stats || { martial: 500, tactical: 500, command: 500 };
+
+    const curFactions = curNames.map(n => getOfficerDogamData(n).faction).filter(Boolean);
+    const majorFaction = curFactions.length > 0 ? curFactions[0] : missingFaction;
 
     const allNames = getOfficerNamesBridge();
     let candidates = [];
+
     Object.keys(heroDataMap).forEach(cleanCand => {
         if (!heroDataMap[cleanCand]?.isOwned || curNames.some(cn => cStr(cn) === cleanCand) || cleanCand === cleanMissing) return;
         const originName = allNames.find(n => cStr(n) === cleanCand) || cleanCand;
-        let score = 0;
         const candInfo = getOfficerDogamData(originName);
-        const isTac = tacticalSet.has(originName), isSup = supportSet.has(originName);
-        const faction = candInfo.faction || "", units = (candInfo.unitSuitability || "").split("/");
-        
-        if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) score += 5;
-        if (missingFaction && faction === missingFaction) score += 3;
-        if (deckUnitType && units.includes(deckUnitType)) score += 4; else if (missingUnits.some(u => units.includes(u))) score += 2;
+        const candStats = candInfo.stats || { martial: 500, tactical: 500, command: 500 };
+        const faction = candInfo.faction || "";
+        const units = (candInfo.unitSuitability || "").split("/");
+
+        let score = 0;
+        if (faction === majorFaction || faction === missingFaction) score += 40;
+        if (deckUnitType && deckUnitType !== "자동 판별" && units.includes(deckUnitType)) score += 35;
+        else if (missingUnits.some(u => units.includes(u))) score += 20;
+
+        const missingPrimary = missingStats.martial > missingStats.tactical ? 'martial' : 'tactical';
+        const candPrimary = candStats.martial > candStats.tactical ? 'martial' : 'tactical';
+        if (missingPrimary === candPrimary && Math.abs(missingStats[missingPrimary] - candStats[candPrimary]) < 150) {
+            score += 30;
+        }
+        if (candStats.command > 580 && missingStats.command > 580) score += 20;
+
         if (score > 0) candidates.push({ name: originName, score: score });
     });
+
     candidates.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ko'));
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
+// [고도화] 무장 전투 아키타입 및 도감 스탯 스케일링을 분석하는 대체 전법 연산 알고리즘
+function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "") {
     const cleanMissing = cStr(missingTacName);
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
         const cleanT = cStr(t);
-        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
-    }
-    const targetStats = internalTacticStatMap[missingTacName];
-    if (targetStats) {
-        const targetKeys = Object.keys(targetStats);
-        const isAttack = targetKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k));
-        const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
-
-        const allTacs = getTacticListBridge();
-        for (let cleanTName of Object.keys(tacticDataMap)) {
-            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.some(et => cStr(et) === cleanTName) || recommendedTacs.has(cleanTName) || cleanTName === cleanMissing) continue;
-            const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
-            const candStats = internalTacticStatMap[originTName]; if (!candStats) continue;
-            const candKeys = Object.keys(candStats);
-            if ((isAttack && !candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k))) || 
-                (isSupport && !candKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k)))) continue;
-
-            if (targetKeys.some(k => candStats[k] !== undefined)) { recommendedTacs.add(originTName); return originTName; }
+        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) {
+            recommendedTacs.add(t);
+            return t;
         }
+    }
+
+    const offInfo = getOfficerDogamData(officerName);
+    const stats = offInfo?.stats || { martial: 500, tactical: 500, command: 500, speed: 400 };
+    
+    const isPhysCarry = stats.martial >= stats.tactical && stats.martial > 520;
+    const isStratCarry = stats.tactical > stats.martial && stats.tactical > 520;
+    const isSupport = stats.command > 560 || (offInfo?.role && (offInfo.role.includes("지휘") || offInfo.role.includes("보조")));
+
+    const allTacs = getTacticListBridge();
+    let bestCandidate = null, maxScore = -1;
+
+    for (let cleanTName of Object.keys(tacticDataMap)) {
+        if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.some(et => cStr(et) === cleanTName) || recommendedTacs.has(cleanTName) || cleanTName === cleanMissing) continue;
+        
+        const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
+        const candStats = internalTacticStatMap[originTName] || {};
+        const candDogam = window.getTacticDataFromDogam ? window.getTacticDataFromDogam(originTName) : null;
+        const desc = candDogam?.desc || "";
+
+        let score = 0;
+        const candKeys = Object.keys(candStats);
+
+        if (isPhysCarry) {
+            if (candKeys.some(k => ['physicalDmg', 'comboRate', 'armorPen', 'damageDealtInc'].includes(k))) score += 50;
+            if (desc.includes("무용 피해") || desc.includes("일반 공격") || desc.includes("연격")) score += 30;
+        } else if (isStratCarry) {
+            if (candKeys.some(k => ['strategyDmg', 'activeRate', 'damageDealtInc'].includes(k))) score += 50;
+            if (desc.includes("모략 피해") || desc.includes("신산") || desc.includes("화상") || desc.includes("수공")) score += 30;
+        } else if (isSupport) {
+            if (candKeys.some(k => ['damageTakenRed', 'healGiven', 'leech', 'counterDmg'].includes(k))) score += 50;
+            if (desc.includes("피해 감소") || desc.includes("병력 회복") || desc.includes("치유") || desc.includes("저항")) score += 30;
+        } else {
+            if (candKeys.length > 0) score += 30;
+        }
+
+        if (isPhysCarry && desc.includes("무용의 영향")) score += 25;
+        if (isStratCarry && desc.includes("모략의 영향")) score += 25;
+        if (isSupport && desc.includes("통솔의 영향")) score += 25;
+        if (deckUnitType && deckUnitType !== "자동 판별" && desc.includes(deckUnitType)) score += 20;
+
+        if (score > maxScore && score > 0) {
+            maxScore = score;
+            bestCandidate = originTName;
+        }
+    }
+
+    if (bestCandidate) {
+        recommendedTacs.add(bestCandidate);
+        return bestCandidate;
     }
     return null;
 }
@@ -419,7 +468,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 if (!cT) {
                     if (unmatchTac.length > 0) {
                         const pTac = unmatchTac.shift();
-                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
                         const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                         fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
                     }
@@ -429,12 +478,12 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
                     if (!isMeta && !isAlt) {
                         const pTac = unmatchTac.length > 0 ? unmatchTac.shift() : targetMetaTacs[i] || "정석 전법";
-                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs);
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
                         const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                         fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 오배치: <span style="color:#f87171; text-decoration:line-through;">[${t}]</span> (역시너지) ➔ 권장: [${pTac}] (또는 대체 ${altsText})` });
                     } else {
                         if (!tacticDataMap[cT]?.isOwned) {
-                            const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs);
+                            const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
                             const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                             fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
                         }
@@ -463,7 +512,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 5: UI 파이프라인 및 모달 컨트롤 (3단 다중 도감 폴백 연계 종결 팝업)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (3단 다중 도감 폴백 연계 종결 팝업)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -492,7 +541,6 @@ function openModalPopup(e, title, meta1, desc1, meta2 = null, desc2 = null) {
     modalPopupEl.style.left = `${left}px`;
 }
 
-// [고도화] 전법 도감 -> 장수 도감 -> 연산 추정치 3단 폴백 파이프라인 결선
 window.showTacticPopup = function(e, tacticName) {
     if (!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
@@ -500,10 +548,7 @@ window.showTacticPopup = function(e, tacticName) {
     const cleanName = cStr(tacticName);
     let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
 
-    // 1차: 전법 도감 API 조회 (일반 전법 및 이관된 고유 전법 사전 커버)
     let tData = window.getTacticDataFromDogam ? window.getTacticDataFromDogam(tacticName) : null;
-    
-    // 2차: 장수 도감 API 조회 (미등록된 고유 전법 동적 탐색)
     if (!tData && window.getAllOfficerNamesFromDogam && window.getOfficerDataFromDogam) {
         const allOfficers = window.getAllOfficerNamesFromDogam();
         for (let offName of allOfficers) {
@@ -520,7 +565,6 @@ window.showTacticPopup = function(e, tacticName) {
         pTarget = tData.target || "-";
         pDesc = tData.desc || tData.skillDesc || pDesc;
     } else if (internalTacticStatMap[cleanName]) {
-        // 3차 최후의 수단: 내부 연산 가중치 테이블을 역파싱하여 동적 설명 표출
         const st = internalTacticStatMap[cleanName];
         let summary = [];
         if (st.damageTakenRed) summary.push(`피해 감소 +${st.damageTakenRed}%`);
@@ -536,7 +580,6 @@ window.showTacticPopup = function(e, tacticName) {
     openModalPopup(e, `⭐ ${tacticName}`, `타입: ${pRole} | 대상: ${pTarget}`, pDesc);
 };
 
-// [고도화] 장비 사전 가이드 연동 폴백 엔진 바인딩
 window.showEquipPopup = function(e, attr1, attr2) {
     const getDesc = attr => window.getEquipDescFromGuide ? window.getEquipDescFromGuide(attr) : "상세 데이터 미등록 (가이드 연동 필요)";
     openModalPopup(e, "⚒️ 장비 추가 속성 설명", `🔹 1차: ${attr1}`, getDesc(attr1), `🔹 2차: ${attr2}`, getDesc(attr2));
