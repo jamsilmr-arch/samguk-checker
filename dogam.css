@@ -1,109 +1,92 @@
-/* 글로벌 공통 레이아웃 */
+/* ==========================================================================
+   LAYER 1: 전역 테마 변수 및 글로벌 리셋
+   ========================================================================== */
+:root {
+    --bg-main: #141414;
+    --bg-header: #111;
+    --bg-nav: #2b1a1a;
+    --card-bg: #f5f2eb;
+    --card-skill: #eae6db;
+    --gold: #cd9b33;
+    --gold-light: #ffcc00;
+    --text-main: #e0e0e0;
+    --text-sub: #888;
+    --wei: #2270b5;
+    --shu: #229944;
+    --wu: #b82d2d;
+    --qun: #c99414;
+}
+
+/* [치명적 버그 수정] 검은 배경에 짙은 회색 글자(#333) 오기입 -> 다크 테마 밝은 회색(#e0e0e0) 적용 */
 body {
-    background-color: #141414;
-    color: #333333;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     font-family: 'Malgun Gothic', sans-serif;
     margin: 0;
     padding: 0 0 40px 0;
 }
 
-/* 글로벌 헤더 및 메뉴 바 동기화 */
-.top-title-header {
-    background-color: #111111;
-    padding: 20px 30px;
-    display: flex;
-    align-items: baseline;
-}
-.top-title-header h1 {
-    color: #cd9b33;
-    font-size: 26px;
-    margin: 0;
-    font-weight: bold;
-}
-.top-title-header .version-text { color: #ffffff; font-size: 24px; margin-left: 5px; }
-.top-title-header .author-text { color: #777777; font-size: 13px; margin-left: 10px; }
+/* ==========================================================================
+   LAYER 2: 글로벌 헤더 및 내비게이션 바
+   ========================================================================== */
+.top-title-header { background-color: var(--bg-header); padding: 20px 30px; display: flex; align-items: baseline; }
+.top-title-header h1 { color: var(--gold); font-size: 26px; margin: 0; font-weight: bold; }
+.top-title-header .version-text { color: #fff; font-size: 24px; margin-left: 5px; }
+.top-title-header .author-text { color: #777; font-size: 13px; margin-left: 10px; }
 
-.global-nav-bar {
-    background-color: #2b1a1a;
-    border-bottom: 2px solid #cd9b33;
-    display: flex;
-    justify-content: flex-end;
-    padding: 0 30px;
-}
+.global-nav-bar { background-color: var(--bg-nav); border-bottom: 2px solid var(--gold); display: flex; justify-content: flex-end; padding: 0 30px; }
 .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; }
-.nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: bold; }
-.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
-.nav-menu-item.active a { color: #ffcc00; }
+.nav-menu-item a { display: block; color: #bbb; text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: bold; transition: color 0.15s ease; }
+.nav-menu-item a:hover { color: #fff; }
+.nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid var(--gold); margin-bottom: -2px; }
+.nav-menu-item.active a { color: var(--gold-light); }
 
-/* 필터 바 컨트롤 인터페이스 */
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
-}
+/* ==========================================================================
+   LAYER 3: 필터 바 컨트롤 인터페이스
+   ========================================================================== */
+.filter-bar { display: flex; gap: 10px; max-width: 1200px; margin: 20px auto; padding: 0 20px; flex-wrap: wrap; }
 .filter-btn {
-    background-color: #262626;
-    color: #888;
-    border: 1px solid #444;
-    padding: 6px 18px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 12px;
+    background-color: #262626; color: var(--text-sub); border: 1px solid #444;
+    padding: 6px 18px; border-radius: 20px; cursor: pointer; font-weight: bold;
+    font-size: 12px; transition: all 0.15s ease;
 }
-.filter-btn.active {
-    background-color: #ffffff;
-    color: #121212;
-    border-color: #ffffff;
-}
+.filter-btn:hover { background-color: #333; color: #fff; border-color: #666; }
+.filter-btn.active { background-color: #fff; color: #121212; border-color: #fff; }
 
-/* 도감 전용 레이아웃 매트릭스 */
+/* ==========================================================================
+   LAYER 4: 도감 레이아웃 매트릭스 및 정밀 카드 하드웨어
+   ========================================================================== */
 .dogam-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 20px;
 }
 
-/* 정밀 카드 하드웨어 바디 */
+/* 양피지 테마 텍스트 명도 독립 보존 (#111) 및 GPU 가속 호버 애니메이션 결합 */
 .dogam-card {
-    background-color: #f5f2eb;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    border-top: 6px solid #ccc;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    transition: transform 0.2s;
+    background-color: var(--card-bg); color: #111; border-radius: 6px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); border-top: 6px solid #ccc;
+    display: flex; flex-direction: column; padding: 16px; box-sizing: border-box;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.dogam-card:hover { transform: translateY(-4px); }
+.dogam-card:hover { transform: translateY(-4px); box-shadow: 0 8px 18px rgba(0,0,0,0.6); }
 
-.dogam-card.wei { border-top-color: #2270b5; }
-.dogam-card.shu { border-top-color: #229944; }
-.dogam-card.wu { border-top-color: #b82d2d; }
-.dogam-card.qun { border-top-color: #c99414; }
+/* 진영별 마스터 컬러 변수 연동 */
+.dogam-card.wei { border-top-color: var(--wei); }
+.dogam-card.shu { border-top-color: var(--shu); }
+.dogam-card.wu  { border-top-color: var(--wu); }
+.dogam-card.qun { border-top-color: var(--qun); }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .card-title { font-size: 16px; font-weight: bold; color: #111; }
-.card-check { color: #229944; font-weight: bold; }
+.card-check { color: var(--shu); font-weight: bold; }
 
-/* 핵심 로직 변경: 단일 차원 구성에 따라 불필요한 레이아웃 가로 정렬 제거 및 최적화 */
 .card-body { display: block; margin-bottom: 12px; }
 .profile-info { font-size: 12px; line-height: 1.6; color: #222; }
 .label-orange { color: #cc7a00; font-weight: bold; margin-right: 6px; }
 
 /* 가변형 컴포넌트 자동 높이 맞춤 박스 */
 .skill-box {
-    background-color: #eae6db;
-    padding: 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 1.5;
-    flex-grow: 1; 
+    background-color: var(--card-skill); padding: 12px; border-radius: 4px;
+    font-size: 12px; line-height: 1.5; color: #222; flex-grow: 1; box-sizing: border-box;
 }
-.skill-name { color: #b82d2d; font-weight: bold; margin-bottom: 6px; }
+.skill-name { color: var(--wu); font-weight: bold; margin-bottom: 6px; }
