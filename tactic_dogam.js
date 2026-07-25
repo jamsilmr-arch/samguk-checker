@@ -1,7 +1,7 @@
-console.log("[시스템 분석] tactic_dogam.js 고속 해시 맵 렌더러 및 스타일 위임 엔진 기동");
+console.log("[시스템 분석] tactic_dogam.js 고속 해시 맵 렌더러 및 통합 마스터 사전 기동");
 
 // ==========================================================================
-// LAYER 1: 전법 마스터 데이터베이스 구역 (70여 종 전체 데이터 보존)
+// LAYER 1: 전법 마스터 데이터베이스 구역 (70여 종 일반 전법 보존)
 // ==========================================================================
 const tacticDogamData = [
     { id: 't_gandam', name: '간담상조', type: '지휘 (100%)', target: '적군 전체, 아군 2팀', desc: '매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을(를) 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음).' },
@@ -80,8 +80,102 @@ const tacticDogamData = [
     { id: 't_huyang', name: '휴양생식', type: '능동 (35%)', target: '아군 2팀', desc: '아군 2개 대상의 병력을 회복(치료율 165%, 모략 영향)하고 해당 대상에게 통찰을 부여하며 1턴 지속합니다.' }
 ];
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
-const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+// [이관 완료] deck_core.js에서 이관된 무장 고유 전법 + S/A급 통합 마스터 사전
+const TACTIC_MASTER_DESC = {
+    // 1. 주요 무장 고유 전법 (장수 도감 소속 데이터)
+    "재주복주": { role: "지휘 (100%)", target: "아군 2명", desc: "매 턴 아군 2명 치료(치료율 68%, 모략 영향) 및 10% 확률로 대상에게 허약 상태 부여(1턴 지속). 자신이 주장일 시 허약 부여 확률 15%로 상승." },
+    "연인노호": { role: "패시브 (100%)", target: "적군 전체", desc: "전투 2, 4턴에 적군 전체에게 무용 피해(계수 104%)를 가하고, 대상이 무장해제 상태일 경우 50% 확률로 통솔 50 감소(2턴 지속). 주장일 시 통솔 감소 효과가 겁전 상태 대상에게도 적용." },
+    "무성": { role: "액티브 (35%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 맹렬한 무용 피해(계수 146%)를 가하고, 50% 확률로 대상에게 무장해제 또는 겁전 상태 부여(1턴 지속). 또한 자신이 가하는 무용 피해 36% 증가(2턴 지속)." },
+    "응시낭고": { role: "지휘 (100%)", target: "자신", desc: "전투 1~4턴 시작 시 80% 확률로 자신에게 공심 100% 부여 또는 자신이 받는 모략 피해 30% 감소(1턴 지속). 5턴 이후부터 매 턴 80% 확률로 1~2명의 적군에게 모략 피해(계수 154%) 부여." },
+    "함진살적": { role: "패시브 (100%)", target: "자신", desc: "일반 공격 후 대상에게 추가 무용 피해(계수 188%)를 가하며, 해당 타격은 대상의 통솔을 일정 비율 무시. 주장의 타격 우선권이 대폭 상승." },
+    "초선차전": { role: "액티브 (40%)", target: "아군 다수", desc: "아군 2명의 제어 상태를 모두 해제하고, 피해를 입을 때마다 일정 비율로 병력을 회복하는 상태 부여(2턴 지속)." },
+    "칠진칠출": { role: "패시브 (100%)", target: "자신", desc: "전투 중 자신은 모든 제어 상태에 면역(통찰)되며, 무용, 모략, 속도, 통솔 속성이 40 증가. 자신이 주장일 경우 증가 수치가 50으로 상승." },
+    "천하무쌍": { role: "액티브 (35%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어에 면역되고 받는 피해가 감소하며, 일반 공격 후 추격 전법 정상 발동." },
+    "경달권변": { role: "능동 (65%)", target: '적군 단체', desc: '적군 단체에 혼란 효과를 부여하고 강력한 모략 피해를 가합니다.' },
+    "산무유책": { role: "능동 (50%)", target: '적군 전체', desc: '적군 전체에 모략 피해를 가하고 가하는 피해를 감소시킵니다.' },
+    "거중지중": { role: "능동 (50%)", target: '아군 전체', desc: '아군 전체가 받는 피해를 상시 억제하고 병력을 지속 회복시킵니다.' },
+    "분용당선": { role: "능동 (70%)", target: '적군 전열', desc: '적군 전열에 강력한 무용 피해를 가하고 자신에게 허약을 부여합니다.' },
+    "축호과간": { role: "패시브 (100%)", target: '적군 1팀', desc: '아군 주장이 일반 공격을 받을 시 대신 매서운 반격 무용 피해를 가합니다.' },
+    "십면매복": { role: "추격 (50%)", target: '적군 단체', desc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해를 입힙니다.' },
+    "군령여산": { role: "지휘 (100%)", target: '아군 전체', desc: '아군 전체의 가하는 피해를 통솔에 비례하여 영구 증폭시킵니다.' },
+    "효웅": { role: "지휘 (100%)", target: '아군 전체', desc: '부대 내 아군이 가하는 모든 피해의 일정 비율을 흡수하여 치료합니다.' },
+    "교변병기": { role: "지휘 (100%)", target: '아군 전체', desc: '전투 시작 시 아군 전체의 전법 발동 확률을 유의미하게 끌어올립니다.' },
+    "발시담정": { role: "패시브 (50%)", target: '적군 전체', desc: '피해를 입을 때마다 일정 확률로 적군 전체에 즉각 반격을 가합니다.' },
+    "충용": { role: "능동 (50%)", target: '적군 전체', desc: '적군 전체에 무용 피해를 입히고 확률적으로 제어 불가를 부여합니다.' },
+    "담대여두": { role: "추격 (50%)", target: '적군 단체', desc: '일반 공격 후 적의 스탯을 빼앗아 자신에게 흡수 누적시킵니다.' },
+    "습참": { role: "능동 (35%)", target: '적군 단체', desc: '적군 단체에 피해를 입히고 가하는 피해량을 일정 비율 차단합니다.' },
+    "출수법": { role: "패시브 (100%)", target: '적군 다수', desc: '자신의 일반 공격 피해를 주위 적들에게 확산 전이시킵니다.' },
+    "절절학문": { role: "지휘 (100%)", target: '아군 전체', desc: '아군이 능동 전법을 발동할 때마다 아군 전체의 공격력을 증폭합니다.' },
+    "만왕": { role: "추격 (35%)", target: '적군 단체', desc: '일반 공격 후 대상을 변칙적인 공황 및 약화 상태로 빠뜨립니다.' },
+    "실병제위": { role: "패시브 (70%)", target: '자신', desc: '준비 턴이 필요한 능동 전법의 대기 시간을 확률적으로 즉시 삭제합니다.' },
+    "인정": { role: "지휘 (100%)", target: '아군 전체', desc: '매 턴 아군 전체의 병력을 안정적으로 정량 회복시키고 속성을 높입니다.' },
+    "적혈도": { role: "패시브 (100%)", target: '자신', desc: '자신의 전법 크리티컬(회심) 확률을 상시 임계점 이상으로 유지합니다.' },
+    "묘산천기": { role: "지휘 (100%)", target: '아군 전체', desc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 강제로 폭증시킵니다.' },
+    "정수유심": { role: "지휘 (100%)", target: '아군 전체', desc: '아군 전체가 받는 피해의 일부를 적 시전자에게 즉각 반사 유도합니다.' },
+    "탑상책": { role: "지휘 (100%)", target: '아군 단체', desc: '자신의 속성 절반을 아군에게 양도하고 병력이 낮은 아군을 집중 보호합니다.' },
+    "화용욕모": { role: "능동 (70%)", target: '적군 단체', desc: '적군 단체의 방어선을 완전 해제하고 아군의 전법 발동률을 보정합니다.' },
+    "강동맹호": { role: "지휘 (100%)", target: '적군 전체', desc: '적군 전체에 도발을 시전하여 모든 일반 공격을 자신에게 강제 집중시킵니다.' },
+    "웅거": { role: "지휘 (100%)", target: '자신', desc: '아군이 일반 공격을 행할 때마다 자신에게 연격, 통찰 등의 영웅 버프를 중첩합니다.' },
+    "효희": { role: "능동 (50%)", target: '적군 다수', desc: '자신에게 걸린 버프 개수에 비례하여 무용 타격 횟수와 화력이 증가합니다.' },
+    "강동패주": { role: "능동 (50%)", target: '적군 단체', desc: '일반 공격 시 확률적으로 파괴적인 연타 피해를 입히고 병력을 흡혈합니다.' },
+    "겸권상계": { role: "지휘 (100%)", target: '아군 전체', desc: '오나라 진영 무장들과 결선 시 아군 전체의 전술 스탯을 최대치로 개방합니다.' },
+    "백의도강": { role: "지휘 (100%)", target: '아군 전체', desc: '전투 첫 턴에 아군 전체에 도피를 부여하고 무용/모략 차단 제어를 독립 연산합니다.' },
+    "지변규려": { role: "추격 (50%)", target: '적군 단체', desc: '일반 공격 후 대상에게 화상을 입히고 이미 화상 상태면 폭발 확산 피해를 줍니다.' },
+    "청백충근": { role: "능동 (60%)", target: '아군 주장', desc: '아군 주장의 모략 크리티컬 확률을 증폭하고 피해를 대신 숄더링합니다.' },
+    "봉화연천": { role: "패시브 (80%)", target: '적군 전체', desc: '자신이 신산 버프를 획득할 때마다 적 전체에 광역 신성 모략 불화살을 투하합니다.' },
+    "청라산개": { role: "지휘 (100%)", target: '아군 주장', desc: '아군 주장이 입는 치명상을 대신 유기적으로 흡수하고 주장의 공격력을 높입니다.' },
+    "칠척사모": { role: "지휘 (100%)", target: '적군 단체', desc: '피해를 입으면 자신에게 걸린 디버프를 세척하고 적 전체 중 1명에게 공포를 부여합니다.' },
+    "요원지화": { role: "능동 (50%)", target: '적군 전체', desc: '자신의 병력을 일정량 소모하여 적군 전체에 확정적 강한 화상 피해를 가합니다.' },
+    "위진새북": { role: "패시브 (100%)", target: '자신', desc: '턴 시작 시 확률적으로 무용과 속도를 증폭하고 액티브 타격 후 속도 비례 확산 피해를 입힙니다.' },
+    "전권난정": { role: "지휘 (100%)", target: '적/아군 전체', desc: '매 턴 자신의 무용을 증폭시키며 후반 라운드 진입 시 적과 아군 전체를 무차별 난사 공격합니다.' },
+    "효장": { role: "능동 (50%)", target: '적군 단체', desc: '적 단체에 고배율 무용 참격 충격을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다.' },
+    "태평경": { role: "지휘 (70%)", target: '적군 전체', desc: '매 턴 고정 확률로 적군 전체에 수공 상태를 걸어 지속적인 내구도 붕괴 모략 피해를 줍니다.' },
+    "사소도": { role: "지휘 (100%)", target: '아군 전체', desc: '매 턴 아군 전체의 통솔력을 누적 증폭시키며 가하는 광역 무용 화살 피해 화력을 보정합니다.' },
+    "황천당립": { role: "능동 (50%)", target: '적군 전체', desc: '1턴 준비 후 적 전체에 강력한 천벌 벼락 모략 타격을 5회 연쇄적으로 내리꽂습니다.' },
+    "천의난위": { role: "능동 (50%)", target: '적군 단체', desc: '적군의 속성을 흡수하여 아군에게 공유하고 강력한 모략 피해를 줍니다.' },
+    "요풍사기": { role: "능동 (50%)", target: '적/아군 전체', desc: '적 전체에 강한 모래바람 결계를 치고 아군 전체에게 장벽 수치를 중첩 부여합니다.' },
+    "화겁생기": { role: "패시브 (100%)", target: '아군 전체', desc: '부대 아군 전체에게 상시 신기루 도피 버프를 부여하여 전법 및 평타 회피율을 극대화합니다.' },
+    "비분시": { role: "능동 (70%)", target: '아군 단체', desc: '아군 단체의 병력을 회복시키고 가하는 피해를 유의미하게 증가시킵니다.' },
+    "폐월": { role: "능동 (50%)", target: '적군 단체', desc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.' },
+    "청낭제세": { role: "능동 (50%)", target: '아군 전체', desc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.' },
+
+    // 2. 범용 S급/A급 전법
+    "간담상조": { role: "지휘 (100%)", target: "적/아군 2팀", desc: "전투 시작 후 처음 3턴 동안 자신이 받는 피해 80%를 아군 지정 목표에게 분담시키고, 매 턴 병력을 크게 회복하는 세이브 효과 부여." },
+    "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 중 아군 전체의 액티브 전법 발동률을 5% 증가시키고, 대상이 가하는 모략 피해를 8% 증가시킴." },
+    "제곤부위": { role: "액티브 (40%)", target: "아군 2명", desc: "아군 2명의 디버프를 해제하고 1회 피해를 80% 저항하는 방어 버프를 부여하며 즉시 병력 회복." },
+    "이아환아": { role: "패시브 (100%)", target: "자신", desc: "전투 중 일반 공격을 받을 때마다 80% 확률로 공격자에게 무용 반격 피해(계수 100%)를 가함." },
+    "만전제발": { role: "액티브 (40%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 강력한 무용 피해를 가하고, 대상에게 출혈 상태를 부여하여 매 턴 지속 피해를 줌." },
+    "선등함진": { role: "패시브 (100%)", target: "자신", desc: "자신의 무용과 속도를 50 증가시키고, 전투 중 파갑(방어 관통) 효과 15% 및 선공권을 획득함." },
+    "수상개화": { role: "액티브 (40%)", target: "적군 2명", desc: "적군 2명에게 모략 피해를 가하고 1턴간 수공 상태를 부여하며, 대상의 모략 속성을 강탈함." },
+    "화소적벽": { role: "액티브 (40%)", target: "적군 전체", desc: "적군 전체에게 강력한 화염 피해를 가하고 화상 상태를 부여. 바람 속성 날씨나 전법과 연계 시 계수 폭증." },
+    "동장철벽": { role: "패시브 (100%)", target: "자신", desc: "자신의 통솔이 50 증가하고, 전투 중 받는 물리 및 모략 피해가 상시 15% 감소함." },
+    "횡징폭렴": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 시작 후 처음 3턴 동안 아군 전체가 받는 피해가 25% 감소하며, 4턴 시작 시 병력을 일정량 회복." },
+    "강유겸제": { role: "지휘 (100%)", target: "아군 2명", desc: "아군 2명이 받는 물리 및 모략 피해를 18% 감소시키고, 전투 중 무용 및 속도 속성을 보강함." },
+    "혼수모어": { role: "액티브 (35%)", target: "적군 2명", desc: "1턴 준비 후 적군 2명에게 혼란 상태(적과 아군을 무차별 공격)를 2턴 동안 부여." },
+    "동구적개": { role: "지휘 (100%)", target: "아군 2명", desc: "아군 2명의 통솔을 증가시키고 매 턴 피격 시 일정 확률로 피해량을 50% 삭감하는 저항 효과 부여." },
+    "위위구조": { role: "액티브 (40%)", target: "아군 단일", desc: "병력이 가장 낮은 아군 단일을 즉시 큰 폭으로 치료하고 1턴간 받는 피해 30% 감소 효과 부여." },
+    "태청단경": { role: "액티브 (45%)", target: "아군 전체", desc: "아군 전체의 디버프를 2개씩 해제하고 지속적인 치료 상태(정비)를 2턴간 부여함." },
+    "현호제세": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 중 매 턴 시작 시 병력이 가장 낮은 아군을 치료하고 대상의 방어 속성을 대폭 상승시킴." },
+    "홍수첨향": { role: "패시브 (100%)", target: "자신", desc: "전투 중 자신이 가하는 치유 효과가 30% 증가하고, 피격 시 일정 확률로 공격자의 화력을 억제함." },
+    "기문둔갑": { role: "지휘 (100%)", target: "적군 전체", desc: "전투 1~3턴에 적군 전체가 가하는 피해를 24% 억제하고 행동 순서를 늦춤." },
+    "사면초가": { role: "액티브 (50%)", target: "적군 2명", desc: "적군 2명에게 중독 상태를 부여하여 매 턴 모략 지속 피해를 입히고 타격 대상의 회복을 봉쇄함." },
+    "일고작기": { role: "추격 (35%)", target: "적군 단일", desc: "일반 공격 후 대상에게 물리 피해를 1회 더 가하고, 30% 확률로 자신의 연격률을 증가시킴." },
+    "사생취의": { role: "패시브 (100%)", target: "자신", desc: "자신의 받는 피해가 15% 증가하는 대신, 가하는 모든 물리 및 모략 피해가 30% 폭증함 (극딜 전용)." },
+    "미우주무": { role: "지휘 (100%)", target: "아군 2명", desc: "전투 중 아군 2명이 회복 효과를 받을 때마다 일정 확률로 대상의 디버프를 해제하고 방어력 상승." },
+    "이퇴위진": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 4턴 이후부터 아군 전체가 받는 피해를 20% 감소시키고 가하는 피해를 15% 증가시킴." }
+};
+
+// [경량화] 일반 전법 배열(tacticDogamData)과 이관된 고유 전법 사전(TACTIC_MASTER_DESC)을 O(1) 해시 맵으로 통합 바인딩
+const masterLookupMap = {};
+tacticDogamData.forEach(t => {
+    if (t?.name) masterLookupMap[cStr(t.name)] = { ...t, role: t.type || t.role };
+});
+Object.entries(TACTIC_MASTER_DESC).forEach(([k, v]) => {
+    const cleanKey = cStr(k);
+    if (!masterLookupMap[cleanKey]) {
+        masterLookupMap[cleanKey] = { name: k, ...v, type: v.role };
+    }
+});
 
 // [경량화] 인라인 스타일 철거 및 동적 CSS 클래스 단일 주입 엔진
 const injectTacticStyles = () => {
@@ -102,7 +196,7 @@ const injectTacticStyles = () => {
 };
 
 // ==========================================================================
-// LAYER 2: API 브릿지 개방 구역 (이름 목록 및 상세 데이터 직접 조회 브릿지)
+// LAYER 2: API 브릿지 개방 구역 (O(1) 통합 해시 맵 즉시 조회 브릿지)
 // ==========================================================================
 window.getAllTacticsFromDogam = function() {
     return tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -110,7 +204,7 @@ window.getAllTacticsFromDogam = function() {
 
 window.getTacticDataFromDogam = function(tacticName) {
     if (!tacticName) return null;
-    return tacticDogamData.find(t => cStr(t?.name) === cStr(tacticName)) || null;
+    return masterLookupMap[cStr(tacticName)] || null;
 };
 
 // ==========================================================================
@@ -134,25 +228,19 @@ function loadTacticData() {
         console.error("전법 도감 데이터 로드 실패:", e);
     }
 
-    // [경량화] O(N^2) 탐색 부하를 O(1) 해시 맵으로 압축
     const tMap = savedTactics.reduce((acc, st) => {
         if (st?.name) acc[cStr(st.name)] = st;
-        return acc;
-    }, {});
-
-    const originMap = tacticDogamData.reduce((acc, ot) => {
-        if (ot?.name) acc[cStr(ot.name)] = ot;
         return acc;
     }, {});
 
     currentTacticState = defaultNames.map(name => {
         const cleanName = cStr(name);
         const found = tMap[cleanName];
-        const originData = originMap[cleanName];
+        const originData = masterLookupMap[cleanName];
         return {
             name: name,
             desc: originData ? originData.desc : "전법 설명 누락",
-            type: originData ? originData.type : "-",
+            type: originData ? (originData.type || originData.role) : "-",
             target: originData ? originData.target : "-",
             isOwned: found ? !!found.isOwned : false,
             star: (found && found.star !== undefined && found.star !== null) ? parseInt(found.star, 10) : 0
@@ -186,6 +274,11 @@ function toggleTacticOwnership(tacticName) {
 function renderTacticDogamUI() {
     let nativeContainer = document.getElementById('tactic-list') || document.getElementById('tactic-container');
     
+    // [도감 UI 방어 로직] 도감 컨테이너가 없는 페이지(예: deck.html)에서 데이터 공급용으로 로드 시 UI 생성 생략
+    if (!nativeContainer && !document.getElementById('tactic-dogam-wrapper')) {
+        return;
+    }
+
     let container = document.getElementById('tactic-dogam-wrapper');
     if (!container) {
         container = document.createElement('div');
@@ -211,8 +304,6 @@ function renderTacticDogamUI() {
     renderTacticGrid();
 }
 
-// [경량화] 인라인 스타일 소거 및 map().join('') 고속 체이닝 렌더러 적용
-// [이벤트 위임] 개별 카드 리스너 대신 #tactic-card-grid 단일 이벤트 위임 적용
 function renderTacticGrid() {
     const gridContainer = document.getElementById('tactic-card-grid');
     const countBadge = document.getElementById('tactic-count-badge');
@@ -236,7 +327,6 @@ function renderTacticGrid() {
         </div>
     `).join('');
 
-    // 상위 그리드 컨테이너에 단 1개의 이벤트 리스너를 위임하여 GC 부하 소거
     gridContainer.onclick = function(e) {
         const card = e.target.closest('.tactic-card-item');
         if (card) {
@@ -246,7 +336,6 @@ function renderTacticGrid() {
     };
 }
 
-// [동기화] setTimeout 지연 철거 및 DOMContentLoaded 동기식 즉시 결선
 function initTacticDogamEngine() {
     injectTacticStyles();
     loadTacticData();
