@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>삼국지 왕전 - 장수 도감</title>
     <link rel="stylesheet" href="dogam.css">
 </head>
@@ -11,10 +12,10 @@
         <span class="author-text">by JHP</span>
     </header>
 
-    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 (배너 종료 직후 정위치 결선) -->
+    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 (동기식 즉시 결선) -->
     <script src="navbar.js"></script>
 
-    <div class="filter-bar">
+    <div class="filter-bar" role="group" aria-label="진영 선택 필터">
         <button class="filter-btn active" onclick="filterCountry('all')">전체</button>
         <button class="filter-btn" onclick="filterCountry('wei')">위나라</button>
         <button class="filter-btn" onclick="filterCountry('shu')">촉나라</button>
