@@ -1,29 +1,13 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 3단 폴백 연동 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 도감 100% 바인딩 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 전법 마스터 사전 바인딩
 // ==========================================================================
-// [이관 완료] EQUIP_ATTR_DESCRIPTIONS 및 internalMasterEquipmentMap 사전은 guide.js와 dogam.js로 각각 통합 이전되었습니다.
+// [이관 완료] EQUIP_ATTR_DESCRIPTIONS, internalMasterEquipmentMap, TACTIC_MASTER_DESC, 
+// OFFICER_MASTER, internalMasterTacticNames 등의 중복 정적 사전은 guide.js, dogam.js, tactic_dogam.js로 전면 이관되어 약 60줄 압축되었습니다.
 
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
-
-const OFFICER_MASTER = {
-    "가후":["경달권변","wei","궁병/방패병","SUPPORT_STR"],"곽가":["산무유책","wei","궁병/방패병","SUPPORT_STR"],"사마의":["응시낭고","wei","방패병/궁병","STR_CARRY"],"순욱":["거중지중","wei","궁병/창병","SUPPORT_STR"],"악진":["분용당선","wei","창병/궁병","PHYS_CARRY"],"전위":["축호과간","wei","창병/방패병","TANK_COUNTER"],"정욱":["십면매복","wei","방패병/궁병","STR_CARRY"],"조조(제왕)":["군령여산","wei","창병/방패병","SUPPORT_HEAL"],"조조":["효웅","wei","방패병/기병","SUPPORT_HEAL"],"장료":["함진살적","wei","창병/기병","PHYS_COMBO"],"장합":["교변병기","wei","방패병/창병","SUPPORT_HEAL"],"하후돈":["발시담정","wei","창병/방패병","TANK_COUNTER"],"하후연":["충용","wei","창병/기병","PHYS_COMBO"],
-    "관우":["무성","shu","창병/기병","PHYS_CARRY"],"강유":["담대여두","shu","방패병/기병","STR_CARRY"],"마대":["습참","shu","창병/방패병","PHYS_CARRY"],"마초":["출수법","shu","창병/기병","PHYS_COMBO"],"서서":["절절학문","shu","창병/궁병","STR_CARRY"],"사마가":["만왕","shu","창병/방패병","PHYS_CARRY"],"위연":["실병제위","shu","창병/궁병","PHYS_CARRY"],"유비":["인정","shu","창병/기병","SUPPORT_HEAL"],"유비(제왕)":["재주복주","shu","창병/방패병","SUPPORT_HEAL"],"장비":["연인노호","shu","창병/방패병","TANK_COUNTER"],"제갈량":["초선차전","shu","궁병/방패병","SUPPORT_STR"],"조운":["칠진칠출","shu","창병/방패병","PHYS_CARRY"],"황충":["적혈도","shu","창병/방패병","PHYS_CARRY"],"황월영":["묘산천기","shu","궁병/방패병","SUPPORT_STR"],
-    "대교":["정수유심","wu","창병/궁병","SUPPORT_STR"],"노숙":["탑상책","wu","궁병/기병","SUPPORT_STR"],"소교":["화용욕모","wu","궁병/기병","SUPPORT_STR"],"손견":["강동맹호","wu","창병/방패병","TANK_COUNTER"],"손권":["웅거","wu","궁병/기병","STR_CARRY"],"손상향":["효희","wu","궁병/기병","PHYS_COMBO"],"손책":["강동패주","wu","창병/방패병","PHYS_CARRY"],"손권(제왕)":["겸권상계","wu","창병/궁병","STR_CARRY"],"여몽":["백의도강","wu","방패병/궁병","SUPPORT_STR"],"육손":["지변규려","wu","창병/기병","STR_CARRY"],"육항":["청백충근","wu","창병/궁병","SUPPORT_STR"],"주유":["봉화연천","wu","창병/궁병","STR_CARRY"],"주태":["청라산개","wu","기병/방패병","TANK_COUNTER"],"정보":["칠척사모","wu","기병/방패병","TANK_COUNTER"],"황개":["요원지화","wu","방패병/궁병","TANK_COUNTER"],
-    "공손찬":["위진새북","qun","기병/창병","PHYS_COMBO"],"동탁":["전권난정","qun","방패병/기병","TANK_COUNTER"],"안량":["효장","qun","창병/기병","PHYS_CARRY"],"여포":["천하무쌍","qun","궁병/기병","PHYS_COMBO"],"우길":["태평경","qun","창병/궁병","STR_CARRY"],"원소":["사소도","qun","방패병/기병","TANK_COUNTER"],"장각":["황천당립","qun","궁병/기병","STR_CARRY"],"장녕":["천의난위","qun","궁병/방패병","STR_CARRY"],"장보":["요풍사기","qun","궁병/방패병","STR_CARRY"],"좌자":["화겁생기","qun","궁병/방패병","SUPPORT_STR"],"채문희":["비분시","qun","궁병/기병","SUPPORT_STR"],"초선":["폐월","qun","창병/기병","SUPPORT_STR"],"화타":["청낭제세","qun","궁병/방패병","SUPPORT_STR"]
-};
-
-const internalMasterOfficerUniqueTacticMap = {}, internalMasterOfficerUnitMap = {}, officerFactionMap = {};
-const internalMasterOfficerNames = Object.keys(OFFICER_MASTER).sort((a,b)=>a.localeCompare(b,'ko'));
-for (let [k,v] of Object.entries(OFFICER_MASTER)) {
-    internalMasterOfficerUniqueTacticMap[k] = v[0];
-    officerFactionMap[k] = v[1];
-    internalMasterOfficerUnitMap[k] = v[2];
-}
-
-const internalMasterTacticNames = ["가정지전","간담상조","강유겸제","견불가최","견진연봉","공기불비","과하탁교","교취호탈","극적제승","금낭묘계","금적금왕","금창신","금철교명","기문둔갑","낙정하석","동구적개","동장철벽","동촉기선","만부막적","만전제발","만천과해","문치무공","미우주무","반객위주","병량촌단","분성지계","비사주석","사면초가","사생취의","선등함진","수상개화","순수견양","승승장구","심모원려","안영찰채","암전난방","양의화생","양초선행","여자동포","요사여신","용맹무쌍","용왕직전","운주유악","원성재도","위위구조","유좌유용","이간계","이아환아","이일대로","이퇴위진","일고작기","인세이도","전위위안","제곤부위","중정기고","지인선임","진퇴유도","진화타겁","질풍노도","천리추격","천시지리","체천행도","축세대발","축호과간","태청단경","토적격문","현호제세","호령삼군","혼수모어","홍수첨향","화소적벽","횡소천군","횡징폭렴","휴양생식"].sort((a,b)=>a.localeCompare(b,'ko'));
 
 const EQ_PRESETS = {
     PHYS_CARRY: ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -91,11 +75,32 @@ const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","�
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
 
 // ==========================================================================
-// LAYER 2: 통합 수치 연산 엔진 (방어/공격 키워드 충돌 100% 소거 및 정규화)
+// LAYER 2: 도감 100% 바인딩 브릿지 및 연산 엔진
 // ==========================================================================
+// [고도화] 무장 데이터 조회 시 dogam.js 브릿지를 1차 참조하는 단일 엔진
+function getOfficerDogamData(officerName) {
+    if (window.getOfficerDataFromDogam) { 
+        const d = window.getOfficerDataFromDogam(officerName); 
+        if (d && (d.uniqueTactic || d.skill)) {
+            return {
+                role: d.role || "보조, 버퍼",
+                uniqueTactic: d.uniqueTactic || d.skill || "고유 전법 누락",
+                unitSuitability: d.unitSuitability || d.unit || "방패병",
+                faction: d.faction || d.group || "qun",
+                stats: d.stats || null
+            };
+        }
+    }
+    return { role: "보조, 버퍼", uniqueTactic: "고유 전법 누락", unitSuitability: "방패병", faction: "qun", stats: null };
+}
+
+const getTacticListBridge = () => window.getAllTacticsFromDogam ? window.getAllTacticsFromDogam() : [];
+const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? window.getAllOfficerNamesFromDogam() : [];
+
 // [고도화] 장비 매핑 3단 폴백(Dogam -> Guide -> Presets) 파이프라인
 function getOfficerEquipment(officerName, deckUnitType = "") {
-    const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
+    const dogamInfo = getOfficerDogamData(officerName);
+    const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (dogamInfo.unitSuitability?.split('/')[0] || "방패병");
     
     let rawEq = window.getOfficerEquipmentFromDogam ? window.getOfficerEquipmentFromDogam(officerName) : null;
     if (!rawEq && window.getEquipmentRecommendationFromGuide) {
@@ -115,25 +120,13 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
         });
         return eq;
     }
-    const profileId = OFFICER_MASTER[officerName]?.[3] || "PHYS_CARRY";
-    const p = EQ_PRESETS[profileId];
+    const p = EQ_PRESETS["PHYS_CARRY"];
     return {
         helmet: { name: p[0], attr1: p[1], attr2: p[2] },
         armor:  { name: p[3], attr1: p[4], attr2: p[5] },
         accessory: { name: p[6], attr1: p[7], attr2: p[8] === "UNIT_DMG_RED" ? `${unitPrefix} 피해 감소` : p[8] }
     };
 }
-
-function getOfficerDogamData(officerName) {
-    if (window.getOfficerDataFromDogam) { 
-        const d = window.getOfficerDataFromDogam(officerName); 
-        if (d?.uniqueTactic && d.uniqueTactic !== "고유 전법 누락") return { ...d, unitSuitability: d.unitSuitability || internalMasterOfficerUnitMap[officerName] || "정보 없음" };
-    }
-    return { role: "지휘/능동/패시브", uniqueTactic: internalMasterOfficerUniqueTacticMap[officerName] || "고유 전법 누락", unitSuitability: internalMasterOfficerUnitMap[officerName] || "정보 없음" };
-}
-
-const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : [...internalMasterTacticNames]) : [...internalMasterTacticNames];
-const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : [...internalMasterOfficerNames]) : [...internalMasterOfficerNames];
 
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
@@ -263,19 +256,24 @@ function buildIntegratedStatsHtml(stats) {
 }
 
 // ==========================================================================
-// LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 검증 엔진
+// LAYER 3: 맞춤형 대체 추천(Arrow Curation) 및 도감 API 동적 바인딩 엔진
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
-    const cleanMissing = missingName.toString().trim().replace(/\s+/g, '');
+    const cleanMissing = cStr(missingName);
+    const missingInfo = getOfficerDogamData(missingName);
     const isMissingTac = tacticalSet.has(missingName), isMissingSup = supportSet.has(missingName);
-    const missingFaction = officerFactionMap[missingName] || "", missingUnits = (internalMasterOfficerUnitMap[missingName] || "").split("/");
+    const missingFaction = missingInfo.faction || "", missingUnits = (missingInfo.unitSuitability || "").split("/");
 
+    const allNames = getOfficerNamesBridge();
     let candidates = [];
     Object.keys(heroDataMap).forEach(cleanCand => {
-        if (!heroDataMap[cleanCand]?.isOwned || curNames.some(cn => cn.replace(/\s+/g, '') === cleanCand) || cleanCand === cleanMissing) return;
-        const originName = internalMasterOfficerNames.find(n => n.replace(/\s+/g, '') === cleanCand) || cleanCand;
+        if (!heroDataMap[cleanCand]?.isOwned || curNames.some(cn => cStr(cn) === cleanCand) || cleanCand === cleanMissing) return;
+        const originName = allNames.find(n => cStr(n) === cleanCand) || cleanCand;
         let score = 0;
-        const isTac = tacticalSet.has(originName), isSup = supportSet.has(originName), faction = officerFactionMap[originName] || "", units = (internalMasterOfficerUnitMap[originName] || "").split("/");
+        const candInfo = getOfficerDogamData(originName);
+        const isTac = tacticalSet.has(originName), isSup = supportSet.has(originName);
+        const faction = candInfo.faction || "", units = (candInfo.unitSuitability || "").split("/");
+        
         if ((isMissingTac && isTac) || (isMissingSup && isSup) || (!isMissingTac && !isMissingSup && !isTac && !isSup)) score += 5;
         if (missingFaction && faction === missingFaction) score += 3;
         if (deckUnitType && units.includes(deckUnitType)) score += 4; else if (missingUnits.some(u => units.includes(u))) score += 2;
@@ -286,10 +284,10 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
 }
 
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set()) {
-    const cleanMissing = missingTacName.toString().trim().replace(/\s+/g, '');
+    const cleanMissing = cStr(missingTacName);
     const alts = tacticAlternativesMap[missingTacName] || [];
     for (let t of alts) {
-        const cleanT = t.toString().trim().replace(/\s+/g, '');
+        const cleanT = cStr(t);
         if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) { recommendedTacs.add(t); return t; }
     }
     const targetStats = internalTacticStatMap[missingTacName];
@@ -298,9 +296,10 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         const isAttack = targetKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k));
         const isSupport = targetKeys.some(k => ['damageTakenRed', 'healGiven', 'leech'].includes(k));
 
+        const allTacs = getTacticListBridge();
         for (let cleanTName of Object.keys(tacticDataMap)) {
-            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.some(et => et.replace(/\s+/g, '') === cleanTName) || recommendedTacs.has(cleanTName) || cleanTName === cleanMissing) continue;
-            const originTName = internalMasterTacticNames.find(n => n.replace(/\s+/g, '') === cleanTName) || cleanTName;
+            if (!tacticDataMap[cleanTName]?.isOwned || allEquipTacs.some(et => cStr(et) === cleanTName) || recommendedTacs.has(cleanTName) || cleanTName === cleanMissing) continue;
+            const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
             const candStats = internalTacticStatMap[originTName]; if (!candStats) continue;
             const candKeys = Object.keys(candStats);
             if ((isAttack && !candKeys.some(k => ['physicalDmg', 'strategyDmg', 'damageDealtInc', 'comboRate', 'armorPen'].includes(k))) || 
@@ -464,7 +463,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (3단 다중 도감 폴백 연계 종결 팝업)
+// LAYER 5: UI 파이프라인 및 모달 컨트롤 (3단 다중 도감 폴백 연계 종결 팝업)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
