@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 전법 드롭다운 UI 최적화 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 고속 연산 경량화 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 데이터 정규화 및 인게임 공식 속성 마스터 사전 바인딩
@@ -47,6 +47,9 @@ const OFFICER_MASTER = {
     "대교":["정수유심","wu","창병/궁병","SUPPORT_STR"],"노숙":["탑상책","wu","궁병/기병","SUPPORT_STR"],"소교":["화용욕모","wu","궁병/기병","SUPPORT_STR"],"손견":["강동맹호","wu","창병/방패병","TANK_COUNTER"],"손권":["웅거","wu","궁병/기병","STR_CARRY"],"손상향":["효희","wu","궁병/기병","PHYS_COMBO"],"손책":["강동패주","wu","창병/방패병","PHYS_CARRY"],"손권(제왕)":["겸권상계","wu","창병/궁병","STR_CARRY"],"여몽":["백의도강","wu","방패병/궁병","SUPPORT_STR"],"육손":["지변규려","wu","창병/기병","STR_CARRY"],"육항":["청백충근","wu","창병/궁병","SUPPORT_STR"],"주유":["봉화연천","wu","창병/궁병","STR_CARRY"],"주태":["청라산개","wu","기병/방패병","TANK_COUNTER"],"정보":["칠척사모","wu","기병/방패병","TANK_COUNTER"],"황개":["요원지화","wu","방패병/궁병","TANK_COUNTER"],
     "공손찬":["위진새북","qun","기병/창병","PHYS_COMBO"],"동탁":["전권난정","qun","방패병/기병","TANK_COUNTER"],"안량":["효장","qun","창병/기병","PHYS_CARRY"],"여포":["천하무쌍","qun","궁병/기병","PHYS_COMBO"],"우길":["태평경","qun","창병/궁병","STR_CARRY"],"원소":["사소도","qun","방패병/기병","TANK_COUNTER"],"장각":["황천당립","qun","궁병/기병","STR_CARRY"],"장녕":["천의난위","qun","궁병/방패병","STR_CARRY"],"장보":["요풍사기","qun","궁병/방패병","STR_CARRY"],"좌자":["화겁생기","qun","궁병/방패병","SUPPORT_STR"],"채문희":["비분시","qun","궁병/기병","SUPPORT_STR"],"초선":["폐월","qun","창병/기병","SUPPORT_STR"],"화타":["청낭제세","qun","궁병/방패병","SUPPORT_STR"]
 };
+
+// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
+const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 const internalMasterOfficerUniqueTacticMap = {}, internalMasterOfficerUnitMap = {}, officerFactionMap = {};
 const internalMasterOfficerNames = Object.keys(OFFICER_MASTER).sort((a,b)=>a.localeCompare(b,'ko'));
@@ -158,7 +161,7 @@ const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","�
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
 
 // ==========================================================================
-// LAYER 2: 통합 수치 연산 엔진
+// LAYER 2: 통합 수치 연산 엔진 (방어/공격 키워드 충돌 100% 소거 및 정규화)
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
@@ -525,7 +528,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (경량화 단일 통합 팝업 엔진)
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
