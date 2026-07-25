@@ -177,10 +177,12 @@ function aggregateIntegratedStats(deck, officerIndex) {
             return;
         }
 
-        function extractVal(str) {
-            const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/);
-            return numMatch ? parseFloat(numMatch[1]) : 3.0;
-        }
+        // 기존: const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/);
+// 교정: % 기호가 붙은 실제 속성 수치를 우선 인식하도록 변경
+function extractVal(str) {
+    const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%/)||str.replace(/\[.*?\]/g,'').match(/([+-]?\d+(?:\.\d+)?)/);
+    return numMatch ? parseFloat(numMatch[1]) : 3.0;
+}
 
         const segments = /\d+%?,\s*\D+/.test(text) ? text.split(',') : [text];
         segments.forEach(seg => {
