@@ -2,33 +2,37 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>삼국지 왕전</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* [경량화] HTML 인라인 스타일 소거 및 공통 액티브 버튼 위임 */
+        .action-btn { padding: 9px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.15s ease; border: none; color: #fff; }
+        .action-btn:hover { opacity: 0.85; }
+        .btn-local { background-color: #b82d2d; }
+        .btn-cloud { background-color: #f97316; }
+        .btn-export { background-color: #28a745; }
+        .btn-import { background-color: #17a2b8; }
+    </style>
 </head>
 <body>
-    <!-- 타이틀 헤더 영역 -->
     <header class="top-title-header">
         <h1>삼국지 왕전</h1>
         <span class="author-text">by JHP</span>
     </header>
 
-    <!-- 공통 내비게이션 바 중앙 제어 엔진 도킹 -->
     <script src="navbar.js"></script>
 
-    <!-- 상단 제어 버튼 컴포넌트 레이어 (파이어베이스 클라우드 동기화 버튼 추가) -->
-    <div style="max-width: 1200px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
-        <button id="save-btn" onclick="saveData()">로컬 기록 저장</button>
-        <button id="firebase-save-btn" style="background-color: #f97316; color: white; border: 1px solid #f97316; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">☁️ 클라우드 동기화</button>
-        <button id="export-btn" onclick="exportData()" style="background-color: #28a745; color: white; border: 1px solid #28a745; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">데이터 영구 백업 (내보내기)</button>
-        <button id="import-btn" onclick="triggerImport()" style="background-color: #17a2b8; color: white; border: 1px solid #17a2b8; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px;">데이터 즉시 복구 (가져오기)</button>
-        
-        <!-- 보이지 않는 파일 업로드 브릿지 센서 -->
+    <!-- 상단 제어 버튼 컴포넌트 레이어 -->
+    <div style="max-width: 1200px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
+        <button id="save-btn" class="action-btn btn-local" onclick="saveData()">로컬 기록 저장</button>
+        <button id="firebase-save-btn" class="action-btn btn-cloud">☁️ 클라우드 동기화</button>
+        <button id="export-btn" class="action-btn btn-export" onclick="exportData()">데이터 영구 백업 (내보내기)</button>
+        <button id="import-btn" class="action-btn btn-import" onclick="triggerImport()">데이터 즉시 복구 (가져오기)</button>
         <input type="file" id="import-file-input" style="display: none;" onchange="importData(this)">
     </div>
     
-    <!-- 메인 대시보드 레이아웃 -->
     <main class="container">
-        <!-- 좌측 무장 섹션 -->
         <section class="section-box">
             <h2>장수 현황</h2>
             
@@ -41,11 +45,11 @@
             <div class="group-title wu">오나라</div>
             <div class="grid-container" id="hero-container-wu"></div>
 
-            <div class="group-title qun">군나라</div>
+            <!-- [용어 정규화] 군나라 -> 군진영 교정 -->
+            <div class="group-title qun">군진영</div>
             <div class="grid-container" id="hero-container-qun"></div>
         </section>
 
-        <!-- 우측 전법 섹션 -->
         <section class="section-box">
             <h2>전법 현황</h2>
             <div class="grid-container" id="tactic-container"></div>
@@ -59,7 +63,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // TODO: Firebase 콘솔에서 발급받은 본인의 프로젝트 설정값으로 반드시 교체하십시오.
         const firebaseConfig = {
             apiKey: "AIzaSy_YOUR_API_KEY_HERE",
             authDomain: "your-project-id.firebaseapp.com",
@@ -69,14 +72,11 @@
             appId: "1:123456789:web:abcdef"
         };
 
-        // 파이어베이스 엔진 초기화
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 클라우드 동기화 이벤트 리스너
         document.getElementById('firebase-save-btn').addEventListener('click', async () => {
             try {
-                // 로컬 스토리지에 저장된 현재 앱 상태 데이터를 즉시 파싱
                 const hobbyData = localStorage.getItem('samguk_hobby_data');
                 const deckText = localStorage.getItem('samguk_deck_text');
 
@@ -85,20 +85,17 @@
                     return;
                 }
 
-                // Firestore에 적재할 Payload 객체 조립
                 const syncData = {
                     hobbyData: hobbyData ? JSON.parse(hobbyData) : null,
                     deckText: deckText ? JSON.parse(deckText) : null,
                     lastUpdated: new Date().toISOString()
                 };
 
-                // 'users' 컬렉션의 'master_account' 문서에 데이터 덮어쓰기 (setDoc 활용)
                 await setDoc(doc(db, "users", "master_account"), syncData);
-                
                 alert("☁️ 클라우드 동기화 완료! 데이터가 안전하게 서버에 덮어씌워졌습니다.");
             } catch (error) {
                 console.error("Firebase Sync Error: ", error);
-                alert("동기화 실패: 파이어베이스 설정 및 보안 규칙(Security Rules)을 확인해 주십시오.\n" + error.message);
+                alert("동기화 실패: 파이어베이스 설정 및 보안 규칙을 확인해 주십시오.\n" + error.message);
             }
         });
     </script>
