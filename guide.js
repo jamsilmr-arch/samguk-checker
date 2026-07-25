@@ -1,7 +1,7 @@
-// [시스템 분석] guide.js 데이터 마스터 허브 및 외부 연동 브릿지 엔진 기동 (인게임 스크린샷 1~7번 수치 100% 검증 완료)
+// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 렌더링 브릿지 엔진 (인게임 스크린샷 검증 규칙 100% 동기화)
 
 // ==========================================================================
-// LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스 (표 양식 통합 완료)
+// LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스
 // ==========================================================================
 const guideDatabase = {
     equip: {
@@ -82,7 +82,6 @@ const guideDatabase = {
                 title: "장비 추가 속성 2단계 명세 (어품 장비 전용 병종 편성 스펙 - 스크린샷 2,3,5,6 검증)",
                 headers: ["장비 파트 위치", "등장 유효 세련 속성 라인업 (편성 조건)", "제한 수치 하한~상한 (어품 최대치)"],
                 rows: [
-                    
                     ["🪖 투구 슬롯", "창병/궁병/방패병/기병 피해 가함 (공격 전용)", "1.0% ~ 3.75%"],
                     ["", "창병/궁병/방패병/기병 강공, 기습 상승 (크리티컬)", "1.0% ~ 3.75%"],
                     ["", "창병/궁병/방패병/기병 치유 효과 상승 (힐러 전용)", "1.6% ~ 6.0%"],
@@ -256,172 +255,46 @@ const guideDatabase = {
 };
 
 // ==========================================================================
-// LAYER 2: deck_core.js 연동용 마스터 장비 딕셔너리 (하드코딩 적출 브릿지 자원)
+// LAYER 2: deck_core.js 연동용 마스터 장비 딕셔너리 (규칙 전수 교정 완료)
 // ==========================================================================
 const masterEquipmentMap = {
-    "마초": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "무용 피해 가함" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 피해 감소" }
-    },
-    "위연": {
-        helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" }
-    },
-    "서서": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" }
-    },
-    "장료": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" }
-    },
-    "조조(제왕)": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" }
-    },
-    "조조": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
-    },
-    "장합": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" }
-    },
-    "하후돈": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "사남패", attr1: "배반", attr2: "방패병 피해 감소" }
-    },
-    "악진": {
-        helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "기병 피해 감소" }
-    },
-    "전위": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
-    },
-    "정욱": {
-        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
-    },
-    "사마의": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "피해 가함" },
-        accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" }
-    },
-    "하후연": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" }
-    },
-    "가후": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" }
-    },
-    "동탁": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
-    },
-    "원소": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" }
-    },
-    "여포": {
-        helmet: { name: "백옥잠", attr1: "연격률", attr2: "강공, 기습 상승" },
-        armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "방패병 배반, 공심 상승" }
-    },
-    "제갈량": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
-    },
-    "황충": {
-        helmet: { name: "호분관", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 피해 감소" }
-    },
-    "강유": {
-        helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" }
-    },
-    "좌자": {
-        helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "창병 피해 감소" }
-    },
-    "장녕": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
-    },
-    "우길": {
-        helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "치유 효과 부여" }
-    },
-    "손권": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
-    },
-    "손권(제왕)": {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" }
-    },
-    "육항": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 부여" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
-        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" }
-    },
-    "노숙": {
-        helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "치유 효과 부여" },
-        armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" },
-        accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" }
-    },
-    "유비(제왕)": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
-    },
-    "유비": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "치유 효과 부여" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" },
-        accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" }
-    },
-    "관우": {
-        helmet: { name: "호분관", attr1: "피해 가함", attr2: "창병 피해 가함" },
-        armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" },
-        accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }
-    },
-    "장비": {
-        helmet: { name: "연함규", attr1: "피해 감소", attr2: "무용 피해 가함" },
-        armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" },
-        accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" }
-    }
+    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 피해 감소" } },
+    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
+    "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소" } },
+    "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" } },
+    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "장합": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "하후돈": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 피해 감소" } },
+    "악진": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
+    "전위": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "정욱": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+    "사마의": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "피해 가함" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" } },
+    "하후연": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 피해 감소" } },
+    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "동탁": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+    "원소": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+    "여포": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "궁병 배반, 공심 상승" } },
+    "제갈량": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" } },
+    "황충": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 피해 감소" } },
+    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소" } },
+    "좌자": { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" } },
+    "장녕": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
+    "우길": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승" } },
+    "손권": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" } },
+    "손권(제왕)": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "무용 피해 가함" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 피해 감소" } },
+    "육항": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+    "노숙": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
+    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "치유 효과 받음" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "관우": { helmet: { name: "호분관", attr1: "피해 가함", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+    "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "무용 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
 // ==========================================================================
-// LAYER 3: UI 렌더링 및 외부 스크립트 연동 API 개방 구역
+// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역 (함수형 체이닝 압축)
 // ==========================================================================
-window.onload = function() {
-    renderGuideContent('equip');
-};
+window.onload = () => renderGuideContent('equip');
 
 function switchGuideTab(categoryKey, btnElement) {
     document.querySelectorAll('.guide-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -434,59 +307,36 @@ function renderGuideContent(categoryKey) {
     const data = guideDatabase[categoryKey];
     if (!data) return;
 
-    let htmlBuilder = `<h2 class="guide-section-title">${data.title}</h2>`;
+    // [경량화] map().join('') 고속 체이닝 렌더러
+    const sectionsHtml = (data.sections || []).map(sec => `
+        <div class="info-card">
+            <h3>${sec.title}</h3>
+            ${sec.content}
+        </div>`).join('');
 
-    if (data.sections) {
-        data.sections.forEach(sec => {
-            htmlBuilder += `
-                <div class="info-card">
-                    <h3>${sec.title}</h3>
-                    ${sec.content}
-                </div>
-            `;
-        });
-    }
+    const tablesHtml = (data.rawTables || []).map(tbl => {
+        const ths = tbl.headers.map(h => `<th>${h}</th>`).join('');
+        const trs = tbl.rows.map(r => `
+            <tr>${r.map((cell, idx) => idx === 0 && cell !== "" 
+                ? `<td style="font-weight:bold;color:#38bdf8;">${cell}</td>` 
+                : `<td>${cell}</td>`).join('')}</tr>`).join('');
 
-    if (data.rawTables) {
-        data.rawTables.forEach(tbl => {
-            let ths = '';
-            tbl.headers.forEach(h => {
-                ths += `<th>${h}</th>`;
-            });
+        return `
+            <div class="data-table-wrapper" style="margin-top:25px;margin-bottom:30px;">
+                <h3 style="color:#feca57;font-size:15px;margin-bottom:12px;font-weight:bold;">📊 ${tbl.title}</h3>
+                <table class="data-table" style="width:100%;border-collapse:collapse;background-color:#141414;border:1px solid #2a2a2a;">
+                    <thead><tr style="background-color:#0f1322;">${ths}</tr></thead>
+                    <tbody>${trs}</tbody>
+                </table>
+            </div>`;
+    }).join('');
 
-            let trs = '';
-            tbl.rows.forEach(r => {
-                let tds = '';
-                r.forEach((cell, idx) => {
-                    if (idx === 0 && cell !== "") {
-                        tds += `<td style="font-weight: bold; color: #38bdf8;">${cell}</td>`;
-                    } else {
-                        tds += `<td>${cell}</td>`;
-                    }
-                });
-                trs += `<tr>${tds}</tr>`;
-            });
-
-            htmlBuilder += `
-                <div class="data-table-wrapper" style="margin-top: 25px; margin-bottom: 30px;">
-                    <h3 style="color: #feca57; font-size: 15px; margin-bottom: 12px; font-weight: bold;">📊 ${tbl.title}</h3>
-                    <table class="data-table" style="width: 100%; border-collapse: collapse; background-color: #141414; border: 1px solid #2a2a2a;">
-                        <thead>
-                            <tr style="background-color: #0f1322;">${ths}</tr>
-                        </thead>
-                        <tbody>${trs}</tbody>
-                    </table>
-                </div>
-            `;
-        });
-    }
-
-    container.innerHTML = htmlBuilder;
+    container.innerHTML = `<h2 class="guide-section-title">${data.title}</h2>${sectionsHtml}${tablesHtml}`;
 }
 
 function getEquipmentRecommendationFromGuide(officerName) {
     return masterEquipmentMap[officerName] || {
-        helmet: { name: "진현관", attr1: "피해 감소", attr2: "피해 가함" },
+        helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" },
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
         accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" }
     };
