@@ -393,19 +393,20 @@ const injectDogamStyles = () => {
 };
 
 // ==========================================================================
-// LAYER 2: API 브릿지 개방 구역 (O(1) 단일 해시 맵 즉시 조회 브릿지)
-// ==========================================================================
+// [dogam.js LAYER 2: API 브릿지 개방 구역] -> 이 영역만 아래 코드로 덮어쓰기 하십시오.
 window.getAllOfficerNamesFromDogam = function() {
     return heroDogamData.map(h => h.name).sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 window.getOfficerDataFromDogam = function(officerName) {
     const target = masterHeroLookupMap[cStr(officerName)];
-    return {
-        role: target ? target.role : "보조, 버퍼",
-        uniqueTactic: target ? target.skill : "고유 전법 누락",
-        unitSuitability: target && target.unit ? target.unit : "정보 없음"
-    };
+    return target ? {
+        role: target.role || "보조, 버퍼",
+        uniqueTactic: target.skill || "고유 전법 누락",
+        unitSuitability: target.unit || "정보 없음",
+        faction: target.group || "qun",
+        stats: target.stats || null
+    } : { role: "보조, 버퍼", uniqueTactic: "고유 전법 누락", unitSuitability: "정보 없음", faction: "qun", stats: null };
 };
 
 window.getOfficerEquipmentFromDogam = function(officerName) {
