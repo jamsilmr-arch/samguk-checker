@@ -1,7 +1,7 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 전법/장비 통합 설명 팝업 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 전법 드롭다운 UI 최적화 종결 엔진
 
 // ==========================================================================
-// LAYER 1: 데이터 정규화 및 인게임 공식 속성/전법 마스터 사전 바인딩
+// LAYER 1: 데이터 정규화 및 인게임 공식 속성 마스터 사전 바인딩
 // ==========================================================================
 const EQUIP_ATTR_DESCRIPTIONS = {
     "피해 가함": "무장 전투 중 가하는 피해 상승",
@@ -39,42 +39,6 @@ const EQUIP_ATTR_DESCRIPTIONS = {
     "기병 배반, 공심 상승": "기병 편성 시 무장 전투 중 피해를 가할 때 피해에 따라 자신의 병력을 회복 (어품 갑옷/장신구 전용)",
     "기병 강공, 기습 증가": "기병 편성 시 무장 전투 중 피해를 가할 때 확률적으로 이번 피해가 50% 상승 (어품 투구 전용)",
     "기병 치유 효과 상승": "기병 편성 시 무장 전투 중 가하는 치유 효과 상승 (힐러 전용)"
-};
-
-// [고도화] 고유 전법 및 범용 S급/A급 전법 상세 설명 마스터 사전 신설
-const TACTIC_MASTER_DESC = {
-    "재주복주": { role: "지휘 (100%)", target: "아군 2명", desc: "매 턴 아군 2명 치료(치료율 68%, 모략 영향) 및 10% 확률로 대상에게 허약 상태 부여(1턴 지속). 자신이 주장일 시 허약 부여 확률 15%로 상승." },
-    "연인노호": { role: "패시브 (100%)", target: "적군 전체", desc: "전투 2, 4턴에 적군 전체에게 무용 피해(계수 104%)를 가하고, 대상이 무장해제 상태일 경우 50% 확률로 통솔 50 감소(2턴 지속). 주장일 시 통솔 감소 효과가 겁전 상태 대상에게도 적용." },
-    "무성": { role: "액티브 (35%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 맹렬한 무용 피해(계수 146%)를 가하고, 50% 확률로 대상에게 무장해제 또는 겁전 상태 부여(1턴 지속). 또한 자신이 가하는 무용 피해 36% 증가(2턴 지속)." },
-    "응시낭고": { role: "지휘 (100%)", target: "자신", desc: "전투 1~4턴 시작 시 80% 확률로 자신에게 공심 100% 부여 또는 자신이 받는 모략 피해 30% 감소(1턴 지속). 5턴 이후부터 매 턴 80% 확률로 1~2명의 적군에게 모략 피해(계수 154%) 부여." },
-    "함진살적": { role: "패시브 (100%)", target: "자신", desc: "일반 공격 후 대상에게 추가 무용 피해(계수 188%)를 가하며, 해당 타격은 대상의 통솔을 일정 비율 무시. 주장의 타격 우선권이 대폭 상승." },
-    "초선차전": { role: "액티브 (40%)", target: "아군 다수", desc: "아군 2명의 제어 상태를 모두 해제하고, 피해를 입을 때마다 일정 비율로 병력을 회복하는 상태 부여(2턴 지속)." },
-    "칠진칠출": { role: "패시브 (100%)", target: "자신", desc: "전투 중 자신은 모든 제어 상태에 면역(통찰)되며, 무용, 모략, 속도, 통솔 속성이 40 증가. 자신이 주장일 경우 증가 수치가 50으로 상승." },
-    "천하무쌍": { role: "액티브 (35%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어에 면역되고 받는 피해가 감소하며, 일반 공격 후 추격 전법 정상 발동." },
-    "간담상조": { role: "지휘 (100%)", target: "아군 다수", desc: "전투 시작 후 처음 3턴 동안 자신이 받는 피해 80%를 아군 지정 목표에게 분담시키고, 매 턴 병력을 크게 회복하는 세이브 효과 부여." },
-    "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 중 아군 전체의 액티브 전법 발동률을 5% 증가시키고, 대상이 가하는 모략 피해를 8% 증가시킴." },
-    "제곤부위": { role: "액티브 (40%)", target: "아군 2명", desc: "아군 2명의 디버프를 해제하고 1회 피해를 80% 저항하는 방어 버프를 부여하며 즉시 병력 회복." },
-    "이아환아": { role: "패시브 (100%)", target: "자신", desc: "전투 중 일반 공격을 받을 때마다 80% 확률로 공격자에게 무용 반격 피해(계수 100%)를 가함." },
-    "만전제발": { role: "액티브 (40%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 강력한 무용 피해를 가하고, 대상에게 출혈 상태를 부여하여 매 턴 지속 피해를 줌." },
-    "선등함진": { role: "패시브 (100%)", target: "자신", desc: "자신의 무용과 속도를 50 증가시키고, 전투 중 파갑(방어 관통) 효과 15% 및 선공권을 획득함." },
-    "군령여산": { role: "지휘 (100%)", target: "아군 2명", desc: "전투 중 아군 2명이 가하는 피해 16% 증가 및 받는 피해 16% 감소. 자신이 주장일 시 부장의 스탯에 비례해 보너스 획득." },
-    "수상개화": { role: "액티브 (40%)", target: "적군 2명", desc: "적군 2명에게 모략 피해를 가하고 1턴간 수공 상태를 부여하며, 대상의 모략 속성을 강탈함." },
-    "화소적벽": { role: "액티브 (40%)", target: "적군 전체", desc: "적군 전체에게 강력한 화염 피해를 가하고 화상 상태를 부여. 바람 속성 날씨나 전법과 연계 시 계수 폭증." },
-    "동장철벽": { role: "패시브 (100%)", target: "자신", desc: "자신의 통솔이 50 증가하고, 전투 중 받는 물리 및 모략 피해가 상시 15% 감소함." },
-    "횡징폭렴": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 시작 후 처음 3턴 동안 아군 전체가 받는 피해가 25% 감소하며, 4턴 시작 시 병력을 일정량 회복." },
-    "강유겸제": { role: "지휘 (100%)", target: "아군 2명", desc: "아군 2명이 받는 물리 및 모략 피해를 18% 감소시키고, 전투 중 무용 및 속도 속성을 보강함." },
-    "혼수모어": { role: "액티브 (35%)", target: "적군 2명", desc: "1턴 준비 후 적군 2명에게 혼란 상태(적과 아군을 무차별 공격)를 2턴 동안 부여." },
-    "동구적개": { role: "지휘 (100%)", target: "아군 2명", desc: "아군 2명의 통솔을 증가시키고 매 턴 피격 시 일정 확률로 피해량을 50% 삭감하는 저항 효과 부여." },
-    "위위구조": { role: "액티브 (40%)", target: "아군 단일", desc: "병력이 가장 낮은 아군 단일을 즉시 큰 폭으로 치료하고 1턴간 받는 피해 30% 감소 효과 부여." },
-    "태청단경": { role: "액티브 (45%)", target: "아군 전체", desc: "아군 전체의 디버프를 2개씩 해제하고 지속적인 치료 상태(정비)를 2턴간 부여함." },
-    "현호제세": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 중 매 턴 시작 시 병력이 가장 낮은 아군을 치료하고 대상의 방어 속성을 대폭 상승시킴." },
-    "홍수첨향": { role: "패시브 (100%)", target: "자신", desc: "전투 중 자신이 가하는 치유 효과가 30% 증가하고, 피격 시 일정 확률로 공격자의 화력을 억제함." },
-    "기문둔갑": { role: "지휘 (100%)", target: "적군 전체", desc: "전투 1~3턴에 적군 전체가 가하는 피해를 24% 억제하고 행동 순서를 늦춤." },
-    "사면초가": { role: "액티브 (50%)", target: "적군 2명", desc: "적군 2명에게 중독 상태를 부여하여 매 턴 모략 지속 피해를 입히고 타격 대상의 회복을 봉쇄함." },
-    "일고작기": { role: "추격 (35%)", target: "적군 단일", desc: "일반 공격 후 대상에게 물리 피해를 1회 더 가하고, 30% 확률로 자신의 연격률을 증가시킴." },
-    "사생취의": { role: "패시브 (100%)", target: "자신", desc: "자신의 받는 피해가 15% 증가하는 대신, 가하는 모든 물리 및 모략 피해가 30% 폭증함 (극딜 전용)." },
-    "미우주무": { role: "지휘 (100%)", target: "아군 2명", desc: "전투 중 아군 2명이 회복 효과를 받을 때마다 일정 확률로 대상의 디버프를 해제하고 방어력 상승." },
-    "이퇴위진": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 4턴 이후부터 아군 전체가 받는 피해를 20% 감소시키고 가하는 피해를 15% 증가시킴." }
 };
 
 const OFFICER_MASTER = {
@@ -194,7 +158,7 @@ const tacticalSet = new Set(["사마의","순욱","정욱","가후","곽가","�
 const supportSet = new Set(["조조","조조(제왕)","유비","유비(제왕)","손권","손권(제왕)","화타","좌자","채문희","노숙","원소","동탁","공손찬"]);
 
 // ==========================================================================
-// LAYER 2: 통합 수치 연산 엔진 (방어/공격 키워드 충돌 100% 소거 및 정규화)
+// LAYER 2: 통합 수치 연산 엔진
 // ==========================================================================
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (internalMasterOfficerUnitMap[officerName]?.split('/')[0] || "방패병");
@@ -561,7 +525,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (경량화 단일 통합 팝업 엔진)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤
 // ==========================================================================
 let dynamicPresetDecks = [], currentSortMode = 'default';
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -616,7 +580,7 @@ const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
-    style.innerHTML = `.deck-card select{background-color:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:4px;padding:6px 24px 6px 10px;font-size:13px;appearance:none;-webkit-appearance:none;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:14px;transition:all 0.2s ease-in-out;width:100%;box-sizing:border-box;font-family:inherit}.deck-card select:focus,.deck-card select:hover{border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,0.25);background-color:#0f172a}.deck-card select option{background-color:#0f172a;color:#f8fafc;padding:8px}.hawk-recommend-box{margin-top:10px;padding:12px;background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:6px;font-size:13px;color:#e2e8f0;line-height:1.5}.hawk-recommend-box .hawk-highlight{color:#60a5fa;font-weight:bold}.hawk-recommend-box .hawk-subtext{color:#94a3b8;font-size:11px}.hawk-recommend-box .hawk-detail{margin-top:6px;padding-top:6px;border-top:1px dashed #334155;color:#cbd5e1;font-size:12px}.equipment-box{margin-top:6px;padding:6px;border:1px solid #334155;border-radius:4px;background-color:#0f172a;font-size:11px}.equipment-box .eq-item{margin-bottom:2px;color:#cbd5e1}.equipment-box .eq-item:last-child{margin-bottom:0}.equipment-box .eq-attr{color:#38bdf8;font-size:10px;margin-left:4px;cursor:pointer;transition:color 0.2s}.equipment-box .eq-attr:hover{color:#facc15}.integrated-stats-box{margin-top:6px;padding:8px;border-radius:4px;background:linear-gradient(145deg,#1e293b,#0f172a);border:1px solid #475569;font-size:11px;font-family:monospace}.integrated-stats-box .istats-title{color:#facc15;font-weight:bold;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}.integrated-stats-box .istats-content{color:#e2e8f0;line-height:1.6}.unit-badge{display:inline-block;background-color:rgba(245,158,11,0.15);color:#fbbf24;font-size:10px;font-weight:600;padding:3px 6px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);margin-top:4px;margin-bottom:4px}.feedback-item.success{color:#4ade80;font-weight:500}.feedback-item.warning{color:#facc15}.feedback-item.info{color:#60a5fa}.officer-meta select{margin-top:4px;margin-bottom:4px}.tactic-row select{margin-top:2px}.deck-footer-bar select{width:auto;min-width:120px;margin-right:12px}#tactic-popup-modal{display:none;position:absolute;z-index:9999;background:rgba(15,23,42,0.98);border:1px solid #a855f7;padding:12px;border-radius:6px;box-shadow:0 4px 15px rgba(0,0,0,0.6);width:280px;color:#f8fafc;font-size:12px;backdrop-filter:blur(4px);pointer-events:none}#tactic-popup-modal .p-title{font-size:14px;font-weight:700;color:#facc15;margin-bottom:6px;border-bottom:1px solid #334155;padding-bottom:6px;letter-spacing:0.5px}#tactic-popup-modal .p-meta{color:#38bdf8;font-size:11px;margin-bottom:8px;font-weight:600}#tactic-popup-modal .p-desc{line-height:1.6;color:#cbd5e1;word-break:keep-all}.tactic-row{cursor:pointer;position:relative;transition:background 0.2s}.tactic-row:hover{background-color:rgba(255,255,255,0.05)}`;
+    style.innerHTML = `.deck-card select{background-color:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:4px;padding:6px 24px 6px 10px;font-size:13px;appearance:none;-webkit-appearance:none;outline:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:14px;transition:all 0.2s ease-in-out;width:100%;box-sizing:border-box;font-family:inherit}.deck-card select:focus,.deck-card select:hover{border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,0.25);background-color:#0f172a}.deck-card select option{background-color:#0f172a;color:#f8fafc;padding:8px}.hawk-recommend-box{margin-top:10px;padding:12px;background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:6px;font-size:13px;color:#e2e8f0;line-height:1.5}.hawk-recommend-box .hawk-highlight{color:#60a5fa;font-weight:bold}.hawk-recommend-box .hawk-subtext{color:#94a3b8;font-size:11px}.hawk-recommend-box .hawk-detail{margin-top:6px;padding-top:6px;border-top:1px dashed #334155;color:#cbd5e1;font-size:12px}.equipment-box{margin-top:6px;padding:6px;border:1px solid #334155;border-radius:4px;background-color:#0f172a;font-size:11px}.equipment-box .eq-item{margin-bottom:2px;color:#cbd5e1}.equipment-box .eq-item:last-child{margin-bottom:0}.equipment-box .eq-attr{color:#38bdf8;font-size:10px;margin-left:4px;cursor:pointer;transition:color 0.2s}.equipment-box .eq-attr:hover{color:#facc15}.integrated-stats-box{margin-top:6px;padding:8px;border-radius:4px;background:linear-gradient(145deg,#1e293b,#0f172a);border:1px solid #475569;font-size:11px;font-family:monospace}.integrated-stats-box .istats-title{color:#facc15;font-weight:bold;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}.integrated-stats-box .istats-content{color:#e2e8f0;line-height:1.6}.unit-badge{display:inline-block;background-color:rgba(245,158,11,0.15);color:#fbbf24;font-size:10px;font-weight:600;padding:3px 6px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);margin-top:4px;margin-bottom:4px}.feedback-item.success{color:#4ade80;font-weight:500}.feedback-item.warning{color:#facc15}.feedback-item.info{color:#60a5fa}.officer-meta select{margin-top:4px;margin-bottom:4px}.tactic-row select{margin-top:2px}.deck-footer-bar select{width:auto;min-width:120px;margin-right:12px}#tactic-popup-modal{display:none;position:absolute;z-index:9999;background:rgba(15,23,42,0.98);border:1px solid #a855f7;padding:12px;border-radius:6px;box-shadow:0 4px 15px rgba(0,0,0,0.6);width:280px;color:#f8fafc;font-size:12px;backdrop-filter:blur(4px);pointer-events:none}#tactic-popup-modal .p-title{font-size:14px;font-weight:700;color:#facc15;margin-bottom:6px;border-bottom:1px solid #334155;padding-bottom:6px;letter-spacing:0.5px}#tactic-popup-modal .p-meta{color:#38bdf8;font-size:11px;margin-bottom:8px;font-weight:600}#tactic-popup-modal .p-desc{line-height:1.6;color:#cbd5e1;word-break:keep-all}.tactic-row{cursor:pointer;position:relative;transition:all 0.2s;padding:6px 12px;border-radius:4px;margin-bottom:4px}.tactic-row:hover{background-color:rgba(168,85,247,0.15);border-color:#a855f7}.tactic-row select{width:76%;min-width:140px;margin:0 auto;display:block}`;
     document.head.appendChild(style);
 };
 
@@ -710,12 +674,12 @@ function renderDeckBuilder() {
                 const isHeroOwned = cName && !!hMap[cName]?.isOwned;
                 const isUniqueOwned = dg?.uniqueTactic && !!tMap[dg.uniqueTactic.toString().trim().replace(/\s+/g,'')]?.isOwned;
                 
-                let tRows = `<div class="tactic-row ${cName&&(isHeroOwned||isUniqueOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
+                let tRows = `<div class="tactic-row ${cName&&(isHeroOwned||isUniqueOwned)?'owned':'missing'}" style="border-left:3px solid #cd9b33;display:flex;align-items:center;justify-content:center;" title="클릭하여 전법 상세 설명 보기" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span>⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT = t?.toString().trim() || "";
                     const isOwn = cT ? !!tMap[cT.replace(/\s+/g,'')]?.isOwned : false;
-                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
+                    tRows += `<div class="tactic-row ${cT?(isOwn?'owned':'missing'):'missing'}" title="클릭하여 전법 상세 설명 보기" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===tx?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
