@@ -289,29 +289,28 @@ const masterEquipmentMap = {
     "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
     "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
     "관우": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승" } },
+    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승" } },
+    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소" } },
     "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } }
 };
 
 // ==========================================================================
-// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역 (메모이제이션 캐싱 적용)
+// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역 (메모이제이션 적용)
 // ==========================================================================
-window.onload = () => renderGuideContent('equip');
+const renderCache = {};
 
 function switchGuideTab(categoryKey, btnElement) {
     document.querySelectorAll('.guide-tab-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
+    if (btnElement) btnElement.classList.add('active');
     renderGuideContent(categoryKey);
 }
 
-// [경량화] 렌더링 결과 메모이제이션 캐시 저장소
-const renderCache = {};
-
+// [경량화] 인라인 스타일 철거 및 CSS 클래스 위임 렌더러
 function renderGuideContent(categoryKey) {
     const container = document.getElementById('guide-content-box');
     const data = guideDatabase[categoryKey];
     if (!data || !container) return;
 
-    // 캐시된 HTML이 존재하면 즉시 반환하여 CPU 연산 0% 달성
     if (renderCache[categoryKey]) {
         container.innerHTML = renderCache[categoryKey];
         return;
@@ -323,22 +322,18 @@ function renderGuideContent(categoryKey) {
             ${sec.content}
         </div>`).join('');
 
-    const tablesHtml = (data.rawTables || []).map(tbl => {
-        const ths = tbl.headers.map(h => `<th>${h}</th>`).join('');
-        const trs = tbl.rows.map(r => `
-            <tr>${r.map((cell, idx) => idx === 0 && cell !== "" 
-                ? `<td style="font-weight:bold;color:#38bdf8;">${cell}</td>` 
-                : `<td>${cell}</td>`).join('')}</tr>`).join('');
-
-        return `
-            <div class="data-table-wrapper" style="margin-top:25px;margin-bottom:30px;">
-                <h3 style="color:#feca57;font-size:15px;margin-bottom:12px;font-weight:bold;">📊 ${tbl.title}</h3>
-                <table class="data-table" style="width:100%;border-collapse:collapse;background-color:#141414;border:1px solid #2a2a2a;">
-                    <thead><tr style="background-color:#0f1322;">${ths}</tr></thead>
-                    <tbody>${trs}</tbody>
-                </table>
-            </div>`;
-    }).join('');
+    const tablesHtml = (data.rawTables || []).map(tbl => `
+        <div class="data-table-wrapper">
+            <h3 style="color:#feca57;font-size:15px;margin:0 0 12px 0;">📊 ${tbl.title}</h3>
+            <table class="data-table">
+                <thead><tr>${tbl.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                <tbody>${tbl.rows.map(r => `
+                    <tr>${r.map((cell, idx) => idx === 0 && cell !== "" 
+                        ? `<td style="color:#38bdf8;font-weight:bold;">${cell}</td>` 
+                        : `<td>${cell}</td>`).join('')}</tr>`).join('')}
+                </tbody>
+            </table>
+        </div>`).join('');
 
     const finalHtml = `<h2 class="guide-section-title">${data.title}</h2>${sectionsHtml}${tablesHtml}`;
     renderCache[categoryKey] = finalHtml;
@@ -351,6 +346,17 @@ function getEquipmentRecommendationFromGuide(officerName) {
         armor: { name: "명재복", attr1: "피해 감소", attr2: "모략 피해 가함" },
         accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소" }
     };
+}
+
+// [동기화] window.onload 철거 및 DOMContentLoaded 동기식 즉시 결선
+function initGuideEngine() {
+    renderGuideContent('equip');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGuideEngine);
+} else {
+    initGuideEngine();
 }
 
 window.switchGuideTab = switchGuideTab;
