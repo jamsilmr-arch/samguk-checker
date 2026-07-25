@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>삼국지 왕전 - 덱 구성</title>
     <link rel="stylesheet" href="deck.css">
 </head>
@@ -14,10 +15,10 @@
     <script src="navbar.js"></script>
 
     <!-- 정렬 메뉴 단일화 및 백업 인터페이스 결선 레이어 -->
-    <div style="max-width: 1300px; margin: 20px auto 0 auto; padding: 0 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <div class="deck-main-container" style="margin-top: 20px; margin-bottom: 0; flex-direction: row; flex-wrap: wrap; gap: 10px;">
         <button id="sort-default-btn" class="control-sort-btn active" style="cursor: default;">부대 순서 고정 (1군~5군)</button>
-        <button id="export-btn" class="control-sort-btn" onclick="exportData()" style="background-color: #28a745; color: white; border-color: #28a745;">데이터 영구 백업 (내보내기)</button>
-        <button id="import-btn" class="control-sort-btn" onclick="triggerImport()" style="background-color: #17a2b8; color: white; border-color: #17a2b8;">데이터 즉시 복구 (가져오기)</button>
+        <button id="export-btn" class="control-sort-btn" onclick="exportData()" style="background-color: #28a745; color: #fff; border-color: #28a745;">데이터 영구 백업 (내보내기)</button>
+        <button id="import-btn" class="control-sort-btn" onclick="triggerImport()" style="background-color: #17a2b8; color: #fff; border-color: #17a2b8;">데이터 즉시 복구 (가져오기)</button>
         <input type="file" id="import-file-input" style="display: none;" onchange="importData(this)">
     </div>
 
