@@ -87,7 +87,9 @@ function getOfficerDogamData(officerName) {
         if (d && (d.uniqueTactic || d.skill)) {
             return {
                 role: d.role || "보조, 버퍼",
+                location: d.location || "-",
                 uniqueTactic: d.uniqueTactic || d.skill || FB_UNIQUE_MAP[officerName] || "고유 전법 누락",
+                skillDesc: d.skillDesc || "",
                 unitSuitability: d.unitSuitability || d.unit || FB_UNIT_MAP[officerName] || "방패병",
                 faction: d.faction || d.group || FB_FACTION_MAP[officerName] || "qun",
                 stats: d.stats || { martial: 500, tactical: 500, command: 500, speed: 400 }
@@ -96,7 +98,9 @@ function getOfficerDogamData(officerName) {
     }
     return { 
         role: "보조, 버퍼", 
+        location: "-",
         uniqueTactic: FB_UNIQUE_MAP[officerName] || "고유 전법 누락", 
+        skillDesc: "",
         unitSuitability: FB_UNIT_MAP[officerName] || "방패병", 
         faction: FB_FACTION_MAP[officerName] || "qun", 
         stats: { martial: 500, tactical: 500, command: 500, speed: 400 } 
@@ -129,7 +133,6 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
         return eq;
     }
 
-    // [고도화] 스마트 스탯 기반 폴백 (무지성 PHYS_CARRY 방지)
     const stats = dogamInfo.stats || { martial: 500, tactical: 500, command: 500 };
     let profileId = "PHYS_CARRY";
     if (stats.tactical > stats.martial && stats.tactical > 550) profileId = "STR_CARRY";
@@ -177,12 +180,10 @@ function aggregateIntegratedStats(deck, officerIndex) {
             return;
         }
 
-        // 기존: const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/);
-// 교정: % 기호가 붙은 실제 속성 수치를 우선 인식하도록 변경
-function extractVal(str) {
-    const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%/)||str.replace(/\[.*?\]/g,'').match(/([+-]?\d+(?:\.\d+)?)/);
-    return numMatch ? parseFloat(numMatch[1]) : 3.0;
-}
+        function extractVal(str) {
+            const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/) || str.replace(/\[.*?\]/g,'').match(/([+-]?\d+(?:\.\d+)?)/);
+            return numMatch ? parseFloat(numMatch[1]) : 3.0;
+        }
 
         const segments = /\d+%?,\s*\D+/.test(text) ? text.split(',') : [text];
         segments.forEach(seg => {
@@ -568,12 +569,16 @@ window.showTacticPopup = function(e, tacticName) {
     let pDesc = "상세 데이터 미등록 (도감 연동 필요)", pRole = "-", pTarget = "-";
 
     let tData = window.getTacticDataFromDogam ? window.getTacticDataFromDogam(tacticName) : null;
-    if (!tData && window.getAllOfficerNamesFromDogam && window.getOfficerDataFromDogam) {
-        const allOfficers = window.getAllOfficerNamesFromDogam();
+    if (!tData) {
+        const allOfficers = getOfficerNamesBridge();
         for (let offName of allOfficers) {
-            const offData = window.getOfficerDataFromDogam(offName);
+            const offData = getOfficerDogamData(offName);
             if (cStr(offData?.uniqueTactic) === cleanName) {
-                tData = { role: offData.role || "고유 전법", target: "전투 명세 참조", desc: `[${offName}] 무장의 고유 전법입니다. 상세 전투 메커니즘은 장수 도감을 참조하십시오.` };
+                tData = { 
+                    role: offData.role || "고유 전법", 
+                    target: offData.location ? `배치: ${offData.location}` : "전투 명세 참조", 
+                    desc: offData.skillDesc || `[${offName}] 무장의 고유 전법입니다. (상세 도감 연동 필요)` 
+                };
                 break;
             }
         }
