@@ -1,4 +1,4 @@
-// [시스템 분석] dogam.js - 55명 전체 무장 원자성(Atomic) 통합 데이터베이스 및 초경량 도감 엔진
+// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 100% 동기화 및 초경량 종결 엔진
 console.log("[시스템 분석] dogam.js 전서버 랭커 실전 최상위 추천 전법 100% 동기화 및 초경량 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -17,7 +17,7 @@ const heroDogamData = [
     { id: 'h_jeonwi', name: '전위', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '축호과간', skillDesc: '아군 주장이 일반 공격을 받을 시 대신 매서운 반격 무용 피해(계수 152%)를 가하고 공격자의 통솔을 10% 감소시킵니다.', stats: { martial: 658, tactical: 402, command: 598, speed: 367 }, unit: '창병/방패병', eq: 'TC', tacs: ["이아환아", "동장철벽"] },
     { id: 'h_jeonguk', name: '정욱', group: 'wei', role: '추격 (50%)', location: '후열', skill: '십면매복', skillDesc: '일반 공격 후 디버프 상태인 적에게 추가 모략 피해(계수 168%, 모략 영향)를 입히고 2턴간 회복 불가 상태로 만듭니다.', stats: { martial: 402, tactical: 592, command: 503, speed: 487 }, unit: '방패병/궁병', eq: 'SC', tacs: ["사면초가", "심모원려"] },
     { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '군령여산', skillDesc: '아군 전체가 가하는 피해를 16%(통솔 영향) 증가시키고 받는 피해를 16%(통솔 영향) 영구 감소시킵니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '창병/방패병', eq: 'TC', tacs: ["이퇴위진", "진퇴유도"] },
-    { id: 'h_jojo', name: '조조', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '효웅', skillDesc: '부대 내 아군이 가하는 모든 피해의 12%를 흡수하여 자신의 병력을 치료하고 아군 전체가 받는 피해를 16% 감소시킵니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '방패병/기병', eq: 'TC', tacs: ["간담상조", "안영찰채"] },
+    { id: 'h_jojo', name: '조조', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '효웅', skillDesc: '부대 내 아군이 가하는 모든 피해의 12%를 흡수하여 자신의 병력을 치료하고 아군 전체가 받는 피해를 16% 감소시킵니다.', stats: { martial: 420, tactical: 580, command: 675, speed: 362 }, unit: '방패병/기병', eq: 'TC', tacs: ["진퇴유도", "간담상조"] },
     { id: 'h_jangryo', name: '장료', group: 'wei', role: '패시브 (100%)', location: '전열', skill: '함진살적', skillDesc: '자신의 일반 공격이 68% 확률로 적군 주장을 정밀 저격하며, 일반 공격 후 대상에게 추가 무용 피해(계수 188%, 무용 영향)를 가합니다.', stats: { martial: 622, tactical: 467, command: 586, speed: 612 }, unit: '창병/기병', eq: 'PCm', tacs: ["질풍노도", "반객위주"] },
     { id: 'h_janghap', name: '장합', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '교변병기', skillDesc: '전투 시작 시 아군 전체의 액티브 전법 발동 확률을 12% 증가시키고, 일반 공격 피격 시 35% 확률로 저항을 부여합니다.', stats: { martial: 580, tactical: 426, command: 592, speed: 463 }, unit: '방패병/창병', eq: 'TC', tacs: ["간담상조", "강유겸제"] },
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', role: '패시브 (50%)', location: '전열', skill: '발시담정', skillDesc: '피해를 입을 때마다 40% 확률로 적군 다수(2명)에게 반격 무용 피해(계수 84%, 무용 영향)를 즉각 가합니다.', stats: { martial: 604, tactical: 396, command: 622, speed: 427 }, unit: '창병/방패병', eq: 'TC', tacs: ["이아환아", "동장철벽"] },
@@ -36,7 +36,7 @@ const heroDogamData = [
     { id: 'h_jangbi', name: '장비', group: 'shu', role: '패시브 (50%)', location: '전열', skill: '연인노호', skillDesc: '전투 2, 4턴에 적군 전체에게 무용 피해(계수 104%)를 가하고, 대상이 무장해제 상태일 경우 50% 확률로 통솔 50 감소(2턴). 주장일 시 겁전 대상도 포함.', stats: { martial: 652, tactical: 414, command: 545, speed: 487 }, unit: '창병/방패병', eq: 'TC', tacs: ["진퇴유도", "선등함진"] },
     { id: 'h_jegaryang', name: '제갈량', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '초선차전', skillDesc: '적군 2명이 능동 전법 발동 시 35% 확률로 시전을 차단하고 모략 역피해(계수 102%, 모략 영향)를 줍니다.', stats: { martial: 402, tactical: 681, command: 634, speed: 362 }, unit: '궁병/방패병', eq: 'SH', tacs: ["전위위안", "안영찰채"] },
     { id: 'h_joun', name: '조운', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '칠진칠출', skillDesc: '자신에게 상시 영구 통찰(제어 면역) 상태를 부여하고 무용, 모략, 속도, 통솔 속성이 40(주장 시 50) 증가합니다.', stats: { martial: 658, tactical: 473, command: 622, speed: 487 }, unit: '창병/방패병', eq: 'PC', tacs: ["이아환아", "횡징폭렴"] },
-    { id: 'h_hwangchung', name: '황충', group: 'shu', role: '패시브 (100%)', location: '후열', skill: '적혈도', skillDesc: '자신의 전법 크리티컬(회심) 확률을 25% 증가시키고, 회심 발동 시 가하는 피해량이 50% 증가합니다.', stats: { martial: 622, tactical: 503, command: 521, speed: 481 }, unit: '창병/방패병', eq: 'PC', tacs: ["강유겸제", "진퇴유도"] },
+    { id: 'h_hwangchung', name: '황충', group: 'shu', role: '패시브 (100%)', location: '후열', skill: '적혈도', skillDesc: '자신의 전법 크리티컬(회심) 확률을 25% 증가시키고, 회심 발동 시 가하는 피해량이 50% 증가합니다.', stats: { martial: 622, tactical: 503, command: 521, speed: 481 }, unit: '창병/방패병', eq: 'PC', tacs: ["횡징폭렴", "강유겸제"] },
     { id: 'h_hwangworyeong', name: '황월영', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '묘산천기', skillDesc: '전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 30% 폭증시키고 4턴부터 가하는 피해 15% 감소.', stats: { martial: 432, tactical: 628, command: 521, speed: 522 }, unit: '궁병/방패병', eq: 'SH', tacs: ["간담상조", "혼수모어"] },
 
     // 오나라 (15명)
