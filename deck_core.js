@@ -1,7 +1,6 @@
-// [시스템 분석] deck_core.js - 전서버 랭커 실전 1~10위 메타 덱 및 세련 속성 교정 100% 반영 종결 엔진
-console.log("[시스템 분석] deck_core.js 전서버 랭커 실전 최상위 메타 덱 및 장비 세련 교정 엔진 기동");
+// [시스템 분석] deck_core.js - 전서버 랭커 실전 1~10위 메타 및 계층적 전법 우선순위(상위 부대 우선) 반영 종결 엔진
+console.log("[시스템 분석] deck_core.js 계층적 전법 우선순위(1군->5군 배타적 사용) 엔진 기동");
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
@@ -25,7 +24,6 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
 };
 
-// [고도화] 사마의 투구(강공, 기습 상승), 가후 장신구(방패병 치유 효과 상승), 조조 3부위 종결 반영
 const FB_EQUIP_MAP = {
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" } },
     "곽가": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
@@ -341,7 +339,7 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
+function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNames);
@@ -367,6 +365,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     if (curFmt !== cStr(meta.formation)) fb.logs.push({ type: 'warning', text: `진형 교정: [${deck.formation}] ➔ <strong>[${meta.formation}]</strong>` });
 
     const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean);
+    const forbiddenTacs = [...new Set([...allEquipTacs, ...higherTierUsedTacs.map(t => cStr(t))])];
     let missingMeta = meta.officers.filter(mo => !curNames.includes(cStr(mo.name)));
     const recommendedTacs = new Set();
 
@@ -403,9 +402,16 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                 if (!cT) {
                     if (unmatchTac.length > 0) {
                         const pTac = unmatchTac.shift();
-                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
-                        const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
-                        fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
+                        const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
+                        
+                        if (isHigherUsed) {
+                            const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[사용 가능한 대체 전법 없음]</span>`;
+                            fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: <span style="color:#f87171; text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 1순위 대체 추천: ${altsText}` });
+                        } else {
+                            const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                            fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ 1순위: [${pTac}] (대체 ${altsText})` });
+                        }
                     }
                 } else {
                     const isMeta = targetMetaTacs.map(x => cStr(x)).includes(cT);
@@ -413,12 +419,19 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 
                     if (!isMeta && !isAlt) {
                         const pTac = unmatchTac.length > 0 ? unmatchTac.shift() : targetMetaTacs[i] || "정석 전법";
-                        const ownedAltTac = getOwnedAlternativeTactic(pTac, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
-                        const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
-                        fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 오배치: <span style="color:#f87171; text-decoration:line-through;">[${t}]</span> (역시너지) ➔ 권장: [${pTac}] (또는 대체 ${altsText})` });
+                        const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
+                        const ownedAltTac = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
+                        
+                        if (isHigherUsed) {
+                            const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[사용 가능한 대체 전법 없음]</span>`;
+                            fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 오배치: <span style="color:#f87171; text-decoration:line-through;">[${t}]</span> ➔ 권장: <span style="color:#f87171; text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 1순위 대체 추천: ${altsText}` });
+                        } else {
+                            const altsText = ownedAltTac ? `<span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#ef4444;">[보유 대체재 없음]</span>`;
+                            fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 오배치: <span style="color:#f87171; text-decoration:line-through;">[${t}]</span> (역시너지) ➔ 권장: [${pTac}] (또는 대체 ${altsText})` });
+                        }
                     } else {
                         if (!tacticDataMap[cT]?.isOwned) {
-                            const ownedAltTac = getOwnedAlternativeTactic(cT, allEquipTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
+                            const ownedAltTac = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
                             const altsText = ownedAltTac ? `➔ 대체 추천: <span style="color:#38bdf8; font-weight:bold;">[${ownedAltTac}]</span>` : `➔ <span style="color:#ef4444;">[보유 대체재 없음]</span>`;
                             fb.logs.push({ type: 'warning', text: `자원 부족: [${t}] 미보유 ${altsText}` });
                         }
@@ -569,12 +582,44 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
 }
 
 window.autoFixDeck = oIdx => {
-    const d = dynamicPresetDecks.find(x => x.originIdx === oIdx);
-    const match = getBestMetaMatch(d?.officers?.map(o=>o?.name?.replace(/\s+/g,'')).filter(Boolean));
+    const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
+    const match = getBestMetaMatch(targetDeck?.officers?.map(o=>o?.name?.replace(/\s+/g,'')).filter(Boolean));
     if (!match || match.maxScore === 0) return alert("[교정 실패] 코어 장수가 없습니다.");
-    d.formation = match.bestMeta.formation; d.unitType = metaDeckUnitTypeMap[match.bestMeta.id] || "";
-    d.officers = match.bestMeta.officers.map(m => ({ name: m.name, chosenTactics: m.chosenTactics.length===3 ? m.chosenTactics.slice(1,3) : [...m.chosenTactics] }));
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder(); alert(`[교정 성공] ${match.bestMeta.name} (으)로 수정됨`);
+    
+    const higherTacs = new Set();
+    dynamicPresetDecks.sort((a,b) => (a.originIdx||0) - (b.originIdx||0)).forEach(d => {
+        if (d.originIdx < oIdx) {
+            d.officers.forEach(o => (o?.chosenTactics||[]).forEach(t => { if(t) higherTacs.add(cStr(t)); }));
+        }
+    });
+
+    targetDeck.formation = match.bestMeta.formation; 
+    targetDeck.unitType = metaDeckUnitTypeMap[match.bestMeta.id] || "";
+    
+    const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
+    const tMap = {};
+    saved.tactics?.forEach(x => { if(x && x.name) tMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
+
+    targetDeck.officers = match.bestMeta.officers.map(m => {
+        const idealTacs = m.chosenTactics.length === 3 ? m.chosenTactics.slice(1,3) : [...m.chosenTactics];
+        const fixedTacs = idealTacs.map(tac => {
+            const cTac = cStr(tac);
+            if (higherTacs.has(cTac)) {
+                const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), m.name, targetDeck.unitType);
+                if (alt) {
+                    higherTacs.add(cStr(alt));
+                    return alt;
+                }
+                return "";
+            }
+            higherTacs.add(cTac);
+            return tac;
+        });
+        return { name: m.name, chosenTactics: fixedTacs };
+    });
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); 
+    renderDeckBuilder(); 
+    alert(`[AI 교정 성공] ${match.bestMeta.name} (상위 부대 사용 전법 자동 배제 완료)`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
@@ -604,6 +649,7 @@ function renderDeckBuilder() {
             }
         });
 
+        let accumulatedHigherTacs = new Set();
         dynamicPresetDecks.sort((a,b) => (a.originIdx||0) - (b.originIdx||0)).forEach((deck, aIdx) => {
             const curNames = deck.officers.map(o => o?.name?.trim().replace(/\s+/g,'')).filter(Boolean);
             const match = getBestMetaMatch(curNames);
@@ -645,9 +691,11 @@ function renderDeckBuilder() {
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)" style="cursor:grab;${!cName?'border:1px dashed #444':''}"><div class="officer-meta"><span class="position-badge">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${unitBadgeHtml}${eqH}${intStatsH}<div class="tactic-status-box">${tRows}</div></div>`;
             }).join('');
 
-            const fb = generateStructuredFeedback(deck, hMap, tMap), score = calculateStrictDeckScore(deck);
+            const fb = generateStructuredFeedback(deck, hMap, tMap, Array.from(accumulatedHigherTacs)), score = calculateStrictDeckScore(deck);
             let fbH = fb.logs.map(l=>`<div class="feedback-item ${l.type}">${l.text}</div>`).join('') + (fb.insight?`<div class="feedback-item info">${fb.insight}</div>`:'');
             fbH += evaluateDeckPerfection(deck, match?.bestMeta?.id || "custom");
+
+            deck.officers.forEach(o => (o?.chosenTactics || []).forEach(t => { if (t && cStr(t)) accumulatedHigherTacs.add(cStr(t)); }));
 
             container.insertAdjacentHTML('beforeend', `<div class="deck-card">
                 <div class="deck-title" style="display:flex;justify-content:space-between;align-items:center;">
