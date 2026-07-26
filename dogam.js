@@ -261,7 +261,9 @@ window.getOfficerDataFromDogam = function(officerName) {
     const target = masterHeroLookupMap[cStr(officerName)];
     return {
         role: target ? target.role : "보조, 버퍼",
+        location: target ? target.location : "-",
         uniqueTactic: target ? target.skill : "고유 전법 누락",
+        skillDesc: target ? target.skillDesc : "",
         unitSuitability: target && target.unit ? target.unit : "정보 없음",
         faction: target ? target.group : "qun",
         stats: target ? target.stats : null
