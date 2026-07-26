@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 전서버 랭커 실전 1~10위 메타 및 계층적 전법 우선순위(상위 부대 우선) 반영 종결 엔진
-console.log("[시스템 분석] deck_core.js 계층적 전법 우선순위(1군->5군 배타적 사용) 엔진 기동");
+// [시스템 분석] deck_core.js - 최종 무결성 결선 (1~10위 메타 + 계층적 전법 배타성 완벽 통합) 기동
+console.log("[시스템 분석] deck_core.js 최종 무결성 결선 (1~10위 메타 + 계층적 전법 배타성 완벽 통합) 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -24,6 +24,7 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
 };
 
+// [고도화] 사마의 투구(강공, 기습 상승), 가후 장신구(방패병 치유 효과 상승), 조조 3부위 종결 반영
 const FB_EQUIP_MAP = {
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" } },
     "곽가": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
@@ -559,6 +560,27 @@ window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
     if (d) { [d.officers[draggedOfficerSlotIdx], d.officers[tOIdx]] = [d.officers[tOIdx], d.officers[draggedOfficerSlotIdx]]; localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder(); }
 };
 window.handleOfficerDragEnd = e => { const s=e.target.closest('.officer-slot'); if(s) s.style.opacity='1'; draggedDeckOriginIdx = draggedOfficerSlotIdx = null; };
+
+// [복구 완료] 1~10위 실전 프리셋 및 초기화 로직
+const analyzedMetaArchetypes = [
+    {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·조조·가후 종결 방패 덱",concept:"[실전 랭킹] 사마의·가후 혼란 방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","반객위주","요사여신"]},{name:"조조",chosenTactics:["효웅","간담상조","안영찰채"]},{name:"가후",chosenTactics:["경달권변","혼수모어","전위위안"]}]},
+    {id:"wei_assassin_sp",name:"[위나라] 악진·조조·장료 기형 신속 덱",concept:"[실전 랭킹] 장료·악진 기형창",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","강유겸제","진퇴유도"]},{name:"조조",chosenTactics:["효웅","혼수모어","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]},
+    {id:"shu_macho_weiyeon_xushu",name:"[촉나라] 위연·마초·서서 구행 폭딜 창병 덱",concept:"[실전 랭킹] 마초·위연·서서 안행/구행창",formation:"구행진",officers:[{name:"위연",chosenTactics:["실병제위","홍수첨향","이퇴위진"]},{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
+    {id:"qun_jwaja_jangnyeong_ugil",name:"[군진영] 좌자·장녕·우길 구행 삼도사 덱",concept:"[실전 랭킹] 좌자·장녕·우길 모략궁",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","강유겸제","유좌유용"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"우길",chosenTactics:["태평경","진퇴유도","기문둔갑"]}]},
+    {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 방원 모략 덱",concept:"[실전 랭킹] 소교·노숙·육손 방원기/궁",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
+    {id:"shu_sp_yubi_jangbi_gangyu",name:"[촉나라] 제왕유비·장비·강유 추형 덱",concept:"[실전 랭킹] 제왕유비·장비·강유 추형방패",formation:"추형진",officers:[{name:"유비(제왕)",chosenTactics:["재주복주","여자동포","안영찰채"]},{name:"장비",chosenTactics:["연인노호","진퇴유도","선등함진"]},{name:"강유",chosenTactics:["담대여두","천리추격","일고작기"]}]},
+    {id:"shu_gwanu_hwangchung_yubi",name:"[촉나라] 관우·황충·유비 안행 기병 덱",concept:"[실전 랭킹] 관우·황충·유비 안행기병",formation:"안행진",officers:[{name:"관우",chosenTactics:["무성","승승장구","질풍노도"]},{name:"황충",chosenTactics:["적혈도","횡징폭렴","강유겸제"]},{name:"유비",chosenTactics:["인정","혼수모어","홍수첨향"]}]},
+    {id:"wu_songwon_yukhang_nosuk",name:"[오나라] 손권·육항·노숙 구행 궁병 덱",concept:"[실전 랭킹] 손권·육항·노숙 구행궁",formation:"구행진",officers:[{name:"손권",chosenTactics:["웅거","기문둔갑","간담상조"]},{name:"육항",chosenTactics:["청백충근","수상개화","요사여신"]},{name:"노숙",chosenTactics:["탑상책","분성지계","여자동포"]}]},
+    {id:"qun_wonso_dongtak_yeopo",name:"[군진영] 원소·동탁·여포 방원 기병 덱",concept:"[실전 랭킹] 원소·동탁·여포 방원기병",formation:"방원진",officers:[{name:"원소",chosenTactics:["사소도","견진연봉","위위구조"]},{name:"동탁",chosenTactics:["전권난정","혼수모어","강유겸제"]},{name:"여포",chosenTactics:["천하무쌍","용왕직전","만부막적"]}]}
+];
+
+const metaDeckUnitTypeMap = {
+    "wei_sima_sp_jojo":"방패병", "wei_assassin_sp":"창병", "shu_macho_weiyeon_xushu":"창병",
+    "qun_jwaja_jangnyeong_ugil":"궁병", "wu_sogyo_nosuk_yukson":"방패병", "shu_sp_yubi_jangbi_gangyu":"방패병",
+    "shu_gwanu_hwangchung_yubi":"기병", "wu_songwon_yukhang_nosuk":"궁병", "qun_wonso_dongtak_yeopo":"기병"
+};
+
+const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
 
 function loadDeckTextData() {
     try {
