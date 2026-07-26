@@ -561,7 +561,18 @@ window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
 };
 window.handleOfficerDragEnd = e => { const s=e.target.closest('.officer-slot'); if(s) s.style.opacity='1'; draggedDeckOriginIdx = draggedOfficerSlotIdx = null; };
 
-// [복구 완료] 1~10위 실전 프리셋 및 초기화 로직
+// [복구 완료] 1~10위 실전 프리셋, 전투매 매핑, 진형 명세, 초기화 로직
+const FORMATIONS = {
+    "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
+    "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
+    "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
+    "기형진": { eff: "전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%", pos: ["back","back","front"] },
+    "어린진": { eff: "전열: 반격률 20.0% | 후열: 피해 감소 6.0%", pos: ["front","back","back"] },
+    "방원진": { eff: "전열: 피해 감소 5.0% | 후열: 연격률 28.0%", pos: ["front","front","back"] },
+    "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] },
+    "호도진": { eff: "전열: 피해 증가 10.0% | 후열: 피해 감소 6.0%", pos: ["front","back","front"] }
+};
+
 const analyzedMetaArchetypes = [
     {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·조조·가후 종결 방패 덱",concept:"[실전 랭킹] 사마의·가후 혼란 방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","반객위주","요사여신"]},{name:"조조",chosenTactics:["효웅","간담상조","안영찰채"]},{name:"가후",chosenTactics:["경달권변","혼수모어","전위위안"]}]},
     {id:"wei_assassin_sp",name:"[위나라] 악진·조조·장료 기형 신속 덱",concept:"[실전 랭킹] 장료·악진 기형창",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","강유겸제","진퇴유도"]},{name:"조조",chosenTactics:["효웅","혼수모어","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]},
@@ -578,6 +589,65 @@ const metaDeckUnitTypeMap = {
     "wei_sima_sp_jojo":"방패병", "wei_assassin_sp":"창병", "shu_macho_weiyeon_xushu":"창병",
     "qun_jwaja_jangnyeong_ugil":"궁병", "wu_sogyo_nosuk_yukson":"방패병", "shu_sp_yubi_jangbi_gangyu":"방패병",
     "shu_gwanu_hwangchung_yubi":"기병", "wu_songwon_yukhang_nosuk":"궁병", "qun_wonso_dongtak_yeopo":"기병"
+};
+
+const internalBondRules = [
+    {name:"도원결의",req:2,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},
+    {name:"오호상장",req:2,heroes:["관우","장비","조운","황충","마초"],effect:"강공 8%"},
+    {name:"연환계",req:2,heroes:["동탁","여포","초선","황충"],effect:"피해가함 4%, 치유효과 4%"},
+    {name:"도법자연",req:2,heroes:["좌자","장각","우길"],effect:"모략피해 4%, 공심 4%"},
+    {name:"가모정세",req:2,heroes:["조조","조조(제왕)","곽가"],effect:"모략피해 4%, 무용피해감소 4%"},
+    {name:"위실주석",req:2,heroes:["하후돈","하후연"],effect:"파갑 8%"},
+    {name:"백제탁고",req:2,heroes:["제갈량","조운"],effect:"배반 8%, 공심 8%"},
+    {name:"오자양장",req:2,heroes:["장료","악진","장합","서황","우금"],effect:"배반 18%"},
+    {name:"동오대도독",req:2,heroes:["주유","육손","여몽","육항","노숙"],effect:"모략피해 7%"},
+    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
+];
+
+const metaHawkRecommendationMap = {
+    "wei_sima_sp_jojo":{name:"열공-여천",skill:"사마의 모략 크리티컬 및 가후 CC 안정성 극대화"},
+    "wei_assassin_sp":{name:"능소-진시",skill:"악진·장료 선공 화력 펌핑 및 피감 보정"},
+    "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 질풍노도 파갑 폭딜 및 서서/위연 액티브 시너지"},
+    "qun_jwaja_jangnyeong_ugil":{name:"결운-감로",skill:"좌자 회피 장벽과 우길 수공/진퇴유도 피감 지원"},
+    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도/천리추격 연격 지원 및 방원진 피감 보정"},
+    "shu_sp_yubi_jangbi_gangyu":{name:"삭풍-설조",skill:"제왕유비 여자동포 피감 및 강유 천리추격/일고작기 지원"},
+    "shu_gwanu_hwangchung_yubi":{name:"능소-전우",skill:"관우 안행진 폭딜 및 황충/유비의 3중 힐 보강"},
+    "wu_songwon_yukhang_nosuk":{name:"열공-여천",skill:"육항 요사여신/수상개화 모략 스케일링 지원"},
+    "qun_wonso_dongtak_yeopo":{name:"삭풍-설조",skill:"여포 천하무쌍/용왕직전/만부막적 추격 연타 극대화"}
+};
+const metaHawkAlternativesMap = {
+    "wei_sima_sp_jojo":["삭풍-성모","결운-호생"],
+    "wei_assassin_sp":["삭풍-설조","열공-전광"],
+    "shu_macho_weiyeon_xushu":["결운-감로","능소-전우"],
+    "qun_jwaja_jangnyeong_ugil":["삭풍-성모","능소-진시"],
+    "wu_sogyo_nosuk_yukson":["결운-감로","능소-전우"],
+    "shu_sp_yubi_jangbi_gangyu":["결운-감로","결운-호생"],
+    "shu_gwanu_hwangchung_yubi":["결운-호생","삭풍-설조"],
+    "wu_songwon_yukhang_nosuk":["능소-진시","결운-감로"],
+    "qun_wonso_dongtak_yeopo":["열공-전광","능소-진시"]
+};
+const metaHawkRandomAttributesMap = {
+    "wei_sima_sp_jojo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wei_assassin_sp":{attr1:{rank1:"[20Lv] 속도 +25",rank2:"[20Lv] 무용 +12%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 발동률 +5%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
+    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "qun_jwaja_jangnyeong_ugil":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_sp_yubi_jangbi_gangyu":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 모략 +10%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_gwanu_hwangchung_yubi":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wu_songwon_yukhang_nosuk":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_wonso_dongtak_yeopo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
+    "custom":{attr1:{rank1:"[20Lv] 전능 +5%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 무용 +10%"},attr2:{rank1:"[30Lv] 피해 가함 +6%",rank2:"[30Lv] 피해 감소 +6%",rank3:"[30Lv] 발동률 +3%"},attr3:{rank1:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 턴 종료 시 병력 회복"}}
+};
+const systemGuideInsights = {
+    "wei_sima_sp_jojo":"💡 [전서버 랭킹 1위] 사마의 반객위주/요사여신 모략 폭딜 및 가후 혼수모어/전위위안 2중 혼란 힐 방패.",
+    "wei_assassin_sp":"💡 [전서버 랭킹 2위] 장료 함진살적/질풍노도 정밀 주격 및 악진·조조 강유겸제/진퇴유도 기형창.",
+    "shu_macho_weiyeon_xushu":"💡 [전서버 랭킹 3위] 서서 문치무공/전위위안 스탯 폭증 버프 뒤 마초 출수법/용맹무쌍/질풍노도 확산 연격 창병.",
+    "qun_jwaja_jangnyeong_ugil":"💡 [전서버 랭킹 4위] 좌자 화겁생기/유좌유용 회피 장벽 뒤 우길 태평경 수공 디버프와 장녕 양의화생 폭격 삼도사.",
+    "wu_sogyo_nosuk_yukson":"💡 [전서버 랭킹 5위] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
+    "shu_sp_yubi_jangbi_gangyu":"💡 [전서버 랭킹 7위] 제왕유비 여자동포/안영찰채 2중 저항 및 장비 선등함진 무장해제, 강유 천리추격/일고작기 스케일링.",
+    "shu_gwanu_hwangchung_yubi":"💡 [전서버 랭킹 8위] 관우 승승장구/질풍노도 안행진 파갑 폭딜 및 황충 횡징폭렴 피감, 유비 혼수모어/홍수첨향 3중 힐 기병.",
+    "wu_songwon_yukhang_nosuk":"💡 [전서버 랭킹 9위] 노숙 탑상책/분성지계 지원 속 육항 청백충근/요사여신 크리티컬 펌핑을 받는 손권 기문둔갑 궁병.",
+    "qun_wonso_dongtak_yeopo":"💡 [전서버 랭킹] 원소 사소도 통솔 버프 및 동탁 효웅/혼수모어 뒤 여포 용왕직전/만부막적 추격 1턴 분쇄 기병."
 };
 
 const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
