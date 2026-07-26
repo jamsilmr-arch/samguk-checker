@@ -1,17 +1,20 @@
-// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 하이브리드 자가 치유 종결 엔진
+// [시스템 분석] deck_core.js - 인게임 공식 명세(스크린샷 검증 완료) 및 하이브리드 자가 치유 초경량 종결 엔진
 
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
-// LAYER 1: 초경량 자가 치유(Self-Healing) 폴백 마스터 사전
+// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전
+// (4개로 분산되던 무장 폴백 데이터를 1개의 고밀도 딕셔너리로 압축 통합)
 // ==========================================================================
-const FB_OFFICERS = "가후,곽가,사마의,순욱,악진,전위,정욱,조조(제왕),조조,장료,장합,하후돈,하후연,관우,강유,마대,마초,서서,사마가,위연,유비,유비(제왕),장비,제갈량,조운,황충,황월영,대교,노숙,소교,손견,손권,손상향,손책,손권(제왕),여몽,육손,육항,주유,주태,정보,황개,공손찬,동탁,안량,여포,우길,원소,장각,장녕,장보,좌자,채문희,초선,화타".split(',');
+const FB_OFF_META = {
+    "가후":["경달권변","궁병/방패병","wei"], "곽가":["산무유책","궁병/방패병","wei"], "사마의":["응시낭고","방패병/궁병","wei"], "순욱":["거중지중","궁병/창병","wei"], "악진":["분용당선","창병/궁병","wei"], "전위":["축호과간","창병/방패병","wei"], "정욱":["십면매복","방패병/궁병","wei"], "조조(제왕)":["군령여산","창병/방패병","wei"], "조조":["효웅","방패병/기병","wei"], "장료":["함진살적","창병/기병","wei"], "장합":["교변병기","방패병/창병","wei"], "하후돈":["발시담정","창병/방패병","wei"], "하후연":["충용","창병/기병","wei"],
+    "관우":["무성","창병/기병","shu"], "강유":["담대여두","방패병/기병","shu"], "마대":["습참","창병/방패병","shu"], "마초":["출수법","창병/기병","shu"], "서서":["절절학문","창병/궁병","shu"], "사마가":["만왕","창병/방패병","shu"], "위연":["실병제위","창병/궁병","shu"], "유비":["인정","창병/기병","shu"], "유비(제왕)":["재주복주","창병/방패병","shu"], "장비":["연인노호","창병/방패병","shu"], "제갈량":["초선차전","궁병/방패병","shu"], "조운":["칠진칠출","창병/방패병","shu"], "황충":["적혈도","창병/방패병","shu"], "황월영":["묘산천기","궁병/방패병","shu"],
+    "대교":["정수유심","창병/궁병","wu"], "노숙":["탑상책","궁병/기병","wu"], "소교":["화용욕모","궁병/기병","wu"], "손견":["강동맹호","창병/방패병","wu"], "손권":["웅거","궁병/기병","wu"], "손상향":["효희","궁병/기병","wu"], "손책":["강동패주","창병/방패병","wu"], "손권(제왕)":["겸권상계","창병/궁병","wu"], "여몽":["백의도강","방패병/궁병","wu"], "육손":["지변규려","창병/기병","wu"], "육항":["청백충근","창병/궁병","wu"], "주유":["봉화연천","창병/궁병","wu"], "주태":["청라산개","기병/방패병","wu"], "정보":["칠척사모","기병/방패병","wu"], "황개":["요원지화","방패병/궁병","wu"],
+    "공손찬":["위진새북","기병/창병","qun"], "동탁":["전권난정","방패병/기병","qun"], "안량":["효장","창병/기병","qun"], "여포":["천하무쌍","궁병/기병","qun"], "우길":["태평경","창병/궁병","qun"], "원소":["사소도","방패병/기병","qun"], "장각":["황천당립","궁병/기병","qun"], "장녕":["천의난위","궁병/방패병","qun"], "장보":["요풍사기","궁병/방패병","qun"], "좌자":["화겁생기","궁병/방패병","qun"], "채문희":["비분시","궁병/기병","qun"], "초선":["폐월","창병/기병","qun"], "화타":["청낭제세","궁병/방패병","qun"]
+};
+const FB_OFFICERS = Object.keys(FB_OFF_META);
 const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
-
-const FB_UNIQUE_MAP = {"가후":"경달권변","곽가":"산무유책","사마의":"응시낭고","순욱":"거중지중","악진":"분용당선","전위":"축호과간","정욱":"십면매복","조조(제왕)":"군령여산","조조":"효웅","장료":"함진살적","장합":"교변병기","하후돈":"발시담정","하후연":"충용","관우":"무성","강유":"담대여두","마대":"습참","마초":"출수법","서서":"절절학문","사마가":"만왕","위연":"실병제위","유비":"인정","유비(제왕)":"재주복주","장비":"연인노호","제갈량":"초선차전","조운":"칠진칠출","황충":"적혈도","황월영":"묘산천기","대교":"정수유심","노숙":"탑상책","소교":"화용욕모","손견":"강동맹호","손권":"웅거","손상향":"효희","손책":"강동패주","손권(제왕)":"겸권상계","여몽":"백의도강","육손":"지변규려","육항":"청백충근","주유":"봉화연천","주태":"청라산개","정보":"칠척사모","황개":"요원지화","공손찬":"위진새북","동탁":"전권난정","안량":"효장","여포":"천하무쌍","우길":"태평경","원소":"사소도","장각":"황천당립","장녕":"천의난위","장보":"요풍사기","좌자":"화겁생기","채문희":"비분시","초선":"폐월","화타":"청낭제세"};
-const FB_UNIT_MAP = {"가후":"궁병/방패병","곽가":"궁병/방패병","사마의":"방패병/궁병","순욱":"궁병/창병","악진":"창병/궁병","전위":"창병/방패병","정욱":"방패병/궁병","조조(제왕)":"창병/방패병","조조":"방패병/기병","장료":"창병/기병","장합":"방패병/창병","하후돈":"창병/방패병","하후연":"창병/기병","관우":"창병/기병","강유":"방패병/기병","마대":"창병/방패병","마초":"창병/기병","서서":"창병/궁병","사마가":"창병/방패병","위연":"창병/궁병","유비":"창병/기병","유비(제왕)":"창병/방패병","장비":"창병/방패병","제갈량":"궁병/방패병","조운":"창병/방패병","황충":"창병/방패병","황월영":"궁병/방패병","대교":"창병/궁병","노숙":"궁병/기병","소교":"궁병/기병","손견":"창병/방패병","손권":"궁병/기병","손상향":"궁병/기병","손책":"창병/방패병","손권(제왕)":"창병/궁병","여몽":"방패병/궁병","육손":"창병/기병","육항":"창병/궁병","주유":"창병/궁병","주태":"기병/방패병","정보":"기병/방패병","황개":"방패병/궁병","공손찬":"기병/창병","동탁":"방패병/기병","안량":"창병/기병","여포":"궁병/기병","우길":"창병/궁병","원소":"방패병/기병","장각":"궁병/기병","장녕":"궁병/방패병","장보":"궁병/방패병","좌자":"궁병/방패병","채문희":"궁병/기병","초선":"창병/기병","화타":"궁병/방패병"};
-const FB_FACTION_MAP = {"가후":"wei","곽가":"wei","사마의":"wei","순욱":"wei","악진":"wei","전위":"wei","정욱":"wei","조조(제왕)":"wei","조조":"wei","장료":"wei","장합":"wei","하후돈":"wei","하후연":"wei","관우":"shu","강유":"shu","마대":"shu","마초":"shu","서서":"shu","사마가":"shu","위연":"shu","유비":"shu","유비(제왕)":"shu","장비":"shu","제갈량":"shu","조운":"shu","황충":"shu","황월영":"shu","대교":"wu","노숙":"wu","소교":"wu","손견":"wu","손권":"wu","손상향":"wu","손책":"wu","손권(제왕)":"wu","여몽":"wu","육손":"wu","육항":"wu","주유":"wu","주태":"wu","정보":"wu","황개":"wu","공손찬":"qun","동탁":"qun","안량":"qun","여포":"qun","우길":"qun","원소":"qun","장각":"qun","장녕":"qun","장보":"qun","좌자":"qun","채문희":"qun","초선":"qun","화타":"qun"};
 
 const EQ_PRESETS = {
     PHYS_CARRY: ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -22,138 +25,7 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
 };
 
-// [신설] 도감 미연동 시에도 정확한 수치 설명을 100% 보장하는 내장 전법 마스터 딕셔너리
-const FB_TACTIC_DESC_MAP = {
-    "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 내 매 턴 시작 시, 아군 전체의 연격률을 각각 30% > 20% > 10%만큼 감소시키고, 턴 종료 시 아군 중 병력이 가장 낮은 대상의 병력을 회복함(치료율 55%, 모략의 영향)." },
-    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음)." },
-    "가정지전": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다." },
-    "강유겸제": { role: "지휘 (50%)", target: "아군 전체", desc: "턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고, 아군 중 무용이 가장 높은 목표가 받는 모략 피해를 17%, 모략이 가장 높은 목표가 받는 무용 피해를 17% 감소시킵니다(턴 종료시까지 지속)." },
-    "견불가최": { role: "패시브 (100%)", target: "자신", desc: "자신이 받는 피해가 35% 감소합니다. 해제 불가. 일반 공격을 받은 후 35%의 확률로 아군 목표 1명의 디버프 상태를 1종류 해제합니다." },
-    "견진연봉": { role: "능동 (60%)", target: "자신, 아군 1팀", desc: "자신과 후열 아군 1명의 연격률이 50% 증가하며 1턴간 지속되고, 1중첩의 저항을 획득합니다." },
-    "공기불비": { role: "추격 (50%)", target: "적군 2팀", desc: "일반 공격 후, 적 2개 목표에게 130% 모략 피해를 가합니다." },
-    "과하탁교": { role: "추격 (50%)", target: "적군 1팀", desc: "일반 공격 후 공격 대상에게 150% 모략 피해를 가하고 50% 확률로 추가로 150% 모략 피해를 한 번 더 가합니다." },
-    "교취호탈": { role: "능동 (35%)", target: "적군 2팀", desc: "적군 2개 대상에게 185% 무용 피해를 가하고 70% 확률로 보급 차단을 부여하며 2턴 지속합니다." },
-    "극적제승": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 중 무용이 가장 높은 대상과 통솔이 가장 낮은 대상에게 135% 모략 피해를 가합니다." },
-    "금적금왕": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체에게 180%의 모략 피해를 입힙니다. 목표가 후열일 경우, 추가로 50%의 모략 피해를 입힙니다." },
-    "금창신": { role: "지휘 (100%)", target: "자신, 아군 1팀", desc: "전투 시작 시, 자신은 전투 첫 3턴동안 받는 피해가 30% 감소하고 해제 불가입니다. 아군 모략이 가장 높은 대상에게 신산 부여: 일반 공격 후 50% 확률로 대상에게 130% 모략 피해를 가함." },
-    "금철교명": { role: "패시브 (50%)", target: "적군 1팀", desc: "일반 공격 또는 반격 후, 공격 대상의 아군 1개 대상에게 이번 피해의 160%에 해당하는 확산 피해를 가합니다." },
-    "기문둔갑": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 2개 대상의 무용·모략·통솔을 15% 감소하고 2턴 지속합니다." },
-    "낙정하석": { role: "능동 (50%)", target: "적군 1팀", desc: "적 1명에게 216%의 모략 피해를 입힙니다. 대상이 디버프를 보유 중이면 해당 피해 계수가 54% 증가합니다." },
-    "동구적개": { role: "지휘 (100%)", target: "아군 2팀", desc: "전투 전 4턴 동안, 자신 및 아군 1개 대상의 받는 피해 36% 감소하고 해제 불가입니다." },
-    "동장철벽": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전체에게 저항과 통어를 각 1중첩 부여하고 2턴 지속합니다." },
-    "동촉기선": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신의 간파 20% 증가하고 2턴 지속되며 적군 2개 대상에게 105% 모략 피해를 가합니다." },
-    "만부막적": { role: "추격 (50%)", target: "적군 전체, 자신", desc: "일반 공격 후, 적군 전체에게 105% 무용 피해를 가하고 자신의 가하는 무용 피해를 5% 증가시키며 최대 4중첩, 해제 불가, 전투 종료까지 지속합니다." },
-    "만전제발": { role: "능동 (50%)", target: "적군 전체", desc: "적군 전체에게 115% 무용 피해를 가하고 50% 확률로 적군 1개 대상(우선 후열)에게 추가로 115% 무용 피해를 가합니다." },
-    "만천과해": { role: "능동 (70%)", target: "아군 2팀", desc: "자신 및 전열의 아군 대상 1명에게 병력을 회복하고(치료율 80%, 모략의 영향 받음), 받는 무용 피해와 모략 피해가 15% 감소합니다(모략의 영향 받음). 2턴 지속." },
-    "문치무공": { role: "능동 (70%)", target: "아군 2팀", desc: "아군 중 무용이 가장 높은 대상의 무용 증가(문치무공 발동자 무용의 10%만큼 증가), 강공 피해 20% 증가(2턴 지속). 또한 모략이 가장 높은 대상의 모략 증가, 치료 효과 25% 증가(2턴 지속)." },
-    "미우주무": { role: "능동 (50%)", target: "아군 1팀", desc: "아군 중 통솔이 가장 높은 1개 대상의 받는 피해를 25% 감소시켜 2턴 지속하고 해당 대상의 병력을 회복(치료율 40%, 모략 영향)합니다." },
-    "반객위주": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "무용 피해를 가한 후 자신의 무용 피해가 8% 상승(최대 4중첩, 해제 불가), 풀중첩 시 대상에게 130% 추가 무용 피해. 모략 피해를 가한 후 자신의 모략 피해가 8% 상승(최대 4중첩), 풀중첩 시 130% 추가 모략 피해." },
-    "병량촌단": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후, 일반 공격 대상에게 280% 무용 피해를 가하며 50% 확률로 허약을 2턴 부여합니다." },
-    "분성지계": { role: "능동 (70%)", target: "적군 전체", desc: "적군 전체에게 화상(행동 시작 시 20% 추가 모략 피해 입음)을 부여하고 대상이 가하는 피해를 20% 감소시키며(모략의 영향을 받음) 2턴 간 지속됩니다." },
-    "비사주석": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 일반 공격 대상에게 220% 무용 피해를 가하며 50% 확률로 겁전을 1턴 부여합니다." },
-    "사면초가": { role: "능동 (50%)", target: "적군 1팀", desc: "적군에게 67% 무용 피해를 4회 가하며, 매 회 대상은 독립적으로 선택됩니다." },
-    "사생취의": { role: "패시브 (100%)", target: "자신", desc: "내가 받는 피해가 10% 상승하고 가하는 피해가 45% 상승하며 해제 불가입니다." },
-    "선등함진": { role: "능동 (50%)", target: "적군 전체", desc: "적 전체에게 100%의 무용 피해를 입히고, 35%의 확률로 겁전 부여, 1턴 지속합니다. 각 목표별 확률은 독립적으로 계산됩니다." },
-    "수상개화": { role: "패시브 (100%)", target: "자신", desc: "무장 고유의 능동 전법 발동 확률이 12% 증가하며 해제 불가합니다. 매 턴 시작 시, 자신이 가하는 피해가 12% 증가하며, 최대 4회 중첩되고 해제 불가합니다." },
-    "승승장구": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신에게 용맹 및 신속을 부여하며 2턴 간 지속됩니다. 적군 대상 2명에게 140% 무용 피해를 입히며, 만약 속도가 대상보다 높을 경우 피해 계수가 40% 상승합니다." },
-    "순수견양": { role: "능동 (50%)", target: "적군 2팀, 아군 2팀", desc: "2턴 동안 적군 2명이 가하는 피해를 15% 감소(모략 영향)시키고, 50% 확률로 무장 해제를 부여하여 1턴간 지속시킵니다. 이후 아군 2명의 병력을 회복시킵니다(치료율 90%, 모략 영향)." },
-    "심모원려": { role: "추격 (50%)", target: "자신, 적군 1팀", desc: "일반 공격 후 자신의 모략 피해가 5% 상승하며 최대 4중첩, 해제 불가이며 일반 공격 대상에게 240% 모략 피해 가합니다." },
-    "안영찰채": { role: "지휘 (100%)", target: "적군 2팀, 아군 전체", desc: "매 턴 시작 시 70% 확률로 아군 전체의 병력을 회복시키고(치료율 80%, 모략 영향), 아군 전체가 행동하기 전 받는 피해를 20% 감소시킵니다. 이후 30% 확률로 적군 전열에 피곤을 부여합니다." }, 
-    "암전난방": { role: "능동 (50%)", target: "자신, 적군 1팀", desc: "자신의 강공 30% 증가하고 2턴 지속하며 적군 대상 1명에게 220% 무용 피해를 가합니다. 대상이 전열일 경우 피해 계수가 110% 상승합니다." },
-    "양의화생": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신에게 2턴 동안 다모를 부여합니다. 적군 대상 2명에게 160%의 모략 피해를 입힙니다. 대상의 무용이 모략보다 높을 경우 피해 계수가 20% 상승합니다." },
-    "양초선행": { role: "능동 (50%)", target: "아군 1팀", desc: "아군 중 병력이 가장 낮은 대상의 병력을 회복(치료율 174%, 모략 영향)하고 해당 대상의 병력이 60% 미만이면 치료 계수 58% 증가합니다." },
-    "여자동포": { role: "능동 (50%)", target: "아군 2팀", desc: "아군 대상 2명에게 저항 및 불굴 1중첩을 부여합니다. 피해를 입은 후 병력을 회복하며(치료율 120%, 모략 영향, 최대 2회 발동), 2턴간 지속됩니다." },
-    "요사여신": { role: "패시브 (100%)", target: "자신", desc: "자신의 기습이 30% 상승하고 매번 모략 피해를 가한 후 자신이 가하는 모략 피해가 11% 상승하며 최대 4회 중첩, 해제 불가, 전투 종료까지 지속합니다." },
-    "용맹무쌍": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "강공이 25% 상승하며(무용 영향), 해제할 수 없습니다. 무용 피해를 입힌 후, 70% 확률로 적군 1개 대상에게 40% 추가 무용 피해를 입힙니다." },
-    "용왕직전": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후 자신에게 용맹 상태를 2턴간 부여합니다. 그 후 적 목표 2명에게 115%의 무용 피해를 입힙니다. 자신의 무용이 목표보다 높을 경우 피해 계수가 27% 증가합니다." },
-    "운주유악": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 전 3턴 동안 매 턴 시작 시, 아군 전체의 연격률을 40% 증가시키고 90% 확률로 아군 1개 대상에게 통찰을 부여하여 턴 종료까지 지속합니다." },
-    "원성재도": { role: "능동 (35%)", target: "적군 1팀", desc: "적군 1개 대상의 받는 피해를 30% 증가시켜 2턴 지속하며 해당 대상에게 155% 모략 피해를 가합니다." },
-    "위위구조": { role: "추격 (50%)", target: "적군 2팀, 아군 2팀", desc: "일반 공격 후 적군 대상 2명이 가하는 피해가 10% 감소하고 최대 4중첩되고 해제 불가이며 2턴 간 지속됩니다. 이어 아군 대상 2명의 병력을 회복(치료율 165%, 통솔 영향)시킵니다." },
-    "유좌유용": { role: "지휘 (50%)", target: "아군 전체", desc: "턴 시작 시, 아군 전체에 불굴 상태를 부여합니다: 피해를 입은 후 병력 회복(치료율 90%, 모략의 영향을 받음), 턴 종료까지 지속, 매 턴 최대 3회 발동." },
-    "이간계": { role: "능동 (35%)", target: "적군 1팀", desc: "적 1개 대상에게 250% 모략 피해 가하고 80% 확률로 혼란을 부여하며 1턴 지속됩니다." },
-    "이아환아": { role: "패시브 (50%)", target: "적군 1팀", desc: "피해를 받은 후 피해 출처에 132% 추가 무용 피해를 가하며(통솔의 영향) 매 턴 최대 4회 발동합니다." },
-    "이일대로": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 2개 대상의 가하는 피해 16% 감소하고 50% 확률로 무기력을 부여하며 2턴 지속합니다." },
-    "이퇴위진": { role: "지휘 (50%)", target: "자신, 아군 1팀", desc: "매 턴 시작 시, 자신과 후열의 아군 대상 1명에게 저항 1중첩을 부여합니다. 자신이 받는 피해가 16% 감소하고, 후열 아군 대상 1명이 가하는 피해가 16% 증가하며, 효과는 턴 종료시까지 지속됩니다." },
-    "일고작기": { role: "패시브 (100%)", target: "자신", desc: "자신의 연격률이 60% 상승하고 가하는 피해가 12% 상승하며 해제 불가입니다." },
-    "인세이도": { role: "패시브 (100%)", target: "자신", desc: "받는 피해 21% 감소, 해제 불가. 자신의 행동 시작 시, 다음 효과 중 1개 발동: 자신에게 장벽 3중첩 부여, 또는 자신의 병력 회복(치료율 60%, 가장 높은 속성의 영향)." },
-    "전위위안": { role: "패시브 (100%)", target: "자신, 아군 1팀", desc: "자신의 통솔이 모략의 15%만큼 상승하며, 해제 불가. 매 턴 최초로 피해를 받은 후, 50%(모략 영향)의 확률로 자신에게 저항을 1중첩 부여하고, 자신 및 아군 1명 치료(치료율 120%, 모략 영향)." },
-    "제곤부위": { role: "지휘 (100%)", target: "아군 2팀", desc: "매 턴 행동 시, 자신과 아군 1개 대상의 병력을 회복(치료율 70%, 통솔의 영향)합니다." },
-    "중정기고": { role: "능동 (35%)", target: "아군 전체", desc: "아군 전체의 병력을 회복(치료율 150%, 모략 영향)합니다." },
-    "지인선임": { role: "능동 (35%)", target: "적군 전체", desc: "적군 전체에게 168% 모략 피해를 가하고 자신의 모략이 대상보다 높으면 해당 피해 계수가 42% 증가합니다." },
-    "진퇴유도": { role: "지휘 (100%)", target: "적군 전체, 아군 전체", desc: "홀수 턴 시작 시 적군 전체가 가하는 피해 30% 감소(통솔 영향, 1턴 지속). 짝수 턴 시작 시 아군 전체가 가하는 피해 15% 증가(통솔 영향, 1턴 지속)." },
-    "진화타겁": { role: "능동 (35%)", target: "적군 전체", desc: "적군 전체에게 115% 무용 피해를 가하고 70% 확률로 허약을 부여하며 2턴 지속합니다." },
-    "질풍노도": { role: "능동 (70%)", target: "자신, 적군 2팀", desc: "자신의 파갑 15% 상승(무용 영향, 2턴 지속). 동시에 적군 대상 2명에게 110%의 무용 피해를 입히고, 40% 확률로 무용이 가장 낮은 적에게 110% 추가 무용 피해를 입힙니다." },
-    "천리추격": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후, 자신 추격 전법 발동률 3% 증가, 추격 전법 가하는 피해 6% 증가(최대 3중첩, 해제 불가). 또한 적군 대상 2명에게 130% 모략 피해를 입힙니다." },
-    "천시지리": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전열이 받는 무용 피해를 22% 감소시키고 후열이 받는 모략 피해를 22% 감소시켜 2턴 동안 지속합니다." },
-    "체천행도": { role: "패시브 (100%)", target: "자신, 적군 2팀", desc: "자신의 공심이 20% 증가합니다(해제 불가). 추격 피해를 입힐 시, 50%의 확률로 목표의 아군 2명에게 65%의 확산 피해를 입힙니다." },
-    "축세대발": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신이 가하는 무용 피해 20% 증가하고 2턴 지속하며 적군 2개 대상에게 130% 무용 피해를 가합니다." },
-    "축호과간": { role: "패시브 (100%)", target: "적군 1팀, 자신", desc: "피해를 입은 후 피해 시전자에게 적의 부여(중첩당 대상 통솔 4% 감소). 또한 자신의 통솔 4% 증가(최대 5중첩). 행동 시 70% 확률로 병력 회복(치료율 240%, 통솔 영향) 및 적 200% 무용 피해." },
-    "태청단경": { role: "패시브 (50%)", target: "아군 2팀", desc: "피해를 입은 후, 아군 2명의 병력을 회복하고(치율 45%, 모략 영향), 50%의 확률로 디버프 1개를 해제합니다. 매 턴 최대 5회 발동합니다." },
-    "토적격문": { role: "능동 (80%)", target: "적군 전체, 자신", desc: "적군 전체에 도발효과를 부여하고 자신이 받는 일반 공격 피해를 40% 감소시키며 2턴 지속합니다." },
-    "현호제세": { role: "능동 (50%)", target: "아군 2팀", desc: "아군 2명의 디버프 1개를 해제하고, 병력을 회복합니다(치료율 155%, 통솔 영향)." },
-    "호령삼군": { role: "패시브 (100%)", target: "자신", desc: "피해를 가한 후 자신의 배반과 공심이 4% 상승하고 강공과 기습이 4% 상승하며 최대 6회 중첩, 해제 불가, 전투 종료까지 지속합니다." },
-    "혼수모어": { role: "지휘 (70%)", target: "적군 1팀, 아군 2팀", desc: "턴 시작 시 적 1명에게 혼란 상태를 부여하고(턴 종료 시까지 지속), 아군 2명의 병력을 회복합니다(치료율 150%, 모략 영향)." },
-    "홍수첨향": { role: "지휘 (50%)", target: "아군 2팀", desc: "턴 시작 시 자신의 병력 회복(치료율 190%, 통솔 영향) 및 받는 피해 30% 감소(통솔 영향, 1턴 지속). 아군 대상 1명에게 치료 및 받는 피해 감소 효과의 절반을 부여합니다." },
-    "화소적벽": { role: "능동 (50%)", target: "적군 전체", desc: "적 전체에게 화상효과를 부여(행동 시작 시 35% 추가 모략 피해를 받음)하고 2턴 지속하며 102% 모략 피해를 가합니다." },
-    "횡소천군": { role: "능동 (35%)", target: "적군 2팀", desc: "적군 2개 대상에게 30% 무용 피해를 가하고 출혈 부여(행동 시작 시 65% 추가 무용 피해 받음)하며 2턴 지속합니다." },
-    "횡징폭렴": { role: "지휘 (100%)", target: "적군 전체, 아군 전체", desc: "전투 첫 2턴 동안 적군 전체의 가하는 피해 36% 감소하고 해제 불가이며 3턴 종료 시 아군 전체를 치료(치료율 140%, 통솔 영향)합니다." },
-    "휴양생식": { role: "능동 (35%)", target: "아군 2팀", desc: "아군 2개 대상의 병력을 회복(치료율 165%, 모략 영향)하고 해당 대상에게 통찰을 부여하며 1턴 지속합니다." },
-    // 고유 전법 백업
-    "재주복주": { role: "지휘 (100%)", target: "아군 2명", desc: "매 턴 아군 2명 치료(치료율 68%, 모략 영향) 및 10% 확률로 대상에게 허약 상태 부여(1턴 지속). 자신이 주장일 시 허약 부여 확률 15%로 상승." },
-    "연인노호": { role: "패시브 (100%)", target: "적군 전체", desc: "전투 2, 4턴에 적군 전체에게 무용 피해(계수 104%)를 가하고, 대상이 무장해제 상태일 경우 50% 확률로 통솔 50 감소(2턴 지속). 주장일 시 통솔 감소 효과가 겁전 상태 대상에게도 적용." },
-    "무성": { role: "액티브 (35%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 맹렬한 무용 피해(계수 146%)를 가하고, 50% 확률로 대상에게 무장해제 또는 겁전 상태 부여(1턴 지속). 또한 자신이 가하는 무용 피해 36% 증가(2턴 지속)." },
-    "응시낭고": { role: "지휘 (100%)", target: "자신", desc: "전투 1~4턴 시작 시 80% 확률로 자신에게 공심 100% 부여 또는 자신이 받는 모략 피해 30% 감소(1턴 지속). 5턴 이후부터 매 턴 80% 확률로 1~2명의 적군에게 모략 피해(계수 154%) 부여." },
-    "함진살적": { role: "패시브 (100%)", target: "자신", desc: "일반 공격 후 대상에게 추가 무용 피해(계수 188%)를 가하며, 해당 타격은 대상의 통솔을 일정 비율 무시. 주장의 타격 우선권이 대폭 상승." },
-    "초선차전": { role: "액티브 (40%)", target: "아군 다수", desc: "아군 2명의 제어 상태를 모두 해제하고, 피해를 입을 때마다 일정 비율로 병력을 회복하는 상태 부여(2턴 지속)." },
-    "칠진칠출": { role: "패시브 (100%)", target: "자신", desc: "전투 중 자신은 모든 제어 상태에 면역(통찰)되며, 무용, 모략, 속도, 통솔 속성이 40 증가. 자신이 주장일 경우 증가 수치가 50으로 상승." },
-    "천하무쌍": { role: "액티브 (35%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어에 면역되고 받는 피해가 감소하며, 일반 공격 후 추격 전법 정상 발동." },
-    "경달권변": { role: "능동 (65%)", target: "적군 단체", desc: "적군 단체(2명)에 65% 확률로 혼란 효과를 부여하고 모략 피해(계수 196%, 모략 영향)를 가합니다." },
-    "산무유책": { role: "능동 (50%)", target: "적군 전체", desc: "적군 전체에게 모략 피해(계수 102%, 모략 영향)를 가하고, 대상이 가하는 피해를 18% 감소(2턴 지속)시킵니다." },
-    "거중지중": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전체가 받는 피해를 16% 감소(모략 영향)시키고, 매 턴 아군 2명의 병력을 지속 회복(치료율 74%, 모략 영향)시킵니다." },
-    "분용당선": { role: "능동 (70%)", target: "적군 전열", desc: "매 턴 100% 발동하여 적군 전열(2명)에 강력한 무용 피해(계수 135%, 무용 영향)를 가하고 자신에게 허약(1턴 지속)을 부여합니다." },
-    "십면매복": { role: "추격 (50%)", target: "적군 단체", desc: "일반 공격 후 디버프 상태인 적에게 추가 모략 피해(계수 168%, 모략 영향)를 입히고 2턴간 회복 불가 상태로 만듭니다." },
-    "군령여산": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 전체가 가하는 피해를 16%(통솔 영향) 증가시키고 받는 피해를 16%(통솔 영향) 영구 감소시킵니다." },
-    "효웅": { role: "지휘 (100%)", target: "아군 전체", desc: "부대 내 아군이 가하는 모든 피해의 12%를 흡수하여 자신의 병력을 치료하고 아군 전체가 받는 피해를 16% 감소시킵니다." },
-    "교변병기": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 시작 시 아군 전체의 액티브 전법 발동 확률을 12% 증가시키고, 일반 공격 피격 시 35% 확률로 저항을 부여합니다." },
-    "발시담정": { role: "패시브 (50%)", target: "적군 전체", desc: "피해를 입을 때마다 40% 확률로 적군 다수(2명)에게 반격 무용 피해(계수 84%, 무용 영향)를 즉각 가합니다." },
-    "충용": { role: "능동 (50%)", target: "적군 전체", desc: "일반 공격 후 적군 전체에게 무용 피해(계수 108%, 무용 영향)를 가하고 30% 확률로 제어 불가(겁전/무장해제)를 1턴 부여합니다." },
-    "담대여두": { role: "추격 (50%)", target: "적군 단체", desc: "홀수 턴에 적군 단체의 무용을 64 강탈하여 무용 피해(계수 184%)를 가하고, 짝수 턴에 모략을 64 강탈하여 모략 피해(계수 184%)를 가합니다." },
-    "습참": { role: "능동 (35%)", target: "적군 단체", desc: "1턴 준비 후 적군 2명에게 무용 피해(계수 210%)를 가하고 대상이 가하는 피해를 25% 차단합니다(2턴 지속)." },
-    "출수법": { role: "패시브 (100%)", target: "적군 다수", desc: "자신의 물리 피해가 34% 증가하고 일반 공격 피해의 54%를 주위 적군에게 확산 전이시킵니다." },
-    "절절학문": { role: "지휘 (100%)", target: "아군 전체", desc: "아군이 능동 전법을 발동할 때마다 60% 확률로 아군 전체의 공격력을 14% 증폭(최대 3중첩)합니다." },
-    "만왕": { role: "추격 (35%)", target: "적군 단체", desc: "일반 공격 후 45% 확률로 대상에게 무용 피해(계수 175%)를 가하고 2턴간 공황 및 약화 상태로 만듭니다." },
-    "실병제위": { role: "패시브 (70%)", target: "자신", desc: "준비 턴이 필요한 능동 전법의 대기 시간을 75% 확률로 즉시 삭제하고 자신의 가하는 피해를 15% 증가시킵니다." },
-    "인정": { role: "지휘 (100%)", target: "아군 전체", desc: "매 턴 68% 확률로 아군 전체의 병력을 회복(치료율 68%, 모략 영향)시키고 매 턴 10% 확률로 대상의 제어 상태를 해제합니다." },
-    "적혈도": { role: "패시브 (100%)", target: "자신", desc: "자신의 전법 크리티컬(회심) 확률을 25% 증가시키고, 회심 발동 시 가하는 피해량이 50% 증가합니다." },
-    "묘산천기": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 첫 3턴 동안 아군 전체가 가하는 전법 피해를 30% 폭증시키고 4턴부터 가하는 피해 15% 감소." },
-    "정수유심": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 전체가 받는 피해의 18%를 적 시전자에게 즉각 반사 유도하고 매 턴 병력을 회복(치료율 62%)합니다." },
-    "탑상책": { role: "지휘 (100%)", target: "아군 단체", desc: "전투 2턴 시작 시 자신의 속성 40%를 병력이 가장 낮은 아군에게 양도하고 3~5턴 동안 피해 감소 26% 부여." },
-    "화용욕모": { role: "능동 (70%)", target: "적군 단체", desc: "적군 2명의 방어 스탯(통솔/모략)을 20% 해제하고 아군 전체의 전법 발동률을 12% 보정합니다." },
-    "강동맹호": { role: "지휘 (100%)", target: "적군 전체", desc: "적군 전체에게 도발을 시전하여 일반 공격을 강제 집중시키고 자신이 받는 피해를 28% 감소(2턴 지속)시킵니다." },
-    "웅거": { role: "지휘 (100%)", target: "자신", desc: "아군이 일반 공격을 행할 때마다 75% 확률로 자신에게 연격, 통찰, 강공, 기습, 선공 중 1개의 버프를 2턴간 획득합니다." },
-    "효희": { role: "능동 (50%)", target: "적군 다수", desc: "일반 공격 전 자신에게 걸린 버프 1개당 물리 피해량 20% 증가(최대 5중첩) 및 추가 물리 타격(계수 88%)을 가합니다." },
-    "강동패주": { role: "능동 (50%)", target: "적군 단체", desc: "일반 공격 후 35% 확률로 대상에게 맹렬한 무용 연타 피해(계수 192%)를 입히고 피해량의 50%를 흡혈합니다." },
-    "겸권상계": { role: "지휘 (100%)", target: "아군 전체", desc: "오나라 진영 무장들과 결선 시 아군 전체의 전술 스탯을 15% 증가시키고 매 턴 50% 확률로 피해 감소 20% 부여." },
-    "백의도강": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 첫 턴에 아군 전체에 1회의 확정 회피(도피)를 부여하고, 피해를 입힐 때마다 40% 확률로 무장해제 또는 겁전을 겁니다." },
-    "지변규려": { role: "추격 (50%)", target: "적군 단체", desc: "적군 2명에게 화상(계수 84%, 3턴 지속)을 입히고 이미 화상 상태면 광역 폭발 모략 피해(계수 164%)를 줍니다." },
-    "청백충근": { role: "능동 (60%)", target: "아군 주장", desc: "아군 주장의 모략 회심 확률을 25% 증가시키고 주장이 받는 피해의 30%를 대신 숄더링하여 분담합니다." },
-    "봉화연천": { role: "패시브 (80%)", target: "적군 전체", desc: "자신이 능동 전법을 발동할 때마다 80% 확률로 적 전체에게 광역 모략 불화살 피해(계수 68%, 모략 영향)를 투하합니다." },
-    "청라산개": { role: "지휘 (100%)", target: "아군 주장", desc: "아군 주장이 입는 피해의 35%, 부대원이 입는 피해의 20%를 대신 흡수하고 주장의 공격력을 18% 증가시킵니다." },
-    "칠척사모": { role: "지휘 (100%)", target: "적군 단체", desc: "피해를 입을 때마다 35% 확률로 자신에게 걸린 디버프를 해제하고 적 1명에게 공포(1턴)를 부여합니다." },
-    "요원지화": { role: "능동 (50%)", target: "적군 전체", desc: "자신의 병력 20%를 소모하여 적군 전체에게 화상 및 확정적 모략 피해(계수 122%, 2턴 지속)를 가합니다." },
-    "위진새북": { role: "패시브 (100%)", target: "자신", desc: "전투 전 2턴 간 부대 전체의 전법 발동률을 13% 증가시키고 액티브 타격 후 속도 비례 추가 무용 피해(계수 96%)를 입힙니다." },
-    "전권난정": { role: "지휘 (100%)", target: "적/아군 전체", desc: "매 턴 자신의 무용을 15% 증폭시키며, 5턴 시작 시 적과 아군 전체에 무차별 무용 피해(계수 68%) 및 50% 흡혈을 시전합니다." },
-    "효장": { role: "능동 (50%)", target: "적군 단체", desc: "1턴 준비 후 적 2명에게 무용 참격 충격(계수 180%)을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다." },
-    "태평경": { role: "지휘 (70%)", target: "적군 전체", desc: "2턴 시작 시 적군 전체에게 수공(계수 72%, 모략 영향, 4턴 지속)을 걸어 지속적인 모략 피해 및 받는 모략 피해 10% 증가 부여." },
-    "사소도": { role: "지휘 (100%)", target: "아군 전체", desc: "1턴 준비 후 적 2명에게 물리 피해(계수 126%) 및 화상(계수 60%, 2턴 지속)을 입히고 아군 전체의 통솔 80 증가(3턴 지속)." },
-    "황천당립": { role: "능동 (50%)", target: "적군 전체", desc: "1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황(1턴)을 부여합니다." },
-    "천의난위": { role: "능동 (50%)", target: "적군 단체", desc: "적군 단체의 모략과 통솔을 38 흡수하여 아군에게 공유하고 강력한 모략 피해(계수 184%)를 줍니다." },
-    "요풍사기": { role: "능동 (50%)", target: "적/아군 전체", desc: "적 전체에 모래바람 모략 피해(계수 106%)를 입히고 아군 전체에게 장벽 2중첩(피해 40% 흡수)을 부여합니다." },
-    "화겁생기": { role: "패시브 (100%)", target: "아군 전체", desc: "전투 첫 2턴 간 아군 전체에게 회피 35%를 부여하고 3~5턴 동안 매 턴 병력을 회복(치료율 68%)시킵니다." },
-    "비분시": { role: "능동 (70%)", target: "아군 단체", desc: "아군 2명의 병력을 회복(치료율 122%, 모략 영향)시키고 50% 확률로 가하는 피해 26% 증가 또는 받는 피해 26% 감소를 부여." },
-    "폐월": { role: "능동 (50%)", target: "적군 단체", desc: "적군 단체를 매혹하여 자신이 입는 피해의 35%를 해당 적이 대신 분담하게 만들고 대상의 통솔/무용을 14% 감소시킵니다." },
-    "청낭제세": { role: "능동 (50%)", target: "아군 전체", desc: "전투 전반기(1~4턴) 동안 아군 2명의 통솔을 40 증가시키고 피격 시 50% 확률로 즉각 병력을 회복(치료율 68%)시킵니다." }
-};
+const tacticAlternativesMap = {"간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조"],"횡징폭렴":["간담상조","동구적개","동장철벽"],"동장철벽":["간담상조","견불가최","천시지리","동구적개"],"전위위안":["간담상조","태청단경","현호제세","제곤부위"],"이퇴위진":["미우주무","천시지리"],"용맹무쌍":["만부막적","비사주석"],"질풍노도":["암전난방","교취호탈"],"문치무공":["양초선행","중정기고"],"혼수모어":["사면초가","이간계"],"반객위주":["일고작기","사생취의"],"유좌유용":["휴양생식","제곤부위"],"선등함진":["만천과해","만전제발"],"강유겸제":["동장철벽","천시지리"],"진퇴유도":["위위구조","동구적개"],"견진연봉":["동장철벽","순수견양"],"위위구조":["간담상조","태청단경","현호제세"],"용왕직전":["천리추격","암전난방"],"만부막적":["용왕직전","천리추격"],"안영찰채":["간담상조","위위구조","미우주무"],"일고작기":["사생취의","용맹무쌍"],"여자동포":["동구적개","천시지리"],"양의화생":["기문둔갑","화소적벽"],"수상개화":["요사여신","사생취의"],"요사여신":["수상개화","사생취의"],"견불가최":["동장철벽","동구적개"],"분성지계":["화소적벽","기문둔갑"],"운주유악":["태청단경","미우주무"],"동구적개":["안영찰채","위위구조"],"사생취의":["일고작기","용맹무쌍"],"양초선행":["문치무공","휴양생식"],"휴양생식":["양초선행","현호제세"],"사면초가":["기문둔갑","화소적벽"],"심모원려":["사면초가","기문둔갑"],"횡소천군":["강유겸제","용맹무쌍"],"천리추격":["극적제승","암전난방"],"암전난방":["극적제승","질풍노도"],"사소도":["이간계","낙정하석"],"미우주무":["현호제세","태청단경"],"이아환아":["금철교명","동장철벽"],"제곤부위":["태청단경","현호제세"],"금낭묘계":["만천과해","태청단경"]};
 
 const internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
@@ -219,21 +91,22 @@ function getOfficerDogamData(officerName) {
             return {
                 role: d.role || "보조, 버퍼",
                 location: d.location || "-",
-                uniqueTactic: d.uniqueTactic || d.skill || FB_UNIQUE_MAP[officerName] || "고유 전법 누락",
+                uniqueTactic: d.uniqueTactic || d.skill || (FB_OFF_META[officerName]?.[0] || "고유 전법 누락"),
                 skillDesc: d.skillDesc || "",
-                unitSuitability: d.unitSuitability || d.unit || FB_UNIT_MAP[officerName] || "방패병",
-                faction: d.faction || d.group || FB_FACTION_MAP[officerName] || "qun",
+                unitSuitability: d.unitSuitability || d.unit || (FB_OFF_META[officerName]?.[1] || "방패병"),
+                faction: d.faction || d.group || (FB_OFF_META[officerName]?.[2] || "qun"),
                 stats: d.stats || { martial: 500, tactical: 500, command: 500, speed: 400 }
             };
         }
     }
+    const [uTac = "고유 전법 누락", uUnit = "방패병", uFac = "qun"] = FB_OFF_META[officerName] || [];
     return { 
         role: "보조, 버퍼", 
         location: "-",
-        uniqueTactic: FB_UNIQUE_MAP[officerName] || "고유 전법 누락", 
+        uniqueTactic: uTac, 
         skillDesc: "",
-        unitSuitability: FB_UNIT_MAP[officerName] || "방패병", 
-        faction: FB_FACTION_MAP[officerName] || "qun", 
+        unitSuitability: uUnit, 
+        faction: uFac, 
         stats: { martial: 500, tactical: 500, command: 500, speed: 400 } 
     };
 }
@@ -278,38 +151,34 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
     };
 }
 
+const STAT_KEY_RULES = [
+    { k: 'damageTakenRed', words: ['피해 감소', '피감', '피해감소', '저항'] },
+    { k: 'physicalDmg', words: ['무용 피해 가함', '무용피해가함', '무용 피해 상승', '무용피해상승'] },
+    { k: 'strategyDmg', words: ['모략 피해 가함', '모략피해가함', '모략 피해 상승', '모략피해상승'] },
+    { k: 'damageDealtInc', words: ['피해 가함', '피해가함', '피해 증가', '피증'] },
+    { k: 'healGiven', words: ['치유', '회복', '보급'] },
+    { k: 'leech', words: ['배반', '공심', '흡혈'] },
+    { k: 'critRate', words: ['강공', '기습', '크리'] },
+    { k: 'comboRate', words: ['연격'] },
+    { k: 'activeRate', words: ['발동'] },
+    { k: 'armorPen', words: ['파갑', '간파'] }
+];
+
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
     if (!officer || !officer.name) return null;
     const hName = officer.name.trim();
     const stats = { damageTakenRed: 0, damageDealtInc: 0, strategyDmg: 0, physicalDmg: 0, healGiven: 0, leech: 0, comboRate: 0, activeRate: 0, armorPen: 0, critRate: 0 };
     
-    const curNames = deck.officers.map(o => o?.name?.trim()).filter(Boolean);
+    const curNames = deck.officers.map(o => cStr(o?.name)).filter(Boolean);
     const matchMeta = getBestMetaMatch(curNames);
     const currentDeckUnit = (deck.unitType && deck.unitType !== "자동 판별") ? deck.unitType : (matchMeta?.bestMeta ? metaDeckUnitTypeMap[matchMeta.bestMeta.id] : "창병");
-
-    const statKeywordMap = { 
-        "피해 감소": "damageTakenRed", "피감": "damageTakenRed", "피해감소": "damageTakenRed", "저항": "damageTakenRed",
-        "피해 가함": "damageDealtInc", "피해증가": "damageDealtInc", "피증": "damageDealtInc", "피해가함": "damageDealtInc",
-        "모략 피해 가함": "strategyDmg", "모략피해가함": "strategyDmg", "모략 피해 상승": "strategyDmg", "모략피해상승": "strategyDmg",
-        "무용 피해 가함": "physicalDmg", "무용피해가함": "physicalDmg", "무용 피해 상승": "physicalDmg", "무용피해상승": "physicalDmg",
-        "치유 효과 부여": "healGiven", "치유 효과 받음": "healGiven", "치유 효과 상승": "healGiven", "치유": "healGiven", "회복": "healGiven", "보급": "healGiven",
-        "배반": "leech", "공심": "leech", "흡혈": "leech",
-        "연격률": "comboRate", "연격": "comboRate",
-        "발동률": "activeRate", "발동": "activeRate",
-        "강공": "critRate", "기습": "critRate", "크리": "critRate",
-        "파갑": "armorPen", "간파": "armorPen",
-        "glassCannonDmg": "damageDealtInc", "stackingDmg": "damageDealtInc", "counterDmg": "physicalDmg"
-    };
 
     function parseAndAdd(textObj) {
         if (!textObj) return;
         const text = (typeof textObj === 'string' ? textObj : textObj.toString()).replace(/\s+/g, ' ');
-        
-        const unitMatch = text.match(/(창병|기병|궁병|방패병)/);
-        if (unitMatch && unitMatch[1] !== currentDeckUnit && currentDeckUnit !== "자동 판별") {
-            return;
-        }
+        const unitMatch = text.match(/(창병|궁병|방패병|기병)/);
+        if (unitMatch && unitMatch[1] !== currentDeckUnit && currentDeckUnit !== "자동 판별") return;
 
         function extractVal(str) {
             const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/) || str.replace(/\[.*?\]/g,'').match(/([+-]?\d+(?:\.\d+)?)/);
@@ -319,26 +188,11 @@ function aggregateIntegratedStats(deck, officerIndex) {
         const segments = /\d+%?,\s*\D+/.test(text) ? text.split(',') : [text];
         segments.forEach(seg => {
             const val = extractVal(seg);
-            if (seg.includes('피해 감소') || seg.includes('피감') || seg.includes('피해감소') || seg.includes('저항')) {
-                stats.damageTakenRed += val;
-            } else if (seg.includes('무용 피해 가함') || seg.includes('무용피해가함') || seg.includes('무용 피해 상승') || seg.includes('무용피해상승')) {
-                stats.physicalDmg += val;
-            } else if (seg.includes('모략 피해 가함') || seg.includes('모략피해가함') || seg.includes('모략 피해 상승') || seg.includes('모략피해상승')) {
-                stats.strategyDmg += val;
-            } else if (seg.includes('피해 가함') || seg.includes('피해가함') || seg.includes('피해 증가') || seg.includes('피증')) {
-                stats.damageDealtInc += val;
-            } else if (seg.includes('치유') || seg.includes('회복') || seg.includes('보급')) {
-                stats.healGiven += val;
-            } else if (seg.includes('배반') || seg.includes('공심') || seg.includes('흡혈')) {
-                stats.leech += val;
-            } else if (seg.includes('강공') || seg.includes('기습') || seg.includes('크리')) {
-                stats.critRate += val;
-            } else if (seg.includes('연격')) {
-                stats.comboRate += val;
-            } else if (seg.includes('발동')) {
-                stats.activeRate += val;
-            } else if (seg.includes('파갑') || seg.includes('간파')) {
-                stats.armorPen += val;
+            for (const rule of STAT_KEY_RULES) {
+                if (rule.words.some(w => seg.includes(w))) {
+                    stats[rule.k] += val;
+                    break;
+                }
             }
         });
     }
@@ -346,7 +200,7 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const eq = getOfficerEquipment(hName, currentDeckUnit);
     if (eq) { ['helmet', 'armor', 'accessory'].forEach(part => { parseAndAdd(eq[part].attr1); parseAndAdd(eq[part].attr2); }); }
 
-    internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(n)).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(n))).size >= r.req)
+    internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req)
         .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
     const hA = metaHawkRandomAttributesMap[matchMeta?.bestMeta?.id || "custom"];
@@ -354,14 +208,10 @@ function aggregateIntegratedStats(deck, officerIndex) {
 
     const dogamData = getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
-        const tkMap = internalTacticStatMap[tacName.replace(/\s+/g, '')];
+        const tkMap = internalTacticStatMap[cStr(tacName)];
         if (tkMap) {
             Object.keys(tkMap).forEach(tk => {
-                if (stats[tk] !== undefined) {
-                    stats[tk] += tkMap[tk];
-                } else if (statKeywordMap[tk] && stats[statKeywordMap[tk]] !== undefined) {
-                    stats[statKeywordMap[tk]] += tkMap[tk];
-                }
+                if (stats[tk] !== undefined) stats[tk] += tkMap[tk];
             });
         }
     });
@@ -436,9 +286,7 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
 
         const missingPrimary = missingStats.martial > missingStats.tactical ? 'martial' : 'tactical';
         const candPrimary = candStats.martial > candStats.tactical ? 'martial' : 'tactical';
-        if (missingPrimary === candPrimary && Math.abs(missingStats[missingPrimary] - candStats[candPrimary]) < 150) {
-            score += 30;
-        }
+        if (missingPrimary === candPrimary && Math.abs(missingStats[missingPrimary] - candStats[candPrimary]) < 150) score += 30;
         if (candStats.command > 580 && missingStats.command > 580) score += 20;
 
         if (score > 0) candidates.push({ name: originName, score: score });
@@ -515,39 +363,39 @@ function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     let bestMeta = analyzedMetaArchetypes[0], maxScore = -1;
     analyzedMetaArchetypes.forEach(meta => {
-        let score = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(mo.name.replace(/\s+/g, '')) ? 1 : 0) + (curNamesClean[idx] === mo.name.replace(/\s+/g, '') ? 0.5 : 0), 0);
+        let score = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
         if (score > maxScore) { maxScore = score; bestMeta = meta; }
     });
     return { bestMeta, maxScore };
 }
 
 function calculateStrictDeckScore(deck) {
-    const curNamesClean = deck?.officers?.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean) || [];
+    const curNamesClean = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNamesClean);
     if (!match || match.maxScore === 0) return 0;
     
     let score = 100;
-    const curFmt = deck.formation?.toString().trim() || "", idealFmt = match.bestMeta.formation.trim();
-    if (curFmt.replace(/\s+/g, '') !== idealFmt.replace(/\s+/g, '')) score -= 10;
+    const curFmt = cStr(deck.formation), idealFmt = cStr(match.bestMeta.formation);
+    if (curFmt !== idealFmt) score -= 10;
 
     match.bestMeta.officers.forEach((metaOff, metaIdx) => {
-        const mName = metaOff.name.replace(/\s+/g, '');
+        const mName = cStr(metaOff.name);
         const userOffIdx = curNamesClean.indexOf(mName);
         if (userOffIdx === -1) score -= 30;
         else {
-            if ((FORMATIONS[curFmt]?.pos[userOffIdx] || "front") !== (FORMATIONS[idealFmt]?.pos[metaIdx] || "front")) score -= 10;
+            if ((FORMATIONS[deck.formation]?.pos[userOffIdx] || "front") !== (FORMATIONS[match.bestMeta.formation]?.pos[metaIdx] || "front")) score -= 10;
             const userOff = deck.officers[userOffIdx];
             const metaTacs = metaOff.chosenTactics.length === 3 ? metaOff.chosenTactics.slice(1,3) : metaOff.chosenTactics;
-            let unmatchTac = metaTacs.map(t => t.trim().replace(/\s+/g, '')), emptyOrWrong = 0, altCount = 0;
+            let unmatchTac = metaTacs.map(t => cStr(t)), emptyOrWrong = 0, altCount = 0;
             
             (Array.isArray(userOff.chosenTactics) ? userOff.chosenTactics : ["",""]).forEach(tac => {
-                const idx = unmatchTac.indexOf(tac?.toString().trim().replace(/\s+/g, '') || "");
+                const idx = unmatchTac.indexOf(cStr(tac));
                 if (idx !== -1) unmatchTac.splice(idx, 1);
             });
 
             (Array.isArray(userOff.chosenTactics) ? userOff.chosenTactics : ["",""]).forEach(tac => {
-                const cT = tac?.toString().trim().replace(/\s+/g, '') || "";
-                if (cT !== "" && !metaTacs.map(t=>t.replace(/\s+/g,'')).includes(cT)) {
+                const cT = cStr(tac);
+                if (cT !== "" && !metaTacs.map(t=>cStr(t)).includes(cT)) {
                     if (unmatchTac.some((pT, i) => tacticAlternativesMap[pT]?.includes(cT) && unmatchTac.splice(i, 1))) altCount++; else emptyOrWrong++;
                 } else if (cT === "") emptyOrWrong++;
             });
@@ -559,16 +407,16 @@ function calculateStrictDeckScore(deck) {
 
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     const fb = { insight: "", logs: [] };
-    const curNames = deck?.officers?.map(o => o?.name?.toString().trim().replace(/\s+/g, '') || "").filter(Boolean) || [];
+    const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNames);
 
     if (!match || match.maxScore === 0) {
         if(curNames.length) fb.logs.push({ type: 'info', text: `💡 <strong>[커스텀 덱]</strong> 코어 장수를 기반으로 재설계해 보십시오.` });
         deck?.officers?.forEach((off, idx) => {
-            const hName = off?.name?.toString().trim() || "", cleanH = hName.replace(/\s+/g, '');
+            const hName = off?.name?.toString().trim() || "", cleanH = cStr(hName);
             if (hName && !heroDataMap[cleanH]?.isOwned) fb.logs.push({ type: 'warning', text: `자원 부족: [${hName}] 미보유` });
             off?.chosenTactics?.forEach((t, i) => { 
-                const cleanT = t?.toString().trim().replace(/\s+/g, '') || "";
+                const cleanT = cStr(t);
                 if(t && !tacticDataMap[cleanT]?.isOwned) fb.logs.push({ type:'warning', text:`전법 누락: ${i+2}번 슬롯 [${t}] 미보유` }); 
             });
         });
@@ -579,15 +427,15 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
     fb.logs.push({ type: 'info', text: `🎯 <strong>[${meta.name}]</strong> 기반 처방입니다.` });
     if (systemGuideInsights[meta.id]) fb.insight = systemGuideInsights[meta.id];
 
-    const curFmt = deck.formation?.toString().trim() || "";
-    if (curFmt.replace(/\s+/g, '') !== meta.formation.replace(/\s+/g, '')) fb.logs.push({ type: 'warning', text: `진형 교정: [${curFmt}] ➔ <strong>[${meta.formation}]</strong>` });
+    const curFmt = cStr(deck.formation);
+    if (curFmt !== cStr(meta.formation)) fb.logs.push({ type: 'warning', text: `진형 교정: [${deck.formation}] ➔ <strong>[${meta.formation}]</strong>` });
 
-    const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => t?.toString().trim().replace(/\s+/g, ''))).filter(Boolean);
-    let missingMeta = meta.officers.filter(mo => !curNames.includes(mo.name.replace(/\s+/g, '')));
+    const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean);
+    let missingMeta = meta.officers.filter(mo => !curNames.includes(cStr(mo.name)));
     const recommendedTacs = new Set();
 
     deck.officers.forEach((off, offIdx) => {
-        const hName = off?.name?.toString().trim() || "", cleanHName = hName.replace(/\s+/g, '');
+        const hName = off?.name?.toString().trim() || "", cleanHName = cStr(hName);
         if (!cleanHName) {
             if (missingMeta.length) {
                 const targetMissing = missingMeta.shift().name;
@@ -604,16 +452,16 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
             fb.logs.push({ type: 'warning', text: `자원 경고: [${hName}] 미보유 ${recText}` });
         }
 
-        const metaIdx = meta.officers.findIndex(mo => mo.name.replace(/\s+/g, '') === cleanHName);
+        const metaIdx = meta.officers.findIndex(mo => cStr(mo.name) === cleanHName);
         if (metaIdx !== -1) {
-            if ((FORMATIONS[curFmt]?.pos[offIdx] || "front") !== (FORMATIONS[meta.formation]?.pos[metaIdx] || "front")) fb.logs.push({ type: 'warning', text: `배치 오류: [${hName}] 위치 교정 요망` });
+            if ((FORMATIONS[deck.formation]?.pos[offIdx] || "front") !== (FORMATIONS[meta.formation]?.pos[metaIdx] || "front")) fb.logs.push({ type: 'warning', text: `배치 오류: [${hName}] 위치 교정 요망` });
             
             const mTacs = meta.officers[metaIdx].chosenTactics;
             const targetMetaTacs = mTacs.length === 3 ? mTacs.slice(1, 3) : mTacs;
-            let unmatchTac = targetMetaTacs.map(t => t.trim().replace(/\s+/g, '')).filter(t => !allEquipTacs.includes(t));
+            let unmatchTac = targetMetaTacs.map(t => cStr(t)).filter(t => !allEquipTacs.includes(t));
             
             (off.chosenTactics || []).forEach((t, i) => {
-                const cT = t?.toString().trim().replace(/\s+/g, '') || "";
+                const cT = cStr(t);
                 const slotNum = i + 2;
 
                 if (!cT) {
@@ -624,8 +472,8 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
                         fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: 1순위 [${pTac}] / 대체 ➔ ${altsText} 권장` });
                     }
                 } else {
-                    const isMeta = targetMetaTacs.map(x => x.replace(/\s+/g, '')).includes(cT);
-                    const isAlt = targetMetaTacs.some(mTac => (tacticAlternativesMap[mTac] || []).map(x => x.replace(/\s+/g, '')).includes(cT));
+                    const isMeta = targetMetaTacs.map(x => cStr(x)).includes(cT);
+                    const isAlt = targetMetaTacs.some(mTac => (tacticAlternativesMap[mTac] || []).map(x => cStr(x)).includes(cT));
 
                     if (!isMeta && !isAlt) {
                         const pTac = unmatchTac.length > 0 ? unmatchTac.shift() : targetMetaTacs[i] || "정석 전법";
@@ -658,7 +506,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap) {
 function calculateActivatedBond(officers) {
     const curNames = officers?.map(o => o?.name?.toString().trim()).filter(Boolean) || [];
     if (!curNames.length) return "활성화 효과 없음";
-    const matched = internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(n)).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(n))).size >= r.req);
+    const matched = internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req);
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
@@ -692,7 +540,7 @@ function openModalPopup(e, title, meta1, desc1, meta2 = null, desc2 = null) {
     modalPopupEl.style.left = `${left}px`;
 }
 
-// [고도화] 도감 API 연계 3단 폴백 팝업 엔진 (고유 전법 및 범용 전법 수치 명세 100% 표출)
+// [고도화] 도감 API, 내장 명세 사전, 고유 전법 탐색까지 완벽 결선된 4단 폴백 팝업 뷰어
 window.showTacticPopup = function(e, tacticName) {
     if (!tacticName || tacticName === "선택 안함" || tacticName === "고유 전법") return;
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
