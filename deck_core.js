@@ -312,8 +312,12 @@ function aggregateIntegratedStats(deck, officerIndex) {
         const unitMatch = text.match(/(창병|궁병|방패병|기병)/);
         if (unitMatch && unitMatch[1] !== currentDeckUnit && currentDeckUnit !== "자동 판별") return;
 
+        // [고도화] 레벨 태그([30Lv]), 확률(50% 확률), 턴/중첩 등 비스탯 숫자 완전 소거 후 % 수치 정밀 추출
         function extractVal(str) {
-            const numMatch = str.match(/([+-]?\d+(?:\.\d+)?)\s*%?/) || str.replace(/\[.*?\]/g,'').match(/([+-]?\d+(?:\.\d+)?)/);
+            const sanitized = str.replace(/\[.*?\]/g, '').replace(/\d+(?:\.\d+)?\s*%?\s*(?:의\s*)?확률/g, '').replace(/\d+\s*(?:턴|회|중첩|명|개|팀|강탈|소모|레벨|Lv)/g, '');
+            const percMatch = sanitized.match(/([+-]?\d+(?:\.\d+)?)\s*%/);
+            if (percMatch) return parseFloat(percMatch[1]);
+            const numMatch = sanitized.match(/([+-]?\d+(?:\.\d+)?)/);
             return numMatch ? parseFloat(numMatch[1]) : 3.0;
         }
 
