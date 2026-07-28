@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 중복 구문 소거 및 최종 무결성 결선 (1~10위 메타 + 계층적 전법 배타성 완벽 통합) 기동
-console.log("[시스템 분석] deck_core.js 중복 구문 소거 및 최종 무결성 결선 엔진 기동");
+// [시스템 분석] deck_core.js - 실전 랭킹 1위 1~3군 세팅 및 계층적 전법 배타성 완전 통합 엔진
+console.log("[시스템 분석] deck_core.js 실전 랭킹 1위 1~3군 세팅 및 계층적 전법 배타성 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -24,7 +24,6 @@ const EQ_PRESETS = {
     SUPPORT_STR: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
 };
 
-// [고도화] 사마의 투구(강공, 기습 상승), 가후 장신구(방패병 치유 효과 상승), 조조 3부위 종결 반영
 const FB_EQUIP_MAP = {
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" } },
     "곽가": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소" } },
@@ -107,7 +106,7 @@ const FB_TACTIC_DESC_MAP = {
     "과하탁교": { role: "추격 (50%)", target: "적군 1팀", desc: "일반 공격 후 공격 대상에게 150% 모략 피해를 가하고 50% 확률로 추가로 150% 모략 피해를 한 번 더 가합니다." },
     "교취호탈": { role: "능동 (35%)", target: "적군 2팀", desc: "적군 2개 대상에게 185% 무용 피해를 가하고 70% 확률로 보급 차단을 부여하며 2턴 지속합니다." },
     "극적제승": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 중 무용이 가장 높은 대상과 통솔이 가장 낮은 대상에게 135% 모략 피해를 가합니다." },
-    "금적금왕": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체에게 180%의 모략 피해를 입깁니다. 목표가 후열일 경우, 추가로 50%의 모략 피해를 입힙니다." },
+    "금적금왕": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체에게 180%의 모략 피해를 입깁니다. 목표가 후열일 경우, 추가로 50%의 모략 피해를 입깁니다." },
     "금창신": { role: "지휘 (100%)", target: "자신, 아군 1팀", desc: "전투 시작 시, 자신은 전투 첫 3턴동안 받는 피해가 30% 감소하고 해제 불가입니다. 아군 모략이 가장 높은 대상에게 신산 부여: 일반 공격 후 50% 확률로 대상에게 130% 모략 피해를 가함." },
     "금철교명": { role: "패시브 (50%)", target: "적군 1팀", desc: "일반 공격 또는 반격 후, 공격 대상의 아군 1개 대상에게 이번 피해의 160%에 해당하는 확산 피해를 가합니다." },
     "기문둔갑": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 2개 대상의 무용·모략·통솔을 15% 감소하고 2턴 지속합니다." },
@@ -133,12 +132,12 @@ const FB_TACTIC_DESC_MAP = {
     "심모원려": { role: "추격 (50%)", target: "자신, 적군 1팀", desc: "일반 공격 후 자신의 모략 피해가 5% 상승하며 최대 4중첩, 해제 불가이며 일반 공격 대상에게 240% 모략 피해 가합니다." },
     "안영찰채": { role: "지휘 (100%)", target: "적군 2팀, 아군 전체", desc: "매 턴 시작 시 70% 확률로 아군 전체의 병력을 회복시키고(치료율 80%, 모략 영향), 아군 전체가 행동하기 전 받는 피해를 20% 감소시킵니다. 이후 30% 확률로 적군 전열에 피곤을 부여합니다." }, 
     "암전난방": { role: "능동 (50%)", target: "자신, 적군 1팀", desc: "자신의 강공 30% 증가하고 2턴 지속하며 적군 대상 1명에게 220% 무용 피해를 가합니다. 대상이 전열일 경우 피해 계수가 110% 상승합니다." },
-    "양의화생": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신에게 2턴 동안 다모를 부여합니다. 적군 대상 2명에게 160%의 모략 피해를 입힙니다. 대상의 무용이 모략보다 높을 경우 피해 계수가 20% 상승합니다." },
+    "양의화생": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신에게 2턴 동안 다모를 부여합니다. 적군 대상 2명에게 160%의 모략 피해를 입깁니다. 대상의 무용이 모략보다 높을 경우 피해 계수가 20% 상승합니다." },
     "양초선행": { role: "능동 (50%)", target: "아군 1팀", desc: "아군 중 병력이 가장 낮은 대상의 병력을 회복(치료율 174%, 모략 영향)하고 해당 대상의 병력이 60% 미만이면 치료 계수 58% 증가합니다." },
     "여자동포": { role: "능동 (50%)", target: "아군 2팀", desc: "아군 대상 2명에게 저항 및 불굴 1중첩을 부여합니다. 피해를 입은 후 병력을 회복하며(치료율 120%, 모략 영향, 최대 2회 발동), 2턴간 지속됩니다." },
     "요사여신": { role: "패시브 (100%)", target: "자신", desc: "자신의 기습이 30% 상승하고 매번 모략 피해를 가한 후 자신이 가하는 모략 피해가 11% 상승하며 최대 4회 중첩, 해제 불가, 전투 종료까지 지속합니다." },
     "용맹무쌍": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "강공이 25% 상승하며(무용 영향), 해제할 수 없습니다. 무용 피해를 입힌 후, 70% 확률로 적군 1개 대상에게 40% 추가 무용 피해를 입깁니다." },
-    "용왕직전": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후 자신에게 용맹 상태를 2턴간 부여합니다. 그 후 적 목표 2명에게 115%의 무용 피해를 입힙니다. 자신의 무용이 목표보다 높을 경우 피해 계수가 27% 증가합니다." },
+    "용왕직전": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후 자신에게 용맹 상태를 2턴간 부여합니다. 그 후 적 목표 2명에게 115%의 무용 피해를 입깁니다. 자신의 무용이 목표보다 높을 경우 피해 계수가 27% 증가합니다." },
     "운주유악": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 전 3턴 동안 매 턴 시작 시, 아군 전체의 연격률을 40% 증가시키고 90% 확률로 아군 1개 대상에게 통찰을 부여하여 턴 종료까지 지속합니다." },
     "원성재도": { role: "능동 (35%)", target: "적군 1팀", desc: "적군 1개 대상의 받는 피해를 30% 증가시켜 2턴 지속하며 해당 대상에게 155% 모략 피해를 가합니다." },
     "위위구조": { role: "추격 (50%)", target: "적군 2팀, 아군 2팀", desc: "일반 공격 후 적군 대상 2명이 가하는 피해가 10% 감소하고 최대 4중첩되고 해제 불가이며 2턴 간 지속됩니다. 이어 아군 대상 2명의 병력을 회복(치료율 165%, 통솔 영향)시킵니다." },
@@ -155,8 +154,8 @@ const FB_TACTIC_DESC_MAP = {
     "지인선임": { role: "능동 (35%)", target: "적군 전체", desc: "적군 전체에게 168% 모략 피해를 가하고 자신의 모략이 대상보다 높으면 해당 피해 계수가 42% 증가합니다." },
     "진퇴유도": { role: "지휘 (100%)", target: "적군 전체, 아군 전체", desc: "홀수 턴 시작 시 적군 전체가 가하는 피해 30% 감소(통솔 영향, 1턴 지속). 짝수 턴 시작 시 아군 전체가 가하는 피해 15% 증가(통솔 영향, 1턴 지속)." },
     "진화타겁": { role: "능동 (35%)", target: "적군 전체", desc: "적군 전체에게 115% 무용 피해를 가하고 70% 확률로 허약을 부여하며 2턴 지속합니다." },
-    "질풍노도": { role: "능동 (70%)", target: "자신, 적군 2팀", desc: "자신의 파갑 15% 상승(무용 영향, 2턴 지속). 동시에 적군 대상 2명에게 110%의 무용 피해를 입히고, 40% 확률로 무용이 가장 낮은 적에게 110% 추가 무용 피해를 입힙니다." },
-    "천리추격": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후, 자신 추격 전법 발동률 3% 증가, 추격 전법 가하는 피해 6% 증가(최대 3중첩, 해제 불가). 또한 적군 대상 2명에게 130% 모략 피해를 입힙니다." },
+    "질풍노도": { role: "능동 (70%)", target: "자신, 적군 2팀", desc: "자신의 파갑 15% 상승(무용 영향, 2턴 지속). 동시에 적군 대상 2명에게 110%의 무용 피해를 입히고, 40% 확률로 무용이 가장 낮은 적에게 110% 추가 무용 피해를 입깁니다." },
+    "천리추격": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "일반 공격 후, 자신 추격 전법 발동률 3% 증가, 추격 전법 가하는 피해 6% 증가(최대 3중첩, 해제 불가). 또한 적군 대상 2명에게 130% 모략 피해를 입깁니다." },
     "천시지리": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전열이 받는 무용 피해를 22% 감소시키고 후열이 받는 모략 피해를 22% 감소시켜 2턴 동안 지속합니다." },
     "체천행도": { role: "패시브 (100%)", target: "자신, 적군 2팀", desc: "자신의 공심이 20% 증가합니다(해제 불가). 추격 피해를 입힐 시, 50%의 확률로 목표의 아군 2명에게 65%의 확산 피해를 입깁니다." },
     "축세대발": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신이 가하는 무용 피해 20% 증가하고 2턴 지속하며 적군 2개 대상에게 130% 무용 피해를 가합니다." },
@@ -218,7 +217,7 @@ const FB_TACTIC_DESC_MAP = {
     "천하무쌍": { role: "패시브 (100%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어에 면역되고 받는 피해가 7% 감소하며 일반 공격 후 추격 전법 정상 발동." },
     "태평경": { role: "지휘 (70%)", target: "적군 전체", desc: "2턴 시작 시 적군 전체에게 수공(계수 72%, 모략 영향, 4턴 지속)을 걸어 지속적인 모략 피해 및 받는 모략 피해 10% 증가 부여." },
     "사소도": { role: "지휘 (100%)", target: "적군 2명/아군", desc: "1턴 준비 후 적 2명에게 물리 피해(계수 126%) 및 화상(계수 60%, 2턴 지속)을 입히고 아군 전체의 통솔 80 증가(3턴 지속)." },
-    "황천당립": { role: "능동 (50%)", target: "무작위 적", desc: "1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황(1턴)을 부여합니다." },
+    "황천당립": { role: "무작위 적", target: "1턴 준비 후 5회 천벌 벼락", desc: "1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황(1턴)을 부여합니다." },
     "천의난위": { role: "능동 (50%)", target: "적군 단체", desc: "적군 단체의 모략과 통솔을 38 흡수하여 아군에게 공유하고 강력한 모략 피해(계수 184%)를 줍니다." },
     "요풍사기": { role: "능동 (50%)", target: "적/아군 전체", desc: "적 전체에 모래바람 모략 피해(계수 106%)를 입히고 아군 전체에게 장벽 2중첩(피해 40% 흡수)을 부여합니다." },
     "화겁생기": { role: "패시브 (100%)", target: "아군 전체", desc: "전투 첫 2턴 간 아군 전체에게 회피 35%를 부여하고 3~5턴 동안 매 턴 병력을 회복(치료율 68%)시킵니다." },
@@ -797,6 +796,7 @@ window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
 };
 window.handleOfficerDragEnd = e => { const s=e.target.closest('.officer-slot'); if(s) s.style.opacity='1'; draggedDeckOriginIdx = draggedOfficerSlotIdx = null; };
 
+// [실전 랭킹 1위 최신 프리셋 동기화]
 const FORMATIONS = {
     "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
     "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
@@ -809,21 +809,19 @@ const FORMATIONS = {
 };
 
 const analyzedMetaArchetypes = [
-    {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·조조·가후 종결 방패 덱",concept:"[실전 랭킹] 사마의·가후 혼란 방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","반객위주","요사여신"]},{name:"조조",chosenTactics:["효웅","간담상조","안영찰채"]},{name:"가후",chosenTactics:["경달권변","혼수모어","전위위안"]}]},
-    {id:"wei_assassin_sp",name:"[위나라] 악진·조조·장료 기형 신속 덱",concept:"[실전 랭킹] 장료·악진 기형창",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","강유겸제","진퇴유도"]},{name:"조조",chosenTactics:["효웅","혼수모어","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]},
-    {id:"shu_macho_weiyeon_xushu",name:"[촉나라] 위연·마초·서서 구행 폭딜 창병 덱",concept:"[실전 랭킹] 마초·위연·서서 안행/구행창",formation:"구행진",officers:[{name:"위연",chosenTactics:["실병제위","홍수첨향","이퇴위진"]},{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
-    {id:"qun_jwaja_jangnyeong_ugil",name:"[군진영] 좌자·장녕·우길 구행 삼도사 덱",concept:"[실전 랭킹] 좌자·장녕·우길 모략궁",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","강유겸제","유좌유용"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"우길",chosenTactics:["태평경","진퇴유도","기문둔갑"]}]},
-    {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 방원 모략 덱",concept:"[실전 랭킹] 소교·노숙·육손 방원기/궁",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
-    {id:"shu_sp_yubi_jangbi_gangyu",name:"[촉나라] 제왕유비·장비·강유 추형 덱",concept:"[실전 랭킹] 제왕유비·장비·강유 추형방패",formation:"추형진",officers:[{name:"유비(제왕)",chosenTactics:["재주복주","여자동포","안영찰채"]},{name:"장비",chosenTactics:["연인노호","진퇴유도","선등함진"]},{name:"강유",chosenTactics:["담대여두","천리추격","일고작기"]}]},
-    {id:"shu_gwanu_hwangchung_yubi",name:"[촉나라] 관우·황충·유비 안행 기병 덱",concept:"[실전 랭킹] 관우·황충·유비 안행기병",formation:"안행진",officers:[{name:"관우",chosenTactics:["무성","승승장구","질풍노도"]},{name:"황충",chosenTactics:["적혈도","횡징폭렴","강유겸제"]},{name:"유비",chosenTactics:["인정","혼수모어","홍수첨향"]}]},
-    {id:"wu_songwon_yukhang_nosuk",name:"[오나라] 손권·육항·노숙 구행 궁병 덱",concept:"[실전 랭킹] 손권·육항·노숙 구행궁",formation:"구행진",officers:[{name:"손권",chosenTactics:["웅거","기문둔갑","간담상조"]},{name:"육항",chosenTactics:["청백충근","수상개화","요사여신"]},{name:"노숙",chosenTactics:["탑상책","분성지계","여자동포"]}]},
-    {id:"qun_wonso_dongtak_yeopo",name:"[군진영] 원소·동탁·여포 방원 기병 덱",concept:"[실전 랭킹] 원소·동탁·여포 방원기병",formation:"방원진",officers:[{name:"원소",chosenTactics:["사소도","견진연봉","위위구조"]},{name:"동탁",chosenTactics:["전권난정","혼수모어","강유겸제"]},{name:"여포",chosenTactics:["천하무쌍","용왕직전","만부막적"]}]}
+    {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 종결 방원기병 덱",concept:"[오늘의 1위 1군] 소교·노숙·육손 방원기병",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
+    {id:"qun_wonso_jangnyeong_jwaja",name:"[군진영] 원소·장녕·좌자 종결 구행방패 덱",concept:"[오늘의 1위 2군] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","혼수모어"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
+    {id:"shu_macho_weiyeon_xushu",name:"[촉나라] 마초·위연·서서 종결 안행창병 덱",concept:"[오늘의 1위 3군] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","반객위주"]},{name:"위연",chosenTactics:["실병제위","이퇴위진","횡징폭렴"]},{name:"서서",chosenTactics:["절절학문","문치무공","여자동포"]}]},
+    {id:"wei_sima_sp_jojo",name:"[위나라] 사마의·조조·가후 종결 방패 덱",concept:"[실전 랭킹] 사마의·가후 혼란 방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","사생취의","요사여신"]},{name:"조조",chosenTactics:["효웅","전위위안","일고작기"]},{name:"가후",chosenTactics:["경달권변","기문둔갑","만천과해"]}]},
+    {id:"wei_assassin_sp",name:"[위나라] 악진·조조·장료 기형 신속 덱",concept:"[실전 랭킹] 장료·악진 기형창",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","승승장구","지인선임"]},{name:"조조",chosenTactics:["효웅","홍수첨향","동구적개"]},{name:"장료",chosenTactics:["함진살적","질풍노도","용왕직전"]}]}
 ];
 
 const metaDeckUnitTypeMap = {
-    "wei_sima_sp_jojo":"방패병", "wei_assassin_sp":"창병", "shu_macho_weiyeon_xushu":"창병",
-    "qun_jwaja_jangnyeong_ugil":"궁병", "wu_sogyo_nosuk_yukson":"방패병", "shu_sp_yubi_jangbi_gangyu":"방패병",
-    "shu_gwanu_hwangchung_yubi":"기병", "wu_songwon_yukhang_nosuk":"궁병", "qun_wonso_dongtak_yeopo":"기병"
+    "wu_sogyo_nosuk_yukson":"기병",
+    "qun_wonso_jangnyeong_jwaja":"방패병",
+    "shu_macho_weiyeon_xushu":"창병",
+    "wei_sima_sp_jojo":"방패병",
+    "wei_assassin_sp":"창병"
 };
 
 const internalBondRules = [
@@ -840,49 +838,33 @@ const internalBondRules = [
 ];
 
 const metaHawkRecommendationMap = {
-    "wei_sima_sp_jojo":{name:"열공-여천",skill:"사마의 모략 크리티컬 및 가후 CC 안정성 극대화"},
-    "wei_assassin_sp":{name:"능소-진시",skill:"악진·장료 선공 화력 펌핑 및 피감 보정"},
-    "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 질풍노도 파갑 폭딜 및 서서/위연 액티브 시너지"},
-    "qun_jwaja_jangnyeong_ugil":{name:"결운-감로",skill:"좌자 회피 장벽과 우길 수공/진퇴유도 피감 지원"},
     "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도/천리추격 연격 지원 및 방원진 피감 보정"},
-    "shu_sp_yubi_jangbi_gangyu":{name:"삭풍-설조",skill:"제왕유비 여자동포 피감 및 강유 천리추격/일고작기 지원"},
-    "shu_gwanu_hwangchung_yubi":{name:"능소-전우",skill:"관우 안행진 폭딜 및 황충/유비의 3중 힐 보강"},
-    "wu_songwon_yukhang_nosuk":{name:"열공-여천",skill:"육항 요사여신/수상개화 모략 스케일링 지원"},
-    "qun_wonso_dongtak_yeopo":{name:"삭풍-설조",skill:"여포 천하무쌍/용왕직전/만부막적 추격 연타 극대화"}
+    "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 회피 장벽과 장녕 모략 펌핑 및 피감 지원"},
+    "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주/용맹무쌍 확산 연격 폭딜 지원"},
+    "wei_sima_sp_jojo":{name:"열공-여천",skill:"사마의 모략 크리티컬 극대화"},
+    "wei_assassin_sp":{name:"능소-진시",skill:"장료 정밀 저격 및 선공 펌핑"}
 };
 const metaHawkAlternativesMap = {
-    "wei_sima_sp_jojo":["삭풍-성모","결운-호생"],
-    "wei_assassin_sp":["삭풍-설조","열공-전광"],
-    "shu_macho_weiyeon_xushu":["결운-감로","능소-전우"],
-    "qun_jwaja_jangnyeong_ugil":["삭풍-성모","능소-진시"],
     "wu_sogyo_nosuk_yukson":["결운-감로","능소-전우"],
-    "shu_sp_yubi_jangbi_gangyu":["결운-감로","결운-호생"],
-    "shu_gwanu_hwangchung_yubi":["결운-호생","삭풍-설조"],
-    "wu_songwon_yukhang_nosuk":["능소-진시","결운-감로"],
-    "qun_wonso_dongtak_yeopo":["열공-전광","능소-진시"]
+    "qun_wonso_jangnyeong_jwaja":["삭풍-설조","능소-진시"],
+    "shu_macho_weiyeon_xushu":["결운-감로","능소-전우"],
+    "wei_sima_sp_jojo":["삭풍-성모","결운-호생"],
+    "wei_assassin_sp":["삭풍-설조","열공-전광"]
 };
 const metaHawkRandomAttributesMap = {
+    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_wonso_jangnyeong_jwaja":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "wei_sima_sp_jojo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "wei_assassin_sp":{attr1:{rank1:"[20Lv] 속도 +25",rank2:"[20Lv] 무용 +12%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 피해 가함 +8%",rank3:"[30Lv] 발동률 +5%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
-    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "qun_jwaja_jangnyeong_ugil":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_sp_yubi_jangbi_gangyu":{attr1:{rank1:"[20Lv] 통솔 +12%",rank2:"[20Lv] 무용 +10%",rank3:"[20Lv] 모략 +10%"},attr2:{rank1:"[30Lv] 피해 감소 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 무용 피해 가함 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_gwanu_hwangchung_yubi":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +12%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "wu_songwon_yukhang_nosuk":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "qun_wonso_dongtak_yeopo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
     "custom":{attr1:{rank1:"[20Lv] 전능 +5%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 무용 +10%"},attr2:{rank1:"[30Lv] 피해 가함 +6%",rank2:"[30Lv] 피해 감소 +6%",rank3:"[30Lv] 발동률 +3%"},attr3:{rank1:"[40Lv 특성] 전투 첫 턴 제어 면역(통찰)",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 턴 종료 시 병력 회복"}}
 };
 const systemGuideInsights = {
-    "wei_sima_sp_jojo":"💡 [전서버 랭킹 1위] 사마의 반객위주/요사여신 모략 폭딜 및 가후 혼수모어/전위위안 2중 혼란 힐 방패.",
-    "wei_assassin_sp":"💡 [전서버 랭킹 2위] 장료 함진살적/질풍노도 정밀 주격 및 악진·조조 강유겸제/진퇴유도 기형창.",
-    "shu_macho_weiyeon_xushu":"💡 [전서버 랭킹 3위] 서서 문치무공/전위위안 스탯 폭증 버프 뒤 마초 출수법/용맹무쌍/질풍노도 확산 연격 창병.",
-    "qun_jwaja_jangnyeong_ugil":"💡 [전서버 랭킹 4위] 좌자 화겁생기/유좌유용 회피 장벽 뒤 우길 태평경 수공 디버프와 장녕 양의화생 폭격 삼도사.",
-    "wu_sogyo_nosuk_yukson":"💡 [전서버 랭킹 5위] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
-    "shu_sp_yubi_jangbi_gangyu":"💡 [전서버 랭킹 7위] 제왕유비 여자동포/안영찰채 2중 저항 및 장비 선등함진 무장해제, 강유 천리추격/일고작기 스케일링.",
-    "shu_gwanu_hwangchung_yubi":"💡 [전서버 랭킹 8위] 관우 승승장구/질풍노도 안행진 파갑 폭딜 및 황충 횡징폭렴 피감, 유비 혼수모어/홍수첨향 3중 힐 기병.",
-    "wu_songwon_yukhang_nosuk":"💡 [전서버 랭킹 9위] 노숙 탑상책/분성지계 지원 속 육항 청백충근/요사여신 크리티컬 펌핑을 받는 손권 기문둔갑 궁병.",
-    "qun_wonso_dongtak_yeopo":"💡 [전서버 랭킹] 원소 사소도 통솔 버프 및 동탁 효웅/혼수모어 뒤 여포 용왕직전/만부막적 추격 1턴 분쇄 기병."
+    "wu_sogyo_nosuk_yukson":"💡 [전서버 랭킹 1위] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
+    "qun_wonso_jangnyeong_jwaja":"💡 [전서버 랭킹 1위] 좌자 화겁생기/유좌유용 회피 장벽 뒤 원소 사소도/강유겸제 피감과 장녕 양의화생/수상개화 폭격 방패.",
+    "shu_macho_weiyeon_xushu":"💡 [전서버 랭킹 1위] 서서 문치무공/여자동포 스탯 폭증 버프 뒤 위연 이퇴위진/횡징폭렴 피감과 마초 반객위주 확산 연격 창병.",
+    "wei_sima_sp_jojo":"💡 [실전 랭킹] 사마의 사생취의 모략 폭딜 및 가후 만천과해/기문둔갑 방패.",
+    "wei_assassin_sp":"💡 [실전 랭킹] 장료 함진살적/질풍노도 정밀 주격 및 악진·조조 기형창."
 };
 
 const defaultPresetDecks = analyzedMetaArchetypes.map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
