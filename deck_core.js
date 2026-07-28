@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 1~5위 실전 메타(15개) + 전투매 특성 사전 복구 + 팝업 토글 + 무장 가나다순 정렬 종결 엔진
-console.log("[시스템 분석] deck_core.js 최종 무결성 결선 엔진 기동 (전투매 마스터 사전 완벽 복구)");
+// [시스템 분석] deck_core.js - 1~5위 실전 메타 + 10대 통합 전투 속성 복구 + 종결 장비 명세 바인딩 엔진
+console.log("[시스템 분석] deck_core.js 10대 통합 전투 속성 복구 및 종결 장비 바인딩 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -19,13 +19,22 @@ const EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
     PCm: ["백옥잠","연격률","창병 피해 가함","세린갑","무용 피해 가함","창병 배반, 공심 상승","쌍호뉴","연격률","창병 배반, 공심 상승"],
     SC:  ["진현관","강공, 기습 상승","창병 피해 가함","명재복","모략 피해 가함","창병 배반, 공심 상승","박산로","공심","창병 배반, 공심 상승"],
-    TC:  ["연함규","피해 감소","창병 피해 가함","청등갑","피해 감소","창병 피해 감소","사남패","피해 감소","창병 배반, 공심 상승"],
+    TC:  ["연함규","피해 감소","창병 치유 효과 상승","청등갑","피해 감소","창병 피해 감소","사남패","치유 효과 받음","창병 피해 감소"],
     SH:  ["연함규","피해 감소","치유 효과 부여","청등갑","피해 감소","창병 치유 효과 상승","사남패","치유 효과 받음","창병 피해 감소"],
-    SS:  ["진현관","피해 감소","방패병 피해 가함","명재복","피해 감소","방패병 피해 감소","박산로","피해 감소","방패병 치유 효과 상승"]
+    SS:  ["진현관","피해 감소","방패병 피해 감소","명재복","피해 감소","방패병 치유 효과 상승","박산로","피해 감소","방패병 피해 감소"]
+};
+
+// [오류 교정 완료] 조조·사마의·가후 등 핵심 무장 종결 장비 명세 우선 바인딩
+const FB_EQUIP_OVERRIDES = {
+    "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승" } },
+    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소" } },
+    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소" } },
+    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승" } }
 };
 
 const FB_EQUIP_MAP = new Proxy({}, {
     get: (_, name) => {
+        if (FB_EQUIP_OVERRIDES[name]) return FB_EQUIP_OVERRIDES[name];
         const meta = FB_OFF_META[name] || ["","방패병","qun","PC"];
         const p = EQ_PRESETS[meta[3] || "PC"], u = meta[1].split('/')[0];
         return {
@@ -120,8 +129,6 @@ function getOfficerDogamData(officerName) {
 }
 
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : FB_TACTICS) : FB_TACTICS;
-
-// [무장 가나다순 완벽 정렬]
 const getOfficerNamesBridge = () => {
     const list = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : FB_OFFICERS;
     return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
@@ -218,6 +225,7 @@ function evaluateDeckPerfection(deck, metaId) {
     return "";
 }
 
+// [완벽 복구] 10대 통합 전투 속성 UI 출력 엔진
 function buildIntegratedStatsHtml(stats) {
     if (!stats) return '';
     let arr = [];
@@ -226,7 +234,12 @@ function buildIntegratedStatsHtml(stats) {
     if (stats.strategyDmg > 0) arr.push(`모략 <span style="color:#c084fc">${stats.strategyDmg.toFixed(1)}%</span>`);
     if (stats.physicalDmg > 0) arr.push(`무용 <span style="color:#facc15">${stats.physicalDmg.toFixed(1)}%</span>`);
     if (stats.healGiven > 0) arr.push(`치유 <span style="color:#60a5fa">${stats.healGiven.toFixed(1)}%</span>`);
-    return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:#facc15;font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div>${arr.join(' | ')}</div></div>`;
+    if (stats.leech > 0) arr.push(`흡혈 <span style="color:#fb7185">${stats.leech.toFixed(1)}%</span>`);
+    if (stats.comboRate > 0) arr.push(`연격 <span style="color:#fb923c">${stats.comboRate.toFixed(1)}%</span>`);
+    if (stats.activeRate > 0) arr.push(`발동 <span style="color:#38bdf8">${stats.activeRate.toFixed(1)}%</span>`);
+    if (stats.critRate > 0) arr.push(`강공/기습 <span style="color:#f43f5e">${stats.critRate.toFixed(1)}%</span>`);
+    if (stats.armorPen > 0) arr.push(`파갑 <span style="color:#94a3b8">${stats.armorPen.toFixed(1)}%</span>`);
+    return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:#facc15;font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div style="display:flex;flex-wrap:wrap;gap:4px 8px;line-height:1.4;">${arr.map(s=>`<span>${s}</span>`).join('')}</div></div>`;
 }
 
 // ==========================================================================
@@ -335,7 +348,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (1~5위 실전 메타 마스터 프리셋)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (팝업 토글 닫기 기능 포함)
 // ==========================================================================
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
