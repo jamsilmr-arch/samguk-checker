@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 1~5위 실전 메타 + 계층적 전법 배타성 + 팝업 토글 닫기 완전 통합 엔진
-console.log("[시스템 분석] deck_core.js 1~5위 실전 메타 덱 및 팝업 토글 컨트롤 엔진 기동");
+// [시스템 분석] deck_core.js - 1~5위 실전 메타 + 계층적 전법 배타성 + 무장 가나다순 정렬 종결 엔진
+console.log("[시스템 분석] deck_core.js 1~5위 실전 메타 덱 및 무장 가나다순 정렬 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -51,7 +51,7 @@ const STAT_KEY_RULES = [
 
 const FB_TACTIC_DESC_MAP = {
     "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 내 매 턴 시작 시, 아군 전체의 연격률을 각각 30% > 20% > 10%만큼 감소시키고, 턴 종료 시 아군 중 병력이 가장 낮은 대상의 병력을 회복함(치료율 55%, 모략의 영향)." },
-    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을 부여합니다." },
+    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며, 적군 대상 2명에게 나약을 부여합니다." },
     "가정지전": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다." },
     "강유겸제": { role: "지휘 (50%)", target: "아군 전체", desc: "턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고 무용/모략 특화 피감을 부여합니다." },
     "견불가최": { role: "패시브 (100%)", target: "자신", desc: "자신이 받는 피해가 35% 감소합니다. 해제 불가. 일반 공격을 받은 후 35%의 확률로 아군 목표 1명의 디버프 상태를 1종류 해제합니다." },
@@ -221,7 +221,10 @@ function getOfficerDogamData(officerName) {
 }
 
 const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : FB_TACTICS) : FB_TACTICS;
-const getOfficerNamesBridge = () => window.getAllOfficerNamesFromDogam ? (window.getAllOfficerNamesFromDogam()?.length > 5 ? window.getAllOfficerNamesFromDogam().sort((a,b)=>a.localeCompare(b,'ko')) : FB_OFFICERS) : FB_OFFICERS;
+const getOfficerNamesBridge = () => {
+    const list = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : FB_OFFICERS;
+    return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
+};
 
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const cleanName = cStr(officerName);
@@ -430,7 +433,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (1~5위 전체 메타 덱 통합)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (1~5위 실전 메타 마스터 프리셋)
 // ==========================================================================
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -492,7 +495,7 @@ const FORMATIONS = {
     "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
-// [오늘 자 1~5위 실전 1~3군 총 15개 종결 메타 완벽 결선]
+// [오늘 자 1위~5위 1~3군 총 15개 실전 종결 메타 완벽 결선]
 const analyzedMetaArchetypes = [
     {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 종결 방원기병 덱",concept:"[1위 1군] 소교·노숙·육손 방원기병",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
     {id:"qun_wonso_jangnyeong_jwaja",name:"[군진영] 원소·장녕·좌자 종결 구행방패 덱",concept:"[1위 2군] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","혼수모어"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
