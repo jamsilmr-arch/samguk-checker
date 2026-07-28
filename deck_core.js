@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 실전 랭킹 1위·2위·3위 (1~3군) 전체 메타 + 계층적 전법 배타성 완전 통합 엔진
-console.log("[시스템 분석] deck_core.js 실전 랭킹 1~3위 1~3군 전체 메타 및 계층적 전법 배타성 엔진 기동");
+// [시스템 분석] deck_core.js - 실전 랭킹 1~5위 1~3군 (총 15개 메타) 및 계층적 전법 배타성 통합 엔진
+console.log("[시스템 분석] deck_core.js 1~5위 실전 메타 덱 및 계층적 전법 배타성 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -24,7 +24,6 @@ const EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 가함","명재복","피해 감소","방패병 피해 감소","박산로","피해 감소","방패병 치유 효과 상승"]
 };
 
-// 동적 장비 프록시
 const FB_EQUIP_MAP = new Proxy({}, {
     get: (_, name) => {
         const meta = FB_OFF_META[name] || ["","방패병","qun","PC"];
@@ -52,7 +51,7 @@ const STAT_KEY_RULES = [
 
 const FB_TACTIC_DESC_MAP = {
     "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 내 매 턴 시작 시, 아군 전체의 연격률을 각각 30% > 20% > 10%만큼 감소시키고, 턴 종료 시 아군 중 병력이 가장 낮은 대상의 병력을 회복함(치료율 55%, 모략의 영향)." },
-    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을 부여합니다." },
+    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며, 적군 대상 2명에게 나약을 부여합니다." },
     "강유겸제": { role: "지휘 (50%)", target: "아군 전체", desc: "턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고 무용/모략 특화 피감을 부여합니다." },
     "안영찰채": { role: "지휘 (100%)", target: "적군 2팀, 아군 전체", desc: "매 턴 시작 시 70% 확률로 아군 전체 병력 회복 및 피감 20% 부여." },
     "분성지계": { role: "능동 (70%)", target: "적군 전체", desc: "적군 전체에게 화상을 부여하고 가하는 피해를 20% 감소시킵니다." },
@@ -76,7 +75,7 @@ const tacticAlternativesMap = {
     "여자동포":["동구적개","천시지리"], "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
     "수상개화":["요사여신","사생취의","양의화생"], "요사여신":["수상개화","사생취의","반객위주"],
     "분성지계":["화소적벽","기문둔갑"], "체천행도":["반객위주","질풍노도","천리추격"], "금창신":["동구적개","강유겸제","간담상조"],
-    "만천과해":["전위위안","태청단경","휴양생식"], "토적격문":["진퇴유도","간담상조","이퇴위진"]
+    "만천과해":["전위위안","태청단경","휴양생식"], "토적격문":["진퇴유도","간담상조","이퇴위진"], "위위구조":["간담상조","진퇴유도","홍수첨향"]
 };
 
 const internalTacticStatMap = {
@@ -86,7 +85,8 @@ const internalTacticStatMap = {
     "금창신":{damageTakenRed:8,strategyDmg:5},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},
     "전위위안":{healGiven:6,damageTakenRed:4},"혼수모어":{damageTakenRed:4,healGiven:6},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"양의화생":{strategyDmg:8},
     "낙정하석":{strategyDmg:10},"유좌유용":{healGiven:6},"여자동포":{healGiven:6,damageTakenRed:4},"반객위주":{stackingDmg:8},"용맹무쌍":{physicalDmg:6},
-    "홍수첨향":{healGiven:8,damageTakenRed:6},"질풍노도":{physicalDmg:6,armorPen:8},"토적격문":{damageTakenRed:6},"만천과해":{damageTakenRed:6,healGiven:6}
+    "홍수첨향":{healGiven:8,damageTakenRed:6},"질풍노도":{physicalDmg:6,armorPen:8},"토적격문":{damageTakenRed:6},"만천과해":{damageTakenRed:6,healGiven:6},
+    "천하무쌍":{physicalDmg:8,comboRate:5},"용왕직전":{physicalDmg:5},"만부막적":{physicalDmg:5},"사소도":{damageDealtInc:6,damageTakenRed:4},"전권난정":{physicalDmg:5,damageTakenRed:4},"위위구조":{healGiven:5,damageTakenRed:4},"인정":{healGiven:8,damageTakenRed:4}
 };
 
 // ==========================================================================
@@ -180,12 +180,6 @@ function aggregateIntegratedStats(deck, officerIndex) {
 
     const eq = getOfficerEquipment(hName, currentDeckUnit);
     if (eq) { ['helmet', 'armor', 'accessory'].forEach(part => { parseAndAdd(eq[part].attr1); parseAndAdd(eq[part].attr2); }); }
-
-    internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req)
-        .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
-
-    const hA = metaHawkRandomAttributesMap[matchMeta?.bestMeta?.id || "custom"];
-    if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
     const dogamData = getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
@@ -317,7 +311,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (1~3위 전체 메타 덱 통합)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤 (1~5위 실전 메타 마스터 프리셋)
 // ==========================================================================
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -365,7 +359,7 @@ const FORMATIONS = {
     "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
-// [오늘 자 1·2·3위 실전 1~3군 및 클래식 메타 완벽 통합]
+// [오늘 자 1위~5위 1~3군 총 15개 실전 종결 메타 완벽 결선]
 const analyzedMetaArchetypes = [
     {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 종결 방원기병 덱",concept:"[1위 1군] 소교·노숙·육손 방원기병",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
     {id:"qun_wonso_jangnyeong_jwaja",name:"[군진영] 원소·장녕·좌자 종결 구행방패 덱",concept:"[1위 2군] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","혼수모어"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
@@ -376,29 +370,40 @@ const analyzedMetaArchetypes = [
     {id:"shu_macho_weiyeon_xushu_3",name:"[촉나라] 마초·위연·서서 안행창병 (3위 세팅)",concept:"[3위 1군] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"위연",chosenTactics:["실병제위","홍수첨향","이퇴위진"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
     {id:"wu_songwon_yukhang_nosuk_3",name:"[오나라] 손권·육항·노숙 종결 구행궁병 덱",concept:"[3위 2군] 손권·육항·노숙 구행궁병",formation:"구행진",officers:[{name:"손권",chosenTactics:["웅거","진퇴유도","토적격문"]},{name:"육항",chosenTactics:["청백충근","양의화생","반객위주"]},{name:"노숙",chosenTactics:["탑상책","분성지계","여자동포"]}]},
     {id:"wei_sima_jojo_gahu_3",name:"[위나라] 사마의·조조·가후 종결 추형방패 덱",concept:"[3위 3군] 사마의·조조·가후 추형방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","수상개화","요사여신"]},{name:"조조",chosenTactics:["효웅","안영찰채","간담상조"]},{name:"가후",chosenTactics:["경달권변","혼수모어","만천과해"]}]},
-    {id:"wei_assassin_sp",name:"[위나라] 악진·조조·장료 기형 신속 덱",concept:"[실전 랭킹] 장료·악진 기형창",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","승승장구","지인선임"]},{name:"조조",chosenTactics:["효웅","홍수첨향","동구적개"]},{name:"장료",chosenTactics:["함진살적","질풍노도","용왕직전"]}]}
+    {id:"qun_wonso_dongtak_yeopo_4",name:"[군진영] 원소·동탁·여포 종결 방원기병 덱",concept:"[4위 1군] 원소·동탁·여포 방원기병",formation:"방원진",officers:[{name:"원소",chosenTactics:["사소도","이퇴위진","횡징폭렴"]},{name:"동탁",chosenTactics:["전권난정","견진연봉","위위구조"]},{name:"여포",chosenTactics:["천하무쌍","용왕직전","만부막적"]}]},
+    {id:"shu_macho_weiyeon_yubi_4",name:"[촉나라] 마초·위연·유비 종결 안행창병 덱",concept:"[4위 2군] 마초·위연·유비 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"위연",chosenTactics:["실병제위","토적격문","문치무공"]},{name:"유비",chosenTactics:["인정","혼수모어","강유겸제"]}]},
+    {id:"wei_jojo_sima_hahou_4",name:"[위나라] 조조·사마의·하후돈 구행방패 (4위 세팅)",concept:"[4위 3군] 조조·사마의·하후돈 구행방패",formation:"구행진",officers:[{name:"조조",chosenTactics:["효웅","현호제세","유좌유용"]},{name:"사마의",chosenTactics:["응시낭고","수상개화","반객위주"]},{name:"하후돈",chosenTactics:["발시담정","홍수첨향","간담상조"]}]},
+    {id:"qun_jwaja_jangnyeong_ugil_5",name:"[군진영] 좌자·장녕·우길 구행궁병 (5위 세팅)",concept:"[5위 1군] 좌자·장녕·우길 구행궁병",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]},{name:"장녕",chosenTactics:["천의난위","수상개화","양의화생"]},{name:"우길",chosenTactics:["태평경","강유겸제","금창신"]}]},
+    {id:"wei_sima_jojo_gahu_5",name:"[위나라] 사마의·조조·가후 추형방패 (5위 세팅)",concept:"[5위 2군] 사마의·조조·가후 추형방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","반객위주","요사여신"]},{name:"조조",chosenTactics:["효웅","진퇴유도","간담상조"]},{name:"가후",chosenTactics:["경달권변","만천과해","혼수모어"]}]},
+    {id:"shu_macho_weiyeon_xushu_5",name:"[촉나라] 마초·위연·서서 안행창병 (5위 세팅)",concept:"[5위 3군] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"위연",chosenTactics:["실병제위","홍수첨향","이퇴위진"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]}
 ];
 
 const metaDeckUnitTypeMap = {
     "wu_sogyo_nosuk_yukson":"기병", "qun_wonso_jangnyeong_jwaja":"방패병", "shu_macho_weiyeon_xushu":"창병",
     "wei_jojo_sima_hahou":"방패병", "shu_macho_weiyeon_xushu_2":"창병", "qun_jwaja_jangnyeong_ugil_2":"궁병",
-    "shu_macho_weiyeon_xushu_3":"창병", "wu_songwon_yukhang_nosuk_3":"궁병", "wei_sima_jojo_gahu_3":"방패병", "wei_assassin_sp":"창병"
+    "shu_macho_weiyeon_xushu_3":"창병", "wu_songwon_yukhang_nosuk_3":"궁병", "wei_sima_jojo_gahu_3":"방패병",
+    "qun_wonso_dongtak_yeopo_4":"기병", "shu_macho_weiyeon_yubi_4":"창병", "wei_jojo_sima_hahou_4":"방패병",
+    "qun_jwaja_jangnyeong_ugil_5":"궁병", "wei_sima_jojo_gahu_5":"방패병", "shu_macho_weiyeon_xushu_5":"창병"
 };
 
 const metaHawkRecommendationMap = {
-    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
-    "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
-    "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"},
-    "shu_macho_weiyeon_xushu_2":{name:"결운-감로",skill:"마초 확산 타격 및 서서 피감 치유 강화"},
-    "qun_jwaja_jangnyeong_ugil_2":{name:"열공-여천",skill:"장녕 낙정하석 폭격 및 우길 수공 지원"},
-    "shu_macho_weiyeon_xushu_3":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"},
-    "wu_songwon_yukhang_nosuk_3":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"},
-    "wei_sima_jojo_gahu_3":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
-    "wei_assassin_sp":{name:"능소-진시",skill:"장료 정밀 저격 및 선공 화력 펌핑"}
+    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"}, "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"}, "shu_macho_weiyeon_xushu_2":{name:"결운-감로",skill:"마초 확산 타격 및 서서 피감 치유 강화"}, "qun_jwaja_jangnyeong_ugil_2":{name:"열공-여천",skill:"장녕 낙정하석 폭격 및 우길 수공 지원"},
+    "shu_macho_weiyeon_xushu_3":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"}, "wu_songwon_yukhang_nosuk_3":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"}, "wei_sima_jojo_gahu_3":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
+    "qun_wonso_dongtak_yeopo_4":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"}, "shu_macho_weiyeon_yubi_4":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"}, "wei_jojo_sima_hahou_4":{name:"능소-진시",skill:"사마의 모략 회심 및 조조/하후돈 안정 방어"},
+    "qun_jwaja_jangnyeong_ugil_5":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산(금창신) 폭딜 지원"}, "wei_sima_jojo_gahu_5":{name:"열공-여천",skill:"사마의 요사여신 모략 폭딜 극대화"}, "shu_macho_weiyeon_xushu_5":{name:"열공-전광",skill:"마초 용맹무쌍/질풍노도 돌파력 강화"}
 };
 
-const defaultPresetDecks = analyzedMetaArchetypes.slice(0,3).map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
+const systemGuideInsights = {
+    "wu_sogyo_nosuk_yukson":"💡 [1위 1군] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
+    "qun_wonso_jangnyeong_jwaja":"💡 [1위 2군] 좌자 화겁생기/유좌유용 회피 장벽 뒤 원소 사소도/강유겸제 피감과 장녕 양의화생/수상개화 폭격 방패.",
+    "shu_macho_weiyeon_xushu":"💡 [1위 3군] 서서 문치무공/여자동포 스탯 폭증 버프 뒤 위연 이퇴위진/횡징폭렴 피감과 마초 반객위주 확산 연격 창병.",
+    "qun_wonso_dongtak_yeopo_4":"💡 [4위 1군] 원소 사소도 통솔 버프 및 동탁 견진연봉/위위구조 피감 뒤 여포 용왕직전/만부막적 1턴 분쇄 기병.",
+    "shu_macho_weiyeon_yubi_4":"💡 [4위 2군] 유비 인정/혼수모어 제어 힐 및 강유겸제 피감 속에서 마초 출수법/용맹무쌍/질풍노도 확산 창병.",
+    "qun_jwaja_jangnyeong_ugil_5":"💡 [5위 1군] 우길 금창신 신산 버프를 받는 장녕 수상개화/양의화생 폭딜 및 좌자 안영찰채/유좌유용 방패/궁병."
+};
+
+const defaultPresetDecks = analyzedMetaArchetypes.slice(0,5).map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
 
 function loadDeckTextData() {
     try {
