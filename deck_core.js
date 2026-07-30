@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 1~5위 실전 메타 + 75개 전법 설명 마스터 사전 복구 종결 엔진
-console.log("[시스템 분석] deck_core.js 전법 설명 마스터 사전 완벽 복구 및 무결성 엔진 기동");
+// [시스템 분석] deck_core.js - 1~5위 실전 메타 + 75개 전법 마스터 사전 + 가이드 인사이트 완전 복구 종결 엔진
+console.log("[시스템 분석] deck_core.js 데이터베이스 잘림 현상 방어 및 무결성 엔진 기동");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -70,7 +70,7 @@ const internalBondRules = [
     {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
 ];
 
-// [완벽 복구] 75개 전법 설명 마스터 사전
+// [복구 완료] 75개 전법 설명 마스터 사전
 const FB_TACTIC_DESC_MAP = {
     "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 내 매 턴 시작 시, 아군 전체의 연격률을 각각 30% > 20% > 10%만큼 감소시키고, 턴 종료 시 아군 중 병력이 가장 낮은 대상의 병력을 회복함(치료율 55%, 모략의 영향)." },
     "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음)." },
@@ -178,7 +178,7 @@ const FB_TACTIC_DESC_MAP = {
     "강동맹호": { role: "지휘 (100%)", target: "적군 전체", desc: "적군 전체에게 도발을 시전하여 일반 공격을 강제 집중시키고 자신이 받는 피해를 28% 감소(2턴 지속)시킵니다." },
     "웅거": { role: "지휘 (100%)", target: "자신", desc: "아군이 일반 공격을 행할 때마다 75% 확률로 자신에게 연격, 통찰, 강공, 기습, 선공 중 1개의 버프를 2턴간 획득합니다." },
     "효희": { role: "능동 (50%)", target: "적군 다수", desc: "일반 공격 전 자신에게 걸린 버프 1개당 물리 피해량 20% 증가(최대 5중첩) 및 추가 물리 타격(계수 88%)을 가합니다." },
-    "강동패주": { role: "능동 (50%)", target: "적군 단체", desc: "일반 공격 후 35% 확률로 대상에게 맹렬한 무용 연타 피해(계수 192%)를 입히고 피해량의 50%를 흡혈합니다." },
+    "강동패주": { role: "능동 (50%)", target: "적군 단체", desc: "일반 공격 후 35% 확률로 대상에게 맹렬 무용 연타 피해(계수 192%)를 입히고 피해량의 50%를 흡혈합니다." },
     "겸권상계": { role: "지휘 (100%)", target: "아군 전체", desc: "오나라 진영 무장들과 결선 시 아군 전체의 전술 스탯을 15% 증가시키고 매 턴 50% 확률로 피해 감소 20% 부여." },
     "백의도강": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 첫 턴에 아군 전체에 1회의 확정 회피(도피)를 부여하고, 피해를 입힐 때마다 40% 확률로 무장해제 또는 겁전을 겁니다." },
     "지변규려": { role: "추격 (50%)", target: "적군 2명", desc: "적군 2명에게 화상(계수 84%, 3턴 지속)을 입히고 이미 화상 상태면 광역 폭발 모략 피해(계수 164%)를 줍니다." },
@@ -190,10 +190,10 @@ const FB_TACTIC_DESC_MAP = {
     "위진새북": { role: "패시브 (100%)", target: "부대 전체", desc: "전투 전 2턴 간 부대 전체의 전법 발동률을 13% 증가시키고 액티브 타격 후 속도 비례 추가 무용 피해(계수 96%)를 입힙니다." },
     "전권난정": { role: "지휘 (100%)", target: "적/아군 전체", desc: "매 턴 자신의 무용을 15% 증폭시키며, 5턴 시작 시 적과 아군 전체에 무차별 무용 피해(계수 68%) 및 50% 흡혈을 시전합니다." },
     "효장": { role: "능동 (50%)", target: "적군 2명", desc: "1턴 준비 후 적 2명에게 무용 참격 충격(계수 180%)을 가하고 1턴간 확정적 공포 제어 상태로 격리합니다." },
-    "천하무쌍": { role: "패시브 (100%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어에 면역되고 받는 피해가 7% 감소하며 일반 공격 후 추격 전법 정상 발동." },
+    "천하무쌍": { role: "패시브 (100%)", target: "적군 단일", desc: "적군 단일에게 일기토를 신청하여 서로 일반 공격을 3회 주고받음. 일기토 중 자신은 제어 면역, 받는 피해 7% 감소." },
     "태평경": { role: "지휘 (70%)", target: "적군 전체", desc: "2턴 시작 시 적군 전체에게 수공(계수 72%, 모략 영향, 4턴 지속)을 걸어 지속적인 모략 피해 및 받는 모략 피해 10% 증가 부여." },
     "사소도": { role: "지휘 (100%)", target: "적군 2명/아군", desc: "1턴 준비 후 적 2명에게 물리 피해(계수 126%) 및 화상(계수 60%, 2턴 지속)을 입히고 아군 전체의 통솔 80 증가(3턴 지속)." },
-    "황천당립": { role: "무작위 적", target: "1턴 준비 후 5회 천벌 벼락", desc: "1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황(1턴)을 부여합니다." },
+    "황천당립": { role: "능동 (50%)", target: "무작위 적", desc: "1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황(1턴)을 부여합니다." },
     "천의난위": { role: "능동 (50%)", target: "적군 단체", desc: "적군 단체의 모략과 통솔을 38 흡수하여 아군에게 공유하고 강력한 모략 피해(계수 184%)를 줍니다." },
     "요풍사기": { role: "능동 (50%)", target: "적/아군 전체", desc: "적 전체에 모래바람 모략 피해(계수 106%)를 입히고 아군 전체에게 장벽 2중첩(피해 40% 흡수)을 부여합니다." },
     "화겁생기": { role: "패시브 (100%)", target: "아군 전체", desc: "전투 첫 2턴 간 아군 전체에게 회피 35%를 부여하고 3~5턴 동안 매 턴 병력을 회복(치료율 68%)시킵니다." },
@@ -258,6 +258,9 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
         const mEq = FB_EQUIP_MAP[cleanName];
         rawEq = { helmet: { ...mEq.helmet }, armor: { ...mEq.armor }, accessory: { ...mEq.accessory } };
     }
+    if (!rawEq && window.getEquipmentRecommendationFromGuide) {
+        rawEq = window.getEquipmentRecommendationFromGuide(officerName);
+    }
 
     if (rawEq) {
         const eq = { helmet: { ...rawEq.helmet }, armor: { ...rawEq.armor }, accessory: { ...rawEq.accessory } };
@@ -315,6 +318,12 @@ function aggregateIntegratedStats(deck, officerIndex) {
 
     const eq = getOfficerEquipment(hName, currentDeckUnit);
     if (eq) { ['helmet', 'armor', 'accessory'].forEach(part => { parseAndAdd(eq[part].attr1); parseAndAdd(eq[part].attr2); }); }
+
+    internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req)
+        .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
+
+    const hA = metaHawkRandomAttributesMap[matchMeta?.bestMeta?.id || "custom"];
+    if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
     const dogamData = getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
@@ -505,19 +514,7 @@ const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
-    style.innerHTML = `
-        .deck-card select { background-color:#1e293b; color:#f8fafc; border:1px solid #475569; border-radius:4px; padding:6px 24px 6px 10px; font-size:13px; width:100%; box-sizing:border-box; font-family:inherit; }
-        .hawk-recommend-box { margin-top:10px; padding:12px; background-color:#1e293b; border-left:4px solid #3b82f6; border-radius:6px; font-size:13px; color:#e2e8f0; line-height:1.5; }
-        .equipment-box { margin-top:6px; padding:6px; border:1px solid #334155; border-radius:4px; background-color:#0f172a; font-size:11px; color:#cbd5e1; }
-        .integrated-stats-box { margin-top:6px; padding:8px; border-radius:4px; background:#0f172a; border:1px solid #475569; font-size:11px; }
-        .unit-badge { display:inline-block; background-color:rgba(245,158,11,0.15); color:#fbbf24; font-size:10px; padding:3px 6px; border-radius:4px; margin:4px 0; }
-        .feedback-item.success { color:#4ade80; } .feedback-item.warning { color:#facc15; } .feedback-item.info { color:#60a5fa; }
-        #tactic-popup-modal { display:none; position:absolute; z-index:9999; background:rgba(15,23,42,0.98); border:1px solid #a855f7; padding:12px; border-radius:6px; width:280px; color:#f8fafc; font-size:12px; }
-        .tactic-row { cursor:pointer; padding:6px 12px; border-radius:4px; margin-bottom:4px; transition: all 0.2s; }
-        .tactic-row select { width:80%; margin:0 auto; display:block; }
-        .tactic-row.owned select { border: 1px solid #4ade80; color: #4ade80; background-color: rgba(74, 222, 128, 0.05); }
-        .tactic-row.missing select { border: 1px dashed #f87171; color: #fca5a5; background-color: rgba(248, 113, 113, 0.05); }
-    `;
+    style.innerHTML = `.deck-card select{background-color:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:4px;padding:6px 24px 6px 10px;font-size:13px;width:100%;box-sizing:border-box;font-family:inherit}.hawk-recommend-box{margin-top:10px;padding:12px;background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:6px;font-size:13px;color:#e2e8f0;line-height:1.5}.equipment-box{margin-top:6px;padding:6px;border:1px solid #334155;border-radius:4px;background-color:#0f172a;font-size:11px;color:#cbd5e1}.integrated-stats-box{margin-top:6px;padding:8px;border-radius:4px;background:#0f172a;border:1px solid #475569;font-size:11px}.unit-badge{display:inline-block;background-color:rgba(245,158,11,0.15);color:#fbbf24;font-size:10px;padding:3px 6px;border-radius:4px;margin:4px 0}.feedback-item.success{color:#4ade80}.feedback-item.warning{color:#facc15}.feedback-item.info{color:#60a5fa}#tactic-popup-modal{display:none;position:absolute;z-index:9999;background:rgba(15,23,42,0.98);border:1px solid #a855f7;padding:12px;border-radius:6px;width:280px;color:#f8fafc;font-size:12px}.tactic-row{cursor:pointer;padding:6px 12px;border-radius:4px;margin-bottom:4px;transition: all 0.2s;}.tactic-row select{width:80%;margin:0 auto;display:block}.tactic-row.owned select{border: 1px solid #4ade80; color: #4ade80; background-color: rgba(74, 222, 128, 0.05);}.tactic-row.missing select{border: 1px dashed #f87171; color: #fca5a5; background-color: rgba(248, 113, 113, 0.05);}`;
     document.head.appendChild(style);
 };
 
@@ -530,6 +527,7 @@ const FORMATIONS = {
     "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
+// [오늘 자 1위~5위 1~3군 총 15개 실전 종결 메타 완벽 결선]
 const analyzedMetaArchetypes = [
     {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 종결 방원기병 덱",concept:"[1위 1군] 소교·노숙·육손 방원기병",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
     {id:"qun_wonso_jangnyeong_jwaja",name:"[군진영] 원소·장녕·좌자 종결 구행방패 덱",concept:"[1위 2군] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","혼수모어"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
@@ -556,9 +554,41 @@ const metaDeckUnitTypeMap = {
     "qun_jwaja_jangnyeong_ugil_5":"궁병", "wei_sima_jojo_gahu_5":"방패병", "shu_macho_weiyeon_xushu_5":"창병"
 };
 
+const metaHawkRecommendationMap = {
+    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"}, "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"}, "shu_macho_weiyeon_xushu_2":{name:"결운-감로",skill:"마초 확산 타격 및 서서 피감 치유 강화"}, "qun_jwaja_jangnyeong_ugil_2":{name:"열공-여천",skill:"장녕 낙정하석 폭격 및 우길 수공 지원"},
+    "shu_macho_weiyeon_xushu_3":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"}, "wu_songwon_yukhang_nosuk_3":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"}, "wei_sima_jojo_gahu_3":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
+    "qun_wonso_dongtak_yeopo_4":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"}, "shu_macho_weiyeon_yubi_4":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"}, "wei_jojo_sima_hahou_4":{name:"능소-진시",skill:"사마의 모략 회심 및 조조/하후돈 안정 방어"},
+    "qun_jwaja_jangnyeong_ugil_5":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산(금창신) 폭딜 지원"}, "wei_sima_jojo_gahu_5":{name:"열공-여천",skill:"사마의 요사여신 모략 폭딜 극대화"}, "shu_macho_weiyeon_xushu_5":{name:"열공-전광",skill:"마초 용맹무쌍/질풍노도 돌파력 강화"}
+};
+
 const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-const metaHawkRandomAttributesMap = new Proxy({}, { get: () => defaultHawkAttr });
-const metaHawkRecommendationMap = new Proxy({}, { get: () => ({name:"범용 전투매", skill:"기본 최적화"}) });
+const metaHawkRandomAttributesMap = new Proxy({
+    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_wonso_jangnyeong_jwaja":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wei_jojo_sima_hahou":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu_2":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "qun_jwaja_jangnyeong_ugil_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wu_songwon_yukhang_nosuk_3":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wei_sima_jojo_gahu_3":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_wonso_dongtak_yeopo_4":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
+    "shu_macho_weiyeon_yubi_4":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wei_jojo_sima_hahou_4":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_jwaja_jangnyeong_ugil_5":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wei_sima_jojo_gahu_5":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu_5":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
+}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+
+const systemGuideInsights = {
+    "wu_sogyo_nosuk_yukson":"💡 [1위 1군] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
+    "qun_wonso_jangnyeong_jwaja":"💡 [1위 2군] 좌자 화겁생기/유좌유용 회피 장벽 뒤 원소 사소도/강유겸제 피감과 장녕 양의화생/수상개화 폭격 방패.",
+    "shu_macho_weiyeon_xushu":"💡 [1위 3군] 서서 문치무공/여자동포 스탯 폭증 버프 뒤 위연 이퇴위진/횡징폭렴 피감과 마초 반객위주 확산 연격 창병.",
+    "qun_wonso_dongtak_yeopo_4":"💡 [4위 1군] 원소 사소도 통솔 버프 및 동탁 견진연봉/위위구조 피감 뒤 여포 용왕직전/만부막적 1턴 분쇄 기병.",
+    "shu_macho_weiyeon_yubi_4":"💡 [4위 2군] 유비 인정/혼수모어 제어 힐 및 강유겸제 피감 속에서 마초 출수법/용맹무쌍/질풍노도 확산 창병.",
+    "qun_jwaja_jangnyeong_ugil_5":"💡 [5위 1군] 우길 금창신 신산 버프를 받는 장녕 수상개화/양의화생 폭딜 및 좌자 안영찰채/유좌유용 방패/궁병."
+};
 
 const defaultPresetDecks = analyzedMetaArchetypes.slice(0,5).map((d, i) => ({ ...d, title: `${i + 1}군`, unitType: "", officers: d.officers.map(o => ({ name: o.name, chosenTactics: o.chosenTactics.length === 3 ? o.chosenTactics.slice(1, 3) : [...o.chosenTactics] })) }));
 
@@ -607,7 +637,6 @@ window.autoFixDeck = oIdx => {
         const fixedTacs = idealTacs.map(tac => {
             const cTac = cStr(tac);
             if (higherTacs.has(cTac)) {
-                // 빈칸 방지: 미보유 전법이라도 찾아서 꽂아넣음
                 const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set());
                 if (alt) { higherTacs.add(cStr(alt)); return alt; }
                 return "";
@@ -634,7 +663,6 @@ function renderDeckBuilder() {
     try {
         container.style.display = 'block'; container.innerHTML = '';
         
-        // 데이터 구조 호환성 파싱 무결성 확보 (Object or Array)
         const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
         const hMap = {}, tMap = {};
         const heroesList = Array.isArray(saved.heroes) ? saved.heroes : Object.values(saved.heroes || {});
@@ -657,7 +685,6 @@ function renderDeckBuilder() {
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT = cStr(t);
-                    // 전법 보유/미보유 직관적 CSS 클래스 바인딩 로직
                     const isOwn = cT ? !!tMap[cT]?.isOwned : false;
                     const cssClass = cT ? (isOwn ? 'owned' : 'missing') : 'missing';
                     
