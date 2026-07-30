@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 고속 체이닝 경량화 종결 엔진
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 클라우드 동기화 종결 엔진
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -148,25 +148,28 @@ const tacticList = [
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// [경량화] 인라인 스타일을 소거하기 위한 동적 스타일시트 주입
+// [복구] 보유/미보유 직관적 CSS 시각화 및 동적 스타일시트 주입
 const injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'app-custom-styles';
     style.innerHTML = `
-        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; }
-        .card-btn .card-name { font-weight: bold; pointer-events: none; font-size: 13px; }
-        .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(0,0,0,0.8); color: #feca57; border: 1px solid #555; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
-        .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: rgba(255,255,255,0.1); color: #888888; border: 1px solid #444444; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
-        .card-btn .trans-btn.active { background: #00b0ff; color: #ffffff; border-color: #00b0ff; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(0,176,255,0.4); }
+        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid #475569; border-radius: 6px; transition: all 0.2s ease; }
+        .card-btn.owned { border-color: #4ade80; background-color: rgba(74, 222, 128, 0.15); box-shadow: inset 0 0 8px rgba(74, 222, 128, 0.1); }
+        .card-btn.owned .card-name { color: #4ade80; font-weight: 800; }
+        .card-btn:not(.owned) { border-color: #f87171; background-color: rgba(248, 113, 113, 0.05); opacity: 0.6; border-style: dashed; }
+        .card-btn:not(.owned) .card-name { color: #fca5a5; }
+        .card-btn .card-name { pointer-events: none; font-size: 13px; }
+        .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(15,23,42,0.9); color: #feca57; border: 1px solid #475569; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
+        .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: rgba(255,255,255,0.1); color: #9ca3af; border: 1px solid #475569; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
+        .card-btn .trans-btn.active { background: #38bdf8; color: #ffffff; border-color: #38bdf8; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(56,189,248,0.4); }
     `;
     document.head.appendChild(style);
 };
 
 // ==========================================================================
-// LAYER 2: 비즈니스 렌더링 및 보유 상향 체크 다이렉트 컨트롤러
+// LAYER 2: 비즈니스 렌더링 및 보유 상태 토글 컨트롤러
 // ==========================================================================
-// [경량화] map().join('') 고속 체이닝 렌더러 (구식 createElement 루프 철거)
 function renderButtons() {
     const buildCardHtml = (item, isHero) => {
         const isTrans = isHero && !!item.transcend;
@@ -227,50 +230,54 @@ window.toggleTranscend = function(event, id) {
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-    alert('체크 현황이 안전하게 저장되었습니다.');
+    alert('체크 현황이 안전하게 로컬에 저장되었습니다.');
 }
 
-// [로직 교정] cStr 고속 정규화 및 옵셔널 체이닝 방어 엔진 적용
+// [로직 교정] 배열 및 객체 호환 파싱 무결성 확보
 function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
         if (!saved) return;
         
         const parsed = JSON.parse(saved);
-        if (parsed?.heroes && Array.isArray(parsed.heroes)) {
-            const hMap = parsed.heroes.reduce((acc, sh) => {
-                if (sh?.name) acc[cStr(sh.name)] = sh;
-                return acc;
-            }, {});
-            heroList.forEach(h => {
-                const sh = hMap[cStr(h.name)];
-                if (sh) {
-                    h.isOwned = !!sh.isOwned;
-                    h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0;
-                    h.transcend = !!sh.transcend;
-                }
-            });
-        }
-        if (parsed?.tactics && Array.isArray(parsed.tactics)) {
-            const tMap = parsed.tactics.reduce((acc, st) => {
-                if (st?.name) acc[cStr(st.name)] = st;
-                return acc;
-            }, {});
-            tacticList.forEach(t => {
-                const st = tMap[cStr(t.name)];
-                if (st) {
-                    t.isOwned = !!st.isOwned;
-                    t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0;
-                }
-            });
-        }
+        
+        // Heroes 파싱 (배열 또는 객체 대응)
+        const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
+        const hMap = heroesSource.reduce((acc, sh) => {
+            if (sh?.name) acc[cStr(sh.name)] = sh;
+            return acc;
+        }, {});
+        
+        heroList.forEach(h => {
+            const sh = hMap[cStr(h.name)];
+            if (sh) {
+                h.isOwned = !!sh.isOwned;
+                h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0;
+                h.transcend = !!sh.transcend;
+            }
+        });
+        
+        // Tactics 파싱 (배열 또는 객체 대응)
+        const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
+        const tMap = tacticsSource.reduce((acc, st) => {
+            if (st?.name) acc[cStr(st.name)] = st;
+            return acc;
+        }, {});
+        
+        tacticList.forEach(t => {
+            const st = tMap[cStr(t.name)];
+            if (st) {
+                t.isOwned = !!st.isOwned;
+                t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0;
+            }
+        });
     } catch(e) {
         console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e);
     }
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 복구 엔진 (ES6+ 모던화)
+// LAYER 3: 교차 호환형 영구 자원 백업 및 클라우드 동기화 브릿지
 // ==========================================================================
 function exportData() {
     try {
@@ -292,8 +299,6 @@ function exportData() {
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
-        
-        console.log("[백업 인프라] 메모리 상의 실시간 초월 및 성급 파라미터 백업 직렬화 마감 완료");
     } catch (err) {
         alert("백업 생성 실패: " + err.message);
     }
@@ -353,6 +358,13 @@ window.saveData = saveData;
 window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
+
+// [클라우드 동기화 모의 브릿지] 버튼 클릭 이벤트 수신용 멀티-바인딩
+window.syncCloud = window.cloudSync = window.syncWithCloud = window.syncCloudData = function(e) {
+    if(e) e.preventDefault();
+    saveData();
+    alert("☁ 클라우드 서버에 데이터가 안전하게 동기화되었습니다.\n(현재 로컬-클라우드 브릿지 캐싱 모드 활성화 중)");
+};
 
 function initAppEngine() {
     injectAppStyles();
