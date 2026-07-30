@@ -459,7 +459,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (팝업 토글 닫기 기능 포함)
+// LAYER 4: UI 파이프라인 및 모달 컨트롤
 // ==========================================================================
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
@@ -508,19 +508,7 @@ const injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
-    style.innerHTML = `
-        .deck-card select { background-color:#1e293b; color:#f8fafc; border:1px solid #475569; border-radius:4px; padding:6px 24px 6px 10px; font-size:13px; width:100%; box-sizing:border-box; font-family:inherit; }
-        .hawk-recommend-box { margin-top:10px; padding:12px; background-color:#1e293b; border-left:4px solid #3b82f6; border-radius:6px; font-size:13px; color:#e2e8f0; line-height:1.5; }
-        .equipment-box { margin-top:6px; padding:6px; border:1px solid #334155; border-radius:4px; background-color:#0f172a; font-size:11px; color:#cbd5e1; }
-        .integrated-stats-box { margin-top:6px; padding:8px; border-radius:4px; background:#0f172a; border:1px solid #475569; font-size:11px; }
-        .unit-badge { display:inline-block; background-color:rgba(245,158,11,0.15); color:#fbbf24; font-size:10px; padding:3px 6px; border-radius:4px; margin:4px 0; }
-        .feedback-item.success { color:#4ade80; } .feedback-item.warning { color:#facc15; } .feedback-item.info { color:#60a5fa; }
-        #tactic-popup-modal { display:none; position:absolute; z-index:9999; background:rgba(15,23,42,0.98); border:1px solid #a855f7; padding:12px; border-radius:6px; width:280px; color:#f8fafc; font-size:12px; }
-        .tactic-row { cursor:pointer; padding:6px 12px; border-radius:4px; margin-bottom:4px; transition: all 0.2s; }
-        .tactic-row select { width:80%; margin:0 auto; display:block; }
-        .tactic-row.owned select { border: 1px solid #4ade80; color: #4ade80; background-color: rgba(74, 222, 128, 0.05); }
-        .tactic-row.missing select { border: 1px dashed #f87171; color: #fca5a5; background-color: rgba(248, 113, 113, 0.05); }
-    `;
+    style.innerHTML = `.deck-card select{background-color:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:4px;padding:6px 24px 6px 10px;font-size:13px;width:100%;box-sizing:border-box;font-family:inherit}.hawk-recommend-box{margin-top:10px;padding:12px;background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:6px;font-size:13px;color:#e2e8f0;line-height:1.5}.equipment-box{margin-top:6px;padding:6px;border:1px solid #334155;border-radius:4px;background-color:#0f172a;font-size:11px;color:#cbd5e1}.integrated-stats-box{margin-top:6px;padding:8px;border-radius:4px;background:#0f172a;border:1px solid #475569;font-size:11px}.unit-badge{display:inline-block;background-color:rgba(245,158,11,0.15);color:#fbbf24;font-size:10px;padding:3px 6px;border-radius:4px;margin:4px 0}.feedback-item.success{color:#4ade80}.feedback-item.warning{color:#facc15}.feedback-item.info{color:#60a5fa}#tactic-popup-modal{display:none;position:absolute;z-index:9999;background:rgba(15,23,42,0.98);border:1px solid #a855f7;padding:12px;border-radius:6px;width:280px;color:#f8fafc;font-size:12px}.tactic-row{cursor:pointer;padding:6px 12px;border-radius:4px;margin-bottom:4px;transition: all 0.2s;}.tactic-row select{width:80%;margin:0 auto;display:block}.tactic-row.owned select{border: 1px solid #4ade80; color: #4ade80; background-color: rgba(74, 222, 128, 0.05);}.tactic-row.missing select{border: 1px dashed #f87171; color: #fca5a5; background-color: rgba(248, 113, 113, 0.05);}`;
     document.head.appendChild(style);
 };
 
