@@ -1,11 +1,7 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 구글 계정 동기화 종결 엔진
-console.log("[시스템 분석] app.js 구글 계정 동기화 버튼 추적 및 강제 결선 엔진 기동");
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 및 자동 백업 엔진
+console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
 
-// ==========================================================================
-// LAYER 1: 마스터 정적 인벤토리 데이터 구역
-// ==========================================================================
 const heroList = [
-    // 위나라 (13명)
     { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0, transcend: false },
@@ -20,7 +16,6 @@ const heroList = [
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
     
-    // 촉나라 (14명)
     { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0, transcend: false },
@@ -36,7 +31,6 @@ const heroList = [
     { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 0, transcend: false },
     
-    // 오나라 (15명)
     { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 0, transcend: false },
     { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 0, transcend: false },
     { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 0, transcend: false },
@@ -53,7 +47,6 @@ const heroList = [
     { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0, transcend: false },
     { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0, transcend: false },
     
-    // 군진영 (13명)
     { id: 'h_gongsonchan', name: '공손찬', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0, transcend: false },
@@ -146,10 +139,8 @@ const tacticList = [
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
 ];
 
-// [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// 보유/미보유 직관적 CSS 시각화 및 동적 스타일시트 주입
 const injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
@@ -168,9 +159,6 @@ const injectAppStyles = () => {
     document.head.appendChild(style);
 };
 
-// ==========================================================================
-// LAYER 2: 비즈니스 렌더링 및 보유 상태 토글 컨트롤러
-// ==========================================================================
 function renderButtons() {
     const buildCardHtml = (item, isHero) => {
         const isTrans = isHero && !!item.transcend;
@@ -207,6 +195,7 @@ function toggleState(id, type) {
     if (target) {
         target.isOwned = !target.isOwned;
         renderButtons();
+        window.saveDataToLocalStorage();
     }
 }
 
@@ -216,6 +205,7 @@ window.updateStar = function(event, id, type, value) {
     const target = list.find(x => x.id === id);
     if (target) {
         target.star = parseInt(value, 10);
+        window.saveDataToLocalStorage();
     }
 };
 
@@ -225,15 +215,15 @@ window.toggleTranscend = function(event, id) {
     if (target) {
         target.transcend = !target.transcend;
         renderButtons();
+        window.saveDataToLocalStorage();
     }
 };
 
-function saveData() {
+window.saveDataToLocalStorage = function() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-}
+};
 
-// 배열 및 객체 호환 파싱 무결성 확보
 function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
@@ -274,127 +264,10 @@ function loadSavedData() {
     }
 }
 
-// ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 구글 계정 동기화 강제 바인딩 엔진
-// ==========================================================================
-function exportData() {
-    try {
-        const liveHobbyData = { heroes: heroList, tactics: tacticList };
-        const deckData = localStorage.getItem('samguk_deck_text');
-        
-        const backupObject = {
-            samguk_hobby_data: liveHobbyData,
-            samguk_deck_text: deckData ? JSON.parse(deckData) : null
-        };
-        
-        const jsonString = JSON.stringify(backupObject, null, 2);
-        const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
-        
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.href = URL.createObjectURL(blob);
-        downloadAnchor.download = "samguk_wangjeon_database_backup.json";
-        
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        document.body.removeChild(downloadAnchor);
-    } catch (err) {
-        alert("백업 생성 실패: " + err.message);
-    }
-}
-
-function triggerImport() {
-    const fileInput = document.getElementById('import-file-input');
-    if (fileInput) fileInput.click();
-}
-
-function importData(input) {
-    const file = input.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedDatabase = JSON.parse(e.target.result);
-            
-            if (!importedDatabase.samguk_hobby_data && !importedDatabase.samguk_deck_text) {
-                alert("삼국지 왕전의 정식 백업 스냅샷 파일이 아닙니다.");
-                return;
-            }
-            
-            if (importedDatabase?.samguk_hobby_data?.heroes) {
-                importedDatabase.samguk_hobby_data.heroes.forEach(h => {
-                    if (h && h.transcend === undefined) h.transcend = false;
-                    if (h && h.star === undefined) h.star = 0;
-                });
-            }
-            if (importedDatabase?.samguk_hobby_data?.tactics) {
-                importedDatabase.samguk_hobby_data.tactics.forEach(t => {
-                    if (t && t.star === undefined) t.star = 0;
-                });
-            }
-            
-            if (importedDatabase.samguk_hobby_data) {
-                localStorage.setItem('samguk_hobby_data', JSON.stringify(importedDatabase.samguk_hobby_data));
-            }
-            if (importedDatabase.samguk_deck_text) {
-                localStorage.setItem('samguk_deck_text', JSON.stringify(importedDatabase.samguk_deck_text));
-            }
-            
-            alert("보유 및 초월 데이터 마이그레이션 완료. 인벤토리 동기화를 위해 화면을 리로드합니다.");
-            location.reload();
-            
-        } catch (err) {
-            alert("JSON 구조 파싱 에러: 파손된 아카이브 파일입니다.");
-        }
-    };
-    reader.readAsText(file, "utf-8");
-}
-
-// [강제 바인딩] HTML 구조 변경 없이 '구글 계정 동기화'로 텍스트 치환 및 이벤트 결선
-function bindGoogleSyncButton() {
-    const buttons = document.querySelectorAll('button, a, div');
-    buttons.forEach(btn => {
-        if (btn.innerText && (btn.innerText.includes('클라우드 동기화') || btn.innerText.includes('구글 계정 동기화'))) {
-            // 버튼 텍스트 강제 교체
-            btn.innerText = btn.innerText.replace('클라우드 동기화', '구글 계정 동기화');
-            btn.removeAttribute('onclick');
-            
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // 로컬 데이터 유무 검증 로직 (스크린샷 피드백 반영)
-                const hobbyData = localStorage.getItem('samguk_hobby_data');
-                const deckData = localStorage.getItem('samguk_deck_text');
-                
-                if (!hobbyData && !deckData) {
-                    alert("구글 계정에 동기화할 로컬 데이터가 없습니다. 먼저 '로컬 기록 저장'을 진행해 주세요.");
-                    return; // 데이터가 없으면 통신 차단
-                }
-
-                saveData(); // 데이터가 있으면 최신 상태 캡처 후 동기화 진행
-                alert("☁ 구글 계정에 데이터가 안전하게 동기화되었습니다.\\n(현재 구글 Firebase 연동 모드 활성화 중)");
-            });
-        }
-    });
-    console.log("[시스템] 구글 계정 동기화 버튼 강제 추적 및 이벤트 바인딩 완료");
-}
-
-window.toggleSortMode = () => {};
-window.toggleState = toggleState;
-window.saveData = function() {
-    const data = { heroes: heroList, tactics: tacticList };
-    localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-    alert("로컬 기록이 기기에 안전하게 저장되었습니다.");
-};
-window.exportData = exportData;
-window.triggerImport = triggerImport;
-window.importData = importData;
-
 function initAppEngine() {
     injectAppStyles();
     loadSavedData();
     renderButtons();
-    bindGoogleSyncButton();
 }
 
 if (document.readyState === 'loading') {
