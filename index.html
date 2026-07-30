@@ -29,12 +29,12 @@
 
     <script src="app.js"></script>
 
-    <!-- Firebase Cloud Firestore 통신 모듈 (발급 키 적용 완료) -->
+    <!-- Firebase Auth 및 Firestore 통합 구글 동기화 모듈 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-        // samguk-checker 실제 발급 파이어베이스 설정값 바인딩
         const firebaseConfig = {
             apiKey: "AIzaSyBMJ96D8OBfivUXFs-jJhjt7DxlPTBrThs",
             authDomain: "samguk-checker.firebaseapp.com",
@@ -48,6 +48,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
         window.handleGoogleSync = async () => {
             if (window.saveDataToLocalStorage) window.saveDataToLocalStorage();
@@ -56,18 +58,31 @@
             const deckText = localStorage.getItem('samguk_deck_text');
 
             if (!hobbyData && !deckText) {
-                throw new Error("구글 계정에 동기화할 로컬 데이터가 없습니다. 먼저 장수나 전법을 체크해 주세요.");
+                throw new Error("동기화할 로컬 데이터가 없습니다. 먼저 장수나 전법을 체크해 주세요.");
             }
 
+            // 1. 로그인 세션 확인 및 팝업 유도
+            let user = auth.currentUser;
+            if (!user) {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    user = result.user;
+                } catch (error) {
+                    throw new Error("구글 로그인이 취소되었거나 팝업이 차단되었습니다. 팝업 차단을 해제해 주세요.");
+                }
+            }
+
+            // 2. 유저별 고유 식별자(UID)를 기반으로 데이터 구조화
             const syncData = {
                 hobbyData: hobbyData ? JSON.parse(hobbyData) : null,
                 deckText: deckText ? JSON.parse(deckText) : null,
-                lastUpdated: new Date().toISOString()
+                lastUpdated: new Date().toISOString(),
+                userEmail: user.email // 추후 관리를 위한 메일 주소 동기화
             };
 
-            // Firestore users 컬렉션 master_account 문서 저장
-            await setDoc(doc(db, "users", "master_account"), syncData);
-            alert("☁️ 구글 계정 동기화 완료! 데이터가 안전하게 서버에 저장되었습니다.");
+            // 3. 공용 폴더가 아닌, 유저 고유의 격리된 폴더(user.uid)에 저장
+            await setDoc(doc(db, "users", user.uid), syncData);
+            alert(`☁️ [${user.email}] 계정에 동기화 완료!\n본인의 데이터가 외부와 완벽히 격리되어 저장되었습니다.`);
         };
     </script>
 </body>
