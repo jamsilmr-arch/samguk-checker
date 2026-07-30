@@ -21,20 +21,22 @@
     <main class="deck-main-container" id="deck-container" style="margin-top: 15px;"></main>
 
     <script src="deck_core.js"></script>
-    
-    <!-- Firebase Cloud Firestore 통신 모듈 (deck.html 용) -->
+
+    <!-- Firebase Cloud Firestore 통신 모듈 (발급 키 적용 완료) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // [🚨필수 조치] 아래 firebaseConfig의 임시 텍스트를 반드시 본인의 진짜 파이어베이스 설정값으로 교체하세요!
+        // samguk-checker 실제 발급 파이어베이스 설정값 바인딩
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "your-project-id.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project-id.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
+            apiKey: "AIzaSyBMJ96D8OBfivUXFs-jJhjt7DxlPTBrThs",
+            authDomain: "samguk-checker.firebaseapp.com",
+            databaseURL: "https://samguk-checker-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "samguk-checker",
+            storageBucket: "samguk-checker.firebasestorage.app",
+            messagingSenderId: "653002634547",
+            appId: "1:653002634547:web:242c1bbb4c169b3fa6fa46",
+            measurementId: "G-6TVYWWVSMK"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -54,6 +56,7 @@
                 lastUpdated: new Date().toISOString()
             };
 
+            // Firestore users 컬렉션 master_account 문서 저장
             await setDoc(doc(db, "users", "master_account"), syncData);
             alert("☁️ 구글 계정 동기화 완료! 덱 구성 데이터가 안전하게 서버에 저장되었습니다.");
         };
