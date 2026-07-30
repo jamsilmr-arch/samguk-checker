@@ -1,4 +1,4 @@
-// [시스템 분석] navbar.js - 구글 계정 동기화, 글로벌 네비게이션, 다크/라이트 테마 제어 엔진
+// [시스템 분석] navbar.js - 구글 계정 동기화, 글로벌 네비게이션, 다크/라이트 테마 제어 및 배색 엔진
 (function() {
     // 1. 테마 초기화 로직 (화면 깜빡임 방지를 위해 최우선 실행)
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
@@ -7,7 +7,7 @@
     function injectGlobalNavbarEngine() {
         if (document.getElementById('dynamic-global-nav-bar')) return;
 
-        // 2. 글로벌 동적 스타일시트 주입 (테마 변수 + 점선 강제 제거 + 버튼 UI)
+        // 2. 글로벌 동적 스타일시트 주입 (헤더/네비게이션 배색 변수 완벽 분리)
         if (!document.getElementById('dynamic-navbar-styles')) {
             document.head.insertAdjacentHTML('beforeend', `
                 <style id="dynamic-navbar-styles">
@@ -15,53 +15,75 @@
                     :root {
                         --bg-main: #111827;
                         --bg-panel: #1f2937;
+                        --bg-header: #151515; /* 다크 모드 헤더 배경 */
+                        --bg-nav: #2b1a1a;    /* 다크 모드 네비 배경 */
                         --text-main: #f3f4f6;
+                        --text-muted: #9ca3af;
                         --border-main: #374151;
+                        --border-accent: #cd9b33;
                         --unowned-bg: transparent;
                         --unowned-border: #475569;
+                        --nav-text: #bbbbbb;
+                        --nav-hover: #ffffff;
+                        --nav-active-bg: #1c1111;
+                        --nav-active-text: #ffcc00;
                     }
                     /* --- CSS 테마 변수 (라이트 모드) --- */
                     [data-theme="light"] {
-                        --bg-main: #f8fafc;
+                        --bg-main: #f1f5f9;
                         --bg-panel: #ffffff;
-                        --text-main: #111827;
+                        --bg-header: #ffffff; /* 라이트 모드 헤더 배경 */
+                        --bg-nav: #f8fafc;    /* 라이트 모드 네비 배경 */
+                        --text-main: #1e293b;
+                        --text-muted: #64748b;
                         --border-main: #cbd5e1;
-                        --unowned-bg: #f1f5f9;
+                        --border-accent: #d97706;
+                        --unowned-bg: #f8fafc;
                         --unowned-border: #94a3b8;
+                        --nav-text: #475569;
+                        --nav-hover: #0f172a;
+                        --nav-active-bg: #ffffff;
+                        --nav-active-text: #d97706;
                     }
                     
-                    /* 글로벌 색상 동기화 (부드러운 전환 효과 포함) */
+                    /* 글로벌 색상 동기화 (전체 배경 및 패널) */
                     body { background-color: var(--bg-main) !important; color: var(--text-main) !important; transition: background-color 0.3s, color 0.3s; }
-                    .section-box, .deck-card, .guide-content-area, aside { background-color: var(--bg-panel) !important; border-color: var(--border-main) !important; transition: background-color 0.3s; }
-                    .author-text { color: var(--text-main) !important; opacity: 0.7; }
-                    h1, h2, h3 { color: var(--text-main) !important; }
+                    .section-box, .deck-card, .guide-content-area, aside { background-color: var(--bg-panel) !important; border-color: var(--border-main) !important; transition: background-color 0.3s, border-color 0.3s; }
                     
-                    /* 🚨 [핵심 가독성 개선] 기존 인라인 점선(dashed)을 찾아 강제 실선(solid) 및 투명도 처리 */
+                    /* 🚨 상단 헤더 및 문구 배색 동적 오버라이드 */
+                    .top-title-header { background-color: var(--bg-header) !important; border-bottom: 1px solid var(--border-main) !important; transition: background-color 0.3s; }
+                    .top-title-header h1 { color: var(--text-main) !important; transition: color 0.3s; }
+                    .author-text { color: var(--text-muted) !important; transition: color 0.3s; }
+                    h1, h2, h3, .group-title { color: var(--text-main) !important; transition: color 0.3s; }
+                    
+                    /* 네비게이션 바 배색 연동 */
+                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; overflow: hidden; position: relative; z-index: 9999; transition: background-color 0.3s, border-color 0.3s; }
+                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
+                    .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; transition: color 0.15s ease, background-color 0.15s ease; }
+                    .nav-menu-item:hover a { color: var(--nav-hover) !important; }
+                    .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; margin-bottom: -2px; transition: background-color 0.3s, border-color 0.3s; }
+                    .nav-menu-item.active a { color: var(--nav-active-text) !important; transition: color 0.3s; }
+                    
+                    /* 점선 스타일 실선 오버라이드 및 미보유 가독성 제어 */
                     [style*="dashed"], .grid-item:not(.owned), .tactic-btn:not(.owned) {
                         border-style: solid !important;
                         border-color: var(--unowned-border) !important;
                         background-color: var(--unowned-bg) !important;
-                        opacity: 0.4 !important; /* 미보유 항목 가독성을 위한 불투명도 조절 */
+                        opacity: 0.45 !important;
                         color: var(--text-main) !important;
-                        transition: opacity 0.2s, background-color 0.3s;
+                        transition: opacity 0.2s, background-color 0.3s, border-color 0.3s, color 0.3s;
                     }
-                    /* 보유 항목 명확화 (오버라이드 방어) */
+                    /* 보유 항목 명확화 */
                     [style*="solid #cd9b33"], [style*="solid #4ade80"], .owned {
                         opacity: 1 !important;
                         border-style: solid !important;
                     }
 
-                    /* 네비게이션 바 스타일 */
-                    .global-nav-bar { background-color: #2b1a1a; border-bottom: 2px solid #cd9b33; display: flex; justify-content: flex-end; padding: 0 30px; overflow: hidden; position: relative; z-index: 9999; }
-                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
-                    .nav-menu-item a { display: block; color: #bbbbbb; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; transition: color 0.15s ease; }
-                    .nav-menu-item:hover a { color: #ffffff; }
-                    .nav-menu-item.active { background-color: #1c1111; border-bottom: 3px solid #cd9b33; margin-bottom: -2px; }
-                    .nav-menu-item.active a { color: #ffcc00; }
+                    /* 동기화 버튼 스타일 */
                     .header-sync-btn { background: #f97316; color: #ffffff !important; border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; transition: opacity 0.15s ease; margin-left: auto; align-self: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
                     .header-sync-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
-                    /* 🌙☀️ 우측 하단 플로팅 테마 변경 버튼 스타일 */
+                    /* 우측 하단 플로팅 테마 변경 버튼 */
                     #global-theme-toggle {
                         position: fixed;
                         bottom: 25px;
@@ -114,13 +136,14 @@
         if (standardTarget) {
             standardTarget.insertAdjacentHTML('afterend', navHtml);
             if (!document.getElementById('global-google-sync-btn')) {
-                standardTarget.insertAdjacentHTML('beforeend', `<button id="global-google-sync-btn" class="action-btn header-sync-btn" onclick="executeGoogleSync(event)">☁️ 구글 계정 동기화</button>`);
+                // 초기 렌더링 시 버튼 텍스트 설정 (firebase_core.js가 상태를 덮어씀)
+                standardTarget.insertAdjacentHTML('beforeend', `<button id="global-google-sync-btn" class="action-btn header-sync-btn" onclick="executeGoogleSync(event)">☁️ 구글 계정 동기화 (OFF)</button>`);
             }
         } else {
             document.body.insertAdjacentHTML('afterbegin', navHtml);
         }
 
-        // 4. 우측 하단 테마 토글 버튼 주입 및 이벤트 바인딩
+        // 4. 테마 토글 버튼 주입 및 이벤트 바인딩
         if (!document.getElementById('global-theme-toggle')) {
             document.body.insertAdjacentHTML('beforeend', `<button id="global-theme-toggle" title="테마 변경">${savedTheme === 'light' ? '🌙' : '☀️'}</button>`);
             
@@ -139,7 +162,7 @@
         }
     }
 
-    // 구글 동기화 실행 우회 함수 (타임아웃 로직 제거판 유지)
+    // 구글 동기화 실행 우회 함수
     window.executeGoogleSync = async function(e) {
         if (e) e.preventDefault();
         const btn = document.getElementById('global-google-sync-btn');
@@ -160,9 +183,12 @@
             alert("❌ 동기화 실패: " + error.message);
         } finally {
             if(btn) {
-                btn.innerText = originalText;
                 btn.style.opacity = "1";
                 btn.style.pointerEvents = "auto";
+                // 성공 시 firebase_core.js 내부 리스너가 UI를 갱신하므로, 예외 상황에서만 복구
+                if(!btn.innerText.includes("ON")) {
+                     btn.innerText = originalText;
+                }
             }
         }
     };
