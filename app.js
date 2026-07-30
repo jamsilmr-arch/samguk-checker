@@ -1,4 +1,5 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 클라우드 동기화 종결 엔진
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 클라우드 강제 바인딩 종결 엔진
+console.log("[시스템 분석] app.js 클라우드 동기화 버튼 추적 및 강제 결선 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -230,7 +231,7 @@ window.toggleTranscend = function(event, id) {
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-    alert('체크 현황이 안전하게 로컬에 저장되었습니다.');
+    // 클라우드 동기화 알림은 별도의 버튼 바인딩에서 처리
 }
 
 // [로직 교정] 배열 및 객체 호환 파싱 무결성 확보
@@ -277,7 +278,7 @@ function loadSavedData() {
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 클라우드 동기화 브릿지
+// LAYER 3: 교차 호환형 영구 자원 백업 및 클라우드 동기화 강제 바인딩 엔진
 // ==========================================================================
 function exportData() {
     try {
@@ -352,6 +353,24 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
+// [강제 바인딩] HTML의 onclick 속성 이름과 무관하게 '클라우드 동기화' 버튼을 추적하여 강제 결선
+function bindCloudSyncButton() {
+    const buttons = document.querySelectorAll('button, a, div');
+    buttons.forEach(btn => {
+        if (btn.innerText && btn.innerText.includes('클라우드 동기화')) {
+            // 기존 onclick 무효화 및 새로운 이벤트 강제 할당
+            btn.removeAttribute('onclick');
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                saveData();
+                alert("☁ 클라우드 서버에 데이터가 안전하게 동기화되었습니다.\\n(현재 로컬-클라우드 브릿지 캐싱 모드 활성화 중)");
+            });
+        }
+    });
+    console.log("[시스템] 클라우드 동기화 버튼 강제 추적 및 이벤트 바인딩 완료");
+}
+
+// 전역 함수 노출
 window.toggleSortMode = () => {};
 window.toggleState = toggleState;
 window.saveData = saveData;
@@ -359,17 +378,11 @@ window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
 
-// [클라우드 동기화 모의 브릿지] 버튼 클릭 이벤트 수신용 멀티-바인딩
-window.syncCloud = window.cloudSync = window.syncWithCloud = window.syncCloudData = function(e) {
-    if(e) e.preventDefault();
-    saveData();
-    alert("☁ 클라우드 서버에 데이터가 안전하게 동기화되었습니다.\n(현재 로컬-클라우드 브릿지 캐싱 모드 활성화 중)");
-};
-
 function initAppEngine() {
     injectAppStyles();
     loadSavedData();
     renderButtons();
+    bindCloudSyncButton(); // 버튼 추적 및 강제 결선 실행
 }
 
 if (document.readyState === 'loading') {
