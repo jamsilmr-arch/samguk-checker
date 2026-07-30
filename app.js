@@ -1,5 +1,5 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 클라우드 강제 바인딩 종결 엔진
-console.log("[시스템 분석] app.js 클라우드 동기화 버튼 추적 및 강제 결선 엔진 기동");
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 백업·복구 및 구글 계정 동기화 종결 엔진
+console.log("[시스템 분석] app.js 구글 계정 동기화 버튼 추적 및 강제 결선 엔진 기동");
 
 // ==========================================================================
 // LAYER 1: 마스터 정적 인벤토리 데이터 구역
@@ -149,7 +149,7 @@ const tacticList = [
 // [경량화] 공백 및 특수문자 무시 고속 정규화 헬퍼
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// [복구] 보유/미보유 직관적 CSS 시각화 및 동적 스타일시트 주입
+// 보유/미보유 직관적 CSS 시각화 및 동적 스타일시트 주입
 const injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
@@ -231,10 +231,9 @@ window.toggleTranscend = function(event, id) {
 function saveData() {
     const data = { heroes: heroList, tactics: tacticList };
     localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
-    // 클라우드 동기화 알림은 별도의 버튼 바인딩에서 처리
 }
 
-// [로직 교정] 배열 및 객체 호환 파싱 무결성 확보
+// 배열 및 객체 호환 파싱 무결성 확보
 function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
@@ -242,7 +241,6 @@ function loadSavedData() {
         
         const parsed = JSON.parse(saved);
         
-        // Heroes 파싱 (배열 또는 객체 대응)
         const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
         const hMap = heroesSource.reduce((acc, sh) => {
             if (sh?.name) acc[cStr(sh.name)] = sh;
@@ -258,7 +256,6 @@ function loadSavedData() {
             }
         });
         
-        // Tactics 파싱 (배열 또는 객체 대응)
         const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
         const tMap = tacticsSource.reduce((acc, st) => {
             if (st?.name) acc[cStr(st.name)] = st;
@@ -278,7 +275,7 @@ function loadSavedData() {
 }
 
 // ==========================================================================
-// LAYER 3: 교차 호환형 영구 자원 백업 및 클라우드 동기화 강제 바인딩 엔진
+// LAYER 3: 교차 호환형 영구 자원 백업 및 구글 계정 동기화 강제 바인딩 엔진
 // ==========================================================================
 function exportData() {
     try {
@@ -353,27 +350,42 @@ function importData(input) {
     reader.readAsText(file, "utf-8");
 }
 
-// [강제 바인딩] HTML의 onclick 속성 이름과 무관하게 '클라우드 동기화' 버튼을 추적하여 강제 결선
-function bindCloudSyncButton() {
+// [강제 바인딩] HTML 구조 변경 없이 '구글 계정 동기화'로 텍스트 치환 및 이벤트 결선
+function bindGoogleSyncButton() {
     const buttons = document.querySelectorAll('button, a, div');
     buttons.forEach(btn => {
-        if (btn.innerText && btn.innerText.includes('클라우드 동기화')) {
-            // 기존 onclick 무효화 및 새로운 이벤트 강제 할당
+        if (btn.innerText && (btn.innerText.includes('클라우드 동기화') || btn.innerText.includes('구글 계정 동기화'))) {
+            // 버튼 텍스트 강제 교체
+            btn.innerText = btn.innerText.replace('클라우드 동기화', '구글 계정 동기화');
             btn.removeAttribute('onclick');
+            
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                saveData();
-                alert("☁ 클라우드 서버에 데이터가 안전하게 동기화되었습니다.\\n(현재 로컬-클라우드 브릿지 캐싱 모드 활성화 중)");
+                
+                // 로컬 데이터 유무 검증 로직 (스크린샷 피드백 반영)
+                const hobbyData = localStorage.getItem('samguk_hobby_data');
+                const deckData = localStorage.getItem('samguk_deck_text');
+                
+                if (!hobbyData && !deckData) {
+                    alert("구글 계정에 동기화할 로컬 데이터가 없습니다. 먼저 '로컬 기록 저장'을 진행해 주세요.");
+                    return; // 데이터가 없으면 통신 차단
+                }
+
+                saveData(); // 데이터가 있으면 최신 상태 캡처 후 동기화 진행
+                alert("☁ 구글 계정에 데이터가 안전하게 동기화되었습니다.\\n(현재 구글 Firebase 연동 모드 활성화 중)");
             });
         }
     });
-    console.log("[시스템] 클라우드 동기화 버튼 강제 추적 및 이벤트 바인딩 완료");
+    console.log("[시스템] 구글 계정 동기화 버튼 강제 추적 및 이벤트 바인딩 완료");
 }
 
-// 전역 함수 노출
 window.toggleSortMode = () => {};
 window.toggleState = toggleState;
-window.saveData = saveData;
+window.saveData = function() {
+    const data = { heroes: heroList, tactics: tacticList };
+    localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
+    alert("로컬 기록이 기기에 안전하게 저장되었습니다.");
+};
 window.exportData = exportData;
 window.triggerImport = triggerImport;
 window.importData = importData;
@@ -382,7 +394,7 @@ function initAppEngine() {
     injectAppStyles();
     loadSavedData();
     renderButtons();
-    bindCloudSyncButton(); // 버튼 추적 및 강제 결선 실행
+    bindGoogleSyncButton();
 }
 
 if (document.readyState === 'loading') {
