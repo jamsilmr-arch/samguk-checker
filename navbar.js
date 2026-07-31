@@ -1,11 +1,13 @@
 // [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 가독성 100% 보장 엔진
 (function() {
+    // 1. 테마 초기화 로직
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     function injectGlobalNavbarEngine() {
         if (document.getElementById('dynamic-global-nav-bar')) return;
 
+        // 2. 글로벌 동적 스타일시트 주입 (화이트/다크 변수 완벽 매핑)
         if (!document.getElementById('dynamic-navbar-styles')) {
             document.head.insertAdjacentHTML('beforeend', `
                 <style id="dynamic-navbar-styles">
@@ -72,6 +74,7 @@
                         --success-bg: rgba(34, 197, 94, 0.1);
                     }
                     
+                    /* 글로벌 색상 동기화 */
                     body { background-color: var(--bg-main) !important; color: var(--text-main) !important; transition: background-color 0.3s, color 0.3s; }
                     .section-box, .guide-content-area, aside { background-color: var(--bg-panel) !important; border-color: var(--border-main) !important; transition: background-color 0.3s, border-color 0.3s; }
                     
@@ -84,18 +87,21 @@
                     .author-text { color: var(--text-muted) !important; }
                     h1, h2, h3, .group-title { color: var(--text-main) !important; }
                     
-                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; }
+                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; overflow: hidden; position: relative; z-index: 9999; }
                     .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
                     .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; }
                     .nav-menu-item:hover a { color: var(--nav-hover) !important; }
                     .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; margin-bottom: -2px; }
                     .nav-menu-item.active a { color: var(--nav-active-text) !important; }
                     
-                    [style*="dashed"], .grid-item:not(.owned), .tactic-btn:not(.owned) { border: 1px solid var(--unowned-border) !important; background-color: var(--unowned-bg) !important; color: var(--unowned-text) !important; opacity: 1 !important; }
+                    /* 미보유 점선 오버라이드 */
+                    [style*="dashed"], .grid-item:not(.owned), .tactic-btn:not(.owned) { border: 1px solid var(--unowned-border) !important; background-color: var(--unowned-bg) !important; color: var(--unowned-text) !important; opacity: 1 !important; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
                     [style*="solid #cd9b33"], [style*="solid #4ade80"], .owned { opacity: 1 !important; }
 
-                    .header-sync-btn { background: #f97316; color: #ffffff !important; border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: auto; align-self: center; }
+                    .header-sync-btn { background: #f97316; color: #ffffff !important; border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: auto; align-self: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+                    .header-sync-btn:hover { opacity: 0.85; transform: translateY(-1px); }
                     
+                    /* 우측 하단 플로팅 테마 변경 버튼 */
                     #global-theme-toggle { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-main); border: 2px solid var(--border-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: transform 0.2s; }
                     #global-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
                 </style>
@@ -125,6 +131,7 @@
         `;
 
         const standardTarget = document.querySelector('.top-title-header') || document.querySelector('header');
+        
         if (standardTarget) {
             standardTarget.insertAdjacentHTML('afterend', navHtml);
             if (!document.getElementById('global-google-sync-btn')) {
@@ -134,11 +141,14 @@
             document.body.insertAdjacentHTML('afterbegin', navHtml);
         }
 
+        // 테마 토글 버튼 주입
         if (!document.getElementById('global-theme-toggle')) {
             document.body.insertAdjacentHTML('beforeend', `<button id="global-theme-toggle" title="테마 변경">${savedTheme === 'light' ? '🌙' : '☀️'}</button>`);
+            
             document.getElementById('global-theme-toggle').addEventListener('click', function() {
                 const root = document.documentElement;
                 const newTheme = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                
                 root.setAttribute('data-theme', newTheme);
                 this.innerHTML = newTheme === 'light' ? '🌙' : '☀️';
                 localStorage.setItem('samguk_theme', newTheme);
@@ -149,24 +159,35 @@
     window.executeGoogleSync = async function(e) {
         if (e) e.preventDefault();
         const btn = document.getElementById('global-google-sync-btn');
-        if (!window.handleGoogleSync) return alert("⚠️ 구글 동기화 모듈 누락");
+        
+        if (!window.handleGoogleSync) {
+            alert("⚠️ 구글 동기화 모듈이 누락되었습니다. (firebase_core.js 호출 확인)");
+            return;
+        }
         
         const originalText = btn.innerText;
         btn.innerText = "⏳ 통신 중...";
         btn.style.opacity = "0.7";
         btn.style.pointerEvents = "none";
         
-        try { await window.handleGoogleSync(); } 
-        catch (error) { alert("❌ 동기화 실패: " + error.message); } 
-        finally {
+        try {
+            await window.handleGoogleSync();
+        } catch (error) {
+            alert("❌ 동기화 실패: " + error.message);
+        } finally {
             if(btn) {
                 btn.style.opacity = "1";
                 btn.style.pointerEvents = "auto";
-                if(!btn.innerText.includes("ON")) btn.innerText = originalText;
+                if(!btn.innerText.includes("ON")) {
+                     btn.innerText = originalText;
+                }
             }
         }
     };
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
-    else injectGlobalNavbarEngine();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
+    } else {
+        injectGlobalNavbarEngine();
+    }
 })();
