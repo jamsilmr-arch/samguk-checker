@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 및 자동 백업 엔진
+// [시스템 분석] app.js 인벤토리 연동 및 자동 백업 엔진 (신규 무장/전법 추가)
 console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
 
 const heroList = [
@@ -15,6 +15,7 @@ const heroList = [
     { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
+    { id: 'h_heojeo', name: '허저', group: 'wei', isOwned: false, star: 0, transcend: false },
     
     { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
@@ -88,6 +89,7 @@ const tacticList = [
     { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_budong', name: '부동여산', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bunseong', name: '분성지계', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bisa', name: '비사주석', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_samyeon', name: '사면초가', group: 'tactic', isOwned: false, star: 0 },
