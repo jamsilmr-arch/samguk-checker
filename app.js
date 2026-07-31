@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 및 자동 백업 엔진 (허저 추가)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (테마 변수 적용)
 console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
 
 const heroList = [
@@ -149,14 +149,13 @@ const injectAppStyles = () => {
     const style = document.createElement('style');
     style.id = 'app-custom-styles';
     style.innerHTML = `
-        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid #475569; border-radius: 6px; transition: all 0.2s ease; }
-        .card-btn.owned { border-color: #4ade80; background-color: rgba(74, 222, 128, 0.15); box-shadow: inset 0 0 8px rgba(74, 222, 128, 0.1); }
-        .card-btn.owned .card-name { color: #4ade80; font-weight: 800; }
-        .card-btn:not(.owned) { border-color: #f87171; background-color: rgba(248, 113, 113, 0.05); opacity: 0.6; border-style: dashed; }
-        .card-btn:not(.owned) .card-name { color: #fca5a5; }
+        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
+        .card-btn.owned { border-color: var(--success-text); background-color: var(--success-bg); box-shadow: inset 0 0 8px rgba(74, 222, 128, 0.1); }
+        .card-btn.owned .card-name { color: var(--text-main); font-weight: 800; }
+        .card-btn:not(.owned) { border-style: dashed; }
         .card-btn .card-name { pointer-events: none; font-size: 13px; }
-        .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: rgba(15,23,42,0.9); color: #feca57; border: 1px solid #475569; border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
-        .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: rgba(255,255,255,0.1); color: #9ca3af; border: 1px solid #475569; border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
+        .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: var(--bg-input); color: var(--text-highlight); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
+        .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: var(--bg-inner); color: var(--text-muted); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
         .card-btn .trans-btn.active { background: #38bdf8; color: #ffffff; border-color: #38bdf8; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(56,189,248,0.4); }
     `;
     document.head.appendChild(style);
@@ -165,21 +164,9 @@ const injectAppStyles = () => {
 function renderButtons() {
     const buildCardHtml = (item, isHero) => {
         const isTrans = isHero && !!item.transcend;
-        const selectHtml = item.isOwned ? `
-            <select onclick="event.stopPropagation();" onchange="window.updateStar(event, '${item.id}', '${isHero ? 'hero' : 'tactic'}', this.value)">
-                ${[0, 1, 2, 3, 4, 5].map(s => `<option value="${s}" ${item.star === s ? 'selected' : ''}>${s}성</option>`).join('')}
-            </select>` : '';
-        const transHtml = (item.isOwned && isHero) ? `
-            <button onclick="event.stopPropagation(); window.toggleTranscend(event, '${item.id}')" class="trans-btn ${isTrans ? 'active' : ''}">
-                초월
-            </button>` : '';
-        
-        return `
-            <div id="${item.id}" class="card-btn ${item.group} ${item.isOwned ? 'owned' : ''}" onclick="window.toggleState('${item.id}', '${isHero ? 'hero' : 'tactic'}')">
-                <span class="card-name">${item.name}</span>
-                ${selectHtml}
-                ${transHtml}
-            </div>`;
+        const selectHtml = item.isOwned ? `<select onclick="event.stopPropagation();" onchange="window.updateStar(event, '${item.id}', '${isHero ? 'hero' : 'tactic'}', this.value)">${[0, 1, 2, 3, 4, 5].map(s => `<option value="${s}" ${item.star === s ? 'selected' : ''}>${s}성</option>`).join('')}</select>` : '';
+        const transHtml = (item.isOwned && isHero) ? `<button onclick="event.stopPropagation(); window.toggleTranscend(event, '${item.id}')" class="trans-btn ${isTrans ? 'active' : ''}">초월</button>` : '';
+        return `<div id="${item.id}" class="card-btn ${item.group} ${item.isOwned ? 'owned' : ''}" onclick="window.toggleState('${item.id}', '${isHero ? 'hero' : 'tactic'}')"><span class="card-name">${item.name}</span>${selectHtml}${transHtml}</div>`;
     };
 
     const heroGroups = { wei: 'hero-container-wei', shu: 'hero-container-shu', wu: 'hero-container-wu', qun: 'hero-container-qun' };
@@ -195,31 +182,20 @@ function renderButtons() {
 function toggleState(id, type) {
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
-    if (target) {
-        target.isOwned = !target.isOwned;
-        renderButtons();
-        window.saveDataToLocalStorage();
-    }
+    if (target) { target.isOwned = !target.isOwned; renderButtons(); window.saveDataToLocalStorage(); }
 }
 
 window.updateStar = function(event, id, type, value) {
     event.stopPropagation();
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
-    if (target) {
-        target.star = parseInt(value, 10);
-        window.saveDataToLocalStorage();
-    }
+    if (target) { target.star = parseInt(value, 10); window.saveDataToLocalStorage(); }
 };
 
 window.toggleTranscend = function(event, id) {
     event.stopPropagation();
     const target = heroList.find(x => x.id === id);
-    if (target) {
-        target.transcend = !target.transcend;
-        renderButtons();
-        window.saveDataToLocalStorage();
-    }
+    if (target) { target.transcend = !target.transcend; renderButtons(); window.saveDataToLocalStorage(); }
 };
 
 window.saveDataToLocalStorage = function() {
@@ -231,50 +207,24 @@ function loadSavedData() {
     try {
         const saved = localStorage.getItem('samguk_hobby_data');
         if (!saved) return;
-        
         const parsed = JSON.parse(saved);
         
         const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
-        const hMap = heroesSource.reduce((acc, sh) => {
-            if (sh?.name) acc[cStr(sh.name)] = sh;
-            return acc;
-        }, {});
-        
+        const hMap = heroesSource.reduce((acc, sh) => { if (sh?.name) acc[cStr(sh.name)] = sh; return acc; }, {});
         heroList.forEach(h => {
             const sh = hMap[cStr(h.name)];
-            if (sh) {
-                h.isOwned = !!sh.isOwned;
-                h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0;
-                h.transcend = !!sh.transcend;
-            }
+            if (sh) { h.isOwned = !!sh.isOwned; h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0; h.transcend = !!sh.transcend; }
         });
         
         const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
-        const tMap = tacticsSource.reduce((acc, st) => {
-            if (st?.name) acc[cStr(st.name)] = st;
-            return acc;
-        }, {});
-        
+        const tMap = tacticsSource.reduce((acc, st) => { if (st?.name) acc[cStr(st.name)] = st; return acc; }, {});
         tacticList.forEach(t => {
             const st = tMap[cStr(t.name)];
-            if (st) {
-                t.isOwned = !!st.isOwned;
-                t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0;
-            }
+            if (st) { t.isOwned = !!st.isOwned; t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0; }
         });
-    } catch(e) {
-        console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e);
-    }
+    } catch(e) { console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e); }
 }
 
-function initAppEngine() {
-    injectAppStyles();
-    loadSavedData();
-    renderButtons();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAppEngine);
-} else {
-    initAppEngine();
-}
+function initAppEngine() { injectAppStyles(); loadSavedData(); renderButtons(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAppEngine);
+else initAppEngine();
