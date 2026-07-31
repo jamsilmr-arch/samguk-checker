@@ -1,14 +1,12 @@
-// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 100% 동기화 및 초경량 종결 엔진
-console.log("[시스템 분석] dogam.js 전서버 랭커 실전 최상위 추천 전법 100% 동기화 및 초경량 엔진 기동");
-
+// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 초경량 엔진 기동 (신규 무장 '허저' 반영)
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
-// LAYER 1: 55명 무장 단일 원자성 마스터 데이터베이스
+// LAYER 1: 56명 무장 단일 원자성 마스터 데이터베이스 (허저 추가)
 // [id, 이름, 진영, 역할, 배치, 고유전법, 전법설명, 스탯, 병종, 장비코드(SC/SH/TC/PC/PCm/SS), 추천전법]
 // ==========================================================================
 const heroDogamData = [
-    // 위나라 (13명)
+    // 위나라 (14명)
     { id: 'h_gahu', name: '가후', group: 'wei', role: '능동 (65%)', location: '후열', skill: '경달권변', skillDesc: '적군 단체(2명)에 65% 확률로 혼란 효과를 부여하고 모략 피해(계수 196%, 모략 영향)를 가합니다.', stats: { martial: 437, tactical: 634, command: 503, speed: 469 }, unit: '궁병/방패병', eq: 'SS', tacs: ["혼수모어", "전위위안"] },
     { id: 'h_gwa_ga', name: '곽가', group: 'wei', role: '능동 (50%)', location: '후열', skill: '산무유책', skillDesc: '적군 전체에게 모략 피해(계수 102%, 모략 영향)를 가하고, 대상이 가하는 피해를 18% 감소(2턴 지속)시킵니다.', stats: { martial: 378, tactical: 634, command: 539, speed: 362 }, unit: '궁병/방패병', eq: 'SH', tacs: ["간담상조", "강유겸제"] },
     { id: 'h_samy', name: '사마의', group: 'wei', role: '능동 (60%)', location: '후열', skill: '응시낭고', skillDesc: '전투 1~4턴 시작 시 80% 확률로 공심 100% 획득 또는 받는 모략 피해 30% 감소(1턴). 5턴 이후 매 턴 80% 확률로 1~2명 적에게 모략 피해(계수 154%) 부여.', stats: { martial: 414, tactical: 664, command: 652, speed: 332 }, unit: '방패병/궁병', eq: 'SC', tacs: ["반객위주", "요사여신"] },
@@ -22,6 +20,7 @@ const heroDogamData = [
     { id: 'h_janghap', name: '장합', group: 'wei', role: '지휘 (100%)', location: '후열', skill: '교변병기', skillDesc: '전투 시작 시 아군 전체의 액티브 전법 발동 확률을 12% 증가시키고, 일반 공격 피격 시 35% 확률로 저항을 부여합니다.', stats: { martial: 580, tactical: 426, command: 592, speed: 463 }, unit: '방패병/창병', eq: 'TC', tacs: ["간담상조", "강유겸제"] },
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', role: '패시브 (50%)', location: '전열', skill: '발시담정', skillDesc: '피해를 입을 때마다 40% 확률로 적군 다수(2명)에게 반격 무용 피해(계수 84%, 무용 영향)를 즉각 가합니다.', stats: { martial: 604, tactical: 396, command: 622, speed: 427 }, unit: '창병/방패병', eq: 'TC', tacs: ["이아환아", "동장철벽"] },
     { id: 'h_hahouyeon', name: '하후연', group: 'wei', role: '능동 (50%)', location: '후열', skill: '충용', skillDesc: '일반 공격 후 적군 전체에게 무용 피해(계수 108%, 무용 영향)를 가하고 30% 확률로 제어 불가(겁전/무장해제)를 1턴 부여합니다.', stats: { martial: 592, tactical: 408, command: 562, speed: 641 }, unit: '창병/기병', eq: 'PCm', tacs: ["일고작기", "암전난방"] },
+    { id: 'h_heojeo', name: '허저', group: 'wei', role: '능동 (60%)', location: '전열', skill: '호치', skillDesc: '적군 대상 2명의 통솔을 7% 탈취하고(무용 영향) 200% 무용 피해를 입힙니다(전열 대상 40% 증가). 입힌 피해의 20%만큼 병력을 회복하며 40% 확률로 쟁패 3중첩 획득, 35% 확률로 피곤을 1턴 부여합니다.', stats: { martial: 680, tactical: 409, command: 642, speed: 550 }, unit: '방패병/창병', eq: 'TC', tacs: ["부동여산", "만부막적"] },
 
     // 촉나라 (14명)
     { id: 'h_gwanu', name: '관우', group: 'shu', role: '능동 (50%)', location: '전열', skill: '무성', skillDesc: '1턴 준비 후 적군 전체에게 맹렬한 무용 피해(계수 146%, 무용 영향)를 가하고 50% 확률로 무장해제 또는 겁전을 1턴간 부여하며, 자신의 물리 피해 36% 증가(2턴).', stats: { martial: 658, tactical: 503, command: 628, speed: 558 }, unit: '창병/기병', eq: 'PC', tacs: ["승승장구", "질풍노도"] },
