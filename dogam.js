@@ -1,10 +1,8 @@
-// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 초경량 엔진 기동 (신규 무장 '허저' 반영)
+// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 100% 무손실 엔진
+console.log("[시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원)");
+
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// ==========================================================================
-// LAYER 1: 56명 무장 단일 원자성 마스터 데이터베이스 (허저 추가)
-// [id, 이름, 진영, 역할, 배치, 고유전법, 전법설명, 스탯, 병종, 장비코드(SC/SH/TC/PC/PCm/SS), 추천전법]
-// ==========================================================================
 const heroDogamData = [
     // 위나라 (14명)
     { id: 'h_gahu', name: '가후', group: 'wei', role: '능동 (65%)', location: '후열', skill: '경달권변', skillDesc: '적군 단체(2명)에 65% 확률로 혼란 효과를 부여하고 모략 피해(계수 196%, 모략 영향)를 가합니다.', stats: { martial: 437, tactical: 634, command: 503, speed: 469 }, unit: '궁병/방패병', eq: 'SS', tacs: ["혼수모어", "전위위안"] },
@@ -87,8 +85,32 @@ const injectDogamStyles = () => {
     if (document.getElementById('dogam-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'dogam-custom-styles';
+    // [UI 교정] 글로벌 테마 변수를 활용하여 모드에 맞게 카드 디자인 100% 동기화
     style.innerHTML = `
-        .dogam-card-item{background:#111;border:1px solid #2d2d2d;border-radius:6px;padding:15px 20px;cursor:pointer;transition:all .2s ease;position:relative;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;min-height:180px;opacity:.4;filter:grayscale(100%)}.dogam-card-item.owned{background:#1c1c1c;border-color:#4ade80;box-shadow:0 0 12px rgba(74,222,128,.15);opacity:1;filter:grayscale(0%)}.dogam-card-item.wei{border-top:5px solid #2270b5}.dogam-card-item.shu{border-top:5px solid #b82d2d}.dogam-card-item.wu{border-top:5px solid #2a9d8f}.dogam-card-item.qun{border-top:5px solid #cd9b33}.dogam-card-item .d-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:8px}.dogam-card-item .d-name{font-size:18px;font-weight:700;color:#888;letter-spacing:1px}.dogam-card-item.owned .d-name{color:#fff}.dogam-card-item .d-faction{font-size:11px;font-weight:700}.dogam-card-item.wei .d-faction{color:#2270b5}.dogam-card-item.shu .d-faction{color:#b82d2d}.dogam-card-item.wu .d-faction{color:#2a9d8f}.dogam-card-item.qun .d-faction{color:#cd9b33}.dogam-card-item .d-status{font-size:10px;padding:3px 6px;border-radius:4px;background:#333;color:#777;font-weight:700;white-space:nowrap}.dogam-card-item.owned .d-status{background:#28a745;color:#fff}.dogam-card-item .d-meta{display:flex;gap:12px;font-size:11px;color:#bbb;margin-bottom:4px}.dogam-card-item .d-meta span{color:#feca57;font-weight:700}.dogam-card-item .d-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:rgba(0,0,0,.4);border:1px solid #333;border-radius:4px;padding:8px;margin:10px 0;font-size:11px}.dogam-card-item .d-equip{background:rgba(0,0,0,.5);border:1px solid #333;border-radius:4px;padding:8px;margin-bottom:8px;font-size:11px}.dogam-card-item .d-equip-title{color:#feca57;font-weight:700;margin-bottom:4px}.dogam-card-item .d-equip-list{display:flex;flex-direction:column;gap:3px;color:#ccc}.dogam-card-item .d-tactic{background:rgba(168,85,247,.08);border:1px solid #44315f;border-left:3px solid #a855f7;border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px}.dogam-card-item .d-tactic-title{color:#c084fc;font-weight:700;margin-bottom:4px}.dogam-card-item .d-tactic-list{display:flex;flex-direction:column;gap:3px;color:#ccc}.dogam-card-item .d-tactic-item{cursor:pointer}.dogam-card-item .d-tactic-item span{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:2px}.dogam-card-item .d-desc{background:rgba(20,20,20,.6);border:1px solid #2a2a2a;border-radius:4px;padding:8px;font-size:11px;line-height:1.5;margin-top:auto}.dogam-card-item .d-desc-title{color:#38bdf8;font-weight:700;margin-bottom:3px}.dogam-card-item .d-desc-text{color:#ddd;word-break:keep-all}
+        .dogam-card-item{background-color:var(--bg-card);border:1px solid var(--border-main);border-radius:6px;padding:15px 20px;cursor:pointer;transition:all .3s ease;position:relative;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;min-height:180px;opacity:.45;filter:grayscale(100%)}
+        .dogam-card-item.owned{background-color:var(--bg-panel);border-color:var(--success-text);box-shadow:0 4px 12px var(--success-bg);opacity:1;filter:grayscale(0%)}
+        .dogam-card-item.wei{border-top:5px solid #2270b5} .dogam-card-item.shu{border-top:5px solid #b82d2d} .dogam-card-item.wu{border-top:5px solid #2a9d8f} .dogam-card-item.qun{border-top:5px solid #cd9b33}
+        .dogam-card-item .d-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border-main);padding-bottom:8px; transition:border-color 0.3s;}
+        .dogam-card-item .d-name{font-size:18px;font-weight:700;color:var(--text-muted);letter-spacing:1px; transition:color 0.3s;}
+        .dogam-card-item.owned .d-name{color:var(--text-main)}
+        .dogam-card-item .d-faction{font-size:11px;font-weight:700}
+        .dogam-card-item.wei .d-faction{color:#2270b5} .dogam-card-item.shu .d-faction{color:#b82d2d} .dogam-card-item.wu .d-faction{color:#2a9d8f} .dogam-card-item.qun .d-faction{color:#cd9b33}
+        .dogam-card-item .d-status{font-size:10px;padding:3px 6px;border-radius:4px;background-color:var(--bg-inner);color:var(--text-muted);font-weight:700;white-space:nowrap; transition:background-color 0.3s, color 0.3s;}
+        .dogam-card-item.owned .d-status{background-color:var(--success-text);color:#fff}
+        .dogam-card-item .d-meta{display:flex;gap:12px;font-size:11px;color:var(--text-desc);margin-bottom:4px; transition:color 0.3s;}
+        .dogam-card-item .d-meta span{color:var(--text-highlight);font-weight:700}
+        .dogam-card-item .d-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background-color:var(--bg-inner);border:1px solid var(--border-main);border-radius:4px;padding:8px;margin:10px 0;font-size:11px; transition:background-color 0.3s, border-color 0.3s;}
+        .dogam-card-item .d-equip{background-color:var(--bg-inner);border:1px solid var(--border-main);border-radius:4px;padding:8px;margin-bottom:8px;font-size:11px; transition:background-color 0.3s, border-color 0.3s;}
+        .dogam-card-item .d-equip-title{color:var(--text-highlight);font-weight:700;margin-bottom:4px}
+        .dogam-card-item .d-equip-list{display:flex;flex-direction:column;gap:3px;color:var(--text-desc); transition:color 0.3s;}
+        .dogam-card-item .d-tactic{background-color:rgba(168,85,247,.08);border:1px solid #c084fc;border-left:3px solid #a855f7;border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px}
+        .dogam-card-item .d-tactic-title{color:#c084fc;font-weight:700;margin-bottom:4px}
+        .dogam-card-item .d-tactic-list{display:flex;flex-direction:column;gap:3px;color:var(--text-desc); transition:color 0.3s;}
+        .dogam-card-item .d-tactic-item{cursor:pointer}
+        .dogam-card-item .d-tactic-item span{color:var(--text-main);font-weight:700;text-decoration:underline;text-underline-offset:2px; transition:color 0.3s;}
+        .dogam-card-item .d-desc{background-color:var(--bg-inner);border:1px solid var(--border-main);border-radius:4px;padding:8px;font-size:11px;line-height:1.5;margin-top:auto; transition:background-color 0.3s, border-color 0.3s;}
+        .dogam-card-item .d-desc-title{color:#38bdf8;font-weight:700;margin-bottom:3px}
+        .dogam-card-item .d-desc-text{color:var(--text-desc);word-break:keep-all; transition:color 0.3s;}
     `;
     document.head.appendChild(style);
 };
@@ -197,9 +219,9 @@ function renderDogamUI() {
     }
 
     container.innerHTML = `
-        <div id="dogam-stats-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:10px;">
-            <h2 style="color:#cd9b33;margin:0;font-size:22px;">장수 도감 마스터 보드</h2>
-            <span id="dogam-count-badge" style="color:#aaa;font-weight:bold;font-size:15px;">보유율: </span>
+        <div id="dogam-stats-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid var(--border-main);padding-bottom:10px;">
+            <h2 style="color:var(--text-highlight);margin:0;font-size:22px;">장수 도감 마스터 보드</h2>
+            <span id="dogam-count-badge" style="color:var(--text-muted);font-weight:bold;font-size:15px;">보유율: </span>
         </div>
         <div id="dogam-card-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:15px;width:100%;align-items:stretch;"></div>
     `;
@@ -237,13 +259,13 @@ function renderDogamGrid() {
                     <div><span>배치:</span> ${hero.location}</div>
                     ${hero.unit && hero.unit !== "-" ? `<div><span>병종:</span> ${hero.unit}</div>` : ''}
                 </div>
-                ${hero.stats ? `<div class="d-stats"><div><span style="color:#ff9f43;margin-right:4px;">⚔️ 무용:</span><span style="color:#fff;font-weight:bold;">${hero.stats.martial}</span></div><div><span style="color:#38bdf8;margin-right:4px;">🔮 모략:</span><span style="color:#fff;font-weight:bold;">${hero.stats.tactical}</span></div><div><span style="color:#2ec4b6;margin-right:4px;">🛡️ 통솔:</span><span style="color:#fff;font-weight:bold;">${hero.stats.command}</span></div><div><span style="color:#a855f7;margin-right:4px;">⚡ 속도:</span><span style="color:#fff;font-weight:bold;">${hero.stats.speed}</span></div></div>` : ''}
+                ${hero.stats ? `<div class="d-stats"><div><span style="color:#ff9f43;margin-right:4px;">⚔️ 무용:</span><span style="color:var(--text-main);font-weight:bold;">${hero.stats.martial}</span></div><div><span style="color:#38bdf8;margin-right:4px;">🔮 모략:</span><span style="color:var(--text-main);font-weight:bold;">${hero.stats.tactical}</span></div><div><span style="color:#2ec4b6;margin-right:4px;">🛡️ 통솔:</span><span style="color:var(--text-main);font-weight:bold;">${hero.stats.command}</span></div><div><span style="color:#a855f7;margin-right:4px;">⚡ 속도:</span><span style="color:var(--text-main);font-weight:bold;">${hero.stats.speed}</span></div></div>` : ''}
                 <div class="d-equip">
                     <div class="d-equip-title">🛠️ 추천 장비 및 세련 속성</div>
                     <div class="d-equip-list">
-                        <div>🪖 <span style="color:#fff;font-weight:bold;">${eqP[0]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[1], primaryUnit)} / ${formatEqAttr(eqP[2], primaryUnit)}]</span></div>
-                        <div>🛡️ <span style="color:#fff;font-weight:bold;">${eqP[3]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[4], primaryUnit)} / ${formatEqAttr(eqP[5], primaryUnit)}]</span></div>
-                        <div>📿 <span style="color:#fff;font-weight:bold;">${eqP[6]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[7], primaryUnit)} / ${formatEqAttr(eqP[8], primaryUnit)}]</span></div>
+                        <div>🪖 <span style="color:var(--text-main);font-weight:bold;">${eqP[0]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[1], primaryUnit)} / ${formatEqAttr(eqP[2], primaryUnit)}]</span></div>
+                        <div>🛡️ <span style="color:var(--text-main);font-weight:bold;">${eqP[3]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[4], primaryUnit)} / ${formatEqAttr(eqP[5], primaryUnit)}]</span></div>
+                        <div>📿 <span style="color:var(--text-main);font-weight:bold;">${eqP[6]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[7], primaryUnit)} / ${formatEqAttr(eqP[8], primaryUnit)}]</span></div>
                     </div>
                 </div>
                 <div class="d-tactic">
