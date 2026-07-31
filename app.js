@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (테마 변수 적용)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (전체 무장/전법 보존)
 console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
 
 const heroList = [
@@ -148,12 +148,13 @@ const injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'app-custom-styles';
+    // [UI 교정] 글로벌 테마 변수를 활용하여 모드에 맞게 카드 디자인 동기화
     style.innerHTML = `
-        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; }
+        .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; background-color: var(--bg-card); }
         .card-btn.owned { border-color: var(--success-text); background-color: var(--success-bg); box-shadow: inset 0 0 8px rgba(74, 222, 128, 0.1); }
         .card-btn.owned .card-name { color: var(--text-main); font-weight: 800; }
         .card-btn:not(.owned) { border-style: dashed; }
-        .card-btn .card-name { pointer-events: none; font-size: 13px; }
+        .card-btn .card-name { pointer-events: none; font-size: 13px; color: var(--text-desc); }
         .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: var(--bg-input); color: var(--text-highlight); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
         .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: var(--bg-inner); color: var(--text-muted); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
         .card-btn .trans-btn.active { background: #38bdf8; color: #ffffff; border-color: #38bdf8; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(56,189,248,0.4); }
