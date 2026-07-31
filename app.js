@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 연동 및 자동 백업 엔진 (신규 무장/전법 추가)
+// [시스템 분석] app.js 인벤토리 초월(Transcend) 연동 및 자동 백업 엔진 (허저 추가)
 console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
 
 const heroList = [
@@ -133,6 +133,7 @@ const tacticList = [
     { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hochi', name: '호치', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
