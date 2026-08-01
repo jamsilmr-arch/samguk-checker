@@ -1,4 +1,4 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 로그인 캐시 (깜빡임 방지) 엔진
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 로그인 캐시 엔진 ('메타 덱' 메뉴 신설)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -45,7 +45,6 @@
                     [style*="dashed"], .grid-item:not(.owned), .tactic-btn:not(.owned) { border: 1px solid var(--unowned-border) !important; background-color: var(--unowned-bg) !important; color: var(--unowned-text) !important; opacity: 1 !important; }
                     [style*="solid #cd9b33"], [style*="solid #4ade80"], .owned { opacity: 1 !important; }
 
-                    /* 🚨 [핵심 교정] 동기화 버튼 클래스 설계 (sync-on 유무로 색상 분기) */
                     .header-sync-btn { background: #f97316; color: #ffffff !important; border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: auto; align-self: center; transition: background-color 0.3s; }
                     .header-sync-btn.sync-on { background: #10b981 !important; } 
                     
@@ -55,11 +54,13 @@
             `);
         }
 
+        // 🚨 [핵심 교정] 메뉴 목록에 '메타 덱' 추가
         const globalMenuItems = [
             { name: "나의 장수/전법", url: "index.html" },
             { name: "덱 구성", url: "deck.html" },
             { name: "장수 도감", url: "dogam.html" },
             { name: "전법 도감", url: "tactic_dogam.html" },
+            { name: "메타 덱", url: "meta_deck.html" },
             { name: "시스템 가이드", url: "guide.html" }
         ];
 
@@ -81,11 +82,9 @@
         if (standardTarget) {
             standardTarget.insertAdjacentHTML('afterend', navHtml);
             if (!document.getElementById('global-google-sync-btn')) {
-                // 🚨 [핵심 교정] 로컬 캐시를 확인하여 최초 버튼 UI의 상태(ON/OFF)를 즉시 결정
                 const cachedSyncEmail = localStorage.getItem('samguk_sync_email');
                 const syncBtnClass = cachedSyncEmail ? 'sync-on' : '';
                 const syncBtnText = cachedSyncEmail ? `☁️ 동기화 ON (${cachedSyncEmail.split('@')[0]})` : `☁️ 구글 계정 동기화 (OFF)`;
-                
                 standardTarget.insertAdjacentHTML('beforeend', `<button id="global-google-sync-btn" class="action-btn header-sync-btn ${syncBtnClass}" onclick="executeGoogleSync(event)">${syncBtnText}</button>`);
             }
         } else {
