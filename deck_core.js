@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 부대 순서, 미보유 피드백, 테마 동기화 100% 무손실 종결 엔진 (메타 덱 외부 오프로딩 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (메타 덱 데이터 Offloading 및 초기 Blank 최적화 완료)");
+// [시스템 분석] deck_core.js - 부대 순서, 미보유 피드백, 테마 동기화 100% 무손실 종결 엔진 (에러 픽스 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (렌더링 에러 및 D&D 복구 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -131,6 +131,14 @@ function getTacticInfo(tacticName) {
         const tData = window.getTacticDataFromDogam(cleanName);
         if (tData) return { role: tData.type || tData.role, target: tData.target, desc: tData.desc };
     }
+    let foundOfficer = null;
+    for (const [offName, meta] of Object.entries(FB_OFF_META)) {
+        if (cStr(meta[0]) === cleanName) { foundOfficer = offName; break; }
+    }
+    if (foundOfficer && window.getOfficerDataFromDogam) {
+        const oData = window.getOfficerDataFromDogam(foundOfficer);
+        if (oData) return { role: oData.role, target: "적군/아군", desc: oData.skillDesc };
+    }
     return { role: "전술 전법", target: "부대", desc: "실전 효과가 발동되는 고급 전투 전법입니다. (도감 데이터 연동 필요)" };
 }
 
@@ -239,6 +247,14 @@ function buildIntegratedStatsHtml(stats) {
     if (stats.critRate > 0) arr.push(`강공/기습 <span style="color:#f43f5e">${stats.critRate.toFixed(1)}%</span>`);
     if (stats.armorPen > 0) arr.push(`파갑 <span style="color:var(--text-muted)">${stats.armorPen.toFixed(1)}%</span>`);
     return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:var(--text-highlight);font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div style="display:flex;flex-wrap:wrap;gap:4px 8px;line-height:1.4;">${arr.map(s=>`<span>${s}</span>`).join('')}</div></div>`;
+}
+
+// 🚨 [핵심 교정] 인연 연산 함수 복구 완료
+function calculateActivatedBond(officers) {
+    const curNames = officers?.map(o => o?.name?.toString().trim()).filter(Boolean) || [];
+    if (!curNames.length) return "활성화 효과 없음";
+    const matched = internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req);
+    return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
 // ==========================================================================
@@ -386,6 +402,43 @@ const FORMATIONS = {
 
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
+
+// 🚨 [핵심 교정] 무장 슬롯 드래그 앤 드롭 함수 복구 완료
+window.handleOfficerDragStart = (e, dIdx, oIdx) => { 
+    draggedDeckOriginIdx = dIdx; 
+    draggedOfficerSlotIdx = oIdx; 
+    e.target.style.opacity = '0.5'; 
+};
+window.handleOfficerDragEnd = e => { 
+    e.target.style.opacity = '1'; 
+    document.querySelectorAll('.officer-slot').forEach(el => el.style.border = 'none'); 
+    draggedDeckOriginIdx = null; 
+    draggedOfficerSlotIdx = null; 
+};
+window.handleOfficerDragOver = e => { 
+    e.preventDefault(); 
+    e.currentTarget.style.border = '2px dashed var(--border-accent)'; 
+};
+window.handleOfficerDragLeave = e => { 
+    e.preventDefault(); 
+    e.currentTarget.style.border = 'none'; 
+};
+window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
+    e.preventDefault(); 
+    e.currentTarget.style.border = 'none';
+    if (draggedDeckOriginIdx === null || draggedOfficerSlotIdx === null) return;
+    const srcD = dynamicPresetDecks.find(x => x.originIdx === draggedDeckOriginIdx);
+    const tgtD = dynamicPresetDecks.find(x => x.originIdx === tDIdx);
+    if (!srcD || !tgtD) return;
+    
+    // 무장 스왑 로직
+    const temp = srcD.officers[draggedOfficerSlotIdx];
+    srcD.officers[draggedOfficerSlotIdx] = tgtD.officers[tOIdx];
+    tgtD.officers[tOIdx] = temp;
+    
+    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); 
+    renderDeckBuilder();
+};
 
 let modalPopupEl = null, currentPopupTitle = null;
 function openModalPopup(e, title, meta1, desc1) {
