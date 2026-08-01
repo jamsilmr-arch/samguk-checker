@@ -24,5 +24,14 @@
 
     <!-- 중앙 통제형 Firebase 모듈 1줄 로드 -->
     <script type="module" src="firebase_core.js"></script>
+<!-- (이전 코드 생략) -->
+
+    <!-- 데이터 연동용 브릿지 스크립트를 deck_core.js 보다 '먼저' 로드해야 합니다 -->
+    <script src="guide.js"></script>
+    <script src="meta_deck.js"></script>
+    
+    <script src="tactic_dogam.js"></script>
+    <script src="dogam.js"></script>
+    <script src="deck_core.js"></script>
 </body>
 </html>
