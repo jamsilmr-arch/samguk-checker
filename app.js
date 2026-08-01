@@ -133,7 +133,6 @@ const tacticList = [
     { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hochi', name: '호치', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
