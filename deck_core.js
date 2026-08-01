@@ -1,10 +1,10 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 풀 복구 및 메타 연동 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (에러 픽스 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (비동기 로딩 방어망 및 오리지널 시너지 탑재 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (전법 리스트 안전망 복구 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
-// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전 (56종)
+// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전
 // ==========================================================================
 const FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
@@ -13,6 +13,9 @@ const FB_OFF_META = {
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"]
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
+
+// 🚨 [핵심 교정] 비동기 로딩 에러 방어용 전법 리스트 초경량 하드코딩 복구 (안전망)
+const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -70,7 +73,6 @@ const internalBondRules = [
     {name:"호위경주",req:2,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"}
 ];
 
-// 🚨 [누락 복구 완료] AI 다이나믹 교정용 롤(Role) 기반 전법 풀
 const DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군", "일고작기", "용맹무쌍"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
@@ -122,12 +124,13 @@ function getOfficerDogamData(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 }
 
+// 🚨 [핵심 교정] 비동기 로드 실패 시 "데이터 연동 필요" 대신 FB_TACTICS를 렌더링하는 안전망 구축
 const getTacticListBridge = () => {
     if (window.getAllTacticsFromDogam) {
         const list = window.getAllTacticsFromDogam();
         if (list && list.length > 0) return list;
     }
-    return ["데이터 연동 필요"];
+    return FB_TACTICS;
 };
 
 const getOfficerNamesBridge = () => {
@@ -300,12 +303,9 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
 
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
-    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : null;
-    if (!metaData || !metaData.analyzedMetaArchetypes || !metaData.analyzedMetaArchetypes.length) {
-        console.warn("⚠️ 메타 덱 데이터가 없습니다. deck.html에 meta_deck.js가 연결되었는지 확인하세요.");
-        return null;
-    }
-    const archetypes = metaData.analyzedMetaArchetypes;
+    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
+    const archetypes = metaData.analyzedMetaArchetypes || [];
+    if (!archetypes.length) return null;
 
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
