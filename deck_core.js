@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 부대 순서, 미보유 피드백, 테마 동기화 100% 무손실 종결 엔진 (초기화 디폴트 적용)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (초기 렌더링 Blank 최적화 완료)");
+// [시스템 분석] deck_core.js - 부대 순서, 미보유 피드백, 테마 동기화 100% 무손실 종결 엔진 (전투매 외부 오프로딩 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (전투매 데이터 Offloading 및 초기 Blank 최적화 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -13,7 +13,6 @@ const FB_OFF_META = {
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"]
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
-const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -71,154 +70,6 @@ const internalBondRules = [
     {name:"호위경주",req:2,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"}
 ];
 
-const FB_TACTIC_DESC_MAP = {
-    "금낭묘계": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 내 매 턴 시작 시 연격률을 감소시키고 턴 종료 시 병력이 가장 낮은 대상 병력 회복(치료율 55%, 모략 영향)." },
-    "간담상조": { role: "지휘 (100%)", target: "적군 전체, 아군 2팀", desc: "매 턴 시작 시 가하는 무용 피해 및 모략 피해를 25% 감소시키며 적 대상 2명에게 나약 부여. 이후 아군 2명 병력 회복(치료율 90%, 통솔 영향)." },
-    "가정지전": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 통솔 10% 감소 및 270% 모략 피해." },
-    "강유겸제": { role: "지휘 (50%)", target: "아군 전체", desc: "턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고, 스탯 비례 피해 감소를 17% 추가합니다." },
-    "견불가최": { role: "패시브 (100%)", target: "자신", desc: "자신이 받는 피해가 35% 감소. 피격 후 35% 확률로 아군 디버프 1개 해제." },
-    "견진연봉": { role: "능동 (60%)", target: "자신, 아군 1팀", desc: "자신과 후열 아군 1명의 연격률 50% 증가 및 1중첩 저항 획득." },
-    "공기불비": { role: "추격 (50%)", target: "적군 2팀", desc: "일반 공격 후, 적 2명 130% 모략 피해." },
-    "과하탁교": { role: "추격 (50%)", target: "적군 1팀", desc: "일반 공격 후 150% 모략 피해 및 50% 확률로 150% 모략 피해 추가." },
-    "교취호탈": { role: "능동 (35%)", target: "적군 2팀", desc: "적군 2명에게 185% 무용 피해 및 70% 확률 보급 차단 2턴." },
-    "극적제승": { role: "능동 (50%)", target: "적군 2팀", desc: "무용이 가장 높은 대상과 통솔이 가장 낮은 대상에게 135% 모략 피해." },
-    "금적금왕": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체 180% 모략 피해. 대상이 후열일 경우 50% 추가 피해." },
-    "금창신": { role: "지휘 (100%)", target: "자신, 아군 1팀", desc: "전투 시작 시 자신은 3턴간 피감 30%. 아군 모략 높은 대상에게 신산 부여(일반 공격 후 50% 확률 130% 모략피해)." },
-    "금철교명": { role: "패시브 (50%)", target: "적군 1팀", desc: "공격 후 아군 1명에게 피해 160% 확산 피해를 가합니다." },
-    "기문둔갑": { role: "능동 (50%)", target: "적군 2팀", desc: "적군 2개 대상의 무용/모략/통솔을 15% 감소(2턴)." },
-    "낙정하석": { role: "능동 (50%)", target: "적군 1팀", desc: "적 1명에게 216% 모략 피해. 대상이 디버프 보유 시 피해 계수 54% 증가." },
-    "동구적개": { role: "지휘 (100%)", target: "아군 2팀", desc: "전투 전 4턴 동안 자신 및 아군 1명의 피감 36%." },
-    "동장철벽": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전체에게 저항과 통어를 각 1중첩 부여(2턴)." },
-    "동촉기선": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신 간파 20% 증가 및 적 2명 105% 모략 피해." },
-    "만부막적": { role: "추격 (50%)", target: "적군 전체, 자신", desc: "일반 공격 후 적 전체 105% 무용 피해 및 자신의 가하는 무용 피해 5% 증가(최대 4중첩)." },
-    "만전제발": { role: "능동 (50%)", target: "적군 전체", desc: "적 전체 115% 무용 피해 및 50% 확률로 우선 후열 1명 115% 추가 무용 피해." },
-    "만천과해": { role: "능동 (70%)", target: "아군 2팀", desc: "자신 및 전열 아군의 병력 회복(치료율 80%, 모략 영향), 받는 피해 15% 감소." },
-    "문치무공": { role: "능동 (70%)", target: "아군 2팀", desc: "무용 최고 대상의 무용/강공 피해 증가. 모략 최고 대상의 모략/치료 효과 증가." },
-    "미우주무": { role: "능동 (50%)", target: "아군 1팀", desc: "통솔 가장 높은 아군의 피감 25% 및 병력 회복(치료율 40%, 모략 영향)." },
-    "반객위주": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "무용/모략 피해 가할 때마다 각 스택 8% 상승(최대 4중첩). 풀스택 시 130% 추가 피해 폭발." },
-    "병량촌단": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 280% 무용 피해 및 50% 확률 허약(2턴)." },
-    "부동여산": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "고유 능동 발동률 10% 상승, 통솔이 무용의 15%만큼 영구 상승. 능동 피해 후 적군 1명에게 180% 추가 무용 피해." },
-    "분성지계": { role: "능동 (70%)", target: "적군 전체", desc: "적 전체 화상 부여 및 가하는 피해 20% 감소(2턴)." },
-    "비사주석": { role: "추격 (35%)", target: "적군 1팀", desc: "일반 공격 후 220% 무용 피해 및 50% 확률 겁전(1턴)." },
-    "사면초가": { role: "능동 (50%)", target: "적군 1팀", desc: "적군에게 67% 무용 피해를 4회 독립 난사." },
-    "사생취의": { role: "패시브 (100%)", target: "자신", desc: "자신의 받는 피해 10% 증가, 가하는 피해 45% 영구 증가." },
-    "선등함진": { role: "능동 (50%)", target: "적군 전체", desc: "적 전체 100% 무용 피해 및 35% 확률 겁전(1턴)." },
-    "수상개화": { role: "패시브 (100%)", target: "자신", desc: "고유 능동 발동 확률 12% 증가. 매 턴 시작 시 가하는 피해 12% 증가(최대 4회 중첩)." },
-    "승승장구": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신 용맹/신속 2턴 부여. 적 2명 140% 무용 피해." },
-    "순수견양": { role: "능동 (50%)", target: "적군 2팀, 아군 2팀", desc: "적 2명 피감 및 50% 무장해제 부여. 아군 2명 치료(치료율 90%, 모략 영향)." },
-    "심모원려": { role: "추격 (50%)", target: "자신, 적군 1팀", desc: "일반 공격 후 모략 피해 상승(최대 4중첩) 및 240% 모략 피해." },
-    "안영찰채": { role: "지휘 (100%)", target: "적군 2팀, 아군 전체", desc: "턴 시작 시 70% 확률로 아군 전체 치료 및 피감 부여. 30% 확률로 적 전열 피곤 부여." }, 
-    "암전난방": { role: "능동 (50%)", target: "자신, 적군 1팀", desc: "자신 강공 30% 증가. 적 1명 220% 무용 피해." },
-    "양의화생": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "자신 다모 부여. 적 2명 160% 모략 피해. 조건부로 입힌 피해 30% 병력 회복." },
-    "양초선행": { role: "능동 (50%)", target: "아군 1팀", desc: "병력 가장 낮은 아군 1명 회복(치료율 174%)." },
-    "여자동포": { role: "능동 (50%)", target: "아군 2팀", desc: "아군 2명 저항 및 불굴 1중첩 부여. 피격 후 병력 회복." },
-    "요사여신": { role: "패시브 (100%)", target: "자신", desc: "자신의 기습 30% 상승. 모략 피해 가할 때마다 모략 피해 11% 영구 상승(최대 4중첩)." },
-    "용맹무쌍": { role: "패시브 (100%)", target: "자신, 적군 1팀", desc: "강공 25% 상승. 무용 피해 가한 후 70% 확률 40% 추가 무용 피해." },
-    "용왕직전": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "자신 용맹 상태 부여 및 적 2명 115% 무용 피해." },
-    "운주유악": { role: "지휘 (100%)", target: "아군 전체", desc: "전투 3턴 간 아군 전체 연격률 40% 증가 및 90% 확률 통찰 부여." },
-    "원성재도": { role: "능동 (35%)", target: "적군 1팀", desc: "적 피증 및 155% 모략 피해 가함." },
-    "위위구조": { role: "추격 (50%)", target: "적군 2팀, 아군 2팀", desc: "적 2명 가하는 피해 감소. 아군 2명 병력 회복(치료율 165%) 및 40% 면역." },
-    "유좌유용": { role: "지휘 (50%)", target: "아군 전체", desc: "아군 전체 불굴 상태(피격 후 병력 90% 회복) 부여." },
-    "이간계": { role: "능동 (35%)", target: "적군 1팀", desc: "250% 모략 피해 및 80% 혼란 부여(1턴)." },
-    "이아환아": { role: "패시브 (50%)", target: "적군 1팀", desc: "피격 시 공격자에게 132% 추가 무용 피해(매 턴 최대 4회)." },
-    "이일대로": { role: "능동 (50%)", target: "적군 2팀", desc: "적 2명 가하는 피해 16% 감소 및 50% 무기력 부여." },
-    "이퇴위진": { role: "지휘 (50%)", target: "자신, 아군 1팀", desc: "자신 피감 16% 획득 및 후열 아군 가하는 피해 16% 증가 버프." },
-    "일고작기": { role: "패시브 (100%)", target: "자신", desc: "연격률 60% 영구 상승 및 가하는 피해 12% 상승." },
-    "인세이도": { role: "패시브 (100%)", target: "자신", desc: "피감 21% 영구 상승. 행동 시 장벽 3중첩 획득 또는 병력 회복." },
-    "전위위안": { role: "패시브 (100%)", target: "자신, 아군 1팀", desc: "통솔 상승 및 피격 시 50% 확률 자신/아군 치료 및 디버프 해제." },
-    "제곤부위": { role: "지휘 (100%)", target: "아군 2팀", desc: "매 턴 자신과 아군 1명 병력 회복(치료율 70%)." },
-    "중정기고": { role: "능동 (35%)", target: "아군 전체", desc: "아군 전체 병력 회복(치료율 150%)." },
-    "지인선임": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체 168% 모략 피해. 스탯 우위 시 42% 계수 증가." },
-    "진퇴유도": { role: "지휘 (100%)", target: "적군 전체, 아군 전체", desc: "홀수 턴 적군 피해 감소. 짝수 턴 아군 가하는 피해 증가." },
-    "진화타겁": { role: "능동 (35%)", target: "적군 전체", desc: "적 전체 115% 무용 피해 및 70% 확률 허약 부여." },
-    "질풍노도": { role: "능동 (70%)", target: "자신, 적군 2팀", desc: "파갑 15% 상승 및 적 2명 110% 무용 피해, 40% 확률 추가 110% 타격." },
-    "천리추격": { role: "추격 (50%)", target: "자신, 적군 2팀", desc: "추격 발동률 3% 및 피해량 6% 증가(최대 3중첩). 적 2명 130% 모략 피해." },
-    "천시지리": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전열 무용 피감, 후열 모략 피감 증가." },
-    "체천행도": { role: "패시브 (100%)", target: "자신, 적군 2팀", desc: "자신 공심 20% 증가. 추격 피해 입힐 시 50% 확률 65% 확산 피해." },
-    "축세대발": { role: "능동 (50%)", target: "자신, 적군 2팀", desc: "무용 피해 20% 증가 및 적 2명 130% 무용 피해." },
-    "축호과간": { role: "패시브 (100%)", target: "적군 1팀, 자신", desc: "피격 시 공격자 적의 부여(통솔 감소) 및 통솔 상승. 행동 시 70% 치료 및 반격 타격." },
-    "태청단경": { role: "패시브 (50%)", target: "아군 2팀", desc: "피격 시 아군 2명 병력 회복 및 50% 확률 디버프 해제." },
-    "토적격문": { role: "능동 (80%)", target: "적군 전체, 자신", desc: "적 전체 도발 부여 및 자신 일반 공격 피감 40%." },
-    "현호제세": { role: "능동 (50%)", target: "아군 2팀", desc: "아군 2명 디버프 해제 및 병력 회복(치료율 155%)." },
-    "호령삼군": { role: "패시브 (100%)", target: "자신", desc: "피해 가한 후 배반/공심/강공/기습이 매번 4% 상승(최대 6중첩)." },
-    "호치": { role: "능동 (60%)", target: "적군 2팀, 자신", desc: "적 통솔 7% 강탈 및 200% 무용 피해. 20% 자가 흡혈 발동." },
-    "혼수모어": { role: "지휘 (70%)", target: "적군 1팀, 아군 2팀", desc: "적 1명 혼란 상태 부여 및 아군 2명 150% 치료." },
-    "홍수첨향": { role: "지휘 (50%)", target: "아군 2팀", desc: "턴 시작 시 병력 190% 회복 및 자신 30% 피감. 아군 1명에게도 절반 효과." },
-    "화소적벽": { role: "능동 (50%)", target: "적군 전체", desc: "적 전체 화상 부여 및 102% 모략 피해." },
-    "횡소천군": { role: "능동 (35%)", target: "적군 2팀", desc: "적 2명 30% 무용 피해 및 출혈 부여." },
-    "횡징폭렴": { role: "지휘 (100%)", target: "적군 전체, 아군 전체", desc: "첫 2턴 간 적 전체 가하는 피해 36% 감소. 3턴 종료 시 아군 전체 치료." },
-    "휴양생식": { role: "능동 (35%)", target: "아군 2팀", desc: "아군 2명 병력 회복(치료율 165%) 및 통찰 부여." },
-    "재주복주": { role: "지휘 (100%)", target: "아군 2명", desc: "매 턴 아군 2명 치료(치료율 68%, 모략 영향) 및 10% 확률로 대상 허약 부여." },
-    "연인노호": { role: "패시브 (50%)", target: "적군 전체", desc: "전투 2, 4턴에 적군 전체 무용 피해(계수 104%). 대상 무장해제 시 통솔 감소." },
-    "초선차전": { role: "지휘 (100%)", target: "적군 2명", desc: "적군 2명이 능동 전법 발동 시 35% 확률로 차단하고 모략 역피해(계수 102%)." },
-    "칠진칠출": { role: "패시브 (100%)", target: "자신", desc: "상시 영구 통찰(제어 면역) 부여 및 모든 스탯 대폭 상승." },
-    "적혈도": { role: "패시브 (100%)", target: "자신", desc: "전법 크리티컬(회심) 확률 25% 증가, 회심 피해량 50% 증가." },
-    "묘산천기": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 3턴 동안 아군 전체 전법 피해 30% 폭증. 4턴부터 15% 감소." },
-    "정수유심": { role: "지휘 (100%)", target: "아군 전체", desc: "아군이 받는 피해의 18% 반사 및 매 턴 병력 회복(치료율 62%)." },
-    "탑상책": { role: "지휘 (100%)", target: "아군 단체", desc: "2턴 시작 시 자신 속성 40%를 아군에게 양도. 3~5턴 피감 26% 부여." },
-    "화용욕모": { role: "능동 (70%)", target: "적군 2명", desc: "적 2명의 방어 스탯(통솔/모략) 20% 해제 및 아군 전법 발동률 12% 보정." },
-    "강동맹호": { role: "지휘 (100%)", target: "적군 전체", desc: "적 전체 도발 시전(일반 공격 집중) 및 자신 피감 28%(2턴)." },
-    "웅거": { role: "지휘 (100%)", target: "자신", desc: "아군 일반 공격마다 75% 확률로 연격, 통찰, 강공, 기습, 선공 중 1개 획득." },
-    "효희": { role: "능동 (50%)", target: "적군 다수", desc: "자신 버프 1개당 물리 피해 20% 증가(최대 5중첩) 및 추가 물리 타격." },
-    "강동패주": { role: "능동 (50%)", target: "적군 단체", desc: "일반 공격 후 35% 확률 192% 맹렬 연타 피해 및 피해량 50% 흡혈." },
-    "겸권상계": { role: "지휘 (100%)", target: "아군 전체", desc: "오나라 결선 시 전술 스탯 15% 증가, 매 턴 50% 확률 피감 20% 부여." },
-    "백의도강": { role: "지휘 (100%)", target: "아군 전체", desc: "첫 턴 아군 전체 확정 회피 1회. 피해 입힐 때마다 40% 무장해제/겁전 부여." },
-    "지변규려": { role: "추격 (50%)", target: "적군 2명", desc: "적 2명 화상 부여. 이미 화상 시 164% 광역 폭발 모략 피해." },
-    "청백충근": { role: "능동 (60%)", target: "아군 주장", desc: "아군 주장 모략 회심 확률 25% 증가 및 피해 30% 분담(숄더링)." },
-    "봉화연천": { role: "패시브 (80%)", target: "적군 전체", desc: "능동 전법 발동 시 80% 확률로 적 전체 광역 모략 불화살 피해 투하." },
-    "청라산개": { role: "지휘 (100%)", target: "아군 주장/부대", desc: "아군 주장 피해 35% 흡수 및 공격력 18% 증가." },
-    "칠척사모": { role: "지휘 (100%)", target: "적군 1명", desc: "피격 시 35% 확률 자신 디버프 해제 및 적 1명 공포(1턴)." },
-    "요원지화": { role: "능동 (50%)", target: "적군 전체", desc: "자신 병력 20% 소모하여 적 전체 화상 및 122% 확정 모략 피해." },
-    "위진새북": { role: "패시브 (100%)", target: "부대 전체", desc: "첫 2턴 부대 전법 발동률 13% 증가. 액티브 타격 후 속도 비례 추가 피해." },
-    "전권난정": { role: "지휘 (100%)", target: "적/아군 전체", desc: "매 턴 무용 증폭. 5턴 시작 시 적/아군 무차별 피해 및 50% 흡혈." },
-    "효장": { role: "능동 (50%)", target: "적군 2명", desc: "1턴 준비 후 적 2명 180% 참격 충격 및 확정 공포 제어 부여." },
-    "천하무쌍": { role: "패시브 (100%)", target: "적군 단일", desc: "일기토 강제 시전. 제어 면역 상태에서 일반 공격 3회 타격." },
-    "태평경": { role: "지휘 (70%)", target: "적군 전체", desc: "2턴 시작 시 적 전체 수공 4턴 부여. 모략 피증 디버프." },
-    "사소도": { role: "지휘 (100%)", target: "적군 2명/아군", desc: "1턴 준비 후 물리 피해 및 화상. 아군 전체 통솔 80 증가." },
-    "황천당립": { role: "능동 (50%)", target: "무작위 적", desc: "1턴 준비 후 무작위 적 5회 천벌 벼락(136%) 및 30% 공황 부여." },
-    "천의난위": { role: "능동 (50%)", target: "적군 단체", desc: "적군 모략/통솔을 흡수하여 아군 공유 및 강력 모략 피해." },
-    "요풍사기": { role: "능동 (50%)", target: "적/아군 전체", desc: "적 전체 모래바람 모략 피해. 아군 장벽 2중첩 부여." },
-    "화겁생기": { role: "패시브 (100%)", target: "아군 전체", desc: "첫 2턴 아군 전체 회피 35% 부여. 3~5턴 매 턴 병력 회복." },
-    "비분시": { role: "능동 (70%)", target: "아군 2명", desc: "아군 2명 회복. 50% 확률 피해 증가 또는 감소 부여." },
-    "폐월": { role: "능동 (50%)", target: "적군 단체", desc: "적 매혹하여 피해 35% 전가. 대상 통솔/무용 14% 감소." },
-    "청낭제세": { role: "능동 (50%)", target: "아군 2명", desc: "초반 턴(1~4턴) 통솔 40 증가 및 피격 시 50% 확률 병력 회복." },
-    "경달권변": { role: "능동 (65%)", target: "적군 단체(2명)", desc: "적군 단체에 65% 확률로 혼란 효과 부여 및 모략 피해." },
-    "산무유책": { role: "능동 (50%)", target: "적군 전체", desc: "적군 전체 모략 피해 및 가하는 피해 18% 감소(2턴)." },
-    "응시낭고": { role: "능동 (60%)", target: "자신/적군", desc: "초반 턴 공심/피감. 5턴 이후 매 턴 80% 확률 강력 모략 피해." },
-    "거중지중": { role: "능동 (50%)", target: "아군 전체", desc: "아군 전체 받는 피해 상시 억제 및 병력 지속 회복." },
-    "분용당선": { role: "능동 (70%)", target: "적군 전열(2명)", desc: "적 전열에 강력 무용 피해 가하고 자신 허약(1턴) 페널티." },
-    "십면매복": { role: "추격 (50%)", target: "적군 단체", desc: "일반 공격 후 디버프 상태 적에게 추가 피해 및 회복 불가 부여." },
-    "군령여산": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 전체 가하는 피해 16% 증가 및 받는 피해 16% 영구 감소." },
-    "효웅": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 전체 가하는 피해의 12%를 흡수 치료 및 피해 16% 감소." },
-    "함진살적": { role: "패시브 (100%)", target: "적군 주장", desc: "일반 공격이 적 주장을 정밀 저격하며 추가 무용 피해 가함." },
-    "교변병기": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 전체 액티브 발동 확률 12% 증가, 피격 시 35% 확률 저항." },
-    "발시담정": { role: "패시브 (50%)", target: "적군 다수(2명)", desc: "피격 시마다 40% 확률로 즉각 반격 무용 피해." },
-    "충용": { role: "능동 (50%)", target: "적군 전체", desc: "일반 공격 후 적 전체 무용 피해 및 30% 확률 겁전/무장해제." },
-    "무성": { role: "능동 (50%)", target: "적군 전체", desc: "1턴 준비 후 맹렬 무용 피해, 50% 무장해제/겁전 부여." },
-    "담대여두": { role: "추격 (50%)", target: "적군 단체", desc: "홀수 턴 무용 강탈 타격, 짝수 턴 모략 강탈 타격." },
-    "습참": { role: "능동 (35%)", target: "적군 2명", desc: "1턴 준비 후 무용 피해 및 적이 가하는 피해 25% 차단." },
-    "출수법": { role: "패시브 (100%)", target: "주위 적군", desc: "물리 피해 34% 증가 및 일반 공격 피해 54% 주변 확산." },
-    "절절학문": { role: "지휘 (100%)", target: "아군 전체", desc: "아군 능동 전법 발동 시 60% 확률 공격력 14% 증폭(최대 3중첩)." },
-    "만왕": { role: "추격 (35%)", target: "적군 단체", desc: "일반 공격 후 45% 확률 피해 및 공황/약화 부여." },
-    "실병제위": { role: "패시브 (70%)", target: "자신", desc: "준비 턴 필요한 능동 전법 대기시간 75% 확률 삭제 및 피증 15%." },
-    "인정": { role: "지휘 (100%)", target: "아군 전체", desc: "매 턴 68% 확률 아군 전체 회복 및 10% 확률 제어 해제." }
-};
-
-const tacticAlternativesMap = {
-    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], "횡징폭렴":["간담상조","동구적개","동장철벽","홍수첨향"],
-    "동장철벽":["간담상조","견불가최","천시지리","동구적개"], "전위위안":["간담상조","태청단경","현호제세","제곤부위","안영찰채","만천과해"],
-    "이퇴위진":["미우주무","천시지리","진퇴유도","홍수첨향"], "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
-    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], "혼수모어":["사면초가","이간계","안영찰채"],
-    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], "유좌유용":["휴양생식","제곤부위","안영찰채"],
-    "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
-    "여자동포":["동구적개","천시지리"], "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
-    "수상개화":["요사여신","사생취의","양의화생"], "요사여신":["수상개화","사생취의","반객위주"],
-    "분성지계":["화소적벽","기문둔갑"], "체천행도":["반객위주","질풍노도","천리추격"], "금창신":["동구적개","강유겸제","간담상조"],
-    "만천과해":["전위위안","태청단경","휴양생식"], "토적격문":["진퇴유도","간담상조","이퇴위진"], "위위구조":["간담상조","진퇴유도","홍수첨향"],
-    "견진연봉":["동장철벽","순수견양"], "용왕직전":["천리추격","암전난방"], "만부막적":["용왕직전","천리추격"], "일고작기":["사생취의","용맹무쌍"],
-    "부동여산":["동장철벽", "견불가최"], "호치":["만부막적", "용왕직전"]
-};
-
 const internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
@@ -226,7 +77,7 @@ const internalTacticStatMap = {
 };
 
 // ==========================================================================
-// LAYER 2: 하이브리드 도감 동적 바인딩 및 스마트 적성 연산 엔진
+// LAYER 2: 하이브리드 도감 동적 바인딩 (외부 JS 크로스 브릿지)
 // ==========================================================================
 function getOfficerDogamData(officerName) {
     if (window.getOfficerDataFromDogam) { 
@@ -246,7 +97,14 @@ function getOfficerDogamData(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 }
 
-const getTacticListBridge = () => window.getAllTacticsFromDogam ? (window.getAllTacticsFromDogam()?.length > 5 ? window.getAllTacticsFromDogam() : FB_TACTICS) : FB_TACTICS;
+const getTacticListBridge = () => {
+    if (window.getAllTacticsFromDogam) {
+        const list = window.getAllTacticsFromDogam();
+        if (list && list.length > 0) return list;
+    }
+    return ["데이터 연동 필요"];
+};
+
 const getOfficerNamesBridge = () => {
     const list = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : FB_OFFICERS;
     return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
@@ -258,9 +116,7 @@ function getTacticInfo(tacticName) {
         const tData = window.getTacticDataFromDogam(cleanName);
         if (tData) return { role: tData.type || tData.role, target: tData.target, desc: tData.desc };
     }
-    const internalTac = TACTIC_MASTER_DESC[cleanName];
-    if (internalTac) return { role: internalTac.role, target: internalTac.target || "적군/아군", desc: internalTac.desc };
-    return { role: "전술 전법", target: "부대", desc: "실전 효과가 발동되는 고급 전투 전법입니다. (도감 연동 필요)" };
+    return { role: "전술 전법", target: "부대", desc: "실전 효과가 발동되는 고급 전투 전법입니다. (도감 데이터 연동 필요)" };
 }
 
 function getOfficerEquipment(officerName, deckUnitType = "") {
@@ -334,7 +190,9 @@ function aggregateIntegratedStats(deck, officerIndex) {
     internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req)
         .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
-    const hA = metaHawkRandomAttributesMap[matchMeta?.bestMeta?.id || "custom"];
+    // 🚨 [핵심 교정] 전투매 스탯 데이터를 외부 guide.js 브릿지에서 즉시 로드
+    const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(matchMeta?.bestMeta?.id) : { attributes: null };
+    const hA = hawkData.attributes;
     if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
     const dogamData = getOfficerDogamData(hName);
@@ -370,6 +228,21 @@ function buildIntegratedStatsHtml(stats) {
 // ==========================================================================
 // LAYER 3: 조합 맞춤형 동적 대체 추천 및 계층적 배타성 추천 엔진
 // ==========================================================================
+const tacticAlternativesMap = {
+    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], "횡징폭렴":["간담상조","동구적개","동장철벽","홍수첨향"],
+    "동장철벽":["간담상조","견불가최","천시지리","동구적개"], "전위위안":["간담상조","태청단경","현호제세","제곤부위","안영찰채","만천과해"],
+    "이퇴위진":["미우주무","천시지리","진퇴유도","홍수첨향"], "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
+    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], "혼수모어":["사면초가","이간계","안영찰채"],
+    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], "유좌유용":["휴양생식","제곤부위","안영찰채"],
+    "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
+    "여자동포":["동구적개","천시지리"], "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
+    "수상개화":["요사여신","사생취의","양의화생"], "요사여신":["수상개화","사생취의","반객위주"],
+    "분성지계":["화소적벽","기문둔갑"], "체천행도":["반객위주","질풍노도","천리추격"], "금창신":["동구적개","강유겸제","간담상조"],
+    "만천과해":["전위위안","태청단경","휴양생식"], "토적격문":["진퇴유도","간담상조","이퇴위진"], "위위구조":["간담상조","진퇴유도","홍수첨향"],
+    "견진연봉":["동장철벽","순수견양"], "용왕직전":["천리추격","암전난방"], "만부막적":["용왕직전","천리추격"], "일고작기":["사생취의","용맹무쌍"],
+    "부동여산":["동장철벽", "견불가최"], "호치":["만부막적", "용왕직전"]
+};
+
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const allNames = getOfficerNamesBridge();
@@ -490,13 +363,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     return fb;
 }
 
-function calculateActivatedBond(officers) {
-    const curNames = officers?.map(o => o?.name?.toString().trim()).filter(Boolean) || [];
-    if (!curNames.length) return "활성화 효과 없음";
-    const matched = internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req);
-    return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
-}
-
 // ==========================================================================
 // LAYER 4: UI 파이프라인 및 모달 컨트롤 (테마 동기화)
 // ==========================================================================
@@ -600,25 +466,6 @@ const metaDeckUnitTypeMap = {
     "qun_jwaja_jangnyeong_ugil_5":"궁병", "wei_sima_jojo_gahu_5":"방패병", "shu_macho_weiyeon_xushu_5":"창병"
 };
 
-const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-const metaHawkRandomAttributesMap = new Proxy({
-    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "qun_wonso_jangnyeong_jwaja":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "wei_jojo_sima_hahou":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_macho_weiyeon_xushu_2":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "qun_jwaja_jangnyeong_ugil_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_macho_weiyeon_xushu_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "wu_songwon_yukhang_nosuk_3":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "wei_sima_jojo_gahu_3":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "qun_wonso_dongtak_yeopo_4":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
-    "shu_macho_weiyeon_yubi_4":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "wei_jojo_sima_hahou_4":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "qun_jwaja_jangnyeong_ugil_5":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "wei_sima_jojo_gahu_5":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "shu_macho_weiyeon_xushu_5":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
-}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-
 const systemGuideInsights = {
     "wu_sogyo_nosuk_yukson":"💡 [1위 1군] 소교 화용욕모 방어 해제 및 노숙 견진연봉 연격 버프를 받는 육손 체천행도 추격 마법사.",
     "qun_wonso_jangnyeong_jwaja":"💡 [1위 2군] 좌자 화겁생기/유좌유용 회피 장벽 뒤 원소 사소도/강유겸제 피감과 장녕 양의화생/수상개화 폭격 방패.",
@@ -628,15 +475,6 @@ const systemGuideInsights = {
     "qun_jwaja_jangnyeong_ugil_5":"💡 [5위 1군] 우길 금창신 신산 버프를 받는 장녕 수상개화/양의화생 폭딜 및 좌자 안영찰채/유좌유용 방패/궁병."
 };
 
-const metaHawkRecommendationMap = new Proxy({
-    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"}, "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"}, "shu_macho_weiyeon_xushu_2":{name:"결운-감로",skill:"마초 확산 타격 및 서서 피감 치유 강화"}, "qun_jwaja_jangnyeong_ugil_2":{name:"열공-여천",skill:"장녕 낙정하석 폭격 및 우길 수공 지원"},
-    "shu_macho_weiyeon_xushu_3":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"}, "wu_songwon_yukhang_nosuk_3":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"}, "wei_sima_jojo_gahu_3":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
-    "qun_wonso_dongtak_yeopo_4":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"}, "shu_macho_weiyeon_yubi_4":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"}, "wei_jojo_sima_hahou_4":{name:"능소-진시",skill:"사마의 모략 회심 및 조조/하후돈 안정 방어"},
-    "qun_jwaja_jangnyeong_ugil_5":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산(금창신) 폭딜 지원"}, "wei_sima_jojo_gahu_5":{name:"열공-여천",skill:"사마의 요사여신 모략 폭딜 극대화"}, "shu_macho_weiyeon_xushu_5":{name:"열공-전광",skill:"마초 용맹무쌍/질풍노도 돌파력 강화"}
-}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
-
-// 🚨 [핵심 교정] 최초 진입 시 메타 덱 강제 주입 해제 및 빈 배열(Blank) 디폴트 설정
 const defaultPresetDecks = Array.from({ length: 5 }, (_, i) => ({
     title: `${i + 1}군`,
     formation: "구행진",
@@ -765,7 +603,9 @@ function renderDeckBuilder() {
             });
             statsHtml += `</div>`;
 
-            const hawkRec = metaHawkRecommendationMap[match?.bestMeta?.id || "custom"];
+            // 🚨 [핵심 교정] 전투매 외부 연동
+            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(match?.bestMeta?.id) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
+            const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
             const fb = generateStructuredFeedback(deck, hMap, tMap, Array.from(accumulatedHigherTacs)), score = calculateStrictDeckScore(deck);
@@ -802,3 +642,4 @@ window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk
 window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
 
 document.addEventListener('DOMContentLoaded', () => { injectCustomUIStyles(); loadDeckTextData(); renderDeckBuilder(); });
+]
