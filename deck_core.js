@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (오리지널 시너지 다이나믹 연산 고도화)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (AI 메타 의존 탈피 및 다이나믹 교정 엔진 탑재 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 풀 복구 및 메타 연동 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (에러 픽스 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -70,7 +70,7 @@ const internalBondRules = [
     {name:"호위경주",req:2,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"}
 ];
 
-// 🚨 [핵심 엔진] 다이나믹 커스텀 덱 AI 교정용 롤(Role) 기반 전법 풀
+// 🚨 [누락 복구 완료] AI 다이나믹 교정용 롤(Role) 기반 전법 풀
 const DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군", "일고작기", "용맹무쌍"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
@@ -137,12 +137,10 @@ const getOfficerNamesBridge = () => {
 
 function getTacticInfo(tacticName) {
     const cleanName = cStr(tacticName);
-    // 1. 일반 전법 (tactic_dogam.js 연동)
     if (window.getTacticDataFromDogam) {
         const tData = window.getTacticDataFromDogam(cleanName);
         if (tData) return { role: tData.type || tData.role, target: tData.target, desc: tData.desc };
     }
-    // 2. 무장 고유 전법 (dogam.js 연동)
     let foundOfficer = null;
     for (const [offName, meta] of Object.entries(FB_OFF_META)) {
         if (cStr(meta[0]) === cleanName) { foundOfficer = offName; break; }
@@ -261,7 +259,6 @@ function buildIntegratedStatsHtml(stats) {
     return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:var(--text-highlight);font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div style="display:flex;flex-wrap:wrap;gap:4px 8px;line-height:1.4;">${arr.map(s=>`<span>${s}</span>`).join('')}</div></div>`;
 }
 
-// 🚨 인연 연산 함수
 function calculateActivatedBond(officers) {
     const curNames = officers?.map(o => o?.name?.toString().trim()).filter(Boolean) || [];
     if (!curNames.length) return "활성화 효과 없음";
@@ -270,7 +267,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 3: 다이나믹 조합 맞춤형 대체 추천 및 계층적 배타성 엔진 (오리지널 시너지 지원)
+// LAYER 3: 조합 맞춤형 동적 대체 추천 및 계층적 배타성 추천 엔진
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
@@ -303,9 +300,12 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
 
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
-    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
-    const archetypes = metaData.analyzedMetaArchetypes || [];
-    if (!archetypes.length) return null;
+    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : null;
+    if (!metaData || !metaData.analyzedMetaArchetypes || !metaData.analyzedMetaArchetypes.length) {
+        console.warn("⚠️ 메타 덱 데이터가 없습니다. deck.html에 meta_deck.js가 연결되었는지 확인하세요.");
+        return null;
+    }
+    const archetypes = metaData.analyzedMetaArchetypes;
 
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
@@ -326,13 +326,11 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-// 🚨 [핵심 교정] 피드백 함수에서 "오리지널 시너지" (커스텀 덱) 예외 처리 로직 추가
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNames);
 
-    // 1.5점 미만(메타덱과 거의 안 겹침)이면 유저만의 커스텀 오리지널 덱으로 간주
     const isCustom = !match || match.maxScore < 1.5;
 
     if (isCustom) {
@@ -417,7 +415,6 @@ const FORMATIONS = {
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
-// 무장 슬롯 드래그 앤 드롭
 window.handleOfficerDragStart = (e, dIdx, oIdx) => { 
     draggedDeckOriginIdx = dIdx; 
     draggedOfficerSlotIdx = oIdx; 
@@ -548,7 +545,6 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
-// 🚨 [핵심 교정] 다이나믹 AI 교정 로직 전면 리팩토링 완료
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -571,7 +567,6 @@ window.autoFixDeck = oIdx => {
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
     const archetypes = metaData.analyzedMetaArchetypes || [];
 
-    // 시나리오 1: 덱이 텅 비어있을 때 (가장 많이 소유한 메타덱 추천)
     if (filledCount === 0) {
         let bestMeta = null, highestOwnedCount = -1;
         for (const meta of archetypes) {
@@ -598,16 +593,13 @@ window.autoFixDeck = oIdx => {
         return alert(`[AI 교정 완료] 보유 풀 기반 최적 메타 덱(${bestMeta.name}) 자동 편성 성공!`);
     }
 
-    // 시나리오 2: 유저가 1명이라도 장수를 올렸을 때 (유저 의도 100% 존중 & 다이나믹 교정)
     const match = getBestMetaMatch(currentOfficers);
     
-    // 메타덱과 상당 부분 일치하면 빈 장수 슬롯을 메타덱 장수로 채워줌 (단, 덮어쓰지는 않음)
     if (match && match.maxScore >= 1.5 && filledCount < 3) {
         targetDeck.formation = match.bestMeta.formation;
         targetDeck.officers.forEach((o, idx) => { if (!o.name) o.name = match.bestMeta.officers[idx].name; });
     }
 
-    // 스마트 진형 최적화
     let frontCount = 0, backCount = 0;
     targetDeck.officers.forEach(o => {
         if (o.name) {
@@ -619,7 +611,6 @@ window.autoFixDeck = oIdx => {
     else if (backCount > frontCount) targetDeck.formation = "구행진";
     else targetDeck.formation = "방원진";
 
-    // 전법 다이나믹 교정 로직 (유저가 선택한 전법 유지, 빈칸만 채움)
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
@@ -639,7 +630,6 @@ window.autoFixDeck = oIdx => {
             if (!o.chosenTactics[i]) { 
                 let foundTac = "";
                 
-                // 1순위: 메타덱 권장 전법 탐색
                 if (isMetaMember && metaTacs[i]) {
                     const mt = metaTacs[i];
                     if (!higherTacs.has(cStr(mt))) foundTac = mt;
@@ -649,14 +639,12 @@ window.autoFixDeck = oIdx => {
                     }
                 }
 
-                // 2순위: 다이나믹 풀에서 미사용 & 보유 전법 탐색
                 if (!foundTac) {
                     for (const cand of pool) {
                         if (tMap[cStr(cand)]?.isOwned && !higherTacs.has(cStr(cand))) { foundTac = cand; break; }
                     }
                 }
 
-                // 3순위: 다이나믹 풀에서 미보유라도 미사용 전법 할당 (점선 피드백 유도)
                 if (!foundTac) {
                     for (const cand of pool) {
                         if (!higherTacs.has(cStr(cand))) { foundTac = cand; break; }
@@ -668,7 +656,7 @@ window.autoFixDeck = oIdx => {
                     higherTacs.add(cStr(foundTac));
                 }
             } else {
-                higherTacs.add(cStr(o.chosenTactics[i])); // 유저 수동 지정 전법 중복 검사 락
+                higherTacs.add(cStr(o.chosenTactics[i])); 
             }
         }
     });
