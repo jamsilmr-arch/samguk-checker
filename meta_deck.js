@@ -1,8 +1,8 @@
-// [시스템 분석] meta_deck.js - 전서버 랭커 실전 메타 덱 마스터 데이터베이스 (신규 5종 추가 완료)
+// [시스템 분석] meta_deck.js - 전서버 랭커 실전 메타 덱 마스터 데이터베이스 (장료 덱 신규 추가 완료)
 console.log("[시스템 분석] meta_deck.js 메타 덱 데이터 허브 기동");
 
 const analyzedMetaArchetypes = [
-    // --- [기존 15종 메타 덱] ---
+    // --- [기존 메타 덱] ---
     {id:"wu_sogyo_nosuk_yukson",name:"[오나라] 소교·노숙·육손 종결 방원기병 덱",concept:"[1위 1군] 소교·노숙·육손 방원기병",formation:"방원진",officers:[{name:"소교",chosenTactics:["화용욕모","진퇴유도","간담상조"]},{name:"노숙",chosenTactics:["탑상책","견진연봉","위위구조"]},{name:"육손",chosenTactics:["지변규려","천리추격","체천행도"]}]},
     {id:"qun_wonso_jangnyeong_jwaja",name:"[군진영] 원소·장녕·좌자 종결 구행방패 덱",concept:"[1위 2군] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","혼수모어"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
     {id:"shu_macho_weiyeon_xushu",name:"[촉나라] 마초·위연·서서 종결 안행창병 덱",concept:"[1위 3군] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","반객위주"]},{name:"위연",chosenTactics:["실병제위","이퇴위진","횡징폭렴"]},{name:"서서",chosenTactics:["절절학문","문치무공","여자동포"]}]},
@@ -18,13 +18,14 @@ const analyzedMetaArchetypes = [
     {id:"qun_jwaja_jangnyeong_ugil_5",name:"[군진영] 좌자·장녕·우길 구행궁병 (5위 세팅)",concept:"[5위 1군] 좌자·장녕·우길 구행궁병",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]},{name:"장녕",chosenTactics:["천의난위","수상개화","양의화생"]},{name:"우길",chosenTactics:["태평경","강유겸제","금창신"]}]},
     {id:"wei_sima_jojo_gahu_5",name:"[위나라] 사마의·조조·가후 추형방패 (5위 세팅)",concept:"[5위 2군] 사마의·조조·가후 추형방패",formation:"추형진",officers:[{name:"사마의",chosenTactics:["응시낭고","반객위주","요사여신"]},{name:"조조",chosenTactics:["효웅","진퇴유도","간담상조"]},{name:"가후",chosenTactics:["경달권변","만천과해","혼수모어"]}]},
     {id:"shu_macho_weiyeon_xushu_5",name:"[촉나라] 마초·위연·서서 안행창병 (5위 세팅)",concept:"[5위 3군] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","질풍노도"]},{name:"위연",chosenTactics:["실병제위","홍수첨향","이퇴위진"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
-    
-    // --- [신규 추가 5종 변형 덱] ---
     {id:"qun_wonso_jangnyeong_jwaja_var1",name:"[군진영] 원소·장녕·좌자 구행방패 덱 (변형)",concept:"[변형] 원소·장녕·좌자 구행방패",formation:"구행진",officers:[{name:"원소",chosenTactics:["사소도","강유겸제","여자동포"]},{name:"장녕",chosenTactics:["천의난위","양의화생","수상개화"]},{name:"좌자",chosenTactics:["화겁생기","안영찰채","유좌유용"]}]},
     {id:"wei_heojeo_gahu_akjin",name:"[위나라] 허저·가후·악진 호도창 덱",concept:"[신규] 허저·가후·악진 호도창",formation:"호도진",officers:[{name:"허저",chosenTactics:["호치","부동여산","반객위주"]},{name:"가후",chosenTactics:["경달권변","혼수모어","분성지계"]},{name:"악진",chosenTactics:["분용당선","기문둔갑","횡징폭렴"]}]},
     {id:"wei_jojo_sima_gahu_var1",name:"[위나라] 조조·사마의·가후 구행방패 덱 (변형)",concept:"[변형] 조조·사마의·가후 구행방패",formation:"구행진",officers:[{name:"조조",chosenTactics:["효웅","간담상조","안영찰채"]},{name:"사마의",chosenTactics:["응시낭고","수상개화","요사여신"]},{name:"가후",chosenTactics:["경달권변","혼수모어","금창신"]}]},
     {id:"shu_macho_weiyeon_xushu_var2",name:"[촉나라] 마초·위연·서서 안행창병 덱 (변형)",concept:"[변형] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","반객위주"]},{name:"위연",chosenTactics:["실병제위","강유겸제","진퇴유도"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
-    {id:"qun_jwaja_jangnyeong_ugil_var1",name:"[군진영] 좌자·장녕·우길 구행방패 덱 (변형)",concept:"[변형] 좌자·장녕·우길 구행방패",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","유좌유용","이퇴위진"]},{name:"장녕",chosenTactics:["천의난위","양의화생","낙정하석"]},{name:"우길",chosenTactics:["태평경","분성지계","여자동포"]}]}
+    {id:"qun_jwaja_jangnyeong_ugil_var1",name:"[군진영] 좌자·장녕·우길 구행방패 덱 (변형)",concept:"[변형] 좌자·장녕·우길 구행방패",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","유좌유용","이퇴위진"]},{name:"장녕",chosenTactics:["천의난위","양의화생","낙정하석"]},{name:"우길",chosenTactics:["태평경","분성지계","여자동포"]}]},
+    
+    // 🚨 [신규 등록] 장료·조조(제왕)·악진 기형기병 덱
+    {id:"wei_akjin_jojo_king_jangryo",name:"[위나라] 악진·조조(제왕)·장료 기형기병 덱",concept:"[신규] 악진·조조(제왕)·장료 기형기병",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","동구적개","진퇴유도"]},{name:"조조(제왕)",chosenTactics:["군령여산","횡징폭렴","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]}
 ];
 
 const metaDeckUnitTypeMap = {
@@ -34,7 +35,8 @@ const metaDeckUnitTypeMap = {
     "qun_wonso_dongtak_yeopo_4":"기병", "shu_macho_weiyeon_yubi_4":"창병", "wei_jojo_sima_hahou_4":"방패병",
     "qun_jwaja_jangnyeong_ugil_5":"궁병", "wei_sima_jojo_gahu_5":"방패병", "shu_macho_weiyeon_xushu_5":"창병",
     "qun_wonso_jangnyeong_jwaja_var1":"방패병", "wei_heojeo_gahu_akjin":"창병", "wei_jojo_sima_gahu_var1":"방패병",
-    "shu_macho_weiyeon_xushu_var2":"창병", "qun_jwaja_jangnyeong_ugil_var1":"방패병"
+    "shu_macho_weiyeon_xushu_var2":"창병", "qun_jwaja_jangnyeong_ugil_var1":"방패병",
+    "wei_akjin_jojo_king_jangryo":"기병" // 🚨 병종 매핑 추가
 };
 
 const systemGuideInsights = {
@@ -48,10 +50,10 @@ const systemGuideInsights = {
     "wei_heojeo_gahu_akjin":"💡 [신규] 허저의 묵직한 물리 타격과 가후, 악진의 변수 창출이 어우러진 창병 덱입니다.",
     "wei_jojo_sima_gahu_var1":"💡 [변형] 가후에게 금창신을 쥐여주어 모략 신산 딜링을 폭발시키는 방패병 조합입니다.",
     "shu_macho_weiyeon_xushu_var2":"💡 [변형] 위연에 진퇴유도를 장착해 팀 단위 공방 시너지를 극대화한 창병 조합입니다.",
-    "qun_jwaja_jangnyeong_ugil_var1":"💡 [변형] 우길에 분성지계를 더해 광역 화상 딜링과 디버프를 강화한 방패병 조합입니다."
+    "qun_jwaja_jangnyeong_ugil_var1":"💡 [변형] 우길에 분성지계를 더해 광역 화상 딜링과 디버프를 강화한 방패병 조합입니다.",
+    "wei_akjin_jojo_king_jangryo":"💡 [신규] 장료와 악진의 압도적인 물리 연타 폭딜을 조조(제왕)의 철벽 케어로 보좌하는 최상위 기병 조합입니다." // 🚨 인사이트 추가
 };
 
-// 🚨 글로벌 API 브릿지 개방 (deck_core.js 연동용)
 window.getMetaDeckData = function() {
     return {
         analyzedMetaArchetypes,
@@ -60,7 +62,6 @@ window.getMetaDeckData = function() {
     };
 };
 
-// 메타 덱 페이지 UI 렌더러
 function renderMetaDeckPage() {
     const container = document.getElementById('meta-deck-container');
     if (!container) return;
