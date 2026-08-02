@@ -1,10 +1,10 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (비동기 로딩 방어망 및 오리지널 시너지 탑재 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (전법 리스트 안전망 복구 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (진형 덮어쓰기 버그 픽스 및 UI 복구)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (AI 스마트 진형 버그 수정 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
-// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전
+// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전 (56종)
 // ==========================================================================
 const FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
@@ -14,7 +14,6 @@ const FB_OFF_META = {
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 [핵심 교정] 비동기 로딩 에러 방어용 전법 리스트 초경량 하드코딩 복구 (안전망)
 const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
@@ -124,7 +123,6 @@ function getOfficerDogamData(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 }
 
-// 🚨 [핵심 교정] 비동기 로드 실패 시 "데이터 연동 필요" 대신 FB_TACTICS를 렌더링하는 안전망 구축
 const getTacticListBridge = () => {
     if (window.getAllTacticsFromDogam) {
         const list = window.getAllTacticsFromDogam();
@@ -270,7 +268,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 3: 조합 맞춤형 동적 대체 추천 및 계층적 배타성 추천 엔진
+// LAYER 3: 다이나믹 조합 맞춤형 대체 추천 및 계층적 배타성 추천 엔진
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
@@ -595,21 +593,25 @@ window.autoFixDeck = oIdx => {
 
     const match = getBestMetaMatch(currentOfficers);
     
-    if (match && match.maxScore >= 1.5 && filledCount < 3) {
+    // 🚨 1.0 이상이면 메타덱 베이스로 간주하여 빈칸 무장 자동 채우기 및 진형 덮어쓰기 허용
+    if (match && match.maxScore >= 1.0) {
         targetDeck.formation = match.bestMeta.formation;
-        targetDeck.officers.forEach((o, idx) => { if (!o.name) o.name = match.bestMeta.officers[idx].name; });
-    }
-
-    let frontCount = 0, backCount = 0;
-    targetDeck.officers.forEach(o => {
-        if (o.name) {
-            const role = FB_OFF_META[o.name]?.[3] || "PC";
-            if (role === "TC" || role === "PC") frontCount++; else backCount++;
+        if (filledCount < 3) {
+            targetDeck.officers.forEach((o, idx) => { if (!o.name) o.name = match.bestMeta.officers[idx].name; });
         }
-    });
-    if (frontCount > backCount) targetDeck.formation = "안행진";
-    else if (backCount > frontCount) targetDeck.formation = "구행진";
-    else targetDeck.formation = "방원진";
+    } else {
+        // 완전 커스텀 오리지널 덱일 경우 진형 자동 판별
+        let frontCount = 0, backCount = 0;
+        targetDeck.officers.forEach(o => {
+            if (o.name) {
+                const role = FB_OFF_META[o.name]?.[3] || "PC";
+                if (role === "TC" || role === "PC") frontCount++; else backCount++;
+            }
+        });
+        if (frontCount > backCount) targetDeck.formation = "구행진"; // 2전열 1후열
+        else if (backCount > frontCount) targetDeck.formation = "추형진"; // 1전열 2후열
+        else targetDeck.formation = "방원진"; // 기본
+    }
 
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
@@ -742,6 +744,15 @@ function renderDeckBuilder() {
                         <button onclick="moveDeckAction(${aIdx},-1)" style="visibility:${aIdx>0?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▲</button>
                         <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
                         <span contenteditable="true" style="color:var(--text-main);font-weight:bold;font-size:18px;" onblur="updateDeckState(${deck.originIdx},'title',this.innerText.replace(/\\[추천도:.*?\\]/g,'').trim()||'${deck.title}')">${deck.title}</span>
+                        
+                        <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)" style="margin-left:8px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#38bdf8; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
+                            ${Object.keys(FORMATIONS).map(f => `<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('')}
+                        </select>
+                        <select onchange="updateDeckState(${deck.originIdx},'unitType',this.value)" style="margin-left:4px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#f59e0b; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
+                            <option value="">병종 자동 판별</option>
+                            ${['창병','기병','궁병','방패병'].map(u => `<option value="${u}" ${deck.unitType===u?'selected':''}>${u}</option>`).join('')}
+                        </select>
+                        
                         <span style="color:var(--text-highlight);font-size:13px;margin-left:8px;">[추천도: ${score}점]</span>
                     </div>
                     <div>
