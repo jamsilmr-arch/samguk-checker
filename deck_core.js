@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전투매 매핑 추가)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (에러 픽스 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전투매 매핑 및 오류 최종 픽스 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (최종 수정 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -99,9 +99,6 @@ const internalTacticStatMap = {
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6}
 };
 
-// ==========================================================================
-// LAYER 2: 하이브리드 도감 동적 바인딩 (외부 JS 크로스 브릿지)
-// ==========================================================================
 function getOfficerDogamData(officerName) {
     if (window.getOfficerDataFromDogam) { 
         const d = window.getOfficerDataFromDogam(officerName); 
@@ -266,9 +263,6 @@ function calculateActivatedBond(officers) {
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
-// ==========================================================================
-// LAYER 3: 조합 맞춤형 동적 대체 추천 및 계층적 배타성 추천 엔진
-// ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const allNames = getOfficerNamesBridge();
@@ -397,19 +391,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     return fb;
 }
 
-// ==========================================================================
-// LAYER 4: UI 파이프라인 및 모달 컨트롤 (테마 동기화)
-// ==========================================================================
-const FORMATIONS = {
-    "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
-    "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
-    "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
-    "기형진": { eff: "전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%", pos: ["back","back","front"] },
-    "방원진": { eff: "전열: 피해 감소 5.0% | 후열: 연격률 28.0%", pos: ["front","front","back"] },
-    "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
-};
-
-// 🚨 [핵심 교정] 전투매 매핑 추가 복원 (장료 덱 등)
+// 🚨 [핵심 교정] 전투매 매핑 
 const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 const metaHawkRandomAttributesMap = new Proxy({
     "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
@@ -429,6 +411,15 @@ window.getHawkDataFromGuide = function(metaId) {
         recommendation: metaHawkRecommendationMap[metaId || "custom"],
         attributes: metaHawkRandomAttributesMap[metaId || "custom"]
     };
+};
+
+const FORMATIONS = {
+    "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
+    "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
+    "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
+    "기형진": { eff: "전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%", pos: ["back","back","front"] },
+    "방원진": { eff: "전열: 피해 감소 5.0% | 후열: 연격률 28.0%", pos: ["front","front","back"] },
+    "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
 let dynamicPresetDecks = [];
@@ -614,25 +605,23 @@ window.autoFixDeck = oIdx => {
 
     const match = getBestMetaMatch(currentOfficers);
     
-    // 🚨 1. 스마트 포지셔닝: 메타 덱의 정석 배치 순서대로 강제 재배열 (유저 순서 무시)
+    // 🚨 1. 스마트 포지셔닝 (메타 덱 기준 위치 강제 덮어쓰기)
     if (match && match.maxScore >= 1.0) {
         targetDeck.formation = match.bestMeta.formation;
         let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
         
-        // 메타 덱의 정답지 순서대로 순회하며, 유저 덱에서 찾아서 제자리에 꽂아 넣음
         for(let i=0; i<3; i++) {
             const idealName = match.bestMeta.officers[i].name;
             const existingIdx = targetDeck.officers.findIndex(o => cStr(o.name) === cStr(idealName));
             
             if (existingIdx !== -1) {
                 newOfficers[i] = { ...targetDeck.officers[existingIdx], chosenTactics: [...targetDeck.officers[existingIdx].chosenTactics] };
-                targetDeck.officers[existingIdx].name = ""; // 중복 방지
+                targetDeck.officers[existingIdx].name = ""; 
             } else {
-                newOfficers[i] = { name: idealName, chosenTactics: ["", ""] }; // 없는 장수는 빈칸(이름만 할당)
+                newOfficers[i] = { name: idealName, chosenTactics: ["", ""] };
             }
         }
         
-        // 메타 덱에 없는 찌꺼기 장수(잘못 올린 장수)가 남아있다면, 빈자리에 욱여넣음
         for(let i=0; i<3; i++) {
             if (targetDeck.officers[i].name !== "") {
                 const emptyIdx = newOfficers.findIndex(o => o.name === "");
@@ -642,7 +631,7 @@ window.autoFixDeck = oIdx => {
         targetDeck.officers = newOfficers;
         
     } else {
-        // 🚨 2. 커스텀 덱 롤 기반 진형 할당 및 배치 재조정
+        // 🚨 2. 스마트 포지셔닝 (커스텀 덱 롤 기반 진형 할당)
         let frontPool = [], backPool = [];
         targetDeck.officers.forEach(o => {
             if (o.name) {
@@ -652,8 +641,8 @@ window.autoFixDeck = oIdx => {
             }
         });
 
-        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; // 2전열 1후열
-        else targetDeck.formation = "추형진"; // 1전열 2후열
+        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; 
+        else targetDeck.formation = "추형진"; 
 
         const posReq = FORMATIONS[targetDeck.formation].pos;
         let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
@@ -666,7 +655,6 @@ window.autoFixDeck = oIdx => {
         targetDeck.officers = newOfficers;
     }
 
-    // 🚨 3. 전법 동적 할당
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
