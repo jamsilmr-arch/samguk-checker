@@ -1,13 +1,14 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (오버플로우 스크롤바 버그 픽스)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (디자인 패치 내역 누락분 반영 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // 🚨 히스토리 데이터베이스 (최신 패치 내역)
+    // 🚨 히스토리 데이터베이스 (수정 내역 완벽 동기화)
     const patchHistoryData = [
         {
             date: "2026-08-03",
             logs: [
+                "나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
                 "네비게이션 바 우측에 불필요하게 생성되던 브라우저 강제 스크롤바(▲●▼) 버그 완벽 제거"
             ]
         },
@@ -83,7 +84,6 @@
                     .author-text { color: var(--text-muted) !important; }
                     h1, h2, h3, h4, h5, .group-title, .guide-section-title, .p-title { color: var(--text-main) !important; }
                     
-                    /* 🚨 [핵심 교정] 스크롤바 원천 차단을 위한 overflow 설정 */
                     .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; align-items: center; overflow-y: hidden !important; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
                     .global-nav-bar::-webkit-scrollbar { display: none; }
                     
@@ -91,7 +91,6 @@
                     .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
                     .nav-menu-item:hover a { color: var(--nav-hover) !important; }
                     
-                    /* 🚨 [핵심 교정] 마진값(-2px) 삭제 및 테두리만 생성하여 높이 오버플로우 방지 */
                     .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; }
                     
                     .header-sync-btn, .header-history-btn { border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: 10px; transition: background-color 0.3s; white-space: nowrap; }
