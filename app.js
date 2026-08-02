@@ -1,5 +1,5 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (전체 무장/전법 보존)
-console.log("[시스템 분석] app.js 구글 계정 동기화 연동 백업 엔진 기동");
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (파일 저장/불러오기 기능 추가 완료)
+console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 const heroList = [
     { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0, transcend: false },
@@ -147,7 +147,6 @@ const injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'app-custom-styles';
-    // [UI 교정] 글로벌 테마 변수를 활용하여 모드에 맞게 카드 디자인 동기화
     style.innerHTML = `
         .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; background-color: var(--bg-card); }
         .card-btn.owned { border-color: var(--success-text); background-color: var(--success-bg); box-shadow: inset 0 0 8px rgba(74, 222, 128, 0.1); }
@@ -159,6 +158,91 @@ const injectAppStyles = () => {
         .card-btn .trans-btn.active { background: #38bdf8; color: #ffffff; border-color: #38bdf8; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(56,189,248,0.4); }
     `;
     document.head.appendChild(style);
+};
+
+// 🚨 [핵심 교정] 백업 컨트롤 UI 패널 생성 및 주입
+const injectBackupUI = () => {
+    if (document.getElementById('backup-ui-container')) return;
+    const container = document.createElement('div');
+    container.id = 'backup-ui-container';
+    container.style.cssText = 'padding: 15px 30px; display: flex; gap: 10px; justify-content: flex-end; align-items: center; border-bottom: 1px solid var(--border-main); background-color: var(--bg-panel);';
+    container.innerHTML = `
+        <span style="color: var(--text-muted); font-size: 12px; margin-right: auto;">※ 내 장수/전법 데이터를 PC나 기기에 보관하고 언제든 복구할 수 있습니다.</span>
+        <button onclick="window.exportDataToFile()" style="background:#3b82f6; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.2); transition: background 0.2s;">💾 파일로 저장</button>
+        <button onclick="window.triggerImportData()" style="background:#10b981; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.2); transition: background 0.2s;">📂 파일 불러오기</button>
+    `;
+    
+    const navBar = document.querySelector('.global-nav-bar');
+    if (navBar) navBar.insertAdjacentElement('afterend', container);
+    else document.body.insertBefore(container, document.body.firstChild);
+};
+
+// 🚨 [핵심 교정] 파일로 내보내기 로직 (Export)
+window.exportDataToFile = function() {
+    const data = { heroes: heroList, tactics: tacticList };
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    
+    const d = new Date();
+    const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}`;
+    a.download = `삼국지왕전_백업_${dateStr}.json`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
+// 🚨 [핵심 교정] 파일에서 불러오기 로직 (Import)
+window.triggerImportData = function() {
+    let fileInput = document.getElementById('samguk-file-input');
+    if (!fileInput) {
+        fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = 'samguk-file-input';
+        fileInput.accept = '.json';
+        fileInput.style.display = 'none';
+        
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const parsed = JSON.parse(event.target.result);
+                    if (!parsed.heroes && !parsed.tactics) throw new Error("유효하지 않은 데이터 형식입니다.");
+                    
+                    const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
+                    const hMap = heroesSource.reduce((acc, sh) => { if (sh?.name) acc[cStr(sh.name)] = sh; return acc; }, {});
+                    heroList.forEach(h => {
+                        const sh = hMap[cStr(h.name)];
+                        if (sh) { h.isOwned = !!sh.isOwned; h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0; h.transcend = !!sh.transcend; }
+                    });
+                    
+                    const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
+                    const tMap = tacticsSource.reduce((acc, st) => { if (st?.name) acc[cStr(st.name)] = st; return acc; }, {});
+                    tacticList.forEach(t => {
+                        const st = tMap[cStr(t.name)];
+                        if (st) { t.isOwned = !!st.isOwned; t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0; }
+                    });
+                    
+                    window.saveDataToLocalStorage();
+                    renderButtons();
+                    alert("데이터 복구가 성공적으로 완료되었습니다.");
+                } catch (err) {
+                    alert("파일을 읽는 중 오류가 발생했습니다: " + err.message);
+                }
+                fileInput.value = ""; 
+            };
+            reader.readAsText(file);
+        };
+        document.body.appendChild(fileInput);
+    }
+    fileInput.click();
 };
 
 function renderButtons() {
@@ -225,6 +309,12 @@ function loadSavedData() {
     } catch(e) { console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e); }
 }
 
-function initAppEngine() { injectAppStyles(); loadSavedData(); renderButtons(); }
+function initAppEngine() { 
+    injectAppStyles(); 
+    injectBackupUI(); 
+    loadSavedData(); 
+    renderButtons(); 
+}
+
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAppEngine);
 else initAppEngine();
