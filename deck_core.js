@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (진형 덮어쓰기 버그 픽스 및 UI 복구)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (AI 스마트 진형 버그 수정 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (진형 매트릭스 패턴 매칭 엔진 탑재 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (커스텀 진형/전투매 연산 완벽 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -13,8 +13,6 @@ const FB_OFF_META = {
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"]
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
-
-const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -128,7 +126,7 @@ const getTacticListBridge = () => {
         const list = window.getAllTacticsFromDogam();
         if (list && list.length > 0) return list;
     }
-    return FB_TACTICS;
+    return ["데이터 연동 필요"];
 };
 
 const getOfficerNamesBridge = () => {
@@ -226,7 +224,9 @@ function aggregateIntegratedStats(deck, officerIndex) {
     internalBondRules.filter(r => curNames.filter(n => r.heroes.includes(cStr(n))).length >= r.req && new Set(curNames.filter(n => r.heroes.includes(cStr(n)))).size >= r.req)
         .forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
-    const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(matchMeta?.bestMeta?.id) : { attributes: null };
+    const isCustom = !matchMeta || matchMeta.maxScore < 1.5;
+    const metaIdForHawk = isCustom ? "custom" : matchMeta.bestMeta.id;
+    const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { attributes: null };
     const hA = hawkData.attributes;
     if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
@@ -268,7 +268,7 @@ function calculateActivatedBond(officers) {
 }
 
 // ==========================================================================
-// LAYER 3: 다이나믹 조합 맞춤형 대체 추천 및 계층적 배타성 추천 엔진
+// LAYER 3: 다이나믹 조합 맞춤형 대체 추천 및 계층적 배타성 엔진 (오리지널 시너지 지원)
 // ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
@@ -543,6 +543,7 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
+// 🚨 [핵심 교정] 진형 매트릭스 패턴 매칭 엔진 탑재
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -593,24 +594,41 @@ window.autoFixDeck = oIdx => {
 
     const match = getBestMetaMatch(currentOfficers);
     
-    // 🚨 1.0 이상이면 메타덱 베이스로 간주하여 빈칸 무장 자동 채우기 및 진형 덮어쓰기 허용
     if (match && match.maxScore >= 1.0) {
         targetDeck.formation = match.bestMeta.formation;
         if (filledCount < 3) {
             targetDeck.officers.forEach((o, idx) => { if (!o.name) o.name = match.bestMeta.officers[idx].name; });
         }
     } else {
-        // 완전 커스텀 오리지널 덱일 경우 진형 자동 판별
-        let frontCount = 0, backCount = 0;
-        targetDeck.officers.forEach(o => {
-            if (o.name) {
-                const role = FB_OFF_META[o.name]?.[3] || "PC";
-                if (role === "TC" || role === "PC") frontCount++; else backCount++;
-            }
+        // 🚨 오리지널 덱 진형 스마트 매핑 알고리즘
+        const roles = targetDeck.officers.map(o => {
+            if (!o.name) return "Def";
+            const r = FB_OFF_META[o.name]?.[3] || "PC";
+            return ["PC", "PCm", "SC"].includes(r) ? "Off" : "Def";
         });
-        if (frontCount > backCount) targetDeck.formation = "구행진"; // 2전열 1후열
-        else if (backCount > frontCount) targetDeck.formation = "추형진"; // 1전열 2후열
-        else targetDeck.formation = "방원진"; // 기본
+        
+        const formMap = {
+            "안행진": ["Off", "Def", "Def"],
+            "구행진": ["Def", "Off", "Def"],
+            "기형진": ["Def", "Def", "Off"],
+            "방원진": ["Def", "Def", "Off"],
+            "추형진": ["Off", "Def", "Off"],
+            "일자진": ["Def", "Def", "Def"]
+        };
+        
+        let bestForm = "일자진", maxFScore = -1;
+        for (const [fName, fRoles] of Object.entries(formMap)) {
+            let score = 0;
+            for (let i = 0; i < 3; i++) { if (roles[i] === fRoles[i]) score++; }
+            
+            // 병과별 특수 시너지 가산점 부여
+            if (fName === "방원진" && targetDeck.officers[2]?.name && FB_OFF_META[targetDeck.officers[2].name]?.[3] === "PCm") score += 0.5; // 방원진 연격 특화
+            if (fName === "안행진" && targetDeck.officers[0]?.name && FB_OFF_META[targetDeck.officers[0].name]?.[3] === "PC") score += 0.5; // 안행진 강공 특화
+            if (fName === "기형진" && targetDeck.officers[2]?.name && FB_OFF_META[targetDeck.officers[2].name]?.[3] === "SC") score += 0.5; // 기형진 모략 피증 특화
+            
+            if (score > maxFScore) { maxFScore = score; bestForm = fName; }
+        }
+        targetDeck.formation = bestForm;
     }
 
     targetDeck.officers.forEach(o => {
@@ -664,7 +682,7 @@ window.autoFixDeck = oIdx => {
     });
     
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder(); 
-    alert(`[AI 다이나믹 교정 완료] 메타에 얽매이지 않는 오리지널 시너지 구축 및 전법 할당 성공!`);
+    alert(`[AI 다이나믹 교정 완료] 오리지널 시너지 구축 및 전법 할당 성공!`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
@@ -726,7 +744,10 @@ function renderDeckBuilder() {
             });
             statsHtml += `</div>`;
 
-            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(match?.bestMeta?.id) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
+            // 🚨 [핵심 교정] 커스텀 전투매 추천 로직 독립
+            const isCustom = !match || match.maxScore < 1.5;
+            const metaIdForHawk = isCustom ? "custom" : match.bestMeta.id;
+            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
             const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
