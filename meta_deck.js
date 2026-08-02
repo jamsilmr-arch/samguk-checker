@@ -1,4 +1,4 @@
-// [시스템 분석] meta_deck.js - 전서버 랭커 실전 메타 덱 마스터 데이터베이스 (장료 종결 덱 추가 완료)
+// [시스템 분석] meta_deck.js - 전서버 랭커 실전 메타 덱 마스터 데이터베이스 (장료 덱 창병 픽스 완료)
 console.log("[시스템 분석] meta_deck.js 메타 덱 데이터 허브 기동");
 
 const analyzedMetaArchetypes = [
@@ -26,8 +26,8 @@ const analyzedMetaArchetypes = [
     {id:"shu_macho_weiyeon_xushu_var2",name:"[촉나라] 마초·위연·서서 안행창병 덱 (변형)",concept:"[변형] 마초·위연·서서 안행창병",formation:"안행진",officers:[{name:"마초",chosenTactics:["출수법","용맹무쌍","반객위주"]},{name:"위연",chosenTactics:["실병제위","강유겸제","진퇴유도"]},{name:"서서",chosenTactics:["절절학문","문치무공","전위위안"]}]},
     {id:"qun_jwaja_jangnyeong_ugil_var1",name:"[군진영] 좌자·장녕·우길 구행방패 덱 (변형)",concept:"[변형] 좌자·장녕·우길 구행방패",formation:"구행진",officers:[{name:"좌자",chosenTactics:["화겁생기","유좌유용","이퇴위진"]},{name:"장녕",chosenTactics:["천의난위","양의화생","낙정하석"]},{name:"우길",chosenTactics:["태평경","분성지계","여자동포"]}]},
     
-    // 🚨 [종결 세팅] 장료 덱 신규 편입 완료
-    {id:"wei_akjin_jojo_king_jangryo",name:"[위나라] 악진·조조(제왕)·장료 기형기병 덱",concept:"[신규] 악진·조조(제왕)·장료 기형기병",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","동구적개","진퇴유도"]},{name:"조조(제왕)",chosenTactics:["군령여산","횡징폭렴","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]}
+    // 🚨 [종결 세팅] 장료 덱 병종 및 명칭 '창병'으로 최종 픽스
+    {id:"wei_akjin_jojo_king_jangryo",name:"[위나라] 악진·조조(제왕)·장료 기형창병 덱",concept:"[신규] 악진·조조(제왕)·장료 기형창병",formation:"기형진",officers:[{name:"악진",chosenTactics:["분용당선","동구적개","진퇴유도"]},{name:"조조(제왕)",chosenTactics:["군령여산","횡징폭렴","간담상조"]},{name:"장료",chosenTactics:["함진살적","질풍노도","반객위주"]}]}
 ];
 
 const metaDeckUnitTypeMap = {
@@ -38,7 +38,7 @@ const metaDeckUnitTypeMap = {
     "qun_jwaja_jangnyeong_ugil_5":"궁병", "wei_sima_jojo_gahu_5":"방패병", "shu_macho_weiyeon_xushu_5":"창병",
     "qun_wonso_jangnyeong_jwaja_var1":"방패병", "wei_heojeo_gahu_akjin":"창병", "wei_jojo_sima_gahu_var1":"방패병",
     "shu_macho_weiyeon_xushu_var2":"창병", "qun_jwaja_jangnyeong_ugil_var1":"방패병",
-    "wei_akjin_jojo_king_jangryo":"기병" // 장료 덱 병종
+    "wei_akjin_jojo_king_jangryo":"창병" // 🚨 기병에서 '창병'으로 수정 완료
 };
 
 const systemGuideInsights = {
@@ -53,7 +53,7 @@ const systemGuideInsights = {
     "wei_jojo_sima_gahu_var1":"💡 [변형] 가후에게 금창신을 쥐여주어 모략 신산 딜링을 폭발시키는 방패병 조합입니다.",
     "shu_macho_weiyeon_xushu_var2":"💡 [변형] 위연에 진퇴유도를 장착해 팀 단위 공방 시너지를 극대화한 창병 조합입니다.",
     "qun_jwaja_jangnyeong_ugil_var1":"💡 [변형] 우길에 분성지계를 더해 광역 화상 딜링과 디버프를 강화한 방패병 조합입니다.",
-    "wei_akjin_jojo_king_jangryo":"💡 [신규] 장료와 악진의 압도적인 물리 연타 폭딜을 조조(제왕)의 철벽 케어로 보좌하는 최상위 기병 조합입니다."
+    "wei_akjin_jojo_king_jangryo":"💡 [신규] 장료와 악진의 압도적인 물리 연타 폭딜을 조조(제왕)의 철벽 케어로 보좌하는 최상위 창병 조합입니다." // 🚨 창병으로 수정 완료
 };
 
 window.getMetaDeckData = function() {
