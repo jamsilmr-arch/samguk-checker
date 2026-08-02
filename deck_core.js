@@ -1,11 +1,8 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (스마트 포지셔닝 탑재 및 전법 누락 완벽 픽스)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (스마트 포지셔닝 및 안전망 구축 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전투매 매핑 추가)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (에러 픽스 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// ==========================================================================
-// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전 (56종)
-// ==========================================================================
 const FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
@@ -14,7 +11,6 @@ const FB_OFF_META = {
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 [핵심 교정] 비동기 방어용 전법 리스트 어레이 완벽 복구
 const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
@@ -124,7 +120,6 @@ function getOfficerDogamData(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 }
 
-// 🚨 [핵심 교정] 비동기 데이터 증발 원천 차단 (배열 강제 리턴)
 const getTacticListBridge = () => {
     if (window.getAllTacticsFromDogam) {
         const list = window.getAllTacticsFromDogam();
@@ -414,6 +409,28 @@ const FORMATIONS = {
     "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
+// 🚨 [핵심 교정] 전투매 매핑 추가 복원 (장료 덱 등)
+const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+const metaHawkRandomAttributesMap = new Proxy({
+    "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "qun_wonso_jangnyeong_jwaja":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wei_jojo_sima_hahou":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wei_akjin_jojo_king_jangryo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
+}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+
+const metaHawkRecommendationMap = new Proxy({
+    "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"}, "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"}, "wei_akjin_jojo_king_jangryo":{name:"삭풍-설조",skill:"악진과 장료의 물리 연타 폭딜 및 확산 타격 극대화"}
+}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
+window.getHawkDataFromGuide = function(metaId) {
+    return {
+        recommendation: metaHawkRecommendationMap[metaId || "custom"],
+        attributes: metaHawkRandomAttributesMap[metaId || "custom"]
+    };
+};
+
 let dynamicPresetDecks = [];
 let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
@@ -547,7 +564,6 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
-// 🚨 [핵심 교정] 스마트 포지셔닝(Smart Positioning) 및 전법 할당 무손실 강화 
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -576,6 +592,7 @@ window.autoFixDeck = oIdx => {
             let ownedCount = meta.officers.filter(mo => hMap[cStr(mo.name)]?.isOwned && !higherHeroes.has(cStr(mo.name))).length;
             if (ownedCount > highestOwnedCount) { highestOwnedCount = ownedCount; bestMeta = meta; }
         }
+
         if (!bestMeta || highestOwnedCount === 0) return alert("[교정 실패] 가용 가능한 핵심 무장이 없습니다. 도감에서 보유 무장을 체크해주세요.");
         
         targetDeck.formation = bestMeta.formation;
@@ -597,26 +614,35 @@ window.autoFixDeck = oIdx => {
 
     const match = getBestMetaMatch(currentOfficers);
     
-    // 🚨 1. 스마트 포지셔닝 (메타 덱 기준 위치 강제 덮어쓰기)
+    // 🚨 1. 스마트 포지셔닝: 메타 덱의 정석 배치 순서대로 강제 재배열 (유저 순서 무시)
     if (match && match.maxScore >= 1.0) {
         targetDeck.formation = match.bestMeta.formation;
         let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
         
+        // 메타 덱의 정답지 순서대로 순회하며, 유저 덱에서 찾아서 제자리에 꽂아 넣음
         for(let i=0; i<3; i++) {
             const idealName = match.bestMeta.officers[i].name;
             const existingIdx = targetDeck.officers.findIndex(o => cStr(o.name) === cStr(idealName));
+            
             if (existingIdx !== -1) {
-                // 기존 유저가 갖고 있던 장수면 그대로 복사해오고, 원본에선 삭제(중복 방지)
                 newOfficers[i] = { ...targetDeck.officers[existingIdx], chosenTactics: [...targetDeck.officers[existingIdx].chosenTactics] };
-                targetDeck.officers[existingIdx].name = ""; 
+                targetDeck.officers[existingIdx].name = ""; // 중복 방지
             } else {
-                newOfficers[i] = { name: idealName, chosenTactics: ["", ""] };
+                newOfficers[i] = { name: idealName, chosenTactics: ["", ""] }; // 없는 장수는 빈칸(이름만 할당)
+            }
+        }
+        
+        // 메타 덱에 없는 찌꺼기 장수(잘못 올린 장수)가 남아있다면, 빈자리에 욱여넣음
+        for(let i=0; i<3; i++) {
+            if (targetDeck.officers[i].name !== "") {
+                const emptyIdx = newOfficers.findIndex(o => o.name === "");
+                if (emptyIdx !== -1) newOfficers[emptyIdx] = { ...targetDeck.officers[i], chosenTactics: [...targetDeck.officers[i].chosenTactics] };
             }
         }
         targetDeck.officers = newOfficers;
         
     } else {
-        // 🚨 2. 스마트 포지셔닝 (커스텀 덱 롤 기반 진형 할당)
+        // 🚨 2. 커스텀 덱 롤 기반 진형 할당 및 배치 재조정
         let frontPool = [], backPool = [];
         targetDeck.officers.forEach(o => {
             if (o.name) {
@@ -626,14 +652,12 @@ window.autoFixDeck = oIdx => {
             }
         });
 
-        // 전열과 후열 숫자에 따라 최적 진형 도출
-        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; // 2전열 1후열 (기본)
-        else targetDeck.formation = "추형진"; // 1전열 2후열 (기본)
+        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; // 2전열 1후열
+        else targetDeck.formation = "추형진"; // 1전열 2후열
 
         const posReq = FORMATIONS[targetDeck.formation].pos;
         let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
         
-        // 도출된 진형의 각 슬롯(front/back)에 맞춰 장수를 분배
         for(let i=0; i<3; i++) {
             if (posReq[i] === 'front' && frontPool.length > 0) newOfficers[i] = frontPool.shift();
             else if (posReq[i] === 'back' && backPool.length > 0) newOfficers[i] = backPool.shift();
