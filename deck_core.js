@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (대체 무장 다이나믹 스코어링 엔진 탑재)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (대체 무장 추천 알고리즘 고도화 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 설명 팝업 제거 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (무의미한 전법 팝업 기능 삭제)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -133,23 +133,6 @@ const getOfficerNamesBridge = () => {
     return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
-function getTacticInfo(tacticName) {
-    const cleanName = cStr(tacticName);
-    if (window.getTacticDataFromDogam) {
-        const tData = window.getTacticDataFromDogam(cleanName);
-        if (tData) return { role: tData.type || tData.role, target: tData.target, desc: tData.desc };
-    }
-    let foundOfficer = null;
-    for (const [offName, meta] of Object.entries(FB_OFF_META)) {
-        if (cStr(meta[0]) === cleanName) { foundOfficer = offName; break; }
-    }
-    if (foundOfficer && window.getOfficerDataFromDogam) {
-        const oData = window.getOfficerDataFromDogam(foundOfficer);
-        if (oData) return { role: oData.role, target: "적군/아군", desc: oData.skillDesc };
-    }
-    return { role: "전술 전법", target: "부대", desc: "실전 효과가 발동되는 고급 전투 전법입니다. (도감 데이터 연동 필요)" };
-}
-
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const cleanName = cStr(officerName);
     const dogamInfo = getOfficerDogamData(officerName);
@@ -266,7 +249,9 @@ function calculateActivatedBond(officers) {
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
-// 🚨 [핵심 교정] 다이나믹 스코어링 기반 대체 무장 추천 엔진
+// ==========================================================================
+// LAYER 3: 다이나믹 스코어링 기반 대체 무장 추천 엔진
+// ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const allNames = getOfficerNamesBridge();
@@ -290,16 +275,16 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
         const cFac = candMeta[2] || "";
         const cRole = candMeta[3] || "";
 
-        if (mFac === cFac) score += 50; // 진영 일치 가중치
+        if (mFac === cFac) score += 50; 
 
         if (deckUnitType && deckUnitType !== "자동 판별" && deckUnitType !== "") {
-            if (cUnit.includes(deckUnitType)) score += 40; // 병종 일치 가중치
+            if (cUnit.includes(deckUnitType)) score += 40; 
         } else {
             const mUnits = mUnit.split('/');
             if (mUnits.some(u => cUnit.includes(u))) score += 40;
         }
 
-        if (mRole === cRole) score += 30; // 역할군 일치 가중치
+        if (mRole === cRole) score += 30; 
 
         candidates.push({ name: allNames.find(n => cStr(n) === cleanCand) || cleanCand, score: score });
     });
@@ -499,13 +484,6 @@ function openModalPopup(e, title, meta1, desc1) {
     modalPopupEl.style.left = `${Math.min(rect.right + window.scrollX + 10, window.innerWidth - 290)}px`;
 }
 
-window.showTacticPopup = function(e, tacticName) {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
-    if (!tacticName || tacticName === "선택 안함") return;
-    const tData = getTacticInfo(tacticName);
-    openModalPopup(e, `⭐ ${tacticName}`, `타입: ${tData.role} | 대상: ${tData.target}`, tData.desc);
-};
-
 window.showEquipPopup = function(e, attr1, attr2) {
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
     openModalPopup(e, "⚒️ 장비 추가 속성", `🔹 1차: ${attr1}`, `🔹 2차: ${attr2}`);
@@ -525,7 +503,7 @@ const injectCustomUIStyles = () => {
         .feedback-item.warning { color: var(--text-highlight); }
         .feedback-item.info { color: var(--text-muted); }
         #tactic-popup-modal { display: none; position: absolute; z-index: 9999; background: var(--bg-panel); border: 1px solid var(--border-main); padding: 12px; border-radius: 6px; width: 280px; color: var(--text-main); font-size: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .tactic-row { cursor: pointer; padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; }
+        .tactic-row { padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; cursor: default; }
         .tactic-row select { width: 80%; margin: 0 auto; display: block; }
         .tactic-row.owned select { border: 1px solid var(--success-text); color: var(--success-text); background-color: var(--success-bg); }
         .tactic-row.missing { border: 1px dashed #f87171 !important; background-color: rgba(248, 113, 113, 0.05) !important; }
@@ -595,7 +573,6 @@ window.autoFixDeck = oIdx => {
             let ownedCount = meta.officers.filter(mo => hMap[cStr(mo.name)]?.isOwned && !higherHeroes.has(cStr(mo.name))).length;
             if (ownedCount > highestOwnedCount) { highestOwnedCount = ownedCount; bestMeta = meta; }
         }
-
         if (!bestMeta || highestOwnedCount === 0) return alert("[교정 실패] 가용 가능한 핵심 무장이 없습니다. 도감에서 보유 무장을 체크해주세요.");
         
         targetDeck.formation = bestMeta.formation;
@@ -617,7 +594,6 @@ window.autoFixDeck = oIdx => {
 
     const match = getBestMetaMatch(currentOfficers);
     
-    // 🚨 [핵심 교정] 스마트 포지셔닝: 메타 덱 정답지와 유저 덱을 조합하되, '슬롯 위치'를 강제로 덮어쓰기
     if (match && match.maxScore >= 1.0) {
         targetDeck.formation = match.bestMeta.formation;
         let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
@@ -625,7 +601,6 @@ window.autoFixDeck = oIdx => {
         for(let i=0; i<3; i++) {
             const idealName = match.bestMeta.officers[i].name;
             const existingIdx = targetDeck.officers.findIndex(o => cStr(o.name) === cStr(idealName));
-            
             if (existingIdx !== -1) {
                 newOfficers[i] = { ...targetDeck.officers[existingIdx], chosenTactics: [...targetDeck.officers[existingIdx].chosenTactics] };
                 targetDeck.officers[existingIdx].name = ""; 
@@ -633,7 +608,6 @@ window.autoFixDeck = oIdx => {
                 newOfficers[i] = { name: idealName, chosenTactics: ["", ""] };
             }
         }
-        
         for(let i=0; i<3; i++) {
             if (targetDeck.officers[i].name !== "") {
                 const emptyIdx = newOfficers.findIndex(o => o.name === "");
@@ -643,7 +617,6 @@ window.autoFixDeck = oIdx => {
         targetDeck.officers = newOfficers;
         
     } else {
-        // 커스텀 덱: 탱커/물리딜러는 전열, 마법사/서포터는 후열로 강제 분배
         let frontPool = [], backPool = [];
         targetDeck.officers.forEach(o => {
             if (o.name) {
@@ -757,14 +730,15 @@ function renderDeckBuilder() {
                 const heroCssClass = isHeroOwned ? 'owned' : 'missing';
                 const heroSpanColor = isHeroOwned ? 'var(--text-main)' : '#fca5a5';
                 
-                let tRows = `<div class="tactic-row ${heroCssClass}" style="border-left:3px solid var(--border-accent);" onclick="showTacticPopup(event, '${dg?.uniqueTactic||''}')"><span style="color:${heroSpanColor}; font-weight:bold;">⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
+                // 🚨 [핵심 교정] 고유 전법과 선택 전법 모두 팝업 이벤트를 제거하고 단순 표시용으로 변경
+                let tRows = `<div class="tactic-row ${heroCssClass}" style="border-left:3px solid var(--border-accent);"><span style="color:${heroSpanColor}; font-weight:bold;">⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
                     const cT = cStr(t);
                     const isOwn = cT ? !!tMap[cT]?.isOwned : false;
                     const cssClass = cT ? (isOwn ? 'owned' : 'missing') : 'missing';
                     
-                    tRows += `<div class="tactic-row ${cssClass}" onclick="showTacticPopup(event, this.querySelector('select').value)"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
+                    tRows += `<div class="tactic-row ${cssClass}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
