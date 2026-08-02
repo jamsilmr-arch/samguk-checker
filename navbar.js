@@ -1,10 +1,16 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (오버플로우 스크롤바 버그 픽스)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     // 🚨 히스토리 데이터베이스 (최신 패치 내역)
     const patchHistoryData = [
+        {
+            date: "2026-08-03",
+            logs: [
+                "네비게이션 바 우측에 불필요하게 생성되던 브라우저 강제 스크롤바(▲●▼) 버그 완벽 제거"
+            ]
+        },
         {
             date: "2026-08-02",
             logs: [
@@ -77,14 +83,18 @@
                     .author-text { color: var(--text-muted) !important; }
                     h1, h2, h3, h4, h5, .group-title, .guide-section-title, .p-title { color: var(--text-main) !important; }
                     
-                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; align-items: center; }
-                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
-                    .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; }
-                    .nav-menu-item:hover a { color: var(--nav-hover) !important; }
-                    .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; margin-bottom: -2px; }
-                    .nav-menu-item.active a { color: var(--nav-active-text) !important; }
+                    /* 🚨 [핵심 교정] 스크롤바 원천 차단을 위한 overflow 설정 */
+                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; align-items: center; overflow-y: hidden !important; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+                    .global-nav-bar::-webkit-scrollbar { display: none; }
                     
-                    .header-sync-btn, .header-history-btn { border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: 10px; transition: background-color 0.3s; }
+                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
+                    .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
+                    .nav-menu-item:hover a { color: var(--nav-hover) !important; }
+                    
+                    /* 🚨 [핵심 교정] 마진값(-2px) 삭제 및 테두리만 생성하여 높이 오버플로우 방지 */
+                    .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; }
+                    
+                    .header-sync-btn, .header-history-btn { border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: 10px; transition: background-color 0.3s; white-space: nowrap; }
                     .header-history-btn { background: #6366f1; color: #ffffff !important; margin-left: auto; }
                     .header-history-btn:hover { background: #4f46e5; }
                     .header-sync-btn { background: #f97316; color: #ffffff !important; }
@@ -93,7 +103,6 @@
                     #global-theme-toggle { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-main); border: 2px solid var(--border-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: transform 0.2s; }
                     #global-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
 
-                    /* 🚨 히스토리 모달 UI 스타일 */
                     .history-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(3px); }
                     .history-modal { background: var(--bg-panel); border: 1px solid var(--border-main); border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; }
                     .history-modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: var(--bg-header); }
@@ -139,7 +148,6 @@
             
             const navBarEl = document.getElementById('dynamic-global-nav-bar');
             if (navBarEl && !document.getElementById('global-history-btn')) {
-                // 히스토리 버튼 및 동기화 버튼 주입 (우측 정렬)
                 const cachedSyncEmail = localStorage.getItem('samguk_sync_email');
                 const syncBtnClass = cachedSyncEmail ? 'sync-on' : '';
                 const syncBtnText = cachedSyncEmail ? `☁️ 동기화 ON (${cachedSyncEmail.split('@')[0]})` : `☁️ 구글 계정 동기화 (OFF)`;
@@ -164,7 +172,6 @@
             });
         }
         
-        // 히스토리 모달 HTML 주입
         if (!document.getElementById('history-modal-overlay')) {
             const historyBlocksHtml = patchHistoryData.map(patch => `
                 <div class="history-block">
@@ -191,7 +198,6 @@
         }
     }
 
-    // 히스토리 모달 토글 함수
     window.toggleHistoryModal = function(forceState) {
         const overlay = document.getElementById('history-modal-overlay');
         if (!overlay) return;
