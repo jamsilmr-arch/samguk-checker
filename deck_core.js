@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전서버 1~2위 가중치 락인 및 Set F~I 전투매 매핑 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 고도화 및 세트 전투매 매핑 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 대체 추천 다이나믹 롤 기반 스코어링 픽스 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (가정지전 무지성 리턴 버그 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -81,19 +81,39 @@ const DYNAMIC_TACTIC_POOLS = {
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
+// 🚨 매핑 누락된 핵심 방어/회복 전법들 대규모 업데이트 완료
 const tacticAlternativesMap = {
-    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], "횡징폭렴":["간담상조","동구적개","동장철벽","홍수첨향"],
-    "동장철벽":["간담상조","견불가최","천시지리","동구적개"], "전위위안":["간담상조","태청단경","현호제세","제곤부위","안영찰채","만천과해"],
-    "이퇴위진":["미우주무","천시지리","진퇴유도","홍수첨향"], "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
-    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], "혼수모어":["사면초가","이간계","안영찰채"],
-    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], "유좌유용":["휴양생식","제곤부위","안영찰채"],
-    "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
-    "여자동포":["동구적개","천시지리"], "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
-    "수상개화":["요사여신","사생취의","양의화생"], "요사여신":["수상개화","사생취의","반객위주"],
-    "분성지계":["화소적벽","기문둔갑"], "체천행도":["반객위주","질풍노도","천리추격"], "금창신":["동구적개","강유겸제","간담상조"],
-    "만천과해":["전위위안","태청단경","휴양생식"], "토적격문":["진퇴유도","간담상조","이퇴위진"], "위위구조":["간담상조","진퇴유도","홍수첨향"],
-    "견진연봉":["동장철벽","순수견양"], "용왕직전":["천리추격","암전난방"], "만부막적":["용왕직전","천리추격"], "일고작기":["사생취의","용맹무쌍"],
-    "부동여산":["동장철벽", "견불가최"], "호치":["만부막적", "용왕직전"]
+    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
+    "횡징폭렴":["간담상조","동구적개","동장철벽"],
+    "동장철벽":["간담상조","견불가최","천시지리","동구적개"], 
+    "전위위안":["간담상조","태청단경","현호제세","제곤부위","안영찰채","만천과해"],
+    "이퇴위진":["미우주무","천시지리","진퇴유도"], 
+    "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
+    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], 
+    "혼수모어":["사면초가","이간계","안영찰채"],
+    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], 
+    "유좌유용":["휴양생식","제곤부위","안영찰채"],
+    "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], 
+    "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
+    "여자동포":["동구적개","천시지리"], 
+    "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
+    "수상개화":["요사여신","사생취의","양의화생"], 
+    "요사여신":["수상개화","사생취의","반객위주"],
+    "분성지계":["화소적벽","기문둔갑"], 
+    "체천행도":["반객위주","질풍노도","천리추격"], 
+    "금창신":["동구적개","강유겸제","간담상조"],
+    "만천과해":["전위위안","태청단경","휴양생식"], 
+    "토적격문":["진퇴유도","간담상조","이퇴위진"], 
+    "위위구조":["간담상조","진퇴유도","홍수첨향"],
+    "견진연봉":["동장철벽","순수견양"], 
+    "용왕직전":["천리추격","암전난방"], 
+    "만부막적":["용왕직전","천리추격"], 
+    "일고작기":["사생취의","용맹무쌍"],
+    "부동여산":["동장철벽", "견불가최"], 
+    "호치":["만부막적", "용왕직전"],
+    // 신규 추가 및 픽스 매핑
+    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"],
+    "이아환아":["동구적개","순수견양","부동여산","선등함진"]
 };
 
 const internalTacticStatMap = {
@@ -102,7 +122,6 @@ const internalTacticStatMap = {
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6}
 };
 
-// 🚨 1~2위 생태계 및 신규 Set(A~I) 전투매 속성 100% 매핑
 const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 const metaHawkRandomAttributesMap = new Proxy({
@@ -113,7 +132,6 @@ const metaHawkRandomAttributesMap = new Proxy({
     "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     
-    // 신규 Set 데이터
     "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
@@ -127,7 +145,6 @@ const metaHawkRecommendationMap = new Proxy({
     "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
     "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
     
-    // Set 생태계 매핑
     "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
     "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
     "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
@@ -345,17 +362,36 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
+// 🚨 [핵심 픽스] 가정지전, 강유겸제 무지성 리턴 버그 방지 알고리즘 완전 이식 완료 (역할군 기반 탐색)
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "") {
-    const alts = tacticAlternativesMap[missingTacName] || [];
+    const cleanMissing = cStr(missingTacName);
+    
+    // 1순위: 하드코딩된 완벽한 대체 전법 우선 탐색
+    const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
         const cleanT = cStr(t);
         if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) {
             recommendedTacs.add(t); return t;
         }
     }
+
+    // 2순위: 무장 역할군(Role) 기반 다이나믹 스코어링 탐색 (가정지전 버그 픽스)
+    let role = "PC";
+    if (officerName && FB_OFF_META[officerName]) {
+        role = FB_OFF_META[officerName][3] || "PC";
+    }
+    const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
+    for (let t of pool) {
+        const cleanT = cStr(t);
+        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t) && cleanT !== cleanMissing) {
+            recommendedTacs.add(t); return t;
+        }
+    }
+
+    // 3순위: 최후의 보루 (전체 전법 중 미사용 전법 가나다순 추출)
     const allTacs = getTacticListBridge();
     for (let cleanTName of Object.keys(tacticDataMap)) {
-        if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cStr(missingTacName)) {
+        if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
             recommendedTacs.add(originTName); return originTName;
         }
@@ -363,7 +399,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return null;
 }
 
-// 🚨 [우선순위 엔진 유지] 1위, 2위 덱은 가중치(Priority)를 더하여 무조건 1/2위를 덮어쓰도록(>=) 산정
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
