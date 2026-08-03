@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 설명 팝업 제거 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (무의미한 전법 팝업 기능 삭제)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (최신 메타 우선 매칭 및 드롭다운 UI 가독성 픽스 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 고도화 및 CSS 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -75,7 +75,8 @@ const internalBondRules = [
 const DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군", "일고작기", "용맹무쌍"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임"],
+    // 🚨 SC(모략 캐리) 풀에 '반객위주' 추가하여 커스텀 덱 빌딩 시에도 원활히 추천되도록 보완
+    "SC": ["사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
@@ -249,9 +250,6 @@ function calculateActivatedBond(officers) {
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
-// ==========================================================================
-// LAYER 3: 다이나믹 스코어링 기반 대체 무장 추천 엔진
-// ==========================================================================
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
     const allNames = getOfficerNamesBridge();
@@ -311,6 +309,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return null;
 }
 
+// 🚨 [핵심 교정] 동일 점수일 경우 무조건 배열 하단의 '최신 메타'를 덮어쓰기 하도록 우선순위 판별 업그레이드
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
@@ -320,7 +319,8 @@ function getBestMetaMatch(curNamesClean) {
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
         let score = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
-        if (score > maxScore) { maxScore = score; bestMeta = meta; }
+        // '>=' 연산자로 변경: 완전히 동일한 무장 조합(score가 같음)이라도 배열 맨 끝에 있는 최신 데이터를 우선 매칭
+        if (score >= maxScore) { maxScore = score; bestMeta = meta; }
     });
     return { bestMeta, maxScore };
 }
@@ -506,6 +506,10 @@ const injectCustomUIStyles = () => {
         .tactic-row { padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; cursor: default; }
         .tactic-row select { width: 80%; margin: 0 auto; display: block; }
         .tactic-row.owned select { border: 1px solid var(--success-text); color: var(--success-text); background-color: var(--success-bg); }
+        
+        /* 🚨 [핵심 교정] 드롭다운 내부 option 태그의 배경색과 글자색을 명시적으로 다크 테마로 강제하여 가독성 100% 확보 */
+        .tactic-row select option { background-color: var(--bg-input) !important; color: var(--text-main) !important; font-weight: normal; }
+        
         .tactic-row.missing { border: 1px dashed #f87171 !important; background-color: rgba(248, 113, 113, 0.05) !important; }
         .tactic-row.missing select { border: none; color: #fca5a5; background-color: transparent; }
     `;
@@ -730,7 +734,6 @@ function renderDeckBuilder() {
                 const heroCssClass = isHeroOwned ? 'owned' : 'missing';
                 const heroSpanColor = isHeroOwned ? 'var(--text-main)' : '#fca5a5';
                 
-                // 🚨 [핵심 교정] 고유 전법과 선택 전법 모두 팝업 이벤트를 제거하고 단순 표시용으로 변경
                 let tRows = `<div class="tactic-row ${heroCssClass}" style="border-left:3px solid var(--border-accent);"><span style="color:${heroSpanColor}; font-weight:bold;">⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
                 
                 (off.chosenTactics||[]).forEach((t, sIdx) => {
