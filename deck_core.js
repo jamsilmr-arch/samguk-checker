@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (관우/장비 딜러 전용 대체 전법 알고리즘 긴급 교정 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (부동여산/이아환아 대체 매핑 픽스)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (대체 전법 다중(Top 3) 추천 피드백 엔진 탑재 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (대체 전법 다중 추천 알고리즘 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -81,7 +81,6 @@ const DYNAMIC_TACTIC_POOLS = {
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
-// 🚨 [핵심 교정] 부동여산 및 이아환아의 대체 추천 매핑을 딜러 전용 화력기로 긴급 수술
 const tacticAlternativesMap = {
     "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
     "횡징폭렴":["간담상조","동구적개","동장철벽"],
@@ -109,8 +108,6 @@ const tacticAlternativesMap = {
     "용왕직전":["천리추격","암전난방"], 
     "만부막적":["용왕직전","천리추격"], 
     "일고작기":["사생취의","용맹무쌍"],
-    
-    // 🚨 관우/딜러 전용 픽스: 부동여산 미보유 시 무조건 물리 폭딜기로 대체! (동장철벽 등 방어기 완벽 제거)
     "부동여산":["용맹무쌍", "만부막적", "일고작기", "용왕직전", "사생취의", "질풍노도"], 
     "이아환아":["선등함진", "횡징폭렴", "반객위주", "동구적개"],
     "호치":["만부막적", "용왕직전", "용맹무쌍"],
@@ -364,43 +361,53 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [딜러 전용 스마트 필터링] 딜러 무장에게는 절대로 방어/탱킹 전법을 대체 추천하지 않도록 무장 역할군 보정
-function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "") {
+// 🚨 [핵심 기능] AI 대체 전법 추천 다중(Top 3) 반환 로직 픽스
+function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
     if (officerName && FB_OFF_META[officerName]) {
         role = FB_OFF_META[officerName][3] || "PC";
     }
 
-    // 1순위: 딜러 전용 픽스 수동 대체기 우선 탐색
+    let results = [];
+    const addResult = (t) => { if (!results.includes(t)) results.push(t); };
+    const checkAndAdd = (tStr) => {
+        const cleanT = cStr(tStr);
+        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(tStr) && !recommendedTacs.has(tStr) && cleanT !== cleanMissing) {
+            addResult(tStr);
+        }
+    };
+
+    // 1순위: 하드코딩 대체 맵
     const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
-        const cleanT = cStr(t);
-        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t)) {
-            recommendedTacs.add(t); return t;
-        }
+        checkAndAdd(t);
+        if (!returnList && results.length > 0) return results[0];
+        if (returnList && results.length >= 3) return results;
     }
 
-    // 2순위: 역할군 전용 풀(DYNAMIC_TACTIC_POOLS)에서 무조건 딜러 전용 딜기 탐색
+    // 2순위: 다이나믹 롤 기반 스코어링 풀
     const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
     for (let t of pool) {
-        const cleanT = cStr(t);
-        if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(t) && !recommendedTacs.has(t) && cleanT !== cleanMissing) {
-            recommendedTacs.add(t); return t;
-        }
+        checkAndAdd(t);
+        if (!returnList && results.length > 0) return results[0];
+        if (returnList && results.length >= 3) return results;
     }
 
-    // 3순위: 전체 전법 중 미사용 전법 가나다순 추출 (단, 딜러에게 방어 전법이 안 들어가도록 역할군 검증)
+    // 3순위: 전체 전법 탐색
     const allTacs = getTacticListBridge();
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
-            // PC(물리 딜러)일 경우 방어 전법(동장철벽 등)은 스킵
             if (["PC", "PCm", "SC"].includes(role) && ["동장철벽", "동구적개", "미우주무"].includes(cleanTName)) continue;
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
-            recommendedTacs.add(originTName); return originTName;
+            addResult(originTName);
+            if (!returnList && results.length > 0) return results[0];
+            if (returnList && results.length >= 3) return results;
         }
     }
-    return null;
+    
+    if (returnList) return results;
+    return results.length > 0 ? results[0] : null;
 }
 
 function getBestMetaMatch(curNamesClean) {
@@ -430,6 +437,7 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
+// 🚨 [핵심 교정] 피드백 패널에 최대 3개의 대체 전법 리스트업 적용 완료
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
@@ -479,9 +487,13 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 if (!isCustom && targetMetaTacs[i]) {
                     const pTac = targetMetaTacs[i];
                     const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
-                    const ownedAltTac = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
-                    const isAltOwned = tacticDataMap[cStr(ownedAltTac)]?.isOwned;
-                    const altText = ownedAltTac ? (isAltOwned ? `<span style="color:var(--success-text);font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#f87171;">[${ownedAltTac}](미보유)</span>`) : `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
+                    
+                    let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    if (ownedAlts && ownedAlts.length > 0) {
+                        recommendedTacs.add(ownedAlts[0]); 
+                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
+                    }
                     
                     if (isHigherUsed) fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: <span style="color:#fca5a5;text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 대체 추천: ${altText}` });
                     else fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ 권장 전법: <span style="color:#38bdf8;font-weight:bold;">[${pTac}]</span>` });
@@ -492,9 +504,14 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 const isTacOwned = !!tacticDataMap[cT]?.isOwned;
                 const isHigherUsed = higherTierUsedTacs.includes(cT);
                 if (!isTacOwned || isHigherUsed) {
-                    const ownedAltTac = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType);
-                    const isAltOwned = tacticDataMap[cStr(ownedAltTac)]?.isOwned;
-                    const altText = ownedAltTac ? (isAltOwned ? `<span style="color:var(--success-text);font-weight:bold;">[${ownedAltTac}]</span>` : `<span style="color:#f87171;">[${ownedAltTac}](미보유)</span>`) : `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
+                    
+                    let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    if (ownedAlts && ownedAlts.length > 0) {
+                        recommendedTacs.add(ownedAlts[0]); 
+                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
+                    }
+
                     const issue = isHigherUsed ? "상위 부대 사용" : "미보유";
                     fb.logs.push({ type: 'warning', text: `[${hName}] <span style="color:#fca5a5;text-decoration:line-through;">[${t}]</span> (${issue}) ➔ 대체 추천: ${altText}` });
                 }
@@ -678,7 +695,7 @@ window.autoFixDeck = oIdx => {
             const idealTacs = mo.chosenTactics.length === 3 ? mo.chosenTactics.slice(1,3) : [...mo.chosenTactics];
             const fixedTacs = idealTacs.map(tac => {
                 if (higherTacs.has(cStr(tac))) {
-                    const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), mo.name, targetDeck.unitType);
+                    const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), mo.name, targetDeck.unitType, false);
                     if (alt) { higherTacs.add(cStr(alt)); return alt; }
                     return "";
                 }
@@ -761,7 +778,7 @@ window.autoFixDeck = oIdx => {
                     const mt = metaTacs[i];
                     if (!higherTacs.has(cStr(mt))) foundTac = mt;
                     else {
-                        const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set(), o.name, targetDeck.unitType);
+                        const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set(), o.name, targetDeck.unitType, false);
                         if (alt) foundTac = alt;
                     }
                 }
@@ -869,7 +886,7 @@ function renderDeckBuilder() {
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                     <div style="display:flex; align-items:center; gap:6px;">
                         <button onclick="moveDeckAction(${aIdx},-1)" style="visibility:${aIdx>0?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▲</button>
-                        <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'hidden':'visible'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
+                        <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
                         <span contenteditable="true" style="color:var(--text-main);font-weight:bold;font-size:18px;" onblur="updateDeckState(${deck.originIdx},'title',this.innerText.replace(/\\[추천도:.*?\\]/g,'').trim()||'${deck.title}')">${deck.title}</span>
                         
                         <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)" style="margin-left:8px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#38bdf8; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
