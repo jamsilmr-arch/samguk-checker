@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (최신 메타 우선 매칭 및 드롭다운 UI 가독성 픽스 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 고도화 및 CSS 픽스)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전투매 매핑 복구 및 최신 랭커 ID 동기화 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (전투매 매핑 알고리즘 복구)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -75,7 +75,6 @@ const internalBondRules = [
 const DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군", "일고작기", "용맹무쌍"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    // 🚨 SC(모략 캐리) 풀에 '반객위주' 추가하여 커스텀 덱 빌딩 시에도 원활히 추천되도록 보완
     "SC": ["사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
@@ -101,6 +100,40 @@ const internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6}
+};
+
+// 🚨 [핵심 복구] 누락되었던 전투매(Hawk) 데이터 매핑 및 최신 메타 ID 100% 동기화
+const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+
+const metaHawkRandomAttributesMap = new Proxy({
+    "rank1_1gun_wu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_2gun_qun":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_3gun_wei":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank2_1gun_qun":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_2gun_wei":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_3gun_shu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wei_akjin_jojo_king_jangryo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "wei_jojo_sima_hahou_bangaek_susang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "wei_jojo_sima_hahou_bangaek_yosa":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
+}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+
+const metaHawkRecommendationMap = new Proxy({
+    "rank1_1gun_wu":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
+    "rank1_2gun_qun":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
+    "rank1_3gun_wei":{name:"열공-전광",skill:"허저 및 악진의 물리 피해 극대화"},
+    "rank2_1gun_qun":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
+    "rank2_2gun_wei":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
+    "rank2_3gun_shu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "wei_akjin_jojo_king_jangryo":{name:"삭풍-설조",skill:"악진과 장료의 물리 연타 폭딜 및 확산 극대화"},
+    "wei_jojo_sima_hahou_bangaek_susang":{name:"결운-호생",skill:"사마의 안정형 투트랙 캐리 및 호위 강화"},
+    "wei_jojo_sima_hahou_bangaek_yosa":{name:"결운-호생",skill:"사마의 극딜형 투트랙 캐리 및 호위 강화"}
+}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
+window.getHawkDataFromGuide = function(metaId) {
+    return {
+        recommendation: metaHawkRecommendationMap[metaId || "custom"],
+        attributes: metaHawkRandomAttributesMap[metaId || "custom"]
+    };
 };
 
 function getOfficerDogamData(officerName) {
@@ -309,7 +342,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return null;
 }
 
-// 🚨 [핵심 교정] 동일 점수일 경우 무조건 배열 하단의 '최신 메타'를 덮어쓰기 하도록 우선순위 판별 업그레이드
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
@@ -319,7 +351,6 @@ function getBestMetaMatch(curNamesClean) {
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
         let score = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
-        // '>=' 연산자로 변경: 완전히 동일한 무장 조합(score가 같음)이라도 배열 맨 끝에 있는 최신 데이터를 우선 매칭
         if (score >= maxScore) { maxScore = score; bestMeta = meta; }
     });
     return { bestMeta, maxScore };
@@ -507,7 +538,7 @@ const injectCustomUIStyles = () => {
         .tactic-row select { width: 80%; margin: 0 auto; display: block; }
         .tactic-row.owned select { border: 1px solid var(--success-text); color: var(--success-text); background-color: var(--success-bg); }
         
-        /* 🚨 [핵심 교정] 드롭다운 내부 option 태그의 배경색과 글자색을 명시적으로 다크 테마로 강제하여 가독성 100% 확보 */
+        /* 🚨 드롭다운 내부 option 태그 텍스트/배경색 강제 주입 */
         .tactic-row select option { background-color: var(--bg-input) !important; color: var(--text-main) !important; font-weight: normal; }
         
         .tactic-row.missing { border: 1px dashed #f87171 !important; background-color: rgba(248, 113, 113, 0.05) !important; }
