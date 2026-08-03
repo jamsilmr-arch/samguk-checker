@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전투매 매핑 추가 및 최신 우선순위(Priority) 매칭 엔진 탑재)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 고도화 및 전투매 매핑 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전서버 1~2위 가중치 락인 및 Set F~I 전투매 매핑 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 고도화 및 세트 전투매 매핑 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -102,35 +102,52 @@ const internalTacticStatMap = {
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6}
 };
 
-// 🚨 1~5위 전투매(Hawk) 데이터 매핑 및 최신 메타 ID 100% 동기화
+// 🚨 1~2위 생태계 및 신규 Set(A~I) 전투매 속성 100% 매핑
 const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 const metaHawkRandomAttributesMap = new Proxy({
-    "rank1_1gun_wu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank1_2gun_qun":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank1_3gun_wei":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank2_1gun_qun":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank2_2gun_wei":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank2_3gun_shu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
+    "rank1_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank2_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    
+    // 신규 Set 데이터
+    "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 const metaHawkRecommendationMap = new Proxy({
-    "rank1_1gun_wu":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
-    "rank1_2gun_qun":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
-    "rank1_3gun_wei":{name:"열공-전광",skill:"허저 및 악진의 물리 피해 극대화"},
-    "rank2_1gun_qun":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
-    "rank2_2gun_wei":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
-    "rank2_3gun_shu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    "rank3_1gun_shu":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
-    "rank3_2gun_wu":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
-    "rank3_3gun_wei":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
-    "rank4_1gun_qun":{name:"결운-호생",skill:"원소/동탁/여포 방원진 극딜 보정"},
-    "rank4_2gun_shu":{name:"결운-감로",skill:"마초/위연/유비 전투 지속력 강화"},
-    "rank4_3gun_wei":{name:"능소-진시",skill:"조조/사마의/하후돈 추격 및 폭딜 보정"},
-    "rank5_1gun_wei":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
-    "rank5_2gun_wei":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
-    "rank5_3gun_qun":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
-    "var_jegaryang_hwangchung_gangyu":{name:"결운-호생",skill:"제갈량/황충/강유 방원진 밸런스 유지"}
+    "rank1_1":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
+    "rank1_2":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
+    "rank1_3":{name:"열공-전광",skill:"허저 및 악진의 물리 피해 극대화"},
+    "rank2_1":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
+    "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
+    "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    
+    // Set 생태계 매핑
+    "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
+    "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
+    "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
+    "set_b_1":{name:"결운-호생",skill:"원소/동탁/여포 방원진 극딜 보정"},
+    "set_b_2":{name:"결운-감로",skill:"마초/위연/유비 전투 지속력 강화"},
+    "set_b_3":{name:"능소-진시",skill:"조조/사마의/하후돈 추격 및 폭딜 보정"},
+    "set_c_1":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
+    "set_c_2":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
+    "set_c_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
+    
+    "set_f_1":{name:"결운-감로",skill:"동탁/원소/여포 방원진 유지력 및 돌파력 강화"},
+    "set_f_2":{name:"삭풍-성모",skill:"마초/위연/유비제왕 추형진 공방 밸런스 유지"},
+    "set_f_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭격 지원"},
+    "set_g_1":{name:"결운-호생",skill:"서서/마초/위연 구행진 안정적 딜링 보정"},
+    "set_g_2":{name:"능소-진시",skill:"제갈량/황충/강유 방원진 콤보 시너지 극대화"},
+    "set_g_3":{name:"열공-여천",skill:"유비제왕/장비/관우 추형진 단단한 딜링망 구축"},
+    "set_h_1":{name:"능소-전우",skill:"조조/사마의/가후 구행진 화력 폭발 보조"},
+    "set_h_2":{name:"삭풍-성모",skill:"좌자/장녕/우길 구행진 철벽 유지력 보장"},
+    "set_i_1":{name:"결운-감로",skill:"좌자/장녕/우길 구행진 장기전 카운터 보조"},
+    "set_i_2":{name:"능소-전우",skill:"사마의/조조/가후 안행진 모략 폭격 극대화"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId) {
@@ -346,7 +363,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return null;
 }
 
-// 🚨 [우선순위 엔진] 1위, 2위 덱은 가중치(Priority)를 더하여 점수를 산정
+// 🚨 [우선순위 엔진 유지] 1위, 2위 덱은 가중치(Priority)를 더하여 무조건 1/2위를 덮어쓰도록(>=) 산정
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
@@ -356,7 +373,6 @@ function getBestMetaMatch(curNamesClean) {
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
         let baseScore = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
-        // 장수 일치도(baseScore)가 동일할 경우 1/2위 생태계가 우선 매칭되도록 가중치 합산
         let finalScore = baseScore + (meta.priority || 0);
 
         if (finalScore >= maxScore) { maxScore = finalScore; bestMeta = meta; }
@@ -386,7 +402,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         fb.logs.push({ type: 'info', text: `💡 <strong>[오리지널 시너지]</strong> 메타를 초월한 독자적인 조합입니다. AI가 역할군에 맞춰 분석합니다.` });
     } else {
         const { bestMeta: meta } = match;
-        fb.logs.push({ type: 'info', text: `🎯 <strong>[${meta.name}]</strong> 기반 처방입니다.` });
+        fb.logs.push({ type: 'info', text: `🎯 <strong>${meta.name}</strong> 기반 처방입니다.` });
         const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { systemGuideInsights: {} };
         if (metaData.systemGuideInsights && metaData.systemGuideInsights[meta.id]) {
             fb.insight = metaData.systemGuideInsights[meta.id];
@@ -545,11 +561,11 @@ const injectCustomUIStyles = () => {
         .tactic-row { padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; cursor: default; }
         .tactic-row select { width: 80%; margin: 0 auto; display: block; }
         .tactic-row.owned select { border: 1px solid var(--success-text); color: var(--success-text); background-color: var(--success-bg); }
+        
+        select option { background-color: var(--bg-panel) !important; color: var(--text-main) !important; font-weight: bold !important; }
+        
         .tactic-row.missing { border: 1px dashed #f87171 !important; background-color: rgba(248, 113, 113, 0.05) !important; }
         .tactic-row.missing select { border: none; color: #fca5a5; background-color: transparent; }
-        
-        /* 🚨 [핵심 교정] 드롭다운(select) 및 하위(option) 태그의 가독성 100% 보장 (색상 충돌 완벽 차단) */
-        select option { background-color: var(--bg-panel) !important; color: var(--text-main) !important; font-weight: bold !important; }
     `;
     document.head.appendChild(style);
 };
@@ -613,7 +629,7 @@ window.autoFixDeck = oIdx => {
         let bestMeta = null, highestOwnedCount = -1;
         for (const meta of archetypes) {
             let ownedCount = meta.officers.filter(mo => hMap[cStr(mo.name)]?.isOwned && !higherHeroes.has(cStr(mo.name))).length;
-            let currentScore = ownedCount + (meta.priority || 0); // 우선순위 가중치 1위, 2위 강제 필터
+            let currentScore = ownedCount + (meta.priority || 0);
             if (currentScore > highestOwnedCount) { highestOwnedCount = currentScore; bestMeta = meta; }
         }
         if (!bestMeta) return alert("[교정 실패] 가용 가능한 핵심 무장이 없습니다. 도감에서 보유 무장을 체크해주세요.");
