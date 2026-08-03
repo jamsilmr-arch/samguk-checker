@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전법 대체 추천 다이나믹 롤 기반 스코어링 픽스 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (가정지전 무지성 리턴 버그 픽스)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (관우/장비 딜러 전용 대체 전법 알고리즘 긴급 교정 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (부동여산/이아환아 대체 매핑 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -73,7 +73,7 @@ const internalBondRules = [
 ];
 
 const DYNAMIC_TACTIC_POOLS = {
-    "PC": ["만부막적", "질풍노도", "용왕직전", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군", "일고작기", "용맹무쌍"],
+    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
     "SC": ["사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
@@ -81,7 +81,7 @@ const DYNAMIC_TACTIC_POOLS = {
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
-// 🚨 매핑 누락된 핵심 방어/회복 전법들 대규모 업데이트 완료
+// 🚨 [핵심 교정] 부동여산 및 이아환아의 대체 추천 매핑을 딜러 전용 화력기로 긴급 수술
 const tacticAlternativesMap = {
     "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
     "횡징폭렴":["간담상조","동구적개","동장철벽"],
@@ -109,11 +109,12 @@ const tacticAlternativesMap = {
     "용왕직전":["천리추격","암전난방"], 
     "만부막적":["용왕직전","천리추격"], 
     "일고작기":["사생취의","용맹무쌍"],
-    "부동여산":["동장철벽", "견불가최"], 
-    "호치":["만부막적", "용왕직전"],
-    // 신규 추가 및 픽스 매핑
-    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"],
-    "이아환아":["동구적개","순수견양","부동여산","선등함진"]
+    
+    // 🚨 관우/딜러 전용 픽스: 부동여산 미보유 시 무조건 물리 폭딜기로 대체! (동장철벽 등 방어기 완벽 제거)
+    "부동여산":["용맹무쌍", "만부막적", "일고작기", "용왕직전", "사생취의", "질풍노도"], 
+    "이아환아":["선등함진", "횡징폭렴", "반객위주", "동구적개"],
+    "호치":["만부막적", "용왕직전", "용맹무쌍"],
+    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"]
 };
 
 const internalTacticStatMap = {
@@ -133,6 +134,7 @@ const metaHawkRandomAttributesMap = new Proxy({
     "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     
     "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "set_g_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
@@ -362,11 +364,15 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [핵심 픽스] 가정지전, 강유겸제 무지성 리턴 버그 방지 알고리즘 완전 이식 완료 (역할군 기반 탐색)
+// 🚨 [딜러 전용 스마트 필터링] 딜러 무장에게는 절대로 방어/탱킹 전법을 대체 추천하지 않도록 무장 역할군 보정
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "") {
     const cleanMissing = cStr(missingTacName);
-    
-    // 1순위: 하드코딩된 완벽한 대체 전법 우선 탐색
+    let role = "PC";
+    if (officerName && FB_OFF_META[officerName]) {
+        role = FB_OFF_META[officerName][3] || "PC";
+    }
+
+    // 1순위: 딜러 전용 픽스 수동 대체기 우선 탐색
     const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
         const cleanT = cStr(t);
@@ -375,11 +381,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         }
     }
 
-    // 2순위: 무장 역할군(Role) 기반 다이나믹 스코어링 탐색 (가정지전 버그 픽스)
-    let role = "PC";
-    if (officerName && FB_OFF_META[officerName]) {
-        role = FB_OFF_META[officerName][3] || "PC";
-    }
+    // 2순위: 역할군 전용 풀(DYNAMIC_TACTIC_POOLS)에서 무조건 딜러 전용 딜기 탐색
     const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
     for (let t of pool) {
         const cleanT = cStr(t);
@@ -388,10 +390,12 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         }
     }
 
-    // 3순위: 최후의 보루 (전체 전법 중 미사용 전법 가나다순 추출)
+    // 3순위: 전체 전법 중 미사용 전법 가나다순 추출 (단, 딜러에게 방어 전법이 안 들어가도록 역할군 검증)
     const allTacs = getTacticListBridge();
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
+            // PC(물리 딜러)일 경우 방어 전법(동장철벽 등)은 스킵
+            if (["PC", "PCm", "SC"].includes(role) && ["동장철벽", "동구적개", "미우주무"].includes(cleanTName)) continue;
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
             recommendedTacs.add(originTName); return originTName;
         }
@@ -674,7 +678,7 @@ window.autoFixDeck = oIdx => {
             const idealTacs = mo.chosenTactics.length === 3 ? mo.chosenTactics.slice(1,3) : [...mo.chosenTactics];
             const fixedTacs = idealTacs.map(tac => {
                 if (higherTacs.has(cStr(tac))) {
-                    const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set());
+                    const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), mo.name, targetDeck.unitType);
                     if (alt) { higherTacs.add(cStr(alt)); return alt; }
                     return "";
                 }
@@ -757,7 +761,7 @@ window.autoFixDeck = oIdx => {
                     const mt = metaTacs[i];
                     if (!higherTacs.has(cStr(mt))) foundTac = mt;
                     else {
-                        const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set());
+                        const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set(), o.name, targetDeck.unitType);
                         if (alt) foundTac = alt;
                     }
                 }
@@ -865,7 +869,7 @@ function renderDeckBuilder() {
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                     <div style="display:flex; align-items:center; gap:6px;">
                         <button onclick="moveDeckAction(${aIdx},-1)" style="visibility:${aIdx>0?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▲</button>
-                        <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
+                        <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'hidden':'visible'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
                         <span contenteditable="true" style="color:var(--text-main);font-weight:bold;font-size:18px;" onblur="updateDeckState(${deck.originIdx},'title',this.innerText.replace(/\\[추천도:.*?\\]/g,'').trim()||'${deck.title}')">${deck.title}</span>
                         
                         <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)" style="margin-left:8px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#38bdf8; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
