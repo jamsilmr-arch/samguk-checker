@@ -1,4 +1,4 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (세로 스크롤바 박멸 및 가이드 텍스트 가독성 픽스)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (가이드 본문 li, p 가독성 강제 오버라이드 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -7,9 +7,11 @@
         {
             date: "2026-08-04",
             logs: [
+                "시스템 가이드 세부 본문(li, p) 텍스트 흐림 현상 강제 오버라이드 (가독성 100% 픽스)",
                 "PC 버전 네비게이션 바 세로 스크롤바(▲▼) 부활 버그 완벽 박멸 (flex-nowrap 강제 적용)",
-                "시스템 가이드 라이트 모드(White Theme) 가독성 저하 픽스 (하드코딩 색상 소거 및 테마 변수 연동)",
-                "navbar.js 내부 문법 오류(Syntax Error) 픽스로 PC/모바일 네비바 렌더링 증발 버그 완벽 해결",
+                "라이트 모드(White Theme) 전용 컬러 팔레트 전면 수정 (텍스트 가독성 및 명도 대비 개선)",
+                "네비게이션 바(GNB) 테마 독립화: 라이트 모드에서도 탭 시인성이 묻히지 않도록 컬러 재설계",
+                "PC 버전 네비게이션 바 렌더링 증발 버그 완벽 픽스 (강제 초기화 및 재주입 로직 적용)",
                 "관우/장비 물리 딜러 전용 대체 추천 알고리즘 긴급 수정",
                 "3위 이하 메타 덱 세트화(Set A~I) 개편 및 신규 10종 덱 아카이빙 완료",
                 "단일 전법 추천으로 인한 덱 분배 오류 해결 (최대 3개 대체 전법 리스트업)"
@@ -20,6 +22,14 @@
             logs: [
                 "나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
                 "안드로이드 모바일 브라우저 네비바(GNB) 스와이프 먹통 버그 완벽 픽스"
+            ]
+        },
+        {
+            date: "2026-08-02",
+            logs: [
+                "유저 배치 순서를 최적의 전/후열로 자동 재배열하는 스마트 포지셔닝 엔진 탑재",
+                "대체 무장 추천 시 '가후'만 무지성 리턴하던 하드코딩 버그 수정",
+                "로컬 백업(저장/불러오기) 기능 추가 및 전체 테마 동기화"
             ]
         }
     ];
@@ -53,9 +63,10 @@
                 body { background-color: var(--bg-main) !important; color: var(--text-main) !important; transition: background-color 0.3s, color 0.3s; }
                 .section-box, .guide-content-area, aside, .deck-card, .info-card, .data-table-wrapper { background-color: var(--bg-panel) !important; border-color: var(--border-main) !important; transition: background-color 0.3s, border-color 0.3s; }
                 
-                /* 🚨 [가독성 픽스] 시스템 가이드 내부 텍스트 흐림 현상 원천 차단 */
+                /* 🚨 [강제 오버라이드] 원본 웹사이트의 li, p 등 전역 스타일을 무시하고 무조건 테마 색상으로 덮어쓰기 */
                 .info-card { color: var(--text-desc) !important; line-height: 1.6; }
-                .info-card * { color: var(--text-desc); }
+                .info-card p, .info-card ul, .info-card li, .info-card span, .info-card div { color: var(--text-desc) !important; }
+                .info-card strong, .info-card b { color: var(--text-main) !important; font-weight: bold; }
                 .info-card h3, .guide-section-title { color: var(--text-main) !important; font-weight: bold; }
                 
                 .officer-slot { background-color: var(--bg-inner) !important; border: 1px solid var(--border-main) !important; border-radius: 6px; padding: 10px; }
@@ -73,7 +84,6 @@
                 .top-title-header h1 { color: var(--text-main) !important; }
                 .author-text { color: var(--text-muted) !important; }
                 
-                /* 🚨 [스크롤바 박멸] flex-wrap을 nowrap으로 강제하여 세로 오버플로우 원천 차단 */
                 .global-nav-bar { 
                     background-color: var(--bg-nav) !important; 
                     border-bottom: 2px solid var(--border-accent) !important; 
