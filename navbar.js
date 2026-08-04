@@ -1,19 +1,22 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (PC 렌더링 증발 버그 및 Height Collapse 픽스 완료)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (JS 문법 오류 Syntax Error 완벽 픽스)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
+    // 🚨 [치명적 오류 수정] patchHistoryData 배열 내 객체 쉼표(,) 및 괄호({) 누락으로 인한 파싱 에러 픽스
     const patchHistoryData = [
         {
             date: "2026-08-04",
             logs: [
+                "navbar.js 내부 문법 오류(Syntax Error) 픽스로 PC/모바일 네비바 렌더링 증발 버그 완벽 해결",
                 "안드로이드 모바일 브라우저 환경 네비게이션 바(GNB) 스와이프 먹통 버그 픽스",
                 "모바일 환경 가독성 확보를 위한 완벽한 반응형 웹(RWD) 레이아웃 적용 완료"
             ]
-        }
+        },
+        {
             date: "2026-08-03",
             logs: [
-                 "최대 3개의 대체 전법 리스트([전법1] / [전법2] / [전법3])를 동시 제공하는 다중 추천 엔진 탑재 완료",
+                "최대 3개의 대체 전법 리스트([전법1] / [전법2] / [전법3])를 동시 제공하는 다중 추천 엔진 탑재 완료",
                 "가정지전/강유겸제 무지성 리턴 버그 완전 픽스 (역할군 다이나믹 탐색 로직 이식)",
                 "전법 선택 드롭다운 목록(select option)의 텍스트 색상 상속 버그 픽스 및 다크테마 가독성 100% 개선",
                 "AI 덱 자동 완성 알고리즘 강화 (중복 점수 시 구형 덱이 아닌 최신 메타 덱을 우선 덮어쓰도록 픽스)",
@@ -25,7 +28,6 @@
     ];
 
     function injectGlobalNavbarEngine() {
-        // 🚨 [핵심 방어막] 기존 유령 CSS 및 DOM이 있으면 무조건 파괴 후 재건축 (렌더링 스킵 원천 차단)
         const oldStyles = document.getElementById('dynamic-navbar-styles');
         if (oldStyles) oldStyles.remove();
 
@@ -66,7 +68,6 @@
                 .author-text { color: var(--text-muted) !important; }
                 h1, h2, h3, h4, h5, .group-title, .guide-section-title, .p-title { color: var(--text-main) !important; }
                 
-                /* 🚨 PC Height Collapse 방지용 width 100% 강제 적용 */
                 .global-nav-bar { 
                     background-color: var(--bg-nav) !important; 
                     border-bottom: 2px solid var(--border-accent) !important; 
@@ -130,7 +131,6 @@
             </style>
         `);
 
-        // 🚨 기존 유령 태그 파괴
         const existingNav = document.getElementById('dynamic-global-nav-bar');
         if (existingNav) existingNav.remove();
 
@@ -165,7 +165,6 @@
             </nav>
         `;
 
-        // 🚨 타겟팅 알고리즘 교정: 무조건 타이틀(h1) 아래를 조준하여 겹침 방지
         let target = document.querySelector('.top-title-header') || document.querySelector('header');
         if (!target) {
             const h1El = document.querySelector('h1');
@@ -246,7 +245,6 @@
         }
     };
 
-    // DOM이 완전히 로드되기 전/후에 안전하게 주입
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
     } else {
