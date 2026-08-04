@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (대체 전법 다중(Top 3) 추천 피드백 엔진 탑재 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (대체 전법 다중 추천 알고리즘 픽스)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (모바일 반응형 웹 RWD CSS 완벽 이식 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (모바일 UI 깨짐 및 데스크톱 모드 충돌 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -129,7 +129,6 @@ const metaHawkRandomAttributesMap = new Proxy({
     "rank2_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    
     "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_g_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
@@ -143,7 +142,6 @@ const metaHawkRecommendationMap = new Proxy({
     "rank2_1":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
     "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
     "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    
     "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
     "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
     "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
@@ -153,7 +151,6 @@ const metaHawkRecommendationMap = new Proxy({
     "set_c_1":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
     "set_c_2":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
     "set_c_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
-    
     "set_f_1":{name:"결운-감로",skill:"동탁/원소/여포 방원진 유지력 및 돌파력 강화"},
     "set_f_2":{name:"삭풍-성모",skill:"마초/위연/유비제왕 추형진 공방 밸런스 유지"},
     "set_f_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭격 지원"},
@@ -361,7 +358,7 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [핵심 기능] AI 대체 전법 추천 다중(Top 3) 반환 로직 픽스
+// 🚨 [다중 추천 엔진] 배열(Array) 반환을 지원하도록 파라미터(returnList) 적용
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -378,7 +375,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         }
     };
 
-    // 1순위: 하드코딩 대체 맵
     const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
         checkAndAdd(t);
@@ -386,7 +382,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    // 2순위: 다이나믹 롤 기반 스코어링 풀
     const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
     for (let t of pool) {
         checkAndAdd(t);
@@ -394,7 +389,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    // 3순위: 전체 전법 탐색
     const allTacs = getTacticListBridge();
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
@@ -437,7 +431,6 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-// 🚨 [핵심 교정] 피드백 패널에 최대 3개의 대체 전법 리스트업 적용 완료
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
@@ -487,9 +480,11 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 if (!isCustom && targetMetaTacs[i]) {
                     const pTac = targetMetaTacs[i];
                     const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
-                    const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     
+                    // 🚨 다중 추천(returnList = true)을 호출하여 최대 3개의 결과를 배열로 받아 UI에 나열
+                    const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    
                     if (ownedAlts && ownedAlts.length > 0) {
                         recommendedTacs.add(ownedAlts[0]); 
                         altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
@@ -504,9 +499,11 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 const isTacOwned = !!tacticDataMap[cT]?.isOwned;
                 const isHigherUsed = higherTierUsedTacs.includes(cT);
                 if (!isTacOwned || isHigherUsed) {
-                    const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     
+                    // 🚨 다중 추천(returnList = true)을 호출하여 최대 3개의 결과를 배열로 받아 UI에 나열
+                    const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
+                    
                     if (ownedAlts && ownedAlts.length > 0) {
                         recommendedTacs.add(ownedAlts[0]); 
                         altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
@@ -605,6 +602,18 @@ const injectCustomUIStyles = () => {
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
     style.innerHTML = `
+        /* 🚨 반응형 레이아웃 클래스 정의 (아이폰 데스크톱 모드 UI 깨짐 완벽 방어) */
+        .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+        .deck-header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .deck-header-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .deck-header-actions { display: flex; gap: 6px; }
+        
+        @media (max-width: 850px) {
+            .grid-layout { grid-template-columns: 1fr; } 
+            .deck-header-wrapper { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .deck-card { padding: 10px !important; }
+        }
+
         .deck-card select { background-color: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px; padding: 6px 24px 6px 10px; font-size: 13px; width: 100%; box-sizing: border-box; font-family: inherit; transition: background-color 0.3s, color 0.3s; }
         .hawk-recommend-box { margin-top: 10px; padding: 12px; background-color: var(--bg-inner); border-left: 4px solid #3b82f6; border-radius: 6px; font-size: 13px; color: var(--text-desc); line-height: 1.5; transition: background-color 0.3s; }
         .equipment-box { margin-top: 6px; padding: 6px; border: 1px solid var(--border-main); border-radius: 4px; background-color: var(--bg-inner); font-size: 11px; color: var(--text-desc); transition: background-color 0.3s, border-color 0.3s; }
@@ -695,6 +704,7 @@ window.autoFixDeck = oIdx => {
             const idealTacs = mo.chosenTactics.length === 3 ? mo.chosenTactics.slice(1,3) : [...mo.chosenTactics];
             const fixedTacs = idealTacs.map(tac => {
                 if (higherTacs.has(cStr(tac))) {
+                    // 🚨 AI 교정 함수(실제 슬롯 변경)에서는 returnList = false 파라미터를 사용하여 무조건 1개의 1순위 대체만 받아 안전하게 장착
                     const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), mo.name, targetDeck.unitType, false);
                     if (alt) { higherTacs.add(cStr(alt)); return alt; }
                     return "";
@@ -861,12 +871,11 @@ function renderDeckBuilder() {
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
             }).join('');
 
-            let statsHtml = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;">`;
+            let statsHtmlInner = "";
             deck.officers.forEach((off, oIdx) => {
                 const stats = aggregateIntegratedStats(deck, oIdx);
-                statsHtml += `<div>${buildIntegratedStatsHtml(stats)}</div>`;
+                statsHtmlInner += `<div>${buildIntegratedStatsHtml(stats)}</div>`;
             });
-            statsHtml += `</div>`;
 
             const isCustom = !match || match.maxScore < 1.5;
             const metaIdForHawk = isCustom ? "custom" : match.bestMeta.id;
@@ -882,9 +891,10 @@ function renderDeckBuilder() {
             const bondFeedback = `<div class="feedback-item info" style="margin-top:6px;">🤝 <strong>활성화 인연:</strong> <span style="color:var(--text-highlight);">${calculateActivatedBond(deck.officers)}</span></div>`;
             const perfectionMsg = evaluateDeckPerfection(deck, match?.bestMeta?.id);
 
+            // 🚨 RWD 지원 HTML 구조 적용 (grid-layout, deck-header-wrapper 클래스 사용)
             container.insertAdjacentHTML('beforeend', `<div class="deck-card" style="background-color:var(--bg-panel);border:1px solid var(--border-main);border-radius:8px;padding:16px;margin-bottom:16px; transition: background-color 0.3s, border-color 0.3s;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <div style="display:flex; align-items:center; gap:6px;">
+                <div class="deck-header-wrapper">
+                    <div class="deck-header-controls">
                         <button onclick="moveDeckAction(${aIdx},-1)" style="visibility:${aIdx>0?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▲</button>
                         <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
                         <span contenteditable="true" style="color:var(--text-main);font-weight:bold;font-size:18px;" onblur="updateDeckState(${deck.originIdx},'title',this.innerText.replace(/\\[추천도:.*?\\]/g,'').trim()||'${deck.title}')">${deck.title}</span>
@@ -899,13 +909,13 @@ function renderDeckBuilder() {
                         
                         <span style="color:var(--text-highlight);font-size:13px;margin-left:8px;">[추천도: ${score}점]</span>
                     </div>
-                    <div>
+                    <div class="deck-header-actions">
                         <button onclick="autoFixDeck(${deck.originIdx})" style="background:#8b5cf6;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">✨ AI 교정</button> 
                         <button onclick="updateDeckState(${deck.originIdx},'reset')" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">초기화</button>
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px;">${offHtml}</div>
-                ${statsHtml}
+                <div class="grid-layout">${offHtml}</div>
+                <div class="grid-layout" style="margin-top:6px;">${statsHtmlInner}</div>
                 <div style="margin-top:12px;">${hawkHtml}${fbH}${bondFeedback}${perfectionMsg}</div>
             </div>`);
         });
