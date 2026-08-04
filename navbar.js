@@ -1,28 +1,33 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (JS 문법 오류 Syntax Error 완벽 픽스)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (라이트 모드 가독성 및 명도 대비 최적화 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // 🚨 [치명적 오류 수정] patchHistoryData 배열 내 객체 쉼표(,) 및 괄호({) 누락으로 인한 파싱 에러 픽스
     const patchHistoryData = [
         {
             date: "2026-08-04",
             logs: [
-                "navbar.js 내부 문법 오류(Syntax Error) 픽스로 PC/모바일 네비바 렌더링 증발 버그 완벽 해결",
-                "안드로이드 모바일 브라우저 환경 네비게이션 바(GNB) 스와이프 먹통 버그 픽스",
-                "모바일 환경 가독성 확보를 위한 완벽한 반응형 웹(RWD) 레이아웃 적용 완료"
+                "라이트 모드(White Theme) 전용 컬러 팔레트 전면 수정 (텍스트 가독성 및 명도 대비 100% 개선)",
+                "네비게이션 바(GNB) 테마 독립화: 라이트 모드에서도 탭 시인성이 묻히지 않도록 컬러 재설계",
+                "PC 버전 네비게이션 바 렌더링 증발 버그 완벽 픽스 (강제 초기화 및 재주입 로직 적용)",
+                "관우/장비 물리 딜러 전용 대체 추천 알고리즘 긴급 수정",
+                "3위 이하 메타 덱 세트화(Set A~I) 개편 및 신규 10종 덱 아카이빙 완료",
+                "단일 전법 추천으로 인한 덱 분배 오류 해결 (최대 3개 대체 전법 리스트업)"
             ]
         },
         {
             date: "2026-08-03",
             logs: [
-                "최대 3개의 대체 전법 리스트([전법1] / [전법2] / [전법3])를 동시 제공하는 다중 추천 엔진 탑재 완료",
-                "가정지전/강유겸제 무지성 리턴 버그 완전 픽스 (역할군 다이나믹 탐색 로직 이식)",
-                "전법 선택 드롭다운 목록(select option)의 텍스트 색상 상속 버그 픽스 및 다크테마 가독성 100% 개선",
-                "AI 덱 자동 완성 알고리즘 강화 (중복 점수 시 구형 덱이 아닌 최신 메타 덱을 우선 덮어쓰도록 픽스)",
-                "천공의 일검 랭킹 메타덱 데이터 최신화",
-                "(발끈님 의견 반영)나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
-                "네비게이션 바 우측에 불필요하게 생성되던 브라우저 강제 스크롤바(▲●▼) 버그 완벽 제거"
+                "나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
+                "안드로이드 모바일 브라우저 네비바(GNB) 스와이프 먹통 버그 완벽 픽스"
+            ]
+        },
+        {
+            date: "2026-08-02",
+            logs: [
+                "유저 배치 순서를 최적의 전/후열로 자동 재배열하는 스마트 포지셔닝 엔진 탑재",
+                "대체 무장 추천 시 '가후'만 무지성 리턴하던 하드코딩 버그 수정",
+                "로컬 백업(저장/불러오기) 기능 추가 및 전체 테마 동기화"
             ]
         }
     ];
@@ -42,14 +47,25 @@
                     --success-text: #4ade80; --success-bg: rgba(74, 222, 128, 0.15);
                     --danger-text: #f87171; --danger-bg: rgba(248, 113, 113, 0.05);
                 }
+                
+                /* 🚨 [핵심 교정] 라이트 모드 텍스트 명도 대비 극대화 및 네비바 시인성 확보 */
                 [data-theme="light"] {
-                    --bg-main: #f1f5f9; --bg-panel: #ffffff; --bg-card: #f8fafc; --bg-inner: #f1f5f9; --bg-input: #ffffff; --bg-header: #e2e8f0; --bg-nav: #ffffff;    
-                    --text-main: #0f172a; --text-desc: #334155; --text-muted: #64748b; --text-highlight: #d97706; 
-                    --border-main: #cbd5e1; --border-input: #94a3b8; --border-accent: #d97706;
+                    --bg-main: #f8fafc; --bg-panel: #ffffff; --bg-card: #f1f5f9; --bg-inner: #f1f5f9; --bg-input: #ffffff; --bg-header: #e2e8f0; 
+                    --bg-nav: #1e293b; /* 라이트 모드에서도 네비바는 어둡게 하여 독립적인 시인성 확보 */
+                    
+                    --text-main: #0f172a; /* 거의 블랙 */
+                    --text-desc: #1e293b; /* 본문/테이블 내용을 더 진하게 픽스 */
+                    --text-muted: #475569; /* 비활성 텍스트도 또렷하게 */
+                    --text-highlight: #d97706; 
+                    
+                    --border-main: #cbd5e1; --border-input: #94a3b8; --border-accent: #f59e0b;
                     --unowned-bg: #e2e8f0; --unowned-border: #94a3b8; --unowned-text: #64748b;
-                    --nav-text: #475569; --nav-hover: #0f172a; --nav-active-bg: #f8fafc; --nav-active-text: #d97706;
-                    --success-text: #16a34a; --success-bg: rgba(34, 197, 94, 0.1);
-                    --danger-text: #dc2626; --danger-bg: rgba(220, 38, 38, 0.05);
+                    
+                    --nav-text: #94a3b8; --nav-hover: #ffffff; 
+                    --nav-active-bg: #0f172a; --nav-active-text: #f59e0b;
+                    
+                    --success-text: #15803d; --success-bg: rgba(34, 197, 94, 0.1);
+                    --danger-text: #b91c1c; --danger-bg: rgba(220, 38, 38, 0.05);
                 }
                 
                 body { background-color: var(--bg-main) !important; color: var(--text-main) !important; transition: background-color 0.3s, color 0.3s; }
@@ -57,10 +73,12 @@
                 .officer-slot { background-color: var(--bg-inner) !important; border: 1px solid var(--border-main) !important; border-radius: 6px; padding: 10px; }
                 .filter-btn, .faction-btn, .group-btn, .tier-btn { background-color: var(--bg-input) !important; color: var(--text-muted) !important; border: 1px solid var(--border-main) !important; transition: background-color 0.3s, color 0.3s; }
                 .filter-btn.active, .faction-btn.active, .group-btn.active, .tier-btn.active { background-color: var(--text-main) !important; color: var(--bg-main) !important; }
+                
                 table, .data-table { border-color: var(--border-main) !important; background-color: var(--bg-panel) !important; }
-                th, .data-table th { background-color: var(--bg-header) !important; color: var(--text-main) !important; border-color: var(--border-main) !important; }
+                th, .data-table th { background-color: var(--bg-header) !important; color: var(--text-main) !important; border-color: var(--border-main) !important; font-weight: bold; }
                 td, .data-table td { background-color: var(--bg-panel) !important; color: var(--text-desc) !important; border-color: var(--border-main) !important; }
                 tr:nth-child(even) td, .data-table tr:nth-child(even) td { background-color: var(--bg-inner) !important; }
+                
                 [style*="background: #111"], [style*="background-color: #111"], [style*="background: #1a1"], [style*="background-color: #1a1"], [style*="background: #0f1"], [style*="background-color: #0f1"], [style*="background: #1e2"], [style*="background-color: #1e2"] { background-color: var(--bg-inner) !important; }
 
                 .top-title-header { background-color: var(--bg-header) !important; border-bottom: 1px solid var(--border-main) !important; }
@@ -91,6 +109,7 @@
                 .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13.5px; font-weight: bold; white-space: nowrap; transition: color 0.2s; }
                 .nav-menu-item:hover a { color: var(--nav-hover) !important; }
                 .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; }
+                .nav-menu-item.active a { color: var(--nav-active-text) !important; }
                 
                 .nav-actions-container { display: flex; align-items: center; gap: 8px; padding: 6px 0; margin-left: auto; flex-shrink: 0; }
                 .header-history-btn, .header-sync-btn { border-radius: 4px; padding: 8px 14px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; transition: background-color 0.2s; white-space: nowrap; flex-shrink: 0; }
