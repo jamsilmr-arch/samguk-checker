@@ -1,4 +1,4 @@
-// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (문법 오류 교정 완료)
+// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (하드코딩 색상 소거 및 테마 완벽 동기화 완료)
 
 // ==========================================================================
 // LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스
@@ -321,14 +321,15 @@ function renderGuideContent(categoryKey) {
             ${sec.content}
         </div>`).join('');
 
+    // 🚨 [핵심 교정] 하드코딩된 색상 코드(#feca57, #38bdf8) 전면 소거 및 var() 테마 변수 매핑 완료
     const tablesHtml = (data.rawTables || []).map(tbl => `
         <div class="data-table-wrapper">
-            <h3 style="color:#feca57;font-size:15px;margin:0 0 12px 0;">📊 ${tbl.title}</h3>
+            <h3 style="color:var(--text-highlight); font-size:15px; margin:0 0 12px 0;">📊 ${tbl.title}</h3>
             <table class="data-table">
                 <thead><tr>${tbl.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
                 <tbody>${tbl.rows.map(r => `
                     <tr>${r.map((cell, idx) => idx === 0 && cell !== "" 
-                        ? `<td style="color:#38bdf8;font-weight:bold;">${cell}</td>` 
+                        ? `<td style="color:var(--text-accent); font-weight:bold;">${cell}</td>` 
                         : `<td>${cell}</td>`).join('')}</tr>`).join('')}
                 </tbody>
             </table>
