@@ -1,19 +1,14 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (디자인 패치 내역 누락분 반영 완료)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (안드로이드 모바일 스와이프 픽스 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // 🚨 히스토리 데이터베이스 (수정 내역 완벽 동기화)
+    // 🚨 히스토리 데이터베이스 (향후 유저님께서 직접 업데이트 하실 영역)
     const patchHistoryData = [
         {
             date: "2026-08-03",
             logs: [
-                "최대 3개의 대체 전법 리스트([전법1] / [전법2] / [전법3])를 동시 제공하는 다중 추천 엔진 탑재 완료",
-                "가정지전/강유겸제 무지성 리턴 버그 완전 픽스 (역할군 다이나믹 탐색 로직 이식)",
-                "전법 선택 드롭다운 목록(select option)의 텍스트 색상 상속 버그 픽스 및 다크테마 가독성 100% 개선",
-                "AI 덱 자동 완성 알고리즘 강화 (중복 점수 시 구형 덱이 아닌 최신 메타 덱을 우선 덮어쓰도록 픽스)",
-                "천공의 일검 랭킹 메타덱 데이터 최신화",
-                "(발끈님 의견 반영)나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
+                "나의 장수/전법 진영(국가)별 UI 원색 배경 제거 및 모던 컬러링 전면 개편",
                 "네비게이션 바 우측에 불필요하게 생성되던 브라우저 강제 스크롤바(▲●▼) 버그 완벽 제거"
             ]
         },
@@ -89,19 +84,35 @@
                     .author-text { color: var(--text-muted) !important; }
                     h1, h2, h3, h4, h5, .group-title, .guide-section-title, .p-title { color: var(--text-main) !important; }
                     
-                    .global-nav-bar { background-color: var(--bg-nav) !important; border-bottom: 2px solid var(--border-accent) !important; display: flex; justify-content: flex-end; padding: 0 30px; align-items: center; overflow-y: hidden !important; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+                    /* 🚨 안드로이드 모바일 스와이프 버그 픽스 (flex-end 제거, flex-start 및 터치 스크롤 속성 부여) */
+                    .global-nav-bar { 
+                        background-color: var(--bg-nav) !important; 
+                        border-bottom: 2px solid var(--border-accent) !important; 
+                        display: flex; 
+                        justify-content: flex-start; 
+                        padding: 0 15px; 
+                        align-items: center; 
+                        overflow-y: hidden !important; 
+                        overflow-x: auto; 
+                        -ms-overflow-style: none; 
+                        scrollbar-width: none; 
+                        -webkit-overflow-scrolling: touch;
+                    }
                     .global-nav-bar::-webkit-scrollbar { display: none; }
                     
-                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; }
+                    /* 🚨 아이템 찌그러짐 방지 (flex-shrink: 0) */
+                    .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; flex-shrink: 0; }
+                    .nav-menu-item { flex-shrink: 0; }
                     .nav-menu-item a { display: block; color: var(--nav-text) !important; text-decoration: none; padding: 14px 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
                     .nav-menu-item:hover a { color: var(--nav-hover) !important; }
                     
                     .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; }
                     
-                    .header-sync-btn, .header-history-btn { border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: 10px; transition: background-color 0.3s; white-space: nowrap; }
+                    /* 🚨 패치 히스토리 버튼에 margin-left: auto를 부여하여 flex-end 역할을 대신 수행 (우측 밀어내기) */
+                    .header-sync-btn, .header-history-btn { flex-shrink: 0; border-radius: 4px; padding: 8px 16px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; margin-left: 10px; transition: background-color 0.3s; white-space: nowrap; }
                     .header-history-btn { background: #6366f1; color: #ffffff !important; margin-left: auto; }
                     .header-history-btn:hover { background: #4f46e5; }
-                    .header-sync-btn { background: #f97316; color: #ffffff !important; }
+                    .header-sync-btn { background: #f97316; color: #ffffff !important; margin-right: 15px; }
                     .header-sync-btn.sync-on { background: #10b981 !important; } 
                     
                     #global-theme-toggle { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-main); border: 2px solid var(--border-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: transform 0.2s; }
