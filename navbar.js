@@ -1,4 +1,4 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (PC 네비바 붕괴 버그 완벽 픽스)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (PC 렌더링 증발 버그 및 Height Collapse 픽스 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -24,8 +24,11 @@
         }
     ];
 
-    // 🚨 [핵심 방어막] HTML 구조 여부와 상관없이 무조건 CSS를 최우선으로 시스템에 주입하여 높이 붕괴 차단
-    if (!document.getElementById('dynamic-navbar-styles')) {
+    function injectGlobalNavbarEngine() {
+        // 🚨 [핵심 방어막] 기존 유령 CSS 및 DOM이 있으면 무조건 파괴 후 재건축 (렌더링 스킵 원천 차단)
+        const oldStyles = document.getElementById('dynamic-navbar-styles');
+        if (oldStyles) oldStyles.remove();
+
         document.head.insertAdjacentHTML('beforeend', `
             <style id="dynamic-navbar-styles">
                 :root {
@@ -63,16 +66,23 @@
                 .author-text { color: var(--text-muted) !important; }
                 h1, h2, h3, h4, h5, .group-title, .guide-section-title, .p-title { color: var(--text-main) !important; }
                 
-                /* 🚨 데스크톱/모바일 반응형 하이브리드 네비바 CSS */
+                /* 🚨 PC Height Collapse 방지용 width 100% 강제 적용 */
                 .global-nav-bar { 
                     background-color: var(--bg-nav) !important; 
                     border-bottom: 2px solid var(--border-accent) !important; 
-                    display: flex; 
+                    display: flex !important; 
                     justify-content: space-between; 
                     align-items: center; 
                     padding: 0 15px; 
-                    min-height: 48px; /* 극단적인 높이 붕괴 버그 완벽 차단 */
+                    min-height: 52px !important; 
                     flex-wrap: wrap; 
+                    width: 100% !important; 
+                    box-sizing: border-box !important;
+                    flex-shrink: 0 !important;
+                    position: relative;
+                    z-index: 9999;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 }
                 
                 .nav-menu-list { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; flex-wrap: wrap; }
@@ -81,19 +91,18 @@
                 .nav-menu-item:hover a { color: var(--nav-hover) !important; }
                 .nav-menu-item.active { background-color: var(--nav-active-bg) !important; border-bottom: 3px solid var(--border-accent) !important; }
                 
-                .nav-actions-container { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 5px 0; }
+                .nav-actions-container { display: flex; align-items: center; gap: 8px; padding: 6px 0; margin-left: auto; flex-shrink: 0; }
                 .header-history-btn, .header-sync-btn { border-radius: 4px; padding: 8px 14px !important; cursor: pointer; border: none; font-weight: bold; font-size: 13px; transition: background-color 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .header-history-btn { background: #6366f1; color: #ffffff !important; }
                 .header-history-btn:hover { background: #4f46e5; }
                 .header-sync-btn { background: #f97316; color: #ffffff !important; }
                 .header-sync-btn.sync-on { background: #10b981 !important; } 
 
-                /* 모바일 스와이프 전용 분기점 (850px 이하) */
                 @media (max-width: 850px) {
                     .global-nav-bar { 
                         justify-content: flex-start; 
                         flex-wrap: nowrap; 
-                        overflow-x: auto; 
+                        overflow-x: auto !important; 
                         overflow-y: hidden !important; 
                         -ms-overflow-style: none; 
                         scrollbar-width: none; 
@@ -101,10 +110,9 @@
                     }
                     .global-nav-bar::-webkit-scrollbar { display: none; }
                     .nav-menu-list { flex-wrap: nowrap; }
-                    .nav-actions-container { margin-left: auto; padding-right: 15px; } /* 모바일 스크롤 시 우측 여백 확보 */
+                    .nav-actions-container { margin-left: 20px; padding-right: 15px; }
                 }
                 
-                /* 토글/모달 CSS */
                 #global-theme-toggle { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-main); border: 2px solid var(--border-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: transform 0.2s; }
                 #global-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
                 .history-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(3px); }
@@ -121,10 +129,10 @@
                 .history-list li { margin-bottom: 6px; }
             </style>
         `);
-    }
 
-    function injectGlobalNavbarEngine() {
-        if (document.getElementById('dynamic-global-nav-bar')) return;
+        // 🚨 기존 유령 태그 파괴
+        const existingNav = document.getElementById('dynamic-global-nav-bar');
+        if (existingNav) existingNav.remove();
 
         const globalMenuItems = [
             { name: "나의 장수/전법", url: "index.html" },
@@ -138,6 +146,10 @@
         const locationPath = window.location.pathname;
         const currentFile = locationPath.split('/').pop().split('?')[0].split('#')[0] || "index.html";
         
+        const cachedSyncEmail = localStorage.getItem('samguk_sync_email');
+        const syncBtnClass = cachedSyncEmail ? 'sync-on' : '';
+        const syncBtnText = cachedSyncEmail ? `☁️ 동기화 ON (${cachedSyncEmail.split('@')[0]})` : `☁️ 구글 계정 동기화 (OFF)`;
+
         const navHtml = `
             <nav id="dynamic-global-nav-bar" class="global-nav-bar">
                 <ul class="nav-menu-list">
@@ -146,66 +158,61 @@
                             <a href="${item.url}">${item.name}</a>
                         </li>`).join('')}
                 </ul>
+                <div class="nav-actions-container">
+                    <button id="global-history-btn" class="action-btn header-history-btn" onclick="window.toggleHistoryModal()">📜 패치 히스토리</button>
+                    <button id="global-google-sync-btn" class="action-btn header-sync-btn ${syncBtnClass}" onclick="window.executeGoogleSync(event)">${syncBtnText}</button>
+                </div>
             </nav>
         `;
 
-        const standardTarget = document.querySelector('.top-title-header') || document.querySelector('header');
-        if (standardTarget) {
-            standardTarget.insertAdjacentHTML('afterend', navHtml);
-            
-            const navBarEl = document.getElementById('dynamic-global-nav-bar');
-            if (navBarEl && !document.getElementById('global-history-btn')) {
-                const cachedSyncEmail = localStorage.getItem('samguk_sync_email');
-                const syncBtnClass = cachedSyncEmail ? 'sync-on' : '';
-                const syncBtnText = cachedSyncEmail ? `☁️ 동기화 ON (${cachedSyncEmail.split('@')[0]})` : `☁️ 구글 계정 동기화 (OFF)`;
-                
-                // 🚨 버튼들을 nav-actions-container 래퍼로 묶어 PC flex-wrap 레이아웃과 100% 호환되도록 교정
-                navBarEl.insertAdjacentHTML('beforeend', `
-                    <div id="global-nav-actions" class="nav-actions-container">
-                        <button id="global-history-btn" class="action-btn header-history-btn" onclick="window.toggleHistoryModal()">📜 패치 히스토리</button>
-                        <button id="global-google-sync-btn" class="action-btn header-sync-btn ${syncBtnClass}" onclick="window.executeGoogleSync(event)">${syncBtnText}</button>
-                    </div>
-                `);
-            }
+        // 🚨 타겟팅 알고리즘 교정: 무조건 타이틀(h1) 아래를 조준하여 겹침 방지
+        let target = document.querySelector('.top-title-header') || document.querySelector('header');
+        if (!target) {
+            const h1El = document.querySelector('h1');
+            if (h1El) target = h1El.parentElement; 
+        }
+
+        if (target) {
+            target.insertAdjacentHTML('afterend', navHtml);
         } else {
             document.body.insertAdjacentHTML('afterbegin', navHtml);
         }
 
-        if (!document.getElementById('global-theme-toggle')) {
-            document.body.insertAdjacentHTML('beforeend', `<button id="global-theme-toggle" title="테마 변경">${savedTheme === 'light' ? '🌙' : '☀️'}</button>`);
-            document.getElementById('global-theme-toggle').addEventListener('click', function() {
-                const root = document.documentElement;
-                const newTheme = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-                root.setAttribute('data-theme', newTheme);
-                this.innerHTML = newTheme === 'light' ? '🌙' : '☀️';
-                localStorage.setItem('samguk_theme', newTheme);
-            });
-        }
+        const existingThemeBtn = document.getElementById('global-theme-toggle');
+        if (existingThemeBtn) existingThemeBtn.remove();
+        document.body.insertAdjacentHTML('beforeend', `<button id="global-theme-toggle" title="테마 변경">${savedTheme === 'light' ? '🌙' : '☀️'}</button>`);
+        document.getElementById('global-theme-toggle').addEventListener('click', function() {
+            const root = document.documentElement;
+            const newTheme = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            root.setAttribute('data-theme', newTheme);
+            this.innerHTML = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('samguk_theme', newTheme);
+        });
         
-        if (!document.getElementById('history-modal-overlay')) {
-            const historyBlocksHtml = patchHistoryData.map(patch => `
-                <div class="history-block">
-                    <div class="history-date">📅 [${patch.date}] 업데이트 내역</div>
-                    <ul class="history-list">
-                        ${patch.logs.map(log => `<li>${log}</li>`).join('')}
-                    </ul>
-                </div>
-            `).join('');
+        const existingModal = document.getElementById('history-modal-overlay');
+        if (existingModal) existingModal.remove();
+        const historyBlocksHtml = patchHistoryData.map(patch => `
+            <div class="history-block">
+                <div class="history-date">📅 [${patch.date}] 업데이트 내역</div>
+                <ul class="history-list">
+                    ${patch.logs.map(log => `<li>${log}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
 
-            document.body.insertAdjacentHTML('beforeend', `
-                <div id="history-modal-overlay" class="history-overlay" onclick="window.toggleHistoryModal(false)">
-                    <div class="history-modal" onclick="event.stopPropagation()">
-                        <div class="history-modal-header">
-                            <h2>🔄 시스템 패치 히스토리</h2>
-                            <button class="history-modal-close" onclick="window.toggleHistoryModal(false)">✖</button>
-                        </div>
-                        <div class="history-modal-body">
-                            ${historyBlocksHtml}
-                        </div>
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="history-modal-overlay" class="history-overlay" onclick="window.toggleHistoryModal(false)">
+                <div class="history-modal" onclick="event.stopPropagation()">
+                    <div class="history-modal-header">
+                        <h2>🔄 시스템 패치 히스토리</h2>
+                        <button class="history-modal-close" onclick="window.toggleHistoryModal(false)">✖</button>
+                    </div>
+                    <div class="history-modal-body">
+                        ${historyBlocksHtml}
                     </div>
                 </div>
-            `);
-        }
+            </div>
+        `);
     }
 
     window.toggleHistoryModal = function(forceState) {
@@ -239,6 +246,10 @@
         }
     };
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
-    else injectGlobalNavbarEngine();
+    // DOM이 완전히 로드되기 전/후에 안전하게 주입
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectGlobalNavbarEngine);
+    } else {
+        injectGlobalNavbarEngine();
+    }
 })();
