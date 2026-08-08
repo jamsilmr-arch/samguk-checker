@@ -1,11 +1,11 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (가이드 본문 li, p 가독성 강제 오버라이드 완료)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (패치 히스토리 스크롤 및 모달창 높이 고정 픽스 완료)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     const patchHistoryData = [
         {
-            date: "2026-08-09",
+            date: "2026-08-08",
             logs: [
                 "유저가 수동으로 슬롯에 올린 장수는 변경되지 않고 AI 교정되도록 픽스",
                 "딜러에게는 어떠한 방어/힐링 전법 추천되지 않도록 픽스",
@@ -77,7 +77,6 @@
                 body { background-color: var(--bg-main) !important; color: var(--text-main) !important; transition: background-color 0.3s, color 0.3s; }
                 .section-box, .guide-content-area, aside, .deck-card, .info-card, .data-table-wrapper { background-color: var(--bg-panel) !important; border-color: var(--border-main) !important; transition: background-color 0.3s, border-color 0.3s; }
                 
-                /* 🚨 [강제 오버라이드] 원본 웹사이트의 li, p 등 전역 스타일을 무시하고 무조건 테마 색상으로 덮어쓰기 */
                 .info-card { color: var(--text-desc) !important; line-height: 1.6; }
                 .info-card p, .info-card ul, .info-card li, .info-card span, .info-card div { color: var(--text-desc) !important; }
                 .info-card strong, .info-card b { color: var(--text-main) !important; font-weight: bold; }
@@ -141,12 +140,21 @@
                 #global-theme-toggle { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-main); border: 2px solid var(--border-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: transform 0.2s; }
                 #global-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
                 .history-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(3px); }
-                .history-modal { background: var(--bg-panel); border: 1px solid var(--border-main); border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; }
-                .history-modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: var(--bg-header); }
+                
+                /* 🚨 [핵심 교정] 히스토리 모달 높이 고정 및 스크롤바 디자인 추가 */
+                .history-modal { background: var(--bg-panel); border: 1px solid var(--border-main); border-radius: 8px; width: 90%; max-width: 600px; height: 70vh; min-height: 400px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; }
+                .history-modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: var(--bg-header); flex-shrink: 0; }
                 .history-modal-header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
                 .history-modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 0; transition: color 0.2s; }
                 .history-modal-close:hover { color: var(--danger-text); }
-                .history-modal-body { padding: 20px; overflow-y: auto; color: var(--text-desc); font-size: 13px; line-height: 1.6; }
+                .history-modal-body { padding: 20px; overflow-y: auto; color: var(--text-desc); font-size: 13px; line-height: 1.6; flex-grow: 1; }
+                
+                /* 🚨 웹킷 기반 커스텀 스크롤바 주입 (테마 연동) */
+                .history-modal-body::-webkit-scrollbar { width: 8px; }
+                .history-modal-body::-webkit-scrollbar-track { background: var(--bg-inner); border-radius: 4px; }
+                .history-modal-body::-webkit-scrollbar-thumb { background: var(--border-input); border-radius: 4px; border: 1px solid var(--bg-inner); }
+                .history-modal-body::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
+
                 .history-block { margin-bottom: 20px; }
                 .history-block:last-child { margin-bottom: 0; }
                 .history-date { font-weight: bold; color: var(--text-highlight); margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed var(--border-main); padding-bottom: 4px; }
