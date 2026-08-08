@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (모바일 반응형 웹 RWD CSS 완벽 이식 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (모바일 UI 깨짐 및 데스크톱 모드 충돌 픽스)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (유저 픽 무장 보존 로직 및 가정지전 필터링 완벽 픽스)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (무장 잠금 및 역할군 딥 필터링 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -129,6 +129,7 @@ const metaHawkRandomAttributesMap = new Proxy({
     "rank2_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    
     "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_g_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
@@ -142,6 +143,7 @@ const metaHawkRecommendationMap = new Proxy({
     "rank2_1":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
     "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
     "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    
     "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
     "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
     "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
@@ -151,6 +153,7 @@ const metaHawkRecommendationMap = new Proxy({
     "set_c_1":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
     "set_c_2":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
     "set_c_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
+    
     "set_f_1":{name:"결운-감로",skill:"동탁/원소/여포 방원진 유지력 및 돌파력 강화"},
     "set_f_2":{name:"삭풍-성모",skill:"마초/위연/유비제왕 추형진 공방 밸런스 유지"},
     "set_f_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭격 지원"},
@@ -358,7 +361,7 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [다중 추천 엔진] 배열(Array) 반환을 지원하도록 파라미터(returnList) 적용
+// 🚨 [핵심 교정 완료] 가정지전 및 기타 힐러 전법들이 딜러(PC/PCm)의 3순위 탐색망에 걸리는 버그 차단
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -375,6 +378,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         }
     };
 
+    // 1순위: 하드코딩 대체 맵 탐색
     const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
         checkAndAdd(t);
@@ -382,6 +386,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
+    // 2순위: 다이나믹 롤 기반 스코어링 탐색
     const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
     for (let t of pool) {
         checkAndAdd(t);
@@ -389,10 +394,28 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
+    // 3순위: 광역 역할군 기반 안전망 탐색 (가정지전 등 타 역할군 100% 필터링 보장)
+    let broadPool = [];
+    if (["PC", "PCm"].includes(role)) broadPool = [...DYNAMIC_TACTIC_POOLS["PC"], ...DYNAMIC_TACTIC_POOLS["PCm"]];
+    else if (role === "SC") broadPool = [...DYNAMIC_TACTIC_POOLS["SC"]];
+    else broadPool = [...DYNAMIC_TACTIC_POOLS["TC"], ...DYNAMIC_TACTIC_POOLS["SH"], ...DYNAMIC_TACTIC_POOLS["SS"]];
+
+    for (let t of broadPool) {
+        checkAndAdd(t);
+        if (!returnList && results.length > 0) return results[0];
+        if (returnList && results.length >= 3) return results;
+    }
+
+    // 4순위: 최후의 보루 (가정지전 등 명백한 역상성 전법은 하드코딩으로 무조건 제외)
     const allTacs = getTacticListBridge();
+    const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
+    
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
-            if (["PC", "PCm", "SC"].includes(role) && ["동장철벽", "동구적개", "미우주무"].includes(cleanTName)) continue;
+            
+            // 딜러일 경우 제외 리스트 필터링
+            if (["PC", "PCm", "SC"].includes(role) && excludeForDealers.includes(cleanTName)) continue;
+            
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
             addResult(originTName);
             if (!returnList && results.length > 0) return results[0];
@@ -481,7 +504,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                     const pTac = targetMetaTacs[i];
                     const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
                     
-                    // 🚨 다중 추천(returnList = true)을 호출하여 최대 3개의 결과를 배열로 받아 UI에 나열
                     const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
                     
@@ -500,7 +522,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 const isHigherUsed = higherTierUsedTacs.includes(cT);
                 if (!isTacOwned || isHigherUsed) {
                     
-                    // 🚨 다중 추천(returnList = true)을 호출하여 최대 3개의 결과를 배열로 받아 UI에 나열
                     const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
                     
@@ -602,7 +623,6 @@ const injectCustomUIStyles = () => {
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
     style.innerHTML = `
-        /* 🚨 반응형 레이아웃 클래스 정의 (아이폰 데스크톱 모드 UI 깨짐 완벽 방어) */
         .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
         .deck-header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .deck-header-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -668,6 +688,7 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
+// 🚨 [핵심 교정 완료] AI 오토 픽스 시 유저가 수동으로 입력한 장수는 무조건 Lock 시켜 보존!
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -690,6 +711,8 @@ window.autoFixDeck = oIdx => {
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
     const archetypes = metaData.analyzedMetaArchetypes || [];
 
+    const match = getBestMetaMatch(currentOfficers);
+
     if (filledCount === 0) {
         let bestMeta = null, highestOwnedCount = -1;
         for (const meta of archetypes) {
@@ -704,7 +727,6 @@ window.autoFixDeck = oIdx => {
             const idealTacs = mo.chosenTactics.length === 3 ? mo.chosenTactics.slice(1,3) : [...mo.chosenTactics];
             const fixedTacs = idealTacs.map(tac => {
                 if (higherTacs.has(cStr(tac))) {
-                    // 🚨 AI 교정 함수(실제 슬롯 변경)에서는 returnList = false 파라미터를 사용하여 무조건 1개의 1순위 대체만 받아 안전하게 장착
                     const alt = getOwnedAlternativeTactic(tac, Array.from(higherTacs), tMap, new Set(), mo.name, targetDeck.unitType, false);
                     if (alt) { higherTacs.add(cStr(alt)); return alt; }
                     return "";
@@ -717,54 +739,50 @@ window.autoFixDeck = oIdx => {
         return alert(`[AI 교정 완료] 보유 풀 기반 최적 메타 덱(${bestMeta.name}) 자동 편성 성공!`);
     }
 
-    const match = getBestMetaMatch(currentOfficers);
-    
-    if (match && match.maxScore >= 1.0) {
-        targetDeck.formation = match.bestMeta.formation;
-        let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
-        
-        for(let i=0; i<3; i++) {
-            const idealName = match.bestMeta.officers[i].name;
-            const existingIdx = targetDeck.officers.findIndex(o => cStr(o.name) === cStr(idealName));
-            if (existingIdx !== -1) {
-                newOfficers[i] = { ...targetDeck.officers[existingIdx], chosenTactics: [...targetDeck.officers[existingIdx].chosenTactics] };
-                targetDeck.officers[existingIdx].name = ""; 
-            } else {
-                newOfficers[i] = { name: idealName, chosenTactics: ["", ""] };
-            }
-        }
-        for(let i=0; i<3; i++) {
-            if (targetDeck.officers[i].name !== "") {
-                const emptyIdx = newOfficers.findIndex(o => o.name === "");
-                if (emptyIdx !== -1) newOfficers[emptyIdx] = { ...targetDeck.officers[i], chosenTactics: [...targetDeck.officers[i].chosenTactics] };
-            }
-        }
-        targetDeck.officers = newOfficers;
-        
-    } else {
-        let frontPool = [], backPool = [];
-        targetDeck.officers.forEach(o => {
-            if (o.name) {
-                const role = FB_OFF_META[o.name]?.[3] || "PC";
-                if (["TC", "PC", "PCm"].includes(role)) frontPool.push({...o, chosenTactics:[...o.chosenTactics]});
-                else backPool.push({...o, chosenTactics:[...o.chosenTactics]});
-            }
-        });
+    // 🚨 유저가 입력해 둔 기존 무장 데이터 로스터를 추출하여 '보존(Lock)'
+    let currentRoster = targetDeck.officers.filter(o => o.name.trim() !== "");
+    let emptyCount = 3 - currentRoster.length;
 
-        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; 
-        else targetDeck.formation = "추형진"; 
-
-        const posReq = FORMATIONS[targetDeck.formation].pos;
-        let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
-        
-        for(let i=0; i<3; i++) {
-            if (posReq[i] === 'front' && frontPool.length > 0) newOfficers[i] = frontPool.shift();
-            else if (posReq[i] === 'back' && backPool.length > 0) newOfficers[i] = backPool.shift();
-            else newOfficers[i] = frontPool.length > 0 ? frontPool.shift() : (backPool.length > 0 ? backPool.shift() : {name:"", chosenTactics:["",""]});
+    // 만약 빈 슬롯이 존재하고 메타 매칭이 되었다면, 겹치지 않는 메타 장수만 빈칸에 새로 편입
+    if (match && match.maxScore > 0 && emptyCount > 0) {
+        const metaOfficers = match.bestMeta.officers.map(mo => mo.name);
+        for (let mo of metaOfficers) {
+            if (!currentRoster.some(o => cStr(o.name) === cStr(mo))) {
+                currentRoster.push({ name: mo, chosenTactics: ["", ""] });
+                emptyCount--;
+                if (emptyCount === 0) break;
+            }
         }
-        targetDeck.officers = newOfficers;
     }
 
+    if (match && match.maxScore >= 1.0) {
+        targetDeck.formation = match.bestMeta.formation;
+    }
+
+    // 🚨 유저 픽이 보존된 로스터(currentRoster)를 기반으로 스마트 포지셔닝만 진행
+    let frontPool = [], backPool = [];
+    currentRoster.forEach(o => {
+        const role = FB_OFF_META[o.name]?.[3] || "PC";
+        if (["TC", "PC", "PCm"].includes(role)) frontPool.push(o);
+        else backPool.push(o);
+    });
+
+    if (!match || match.maxScore < 1.0) {
+        if (frontPool.length >= backPool.length) targetDeck.formation = "구행진"; 
+        else targetDeck.formation = "추형진"; 
+    }
+
+    const posReq = FORMATIONS[targetDeck.formation].pos;
+    let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
+    
+    for(let i=0; i<3; i++) {
+        if (posReq[i] === 'front' && frontPool.length > 0) newOfficers[i] = frontPool.shift();
+        else if (posReq[i] === 'back' && backPool.length > 0) newOfficers[i] = backPool.shift();
+        else newOfficers[i] = frontPool.length > 0 ? frontPool.shift() : (backPool.length > 0 ? backPool.shift() : {name:"", chosenTactics:["",""]});
+    }
+    targetDeck.officers = newOfficers;
+
+    // 🚨 전법 분배는 정상적으로 진행
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
@@ -891,7 +909,6 @@ function renderDeckBuilder() {
             const bondFeedback = `<div class="feedback-item info" style="margin-top:6px;">🤝 <strong>활성화 인연:</strong> <span style="color:var(--text-highlight);">${calculateActivatedBond(deck.officers)}</span></div>`;
             const perfectionMsg = evaluateDeckPerfection(deck, match?.bestMeta?.id);
 
-            // 🚨 RWD 지원 HTML 구조 적용 (grid-layout, deck-header-wrapper 클래스 사용)
             container.insertAdjacentHTML('beforeend', `<div class="deck-card" style="background-color:var(--bg-panel);border:1px solid var(--border-main);border-radius:8px;padding:16px;margin-bottom:16px; transition: background-color 0.3s, border-color 0.3s;">
                 <div class="deck-header-wrapper">
                     <div class="deck-header-controls">
