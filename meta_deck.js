@@ -1,4 +1,4 @@
-// [시스템 분석] meta_deck.js - 전서버 실전 메타 덱 데이터베이스 (강유·관우·유비 신규 메타 편입 완료)
+// [시스템 분석] meta_deck.js - 전서버 실전 메타 덱 데이터베이스 (강유·관우·유비 기병덱 속성 픽스 완료)
 console.log("[시스템 분석] meta_deck.js 메타 덱 데이터 허브 기동");
 
 const analyzedMetaArchetypes = [
@@ -46,7 +46,7 @@ const analyzedMetaArchetypes = [
     {id:"set_i_1", priority: 0, name:"[메타 세트 I] 좌자·장녕·우길 구행궁병", concept:"[세트 I]", formation:"구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","토적격문","전위위안"]}, {name:"장녕", chosenTactics:["천의난위","수상개화","양의화생"]}, {name:"우길", chosenTactics:["태평경","안영찰채","이퇴위진"]}]},
     {id:"set_i_2", priority: 0, name:"[메타 세트 I] 사마의·조조·가후 안행방패", concept:"[세트 I]", formation:"안행진", officers:[{name:"사마의", chosenTactics:["응시낭고","반객위주","요사여신"]}, {name:"조조", chosenTactics:["효웅","강유겸제","여자동포"]}, {name:"가후", chosenTactics:["경달권변","만천과해","혼수모어"]}]},
 
-    // 🚨 [신규 편입] 강유·관우·유비 오피셜 도원창병 덱 추가 완료
+    // 🚨 [병종 픽스] 강유·관우·유비 덱 기병으로 속성 및 텍스트 교정 완료
     {id:"var_gangyu_gwanu_yubi", priority: 0, name:"[변형] 관우·유비·강유 도원기병", concept:"[커스텀]", formation:"추형진", officers:[{name:"관우", chosenTactics:["무성","용맹무쌍","질풍노도"]}, {name:"유비", chosenTactics:["인정","강유겸제","간담상조"]}, {name:"강유", chosenTactics:["담대여두","반객위주","화소적벽"]}]}
 ];
 
@@ -62,7 +62,7 @@ const metaDeckUnitTypeMap = {
     "set_g_1":"창병", "set_g_2":"궁병", "set_g_3":"창병",
     "set_h_1":"방패병", "set_h_2":"궁병",
     "set_i_1":"궁병", "set_i_2":"방패병",
-    "var_gangyu_gwanu_yubi":"창병"
+    "var_gangyu_gwanu_yubi":"기병" // 🚨 병종 속성 기병으로 픽스
 };
 
 const systemGuideInsights = {
@@ -97,7 +97,7 @@ const systemGuideInsights = {
     "set_h_2":"💡 [세트 H] 좌자와 우길이 전선을 유지하고 장녕이 폭격하는 구행 궁병.",
     "set_i_1":"💡 [세트 I] 토적격문과 안영찰채로 버티며 장녕의 딜을 극대화한 구행 궁병.",
     "set_i_2":"💡 [세트 I] 조조의 강유겸제와 사마의 쌍버프(반객/요사)가 빛나는 안행 방패병.",
-    "var_gangyu_gwanu_yubi":"💡 [변형] 강유의 모략 서브딜과 관우의 맹공, 유비의 철벽 힐이 어우러진 밸런스형 도원기병."
+    "var_gangyu_gwanu_yubi":"💡 [변형] 강유의 모략 서브딜과 관우의 맹공, 유비의 철벽 힐이 어우러진 밸런스형 도원기병." // 🚨 텍스트 교정 완료
 };
 
 window.getMetaDeckData = function() {
