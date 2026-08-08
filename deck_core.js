@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (유저 픽 무장 보존 로직 및 가정지전 필터링 완벽 픽스)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (무장 잠금 및 역할군 딥 필터링 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (가중치 오작동 버그 픽스 및 PCm 역할군 후열 배치 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 0점 가중치 방어막 및 마초 후열 고정 완료)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -129,11 +129,11 @@ const metaHawkRandomAttributesMap = new Proxy({
     "rank2_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    
     "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_g_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
+    "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "var_gangyu_gwanu_yubi":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 모략 +12%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 const metaHawkRecommendationMap = new Proxy({
@@ -143,7 +143,6 @@ const metaHawkRecommendationMap = new Proxy({
     "rank2_1":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
     "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
     "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    
     "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
     "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
     "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
@@ -153,7 +152,6 @@ const metaHawkRecommendationMap = new Proxy({
     "set_c_1":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
     "set_c_2":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
     "set_c_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
-    
     "set_f_1":{name:"결운-감로",skill:"동탁/원소/여포 방원진 유지력 및 돌파력 강화"},
     "set_f_2":{name:"삭풍-성모",skill:"마초/위연/유비제왕 추형진 공방 밸런스 유지"},
     "set_f_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭격 지원"},
@@ -163,7 +161,8 @@ const metaHawkRecommendationMap = new Proxy({
     "set_h_1":{name:"능소-전우",skill:"조조/사마의/가후 구행진 화력 폭발 보조"},
     "set_h_2":{name:"삭풍-성모",skill:"좌자/장녕/우길 구행진 철벽 유지력 보장"},
     "set_i_1":{name:"결운-감로",skill:"좌자/장녕/우길 구행진 장기전 카운터 보조"},
-    "set_i_2":{name:"능소-전우",skill:"사마의/조조/가후 안행진 모략 폭격 극대화"}
+    "set_i_2":{name:"능소-전우",skill:"사마의/조조/가후 안행진 모략 폭격 극대화"},
+    "var_gangyu_gwanu_yubi":{name:"결운-감로",skill:"관우 돌파력 및 유비 유지력 극대화"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId) {
@@ -361,7 +360,6 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [핵심 교정 완료] 가정지전 및 기타 힐러 전법들이 딜러(PC/PCm)의 3순위 탐색망에 걸리는 버그 차단
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -378,7 +376,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         }
     };
 
-    // 1순위: 하드코딩 대체 맵 탐색
     const alts = tacticAlternativesMap[cleanMissing] || [];
     for (let t of alts) {
         checkAndAdd(t);
@@ -386,7 +383,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    // 2순위: 다이나믹 롤 기반 스코어링 탐색
     const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
     for (let t of pool) {
         checkAndAdd(t);
@@ -394,7 +390,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    // 3순위: 광역 역할군 기반 안전망 탐색 (가정지전 등 타 역할군 100% 필터링 보장)
     let broadPool = [];
     if (["PC", "PCm"].includes(role)) broadPool = [...DYNAMIC_TACTIC_POOLS["PC"], ...DYNAMIC_TACTIC_POOLS["PCm"]];
     else if (role === "SC") broadPool = [...DYNAMIC_TACTIC_POOLS["SC"]];
@@ -406,14 +401,11 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    // 4순위: 최후의 보루 (가정지전 등 명백한 역상성 전법은 하드코딩으로 무조건 제외)
     const allTacs = getTacticListBridge();
     const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
     
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
-            
-            // 딜러일 경우 제외 리스트 필터링
             if (["PC", "PCm", "SC"].includes(role) && excludeForDealers.includes(cleanTName)) continue;
             
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
@@ -427,6 +419,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
+// 🚨 [핵심 교정 완료] 일치하는 장수가 한 명도 없을 경우(baseScore === 0) 가중치를 완전히 무시하여 메타 덮어쓰기 방지
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
@@ -436,7 +429,7 @@ function getBestMetaMatch(curNamesClean) {
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
         let baseScore = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
-        let finalScore = baseScore + (meta.priority || 0);
+        let finalScore = baseScore > 0 ? baseScore + (meta.priority || 0) : baseScore;
 
         if (finalScore >= maxScore) { maxScore = finalScore; bestMeta = meta; }
     });
@@ -688,7 +681,6 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
-// 🚨 [핵심 교정 완료] AI 오토 픽스 시 유저가 수동으로 입력한 장수는 무조건 Lock 시켜 보존!
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -759,11 +751,12 @@ window.autoFixDeck = oIdx => {
         targetDeck.formation = match.bestMeta.formation;
     }
 
-    // 🚨 유저 픽이 보존된 로스터(currentRoster)를 기반으로 스마트 포지셔닝만 진행
+    // 🚨 유저 픽이 보존된 로스터(currentRoster)를 기반으로 스마트 포지셔닝만 진행 (마초 후열 픽스)
     let frontPool = [], backPool = [];
     currentRoster.forEach(o => {
         const role = FB_OFF_META[o.name]?.[3] || "PC";
-        if (["TC", "PC", "PCm"].includes(role)) frontPool.push(o);
+        // 🚨 PCm(마초 등)은 후열로 빼도록 필터링
+        if (["TC", "PC"].includes(role)) frontPool.push(o);
         else backPool.push(o);
     });
 
@@ -782,7 +775,7 @@ window.autoFixDeck = oIdx => {
     }
     targetDeck.officers = newOfficers;
 
-    // 🚨 전법 분배는 정상적으로 진행
+    // 🚨 전법 분배
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
