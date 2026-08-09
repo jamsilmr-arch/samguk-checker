@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (가중치 오작동 버그 픽스 및 PCm 역할군 후열 배치 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (매칭 알고리즘 0점 가중치 방어막 및 마초 후열 고정 완료)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (절대 역할군 방어막 이식 및 역상성 전법 필터링 100% 픽스 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (역상성 전법 추천 원천 차단 알고리즘 탑재)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -360,6 +360,7 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
+// 🚨 [절대 역할군 방어막] 물리 딜러에게 모략기를, 모략 딜러에게 물리/순수방어기를 추천하는 치명적 에러 원천 차단
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -369,8 +370,27 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
 
     let results = [];
     const addResult = (t) => { if (!results.includes(t)) results.push(t); };
+    
+    // 🚨 [신규 필터] 역상성 전법 완벽 차단 방어막
+    const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
+    const isInvalidForRole = (tStr) => {
+        const cleanT = cStr(tStr);
+        const isTacSC = DYNAMIC_TACTIC_POOLS["SC"].includes(cleanT);
+        const isTacPC = DYNAMIC_TACTIC_POOLS["PC"].includes(cleanT) || DYNAMIC_TACTIC_POOLS["PCm"].includes(cleanT);
+        
+        // 1. 딜러(PC/SC)에게 퓨어 힐링기/순수 방어기 강제 차단
+        if (["PC", "PCm", "SC"].includes(role) && excludeForDealers.includes(cleanT)) return true;
+        // 2. 물리 딜러(PC/PCm) 및 메인 탱커(TC)에게 모략 딜링기 강제 차단
+        if (["PC", "PCm", "TC"].includes(role) && isTacSC) return true;
+        // 3. 모략 딜러(SC)에게 물리 딜링기 강제 차단
+        if (["SC"].includes(role) && isTacPC) return true;
+        
+        return false;
+    };
+
     const checkAndAdd = (tStr) => {
         const cleanT = cStr(tStr);
+        if (isInvalidForRole(cleanT)) return; // 🚨 역상성 필터 통과 시에만 추가 허용
         if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(tStr) && !recommendedTacs.has(tStr) && cleanT !== cleanMissing) {
             addResult(tStr);
         }
@@ -402,11 +422,9 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     }
 
     const allTacs = getTacticListBridge();
-    const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
-    
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
-            if (["PC", "PCm", "SC"].includes(role) && excludeForDealers.includes(cleanTName)) continue;
+            if (isInvalidForRole(cleanTName)) continue;
             
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
             addResult(originTName);
@@ -419,7 +437,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
-// 🚨 [핵심 교정 완료] 일치하는 장수가 한 명도 없을 경우(baseScore === 0) 가중치를 완전히 무시하여 메타 덮어쓰기 방지
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
@@ -731,11 +748,9 @@ window.autoFixDeck = oIdx => {
         return alert(`[AI 교정 완료] 보유 풀 기반 최적 메타 덱(${bestMeta.name}) 자동 편성 성공!`);
     }
 
-    // 🚨 유저가 입력해 둔 기존 무장 데이터 로스터를 추출하여 '보존(Lock)'
     let currentRoster = targetDeck.officers.filter(o => o.name.trim() !== "");
     let emptyCount = 3 - currentRoster.length;
 
-    // 만약 빈 슬롯이 존재하고 메타 매칭이 되었다면, 겹치지 않는 메타 장수만 빈칸에 새로 편입
     if (match && match.maxScore > 0 && emptyCount > 0) {
         const metaOfficers = match.bestMeta.officers.map(mo => mo.name);
         for (let mo of metaOfficers) {
@@ -751,11 +766,9 @@ window.autoFixDeck = oIdx => {
         targetDeck.formation = match.bestMeta.formation;
     }
 
-    // 🚨 유저 픽이 보존된 로스터(currentRoster)를 기반으로 스마트 포지셔닝만 진행 (마초 후열 픽스)
     let frontPool = [], backPool = [];
     currentRoster.forEach(o => {
         const role = FB_OFF_META[o.name]?.[3] || "PC";
-        // 🚨 PCm(마초 등)은 후열로 빼도록 필터링
         if (["TC", "PC"].includes(role)) frontPool.push(o);
         else backPool.push(o);
     });
@@ -775,7 +788,6 @@ window.autoFixDeck = oIdx => {
     }
     targetDeck.officers = newOfficers;
 
-    // 🚨 전법 분배
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
