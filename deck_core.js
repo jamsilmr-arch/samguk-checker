@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (절대 역할군 방어막 이식 및 역상성 전법 필터링 100% 픽스 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (역상성 전법 추천 원천 차단 알고리즘 탑재)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (후적박발 1티어 편입 및 사마의 패시브 교정 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (후적박발 스코어링 및 추천 알고리즘 픽스)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -14,7 +14,8 @@ const FB_OFF_META = {
 };
 const FB_OFFICERS = Object.keys(FB_OFF_META);
 
-const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,횡소천군,횡징폭렴,휴양생식".split(',');
+// 🚨 후적박발 배열 내 추가 완료
+const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 const EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
@@ -72,15 +73,17 @@ const internalBondRules = [
     {name:"호위경주",req:2,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"}
 ];
 
+// 🚨 SC 풀에 후적박발 편입 완료
 const DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주"],
+    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
+// 🚨 후적박발과 요사/수상/반객 간의 폴백(Fallback) 안전망 결합 완료
 const tacticAlternativesMap = {
     "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
     "횡징폭렴":["간담상조","동구적개","동장철벽"],
@@ -90,14 +93,14 @@ const tacticAlternativesMap = {
     "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
     "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], 
     "혼수모어":["사면초가","이간계","안영찰채"],
-    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], 
+    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍","후적박발"], 
     "유좌유용":["휴양생식","제곤부위","안영찰채"],
     "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], 
     "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
     "여자동포":["동구적개","천시지리"], 
     "양의화생":["기문둔갑","화소적벽","수상개화","낙정하석"],
-    "수상개화":["요사여신","사생취의","양의화생"], 
-    "요사여신":["수상개화","사생취의","반객위주"],
+    "수상개화":["요사여신","사생취의","양의화생","후적박발"], 
+    "요사여신":["수상개화","사생취의","반객위주","후적박발"],
     "분성지계":["화소적벽","기문둔갑"], 
     "체천행도":["반객위주","질풍노도","천리추격"], 
     "금창신":["동구적개","강유겸제","간담상조"],
@@ -111,13 +114,15 @@ const tacticAlternativesMap = {
     "부동여산":["용맹무쌍", "만부막적", "일고작기", "용왕직전", "사생취의", "질풍노도"], 
     "이아환아":["선등함진", "횡징폭렴", "반객위주", "동구적개"],
     "호치":["만부막적", "용왕직전", "용맹무쌍"],
-    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"]
+    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"],
+    "후적박발":["요사여신", "수상개화", "사생취의", "반객위주"]
 };
 
+// 🚨 후적박발 종합 데미지 기댓값 및 공심(흡혈) 추가
 const internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
-    "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6}
+    "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6},"후적박발":{strategyDmg:15,leech:5}
 };
 
 const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
@@ -360,7 +365,6 @@ function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnit
     return candidates.length > 0 ? candidates[0].name : null;
 }
 
-// 🚨 [절대 역할군 방어막] 물리 딜러에게 모략기를, 모략 딜러에게 물리/순수방어기를 추천하는 치명적 에러 원천 차단
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -371,18 +375,14 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     let results = [];
     const addResult = (t) => { if (!results.includes(t)) results.push(t); };
     
-    // 🚨 [신규 필터] 역상성 전법 완벽 차단 방어막
     const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
     const isInvalidForRole = (tStr) => {
         const cleanT = cStr(tStr);
         const isTacSC = DYNAMIC_TACTIC_POOLS["SC"].includes(cleanT);
         const isTacPC = DYNAMIC_TACTIC_POOLS["PC"].includes(cleanT) || DYNAMIC_TACTIC_POOLS["PCm"].includes(cleanT);
         
-        // 1. 딜러(PC/SC)에게 퓨어 힐링기/순수 방어기 강제 차단
         if (["PC", "PCm", "SC"].includes(role) && excludeForDealers.includes(cleanT)) return true;
-        // 2. 물리 딜러(PC/PCm) 및 메인 탱커(TC)에게 모략 딜링기 강제 차단
         if (["PC", "PCm", "TC"].includes(role) && isTacSC) return true;
-        // 3. 모략 딜러(SC)에게 물리 딜링기 강제 차단
         if (["SC"].includes(role) && isTacPC) return true;
         
         return false;
@@ -390,7 +390,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
 
     const checkAndAdd = (tStr) => {
         const cleanT = cStr(tStr);
-        if (isInvalidForRole(cleanT)) return; // 🚨 역상성 필터 통과 시에만 추가 허용
+        if (isInvalidForRole(cleanT)) return; 
         if (tacticDataMap[cleanT]?.isOwned && !allEquipTacs.includes(tStr) && !recommendedTacs.has(tStr) && cleanT !== cleanMissing) {
             addResult(tStr);
         }
@@ -422,8 +422,10 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     }
 
     const allTacs = getTacticListBridge();
+    
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
+            
             if (isInvalidForRole(cleanTName)) continue;
             
             const originTName = allTacs.find(n => cStr(n) === cleanTName) || cleanTName;
