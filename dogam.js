@@ -1,4 +1,4 @@
-// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 100% 무손실 엔진 (황보숭 신규 추가 완료)
+// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 100% 무손실 엔진 (황보숭 병종 궁병/창병 픽스 완료)
 console.log("[시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -67,8 +67,8 @@ const heroDogamData = [
     { id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', skillDesc: '아군 2명의 병력을 회복(치료율 122%, 모략 영향)시키고 50% 확률로 가하는 피해 26% 증가 또는 받는 피해 26% 감소를 부여.', stats: { martial: 372, tactical: 598, command: 509, speed: 558 }, unit: '궁병/기병', eq: 'SH', tacs: ["간담상조", "강유겸제"] },
     { id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 35%를 해당 적이 대신 분담하게 만들고 대상의 통솔/무용을 14% 감소시킵니다.', stats: { martial: 372, tactical: 592, command: 556, speed: 433 }, unit: '창병/기병', eq: 'SH', tacs: ["혼수모어", "위위구조"] },
     { id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', skillDesc: '전투 전반기(1~4턴) 동안 아군 2명의 통솔을 40 증가시키고 피격 시 50% 확률로 즉각 병력을 회복(치료율 68%)시킵니다.', stats: { martial: 372, tactical: 598, command: 432, speed: 362 }, unit: '궁병/방패병', eq: 'SH', tacs: ["간담상조", "휴양생식"] },
-    // 🚨 황보숭 신규 추가
-    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '강직불아', skillDesc: '매 턴 60% 확률(통솔 영향)로 자신 및 속도가 낮은 아군에게 패시브 전법 피해 20% 감소 부여 및 병력 회복(치료율 120%). 전열 아군 1명에게 받는 피해 10% 감소(대상 속도 낮으면 20% 추가) 부여.', stats: { martial: 545, tactical: 545, command: 719, speed: 498 }, unit: '방패병/창병', eq: 'TC', tacs: ["초선차전", "동장철벽"] }
+    // 🚨 황보숭 병종 궁병/창병으로 픽스 완료
+    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '강직불아', skillDesc: '매 턴 60% 확률(통솔 영향)로 자신 및 속도가 낮은 아군에게 패시브 전법 피해 20% 감소 부여 및 병력 회복(치료율 120%). 전열 아군 1명에게 받는 피해 10% 감소(대상 속도 낮으면 20% 추가) 부여.', stats: { martial: 545, tactical: 545, command: 719, speed: 498 }, unit: '궁병/창병', eq: 'TC', tacs: ["초선차전", "동장철벽"] }
 ];
 
 const EQ_PRESETS = {
