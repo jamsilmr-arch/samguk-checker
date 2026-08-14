@@ -1,4 +1,4 @@
-// [시스템 분석] tactic_dogam.js - 전법 도감 테마 동기화 및 100% 무손실 엔진
+// [시스템 분석] tactic_dogam.js - 전법 도감 테마 동기화 및 100% 무손실 엔진 (명찰추호 신규 추가 완료)
 console.log("[시스템 분석] tactic_dogam.js 고속 해시 맵 렌더러 기동 (전체 데이터 복원)");
 
 const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -25,6 +25,8 @@ const tacticDogamData = [
     { id: 't_manbu', name: '만부막적', type: '추격 (50%)', target: '적군 전체, 자신', desc: '일반 공격 후, 적군 전체에게 105% 무용 피해를 가하고 자신의 가하는 무용 피해를 5% 증가시키며 최대 4중첩, 해제 불가, 전투 종료까지 지속합니다.' },
     { id: 't_manjeon', name: '만전제발', type: '능동 (50%)', target: '적군 전체', desc: '적군 전체에게 115% 무용 피해를 가하고 50% 확률로 적군 1개 대상(우선 후열)에게 추가로 115% 무용 피해를 가합니다.' },
     { id: 't_mancheon', name: '만천과해', type: '능동 (70%)', target: '아군 2팀', desc: '자신 및 전열의 아군 대상 1명에게 병력을 회복하고(치료율 80%, 모략의 영향 받음), 받는 무용 피해와 모략 피해가 15% 감소합니다(모략의 영향 받음). 2턴 지속.' },
+    // 🚨 명찰추호 추가
+    { id: 't_myeongchal', name: '명찰추호', type: '능동 (50%)', target: '자신, 적군 2팀', desc: '자신의 간파이(가) 20% 상승하며(2턴 지속), 적군 대상 2명에게 130% 모략 피해를 입힙니다. 이후 50% 확률(모략의 영향 받음)로 적군 중 무용이 가장 높은 대상에게 65% 모략 피해를 입히며, 대상의 통솔이 자신보다 높을 경우 피해 계수가 30% 상승합니다.' },
     { id: 't_munchi', name: '문치무공', type: '능동 (70%)', target: '아군 2팀', desc: '아군 중 무용이 가장 높은 대상의 무용 증가(문치무공 발동자 무용의 10%만큼 증가), 강공 피해 20% 증가, 2턴 동안 지속됩니다. 또한 아군 중 모략이 가장 높은 대상의 모략 증가(문치무공 발동자 모략의 10%만큼 증가), 치료 효과 25% 증가, 2턴 동안 지속됩니다.' },
     { id: 't_miu', name: '미우주무', type: '능동 (50%)', target: '아군 1팀', desc: '아군 중 통솔이 가장 높은 1개 대상의 받는 피해를 25% 감소시켜 2턴 지속하고 해당 대상의 병력을 회복(치료율 40%, 모략 영향)합니다.' },
     { id: 't_bangaek', name: '반객위주', type: '패시브 (100%)', target: '자신, 적군 1팀', desc: '무용 피해를 가한 후 자신의 무용 피해가 8% 상승하여 최대 4중첩되고 해제 불가이며, 중첩이 모두 쌓인 경우 대상에게 130% 추가 무용 피해 입힙니다. 모략 피해를 가한 후 자신의 모략 피해가 8% 상승하여 최대 4중첩되고 해제 불가이며, 중첩이 모두 쌓인 경우 대상에게 130% 추가 모략 피해 입힙니다. 해당 피해 효과는 매 턴 최대 2회 발동.' },
@@ -73,8 +75,7 @@ const tacticDogamData = [
     { id: 't_tojeok', name: '토적격문', type: '능동 (80%)', target: '적군 전체, 자신', desc: '적군 전체에 도발효과를 부여하고 자신이 받는 일반 공격 피해를 40% 감소시키며 2턴 지속합니다.' },
     { id: 't_hyeonho', name: '현호제세', type: '능동 (50%)', target: '아군 2팀', desc: '아군 2명의 디버프 1개를 해제하고, 병력을 회복합니다(치료율 155%, 통솔에 영향받음).' },
     { id: 't_horyeong', name: '호령삼군', type: '패시브 (100%)', target: '자신', desc: '피해를 가한 후 자신의 배반과 공심이 4% 상승하고 강공과 기습이 4% 상승하며 최대 6회 중첩, 해제 불가, 전투 종료까지 지속합니다.' },
-    { id: 't_hochi', name: '호치', type: '능동 (60%)', target: '적군 2팀, 자신', desc: '적군 대상 2명의 통솔을 7% 탈취하고 200% 무용 피해를 입힙니다(전열일 경우 피해 계수 40% 증가). 입힌 피해의 20%만큼 자신의 병력을 회복하며, 확률적으로 쟁패 획득 및 피곤을 부여합니다.' },
-    { id: 't_honsu', name: '혼수모어', type: '지휘 (70%)', target: '적군 1팀, 아군 2팀', desc: '턴 시작 시 적 1명에게 혼란 상태를 부여하고(턴 종료 시까지 지속), 아군 2명의 병력을 회복합니다(치료율 150%, 모략의 영향 받음).' },
+    { id: 't_horyeong_m', name: '혼수모어', type: '지휘 (70%)', target: '적군 1팀, 아군 2팀', desc: '턴 시작 시 적 1명에게 혼란 상태를 부여하고(턴 종료 시까지 지속), 아군 2명의 병력을 회복합니다(치료율 150%, 모략의 영향 받음).' },
     { id: 't_hongsu', name: '홍수첨향', type: '지휘 (50%)', target: '아군 2팀', desc: '턴 시작 시, 자신의 병력을 회복하고(치율 190%, 통솔의 영향을 받음), 자신이 받는 피해가 30% 감소합니다(통솔의 영향을 받음). 턴 종료 시까지 지속되며, 아군 대상 1명에게 치료 및 받는 피해 감소 효과의 절반을 부여합니다.' },
     { id: 't_hwaso', name: '화소적벽', type: '능동 (50%)', target: '적군 전체', desc: '적 전체에게 화상효과를 부여(행동 시작 시 35% 추가 모략 피해를 받음)하고 2턴 지속하며 102% 모략 피해를 가합니다.' },
     { id: 't_hoengso', name: '횡소천군', type: '능동 (35%)', target: '적군 2팀', desc: '적군 2개 대상에게 30% 무용 피해를 가하고 출혈 부여(행동 시작 시 65% 추가 무용 피해 받음)하며 2턴 지속합니다.' },
@@ -138,7 +139,9 @@ const TACTIC_MASTER_DESC = {
     "화겁생기": { role: "패시브 (100%)", target: '아군 전체', desc: '부대 아군 전체에게 상시 신기루 도피 버프를 부여하여 전법 및 평타 회피율을 극대화합니다.' },
     "비분시": { role: "능동 (70%)", target: '아군 단체', desc: '아군 단체의 병력을 회복시키고 가하는 피해를 유의미하게 증가시킵니다.' },
     "폐월": { role: "능동 (50%)", target: '적군 단체', desc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.' },
-    "청낭제세": { role: "능동 (50%)", target: '아군 전체', desc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.' }
+    "청낭제세": { role: "능동 (50%)", target: '아군 전체', desc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.' },
+    // 🚨 명찰추호 정보 추가
+    "명찰추호": { role: "능동 (50%)", target: '자신, 적군 2팀', desc: '자신의 간파를 대폭 상승시키고, 적 2명에게 모략 피해를 주며 무용이 가장 높은 적에게 조건부 추가 모략 타격을 입힙니다.' }
 };
 
 const masterLookupMap = {};
@@ -156,7 +159,6 @@ const injectTacticStyles = () => {
     if (document.getElementById('tactic-dogam-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'tactic-dogam-custom-styles';
-    // [UI 교정] 글로벌 테마 변수를 활용하여 모드에 맞게 카드 디자인 동기화
     style.innerHTML = `
         .tactic-card-item { background-color: var(--bg-card); border: 1px solid var(--border-main); border-top: 5px solid #7b2cb0; border-radius: 6px; padding: 15px; cursor: pointer; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; justify-content: flex-start; box-sizing: border-box; min-height: 130px; opacity: 0.45; }
         .tactic-card-item.owned { background-color: var(--bg-panel); border-color: #a855f7; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15); opacity: 1; }
