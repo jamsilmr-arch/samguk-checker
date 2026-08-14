@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (진영별 모던 UI 컬러링 패치 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (황보숭, 명찰추호 신규 추가 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 const heroList = [
@@ -60,7 +60,9 @@ const heroList = [
     { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0, transcend: false }
+    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0, transcend: false },
+    // 🚨 신규 무장 추가
+    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
 const tacticList = [
@@ -85,6 +87,8 @@ const tacticList = [
     { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
+    // 🚨 신규 전법 추가
+    { id: 't_myeongchal', name: '명찰추호', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 0 },
@@ -149,34 +153,20 @@ const injectAppStyles = () => {
     style.id = 'app-custom-styles';
     style.innerHTML = `
         .card-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 55px; cursor: pointer; padding: 6px 4px; box-sizing: border-box; border: 1px solid var(--border-input); border-radius: 6px; transition: all 0.2s ease; background-color: var(--bg-card); }
-        
-        /* 미보유 상태: 투명도를 주고 점선 테두리 적용 */
         .card-btn:not(.owned) { border-style: dashed; opacity: 0.65; }
         .card-btn .card-name { pointer-events: none; font-size: 13px; color: var(--text-desc); font-weight: normal; }
         
-        /* 🚨 [핵심 교정] 팩션별 모던하고 고급스러운 컬러링 (촌스러운 솔리드 원색 완전 제거) */
-        
-        /* 1. 위나라 (Blue) */
         .card-btn.wei.owned { border-color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.15) !important; box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.1); }
         .card-btn.wei.owned .card-name { color: #93c5fd !important; font-weight: bold; }
-        
-        /* 2. 촉나라 (Green) - 눈 아픈 쨍한 녹색을 세련된 에메랄드/비취(Jade) 톤으로 덮어쓰기 */
         .card-btn.shu.owned { border-color: #10b981 !important; background-color: rgba(16, 185, 129, 0.15) !important; box-shadow: inset 0 0 8px rgba(16, 185, 129, 0.1); }
         .card-btn.shu.owned .card-name { color: #6ee7b7 !important; font-weight: bold; }
-        
-        /* 3. 오나라 (Red) */
         .card-btn.wu.owned { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.15) !important; box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.1); }
         .card-btn.wu.owned .card-name { color: #fca5a5 !important; font-weight: bold; }
-        
-        /* 4. 군웅 (Purple) */
         .card-btn.qun.owned { border-color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.15) !important; box-shadow: inset 0 0 8px rgba(168, 85, 247, 0.1); }
         .card-btn.qun.owned .card-name { color: #d8b4fe !important; font-weight: bold; }
-
-        /* 5. 전법 (Success Green) */
         .card-btn.tactic.owned { border-color: var(--success-text) !important; background-color: var(--success-bg) !important; }
         .card-btn.tactic.owned .card-name { color: var(--success-text) !important; font-weight: bold; }
 
-        /* 공통 드롭다운 및 초월 버튼 스타일 */
         .card-btn select { width: 85%; max-width: 65px; padding: 2px; font-size: 12px; background: var(--bg-input); color: var(--text-highlight); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; outline: none; text-align: center; text-align-last: center; }
         .card-btn .trans-btn { width: 85%; max-width: 65px; padding: 2px 0; font-size: 11px; background: var(--bg-inner); color: var(--text-muted); border: 1px solid var(--border-input); border-radius: 4px; cursor: pointer; font-weight: bold; outline: none; text-align: center; transition: all 0.15s ease; }
         .card-btn .trans-btn.active { background: #38bdf8; color: #ffffff; border-color: #38bdf8; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: 0 0 5px rgba(56,189,248,0.4); }
@@ -330,12 +320,6 @@ function loadSavedData() {
     } catch(e) { console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e); }
 }
 
-function initAppEngine() { 
-    injectAppStyles(); 
-    injectBackupUI(); 
-    loadSavedData(); 
-    renderButtons(); 
-}
-
+function initAppEngine() { injectAppStyles(); injectBackupUI(); loadSavedData(); renderButtons(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAppEngine);
 else initAppEngine();
