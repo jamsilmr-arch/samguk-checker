@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전역 변수 충돌 방지 var 적용 및 렌더링 픽스 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (렌더링 에러 및 전역 변수 충돌 완벽 픽스)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 스코어링 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -123,59 +123,7 @@ var internalTacticStatMap = {
     "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5}
 };
 
-var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-
-var metaHawkRandomAttributesMap = new Proxy({
-    "rank1_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank1_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank1_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank2_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank2_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank2_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "set_f_1":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "set_g_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "set_h_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 전능 +6%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "set_i_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 치유 효과 부여 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "var_gangyu_gwanu_yubi":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 모략 +12%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
-}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-
-var metaHawkRecommendationMap = new Proxy({
-    "rank1_1":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
-    "rank1_2":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
-    "rank1_3":{name:"열공-전광",skill:"허저 및 악진의 물리 피해 극대화"},
-    "rank2_1":{name:"삭풍-성모",skill:"우길 신산 및 좌자 회피 유지력 극대화"},
-    "rank2_2":{name:"결운-호생",skill:"사마의 투트랙 캐리 및 생존력 강화"},
-    "rank2_3":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    "set_a_1":{name:"능소-진시",skill:"마초/위연/서서 안행진 폭딜 보정"},
-    "set_a_2":{name:"열공-전광",skill:"손권/육항/노숙 콤보 시너지 극대화"},
-    "set_a_3":{name:"삭풍-성모",skill:"사마의/조조/가후 안정성 및 유지력 강화"},
-    "set_b_1":{name:"결운-호생",skill:"원소/동탁/여포 방원진 극딜 보정"},
-    "set_b_2":{name:"결운-감로",skill:"마초/위연/유비 전투 지속력 강화"},
-    "set_b_3":{name:"능소-진시",skill:"조조/사마의/하후돈 추격 및 폭딜 보정"},
-    "set_c_1":{name:"열공-여천",skill:"악진/조조/장료 기형진 선제 폭격"},
-    "set_c_2":{name:"삭풍-성모",skill:"사마의/조조/가후 안행진 유지력 및 신산 보조"},
-    "set_c_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭딜 지원"},
-    "set_f_1":{name:"결운-감로",skill:"동탁/원소/여포 방원진 유지력 및 돌파력 강화"},
-    "set_f_2":{name:"삭풍-성모",skill:"마초/위연/유비제왕 추형진 공방 밸런스 유지"},
-    "set_f_3":{name:"능소-전우",skill:"좌자/장녕/우길 구행진 폭격 지원"},
-    "set_g_1":{name:"결운-호생",skill:"서서/마초/위연 구행진 안정적 딜링 보정"},
-    "set_g_2":{name:"능소-진시",skill:"제갈량/황충/강유 방원진 콤보 시너지 극대화"},
-    "set_g_3":{name:"열공-여천",skill:"유비제왕/장비/관우 추형진 단단한 딜링망 구축"},
-    "set_h_1":{name:"능소-전우",skill:"조조/사마의/가후 구행진 화력 폭발 보조"},
-    "set_h_2":{name:"삭풍-성모",skill:"좌자/장녕/우길 구행진 철벽 유지력 보장"},
-    "set_i_1":{name:"결운-감로",skill:"좌자/장녕/우길 구행진 장기전 카운터 보조"},
-    "set_i_2":{name:"능소-전우",skill:"사마의/조조/가후 안행진 모략 폭격 극대화"},
-    "var_gangyu_gwanu_yubi":{name:"결운-감로",skill:"관우 돌파력 및 유비 유지력 극대화"}
-}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
-
-window.getHawkDataFromGuide = function(metaId) {
-    return {
-        recommendation: metaHawkRecommendationMap[metaId || "custom"],
-        attributes: metaHawkRandomAttributesMap[metaId || "custom"]
-    };
-};
-
-function getOfficerDogamData(officerName) {
+window.getOfficerDogamData = function(officerName) {
     if (window.getOfficerDataFromDogam) { 
         const d = window.getOfficerDataFromDogam(officerName); 
         if (d && (d.uniqueTactic || d.skill)) {
@@ -191,9 +139,9 @@ function getOfficerDogamData(officerName) {
     }
     const [uTac = "고유 전법 누락", uUnit = "방패병", uFac = "qun"] = FB_OFF_META[officerName] || [];
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
-}
+};
 
-const getTacticListBridge = () => {
+window.getTacticListBridge = function() {
     if (window.getAllTacticsFromDogam) {
         const list = window.getAllTacticsFromDogam();
         if (list && list.length > 0) return list;
@@ -201,14 +149,14 @@ const getTacticListBridge = () => {
     return FB_TACTICS;
 };
 
-const getOfficerNamesBridge = () => {
+window.getOfficerNamesBridge = function() {
     const list = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : FB_OFFICERS;
     return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 function getOfficerEquipment(officerName, deckUnitType = "") {
     const cleanName = cStr(officerName);
-    const dogamInfo = getOfficerDogamData(officerName);
+    const dogamInfo = window.getOfficerDogamData(officerName);
     const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (dogamInfo.unitSuitability?.split('/')[0] || "방패병");
     
     let rawEq = window.getOfficerEquipmentFromDogam ? window.getOfficerEquipmentFromDogam(officerName) : null;
@@ -285,7 +233,7 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const hA = hawkData.attributes;
     if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
-    const dogamData = getOfficerDogamData(hName);
+    const dogamData = window.getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
         const tkMap = internalTacticStatMap[cStr(tacName)];
         if (tkMap) Object.keys(tkMap).forEach(tk => { if (stats[tk] !== undefined) stats[tk] += tkMap[tk]; });
@@ -324,7 +272,7 @@ function calculateActivatedBond(officers) {
 
 function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "") {
     const cleanMissing = cStr(missingName);
-    const allNames = getOfficerNamesBridge();
+    const allNames = window.getOfficerNamesBridge();
     
     const missingMeta = FB_OFF_META[cleanMissing];
     if (!missingMeta) return null;
@@ -419,7 +367,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
         if (returnList && results.length >= 3) return results;
     }
 
-    const allTacs = getTacticListBridge();
+    const allTacs = window.getTacticListBridge();
     
     for (let cleanTName of Object.keys(tacticDataMap)) {
         if (tacticDataMap[cleanTName]?.isOwned && !allEquipTacs.includes(cleanTName) && !recommendedTacs.has(cleanTName) && cleanTName !== cleanMissing) {
@@ -560,6 +508,19 @@ var FORMATIONS = {
 
 var dynamicPresetDecks = [];
 var draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
+
+// 🚨 [에러 수정] 사라졌던 defaultPresetDecks 배열 데이터 복구 완료
+var defaultPresetDecks = Array.from({ length: 5 }, (_, i) => ({
+    title: `${i + 1}군`,
+    formation: "구행진",
+    unitType: "",
+    originIdx: i,
+    officers: [
+        { name: "", chosenTactics: ["", ""] },
+        { name: "", chosenTactics: ["", ""] },
+        { name: "", chosenTactics: ["", ""] }
+    ]
+}));
 
 window.handleOfficerDragStart = (e, dIdx, oIdx) => { 
     draggedDeckOriginIdx = dIdx; 
@@ -860,7 +821,7 @@ function renderDeckBuilder() {
 
             const offHtml = deck.officers.map((off, oIdx) => {
                 const hName = off?.name?.trim() || "", cName = cStr(hName);
-                const dg = cName ? getOfficerDogamData(hName) : null;
+                const dg = cName ? window.getOfficerDogamData(hName) : null;
                 
                 const isHeroOwned = cName ? !!hMap[cName]?.isOwned : false;
                 const heroCssClass = isHeroOwned ? 'owned' : 'missing';
@@ -873,13 +834,13 @@ function renderDeckBuilder() {
                     const isOwn = cT ? !!tMap[cT]?.isOwned : false;
                     const cssClass = cT ? (isOwn ? 'owned' : 'missing') : 'missing';
                     
-                    tRows += `<div class="tactic-row ${cssClass}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
+                    tRows += `<div class="tactic-row ${cssClass}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${window.getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
                 const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
 
-                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
+                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${window.getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
             }).join('');
 
             let statsHtmlInner = "";
@@ -890,7 +851,7 @@ function renderDeckBuilder() {
 
             const isCustom = !match || match.maxScore < 1.5;
             const metaIdForHawk = isCustom ? "custom" : match.bestMeta.id;
-            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { attributes: null };
+            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
             const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
