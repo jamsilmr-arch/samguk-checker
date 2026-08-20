@@ -1,9 +1,9 @@
-// [시스템 분석] tactic_dogam.js - 전법 도감 테마 동기화 및 100% 무손실 엔진 (명찰추호 신규 추가 완료)
+// [시스템 분석] tactic_dogam.js - 전법 도감 테마 동기화 및 100% 무손실 엔진 (전역 변수 var 교체 완료)
 console.log("[시스템 분석] tactic_dogam.js 고속 해시 맵 렌더러 기동 (전체 데이터 복원)");
 
-const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-const tacticDogamData = [
+var tacticDogamData = [
     { id: 't_gandam', name: '간담상조', type: '지휘 (100%)', target: '적군 전체, 아군 2팀', desc: '매 턴 시작 시, 60% 확률로 적군 전체가 가하는 무용 피해 및 모략 피해를 25% 감소시키며(통솔의 영향 받음, 같은 열에 적군 아군이 있을 경우 계수 20% 상승), 적군 대상 2명에게 나약을(를) 부여합니다(이번 턴 종료 시까지 지속). 이후 아군 대상 2명의 병력을 회복시킵니다(치료율 90%, 통솔의 영향 받음).' },
     { id: 't_gajeong', name: '가정지전', type: '추격 (35%)', target: '적군 1팀', desc: '일반 공격 후 공격 대상의 통솔을 10% 감소시키고 2턴 동안 지속하며 270% 모략 피해를 가합니다.' },
     { id: 't_gajeong_t', name: '강유겸제', type: '지휘 (50%)', target: '아군 전체', desc: '턴 시작 시 아군 전체가 받는 피해를 34% 감소시키고, 아군 중 무용이 가장 높은 목표가 받는 모략 피해를 17%, 모략이 가장 높은 목표가 받는 무용 피해를 17% 감소시킵니다(턴 종료시까지 지속).' },
@@ -25,7 +25,6 @@ const tacticDogamData = [
     { id: 't_manbu', name: '만부막적', type: '추격 (50%)', target: '적군 전체, 자신', desc: '일반 공격 후, 적군 전체에게 105% 무용 피해를 가하고 자신의 가하는 무용 피해를 5% 증가시키며 최대 4중첩, 해제 불가, 전투 종료까지 지속합니다.' },
     { id: 't_manjeon', name: '만전제발', type: '능동 (50%)', target: '적군 전체', desc: '적군 전체에게 115% 무용 피해를 가하고 50% 확률로 적군 1개 대상(우선 후열)에게 추가로 115% 무용 피해를 가합니다.' },
     { id: 't_mancheon', name: '만천과해', type: '능동 (70%)', target: '아군 2팀', desc: '자신 및 전열의 아군 대상 1명에게 병력을 회복하고(치료율 80%, 모략의 영향 받음), 받는 무용 피해와 모략 피해가 15% 감소합니다(모략의 영향 받음). 2턴 지속.' },
-    // 🚨 명찰추호 추가
     { id: 't_myeongchal', name: '명찰추호', type: '능동 (50%)', target: '자신, 적군 2팀', desc: '자신의 간파이(가) 20% 상승하며(2턴 지속), 적군 대상 2명에게 130% 모략 피해를 입힙니다. 이후 50% 확률(모략의 영향 받음)로 적군 중 무용이 가장 높은 대상에게 65% 모략 피해를 입히며, 대상의 통솔이 자신보다 높을 경우 피해 계수가 30% 상승합니다.' },
     { id: 't_munchi', name: '문치무공', type: '능동 (70%)', target: '아군 2팀', desc: '아군 중 무용이 가장 높은 대상의 무용 증가(문치무공 발동자 무용의 10%만큼 증가), 강공 피해 20% 증가, 2턴 동안 지속됩니다. 또한 아군 중 모략이 가장 높은 대상의 모략 증가(문치무공 발동자 모략의 10%만큼 증가), 치료 효과 25% 증가, 2턴 동안 지속됩니다.' },
     { id: 't_miu', name: '미우주무', type: '능동 (50%)', target: '아군 1팀', desc: '아군 중 통솔이 가장 높은 1개 대상의 받는 피해를 25% 감소시켜 2턴 지속하고 해당 대상의 병력을 회복(치료율 40%, 모략 영향)합니다.' },
@@ -83,7 +82,7 @@ const tacticDogamData = [
     { id: 't_huyang', name: '휴양생식', type: '능동 (35%)', target: '아군 2팀', desc: '아군 2개 대상의 병력을 회복(치료율 165%, 모략 영향)하고 해당 대상에게 통찰을 부여하며 1턴 지속합니다.' }
 ];
 
-const TACTIC_MASTER_DESC = {
+var TACTIC_MASTER_DESC = {
     "재주복주": { role: "지휘 (100%)", target: "아군 2명", desc: "매 턴 아군 2명 치료(치료율 68%, 모략 영향) 및 10% 확률로 대상에게 허약 상태 부여(1턴 지속). 자신이 주장일 시 허약 부여 확률 15%로 상승." },
     "연인노호": { role: "패시브 (100%)", target: "적군 전체", desc: "전투 2, 4턴에 적군 전체에게 무용 피해(계수 104%)를 가하고, 대상이 무장해제 상태일 경우 50% 확률로 통솔 50 감소(2턴 지속). 주장일 시 통솔 감소 효과가 겁전 상태 대상에게도 적용." },
     "무성": { role: "액티브 (35%)", target: "적군 전체", desc: "1턴 준비 후 적군 전체에게 맹렬한 무용 피해(계수 146%)를 가하고, 50% 확률로 대상에게 무장해제 또는 겁전 상태 부여(1턴 지속). 또한 자신이 가하는 무용 피해 36% 증가(2턴 지속)." },
@@ -140,11 +139,10 @@ const TACTIC_MASTER_DESC = {
     "비분시": { role: "능동 (70%)", target: '아군 단체', desc: '아군 단체의 병력을 회복시키고 가하는 피해를 유의미하게 증가시킵니다.' },
     "폐월": { role: "능동 (50%)", target: '적군 단체', desc: '적군 단체를 매혹하여 자신이 입는 피해의 상당량을 해당 적이 대신 분담하게 만듭니다.' },
     "청낭제세": { role: "능동 (50%)", target: '아군 전체', desc: '전투 전반기 동안 아군 전체의 통솔 방어력을 임계점까지 높이고 피격 시 즉각 치료합니다.' },
-    // 🚨 명찰추호 정보 추가
     "명찰추호": { role: "능동 (50%)", target: '자신, 적군 2팀', desc: '자신의 간파를 대폭 상승시키고, 적 2명에게 모략 피해를 주며 무용이 가장 높은 적에게 조건부 추가 모략 타격을 입힙니다.' }
 };
 
-const masterLookupMap = {};
+var masterLookupMap = {};
 tacticDogamData.forEach(t => {
     if (t?.name) masterLookupMap[cStr(t.name)] = { ...t, role: t.type || t.role };
 });
@@ -155,7 +153,7 @@ Object.entries(TACTIC_MASTER_DESC).forEach(([k, v]) => {
     }
 });
 
-const injectTacticStyles = () => {
+var injectTacticStyles = () => {
     if (document.getElementById('tactic-dogam-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'tactic-dogam-custom-styles';
@@ -181,7 +179,7 @@ window.getTacticDataFromDogam = function(tacticName) {
     return masterLookupMap[cStr(tacticName)] || null;
 };
 
-let currentTacticState = [];
+var currentTacticState = [];
 
 function loadTacticData() {
     const defaultNames = tacticDogamData.map(t => t.name).sort((a, b) => a.localeCompare(b, 'ko'));
