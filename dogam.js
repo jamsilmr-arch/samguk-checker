@@ -1,4 +1,4 @@
-// [시스템 분석] dogam.js - 전서버 랭커 실전 1~10위 추천 전법 동기화 및 100% 무손실 엔진 (전역 변수 var 교체 완료)
+// [시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원 및 3옵션 장비 API 연동 완료)
 console.log("[시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -63,17 +63,54 @@ var heroDogamData = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '강직불아', skillDesc: '매 턴 60% 확률(통솔 영향)로 자신 및 속도가 낮은 아군에게 패시브 전법 피해 20% 감소 부여 및 병력 회복(치료율 120%). 전열 아군 1명에게 받는 피해 10% 감소(대상 속도 낮으면 20% 추가) 부여.', stats: { martial: 545, tactical: 545, command: 719, speed: 498 }, unit: '궁병/창병', eq: 'TC', tacs: ["초선차전", "동장철벽"] }
 ];
 
+// 🚨 12열 배열 구조 (투구, 갑옷, 장신구 주혼 3옵션 포함)
 var EQ_PRESETS = {
-    PC: ["호분관","강공, 기습 상승","창병 피해 가함","명광갑","무용 피해 가함","창병 배반, 공심 상승","치룡패","무용 피해 가함","창병 배반, 공심 상승"],
-    PCm: ["백옥잠","연격률","창병 피해 가함","세린갑","무용 피해 가함","창병 배반, 공심 상승","쌍호뉴","연격률","창병 배반, 공심 상승"],
-    SC:  ["진현관","강공, 기습 상승","창병 피해 가함","명재복","모략 피해 가함","창병 배반, 공심 상승","박산로","배반, 공심 상승","창병 배반, 공심 상승"],
-    TC: ["연함규","피해 감소","창병 피해 가함","청등갑","피해 감소","창병 피해 감소","사남패","피해 감소","창병 배반, 공심 상승"],
-    SH: ["연함규","피해 감소","치유 효과 부여","청등갑","피해 감소","창병 치유 효과 상승","사남패","치유 효과 받음","창병 피해 감소"],
-    SS: ["진현관","피해 감소","치유 효과 부여","명재복","피해 감소","창병 피해 감소","박산로","치유 효과 부여","창병 피해 감소"]
+    PC: ["호분관","강공, 기습 상승","창병 피해 가함","용맹","명광갑","무용 피해 가함","창병 배반, 공심 상승","금왕","치룡패","무용 피해 가함","창병 배반, 공심 상승","양렬"],
+    PCm: ["백옥잠","연격률","창병 피해 가함","신속","세린갑","무용 피해 가함","창병 배반, 공심 상승","치밀","쌍호뉴","연격률","창병 배반, 공심 상승","포위"],
+    SC:  ["진현관","강공, 기습 상승","창병 피해 가함","기책","명재복","모략 피해 가함","창병 배반, 공심 상승","치밀","박산로","공심","창병 배반, 공심 상승","모산"],
+    TC: ["연함규","피해 감소","창병 피해 가함","권어","청등갑","피해 감소","창병 피해 감소","무환","사남패","피해 감소","창병 배반, 공심 상승","천우"],
+    SH: ["연함규","피해 감소","치유 효과 부여","원촉","청등갑","피해 감소","창병 치유 효과 상승","지원","사남패","치유 효과 받음","창병 피해 감소","감림"],
+    SS: ["진현관","피해 감소","치유 효과 부여","신속","명재복","피해 감소","창병 피해 감소","천안","박산로","치유 효과 부여","창병 피해 감소","천우"]
 };
 
 var masterHeroLookupMap = {};
 heroDogamData.forEach(h => { if (h?.name) masterHeroLookupMap[cStr(h.name)] = h; });
+
+// 🚨 [에러 수정] 32명의 핵심 무장 주혼 특기(attr3) 종결 스코어링 1:1 매핑 포함
+var masterEquipmentMap = {
+    "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함", attr3: "용맹" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승", attr3: "포위" } },
+    "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소", attr3: "양렬" } },
+    "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "지원" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소", attr3: "감림" } },
+    "장료": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함", attr3: "신속" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승", attr3: "포위" } },
+    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "장합": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "하후돈": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "위명" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "여전" }, accessory: { name: "사남패", attr1: "배반", attr2: "방패병 배반, 공심 상승", attr3: "응변" } },
+    "악진": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "속공" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "기병 피해 감소", attr3: "영전" } },
+    "전위": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "위명" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "응변" } },
+    "정욱": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "영전" } },
+    "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "응변" } },
+    "하후연": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "기병 피해 가함", attr3: "속공" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "기병 피해 감소", attr3: "금왕" }, accessory: { name: "쌍호뉴", attr1: "강공, 기습 상승", attr2: "기병 배반, 공심 상승", attr3: "포위" } },
+    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
+    "동탁": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "원소": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "배반, 공심 상승", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "여포": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "궁병 피해 가함", attr3: "용맹" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "궁병 배반, 공심 상승", attr3: "포위" } },
+    "제갈량": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "궁병 피해 가함", attr3: "원촉" }, armor: { name: "명재복", attr1: "치유 효과 부여", attr2: "궁병 피해 감소", attr3: "비호" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승", attr3: "영전" } },
+    "황충": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "궁병 피해 가함", attr3: "용맹" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "금왕" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "궁병 배반, 공심 상승", attr3: "양렬" } },
+    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
+    "좌자": { helmet: { name: "진현관", attr1: "모략 피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "비호" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "방패병 피해 감소", attr3: "감림" } },
+    "장녕": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "비호" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
+    "우길": { helmet: { name: "진현관", attr1: "배반, 공심 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "비호" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 치유 효과 상승", attr3: "모산" } },
+    "손권": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함", attr3: "속공" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승", attr3: "포위" } },
+    "손권(제왕)": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "궁병 피해 가함", attr3: "속공" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "궁병 배반, 공심 상승", attr3: "포위" } },
+    "육항": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "지원" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소", attr3: "감림" } },
+    "노숙": { helmet: { name: "진현관", attr1: "치유 효과 부여", attr2: "궁병 치유 효과 상승", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "지원" }, accessory: { name: "박산로", attr1: "치유 효과 부여", attr2: "궁병 피해 감소", attr3: "감림" } },
+    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
+    "유비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
+    "관우": { helmet: { name: "호분관", attr1: "강공, 기습 상승", attr2: "창병 피해 가함", attr3: "용맹" }, armor: { name: "명광갑", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승", attr3: "치밀" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 배반, 공심 상승", attr3: "양렬" } },
+    "황보숭": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "통제" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "천우" } },
+    "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "양렬" } }
+};
 
 var injectDogamStyles = () => {
     if (document.getElementById('dogam-custom-styles')) return;
@@ -124,15 +161,29 @@ window.getOfficerDataFromDogam = function(officerName) {
 };
 
 window.getOfficerEquipmentFromDogam = function(officerName) {
-    const target = masterHeroLookupMap[cStr(officerName)];
+    const cleanName = cStr(officerName);
+    const target = masterHeroLookupMap[cleanName];
     if (!target) return null;
-    const p = EQ_PRESETS[target.eq || 'PC'] || EQ_PRESETS['PC'];
+
+    let eq = masterEquipmentMap[cleanName] ? JSON.parse(JSON.stringify(masterEquipmentMap[cleanName])) : null;
+    if (!eq) {
+        const p = EQ_PRESETS[target.eq || 'PC'] || EQ_PRESETS['PC'];
+        eq = {
+            helmet: { name: p[0], attr1: p[1], attr2: p[2], attr3: p[3] },
+            armor: { name: p[4], attr1: p[5], attr2: p[6], attr3: p[7] },
+            accessory: { name: p[8], attr1: p[9], attr2: p[10], attr3: p[11] }
+        };
+    }
     const unitPrefix = target.unit?.split('/')[0] || "방패병";
-    return {
-        helmet: { name: p[0], attr1: p[1].replace(/(창병|기병|궁병|방패병)/g, unitPrefix), attr2: p[2].replace(/(창병|기병|궁병|방패병)/g, unitPrefix) },
-        armor: { name: p[3], attr1: p[4].replace(/(창병|기병|궁병|방패병)/g, unitPrefix), attr2: p[5].replace(/(창병|기병|궁병|방패병)/g, unitPrefix) },
-        accessory: { name: p[6], attr1: p[7].replace(/(창병|기병|궁병|방패병)/g, unitPrefix), attr2: p[8].replace(/(창병|기병|궁병|방패병)/g, unitPrefix) }
-    };
+    ['helmet', 'armor', 'accessory'].forEach(part => {
+        ['attr1', 'attr2', 'attr3'].forEach(attr => {
+            let val = eq[part][attr];
+            if (val && val.match(/(창병|기병|궁병|방패병)/)) {
+                eq[part][attr] = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
+            }
+        });
+    });
+    return eq;
 };
 
 window.getOfficerRecommendedTacticsFromDogam = function(officerName) {
@@ -215,11 +266,6 @@ function renderDogamUI() {
     renderDogamGrid();
 }
 
-function formatEqAttr(val, unitPrefix) {
-    if (!val) return "-";
-    return val.replace(/(창병|기병|궁병|방패병)/g, unitPrefix).replace(unitPrefix === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", unitPrefix === "창병" ? "강공, 기습 상승" : "강공, 기습 증가").trim();
-}
-
 function renderDogamGrid() {
     const gridContainer = document.getElementById('dogam-card-grid');
     const countBadge = document.getElementById('dogam-count-badge');
@@ -230,8 +276,7 @@ function renderDogamGrid() {
     if (countBadge) countBadge.innerHTML = `[${{wei:'위나라',shu:'촉나라',wu:'오나라',qun:'군진영'}[currentFactionFilter]||'전체'}] 보유율: <span style="color:#38bdf8;font-size:18px;">${ownedCount}</span> / ${filteredHeroes.length}`;
 
     gridContainer.innerHTML = filteredHeroes.map(hero => {
-        const primaryUnit = hero.unit?.split('/')[0] || "방패병";
-        const eqP = EQ_PRESETS[hero.eq || 'PC'] || EQ_PRESETS['PC'];
+        const eq = window.getOfficerEquipmentFromDogam(hero.name);
         return `
             <div class="dogam-card-item ${hero.isOwned ? 'owned' : ''} ${hero.faction}" data-hero-name="${hero.name}">
                 <div class="d-header">
@@ -250,9 +295,9 @@ function renderDogamGrid() {
                 <div class="d-equip">
                     <div class="d-equip-title">🛠️ 추천 장비 및 세련 속성</div>
                     <div class="d-equip-list">
-                        <div>🪖 <span style="color:var(--text-main);font-weight:bold;">${eqP[0]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[1], primaryUnit)} / ${formatEqAttr(eqP[2], primaryUnit)}]</span></div>
-                        <div>🛡️ <span style="color:var(--text-main);font-weight:bold;">${eqP[3]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[4], primaryUnit)} / ${formatEqAttr(eqP[5], primaryUnit)}]</span></div>
-                        <div>📿 <span style="color:var(--text-main);font-weight:bold;">${eqP[6]}</span> <span style="color:#38bdf8;">[${formatEqAttr(eqP[7], primaryUnit)} / ${formatEqAttr(eqP[8], primaryUnit)}]</span></div>
+                        <div>🪖 <span style="color:var(--text-main);font-weight:bold;">${eq.helmet.name}</span> <span style="color:#38bdf8;">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div>
+                        <div>🛡️ <span style="color:var(--text-main);font-weight:bold;">${eq.armor.name}</span> <span style="color:#38bdf8;">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div>
+                        <div>📿 <span style="color:var(--text-main);font-weight:bold;">${eq.accessory.name}</span> <span style="color:#38bdf8;">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div>
                     </div>
                 </div>
                 <div class="d-tactic">
