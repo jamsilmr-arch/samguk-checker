@@ -1,4 +1,4 @@
-// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (전역 변수 var 교체 및 3옵션 특기 연동 완료)
+// [시스템 분석] guide.js 데이터 마스터 허브 (중복 코드 제거 및 테마 렌더링 픽스 완료)
 
 var guideDatabase = {
     equip: {
@@ -313,7 +313,6 @@ var guideDatabase = {
     }
 };
 
-// 🚨 32명의 핵심 무장 주혼 특기(attr3) 종결 스코어링 1:1 매핑 완료
 var masterEquipmentMap = {
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함", attr3: "용맹" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승", attr3: "포위" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소", attr3: "양렬" } },
