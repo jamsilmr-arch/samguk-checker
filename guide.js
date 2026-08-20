@@ -1,9 +1,6 @@
-// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (주혼 특기 3옵션 추천 및 UI 렌더링 픽스 완료)
+// [시스템 분석] guide.js 데이터 마스터 허브 및 고속 메모이제이션 렌더러 (전역 변수 var 교체 및 3옵션 특기 연동 완료)
 
-// ==========================================================================
-// LAYER 1: 시스템 가이드 UI 렌더링용 정적 데이터베이스
-// ==========================================================================
-const guideDatabase = {
+var guideDatabase = {
     equip: {
         title: "장비 시스템",
         sections: [
@@ -316,20 +313,8 @@ const guideDatabase = {
     }
 };
 
-// ==========================================================================
-// LAYER 2: deck_core.js 연동용 마스터 장비 딕셔너리 (3옵션 매핑 완료)
-// ==========================================================================
-const EQ_PRESETS = {
-    PC:  ["호분관","강공, 기습 상승","창병 피해 가함","용맹","명광갑","무용 피해 가함","창병 배반, 공심 상승","금왕","치룡패","무용 피해 가함","창병 배반, 공심 상승","양렬"],
-    PCm: ["백옥잠","연격률","창병 피해 가함","신속","세린갑","무용 피해 가함","창병 배반, 공심 상승","치밀","쌍호뉴","연격률","창병 배반, 공심 상승","포위"],
-    SC:  ["진현관","강공, 기습 상승","창병 피해 가함","기책","명재복","모략 피해 가함","창병 배반, 공심 상승","치밀","박산로","공심","창병 배반, 공심 상승","모산"],
-    TC:  ["연함규","피해 감소","창병 치유 효과 상승","권어","청등갑","피해 감소","창병 피해 감소","무환","사남패","피해 감소","창병 배반, 공심 상승","천우"],
-    SH:  ["연함규","피해 감소","치유 효과 부여","원촉","청등갑","피해 감소","창병 치유 효과 상승","지원","사남패","치유 효과 받음","창병 피해 감소","감림"],
-    SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
-};
-
 // 🚨 32명의 핵심 무장 주혼 특기(attr3) 종결 스코어링 1:1 매핑 완료
-const masterEquipmentMap = {
+var masterEquipmentMap = {
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함", attr3: "용맹" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승", attr3: "포위" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소", attr3: "양렬" } },
     "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "지원" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소", attr3: "감림" } },
@@ -364,10 +349,7 @@ const masterEquipmentMap = {
     "장비": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "양렬" } }
 };
 
-// ==========================================================================
-// LAYER 3: 고속 UI 렌더링 및 브릿지 API 개방 구역
-// ==========================================================================
-const renderCache = {};
+var renderCache = {};
 
 function switchGuideTab(categoryKey, btnElement) {
     document.querySelectorAll('.guide-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -417,11 +399,8 @@ function getEquipmentRecommendationFromGuide(officerName) {
     };
 }
 
-// ==========================================================================
-// LAYER 4: 전투매(Hawk) 데이터 연동용 브릿지 API (deck_core.js 최소화)
-// ==========================================================================
-const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-const metaHawkRandomAttributesMap = new Proxy({
+var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+var metaHawkRandomAttributesMap = new Proxy({
     "wu_sogyo_nosuk_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "qun_wonso_jangnyeong_jwaja":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "shu_macho_weiyeon_xushu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
@@ -439,7 +418,7 @@ const metaHawkRandomAttributesMap = new Proxy({
     "shu_macho_weiyeon_xushu_5":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
-const metaHawkRecommendationMap = new Proxy({
+var metaHawkRecommendationMap = new Proxy({
     "wu_sogyo_nosuk_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"}, "qun_wonso_jangnyeong_jwaja":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, "shu_macho_weiyeon_xushu":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
     "wei_jojo_sima_hahou":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/하후돈 호위"}, "shu_macho_weiyeon_xushu_2":{name:"결운-감로",skill:"마초 확산 타격 및 서서 피감 치유 강화"}, "qun_jwaja_jangnyeong_ugil_2":{name:"열공-여천",skill:"장녕 낙정하석 폭격 및 우길 수공 지원"},
     "shu_macho_weiyeon_xushu_3":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"}, "wu_songwon_yukhang_nosuk_3":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"}, "wei_sima_jojo_gahu_3":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
