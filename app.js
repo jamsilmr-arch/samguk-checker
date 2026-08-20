@@ -1,7 +1,7 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (황보숭, 명찰추호 신규 추가 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (전역 변수 충돌 방지 var 적용 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
-const heroList = [
+var heroList = [
     { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0, transcend: false },
@@ -61,11 +61,10 @@ const heroList = [
     { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0, transcend: false },
     { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0, transcend: false },
-    // 🚨 신규 무장 추가
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
-const tacticList = [
+var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
@@ -87,7 +86,6 @@ const tacticList = [
     { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
-    // 🚨 신규 전법 추가
     { id: 't_myeongchal', name: '명찰추호', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
@@ -145,9 +143,9 @@ const tacticList = [
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
 ];
 
-const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-const injectAppStyles = () => {
+var injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
     const style = document.createElement('style');
     style.id = 'app-custom-styles';
@@ -174,7 +172,7 @@ const injectAppStyles = () => {
     document.head.appendChild(style);
 };
 
-const injectBackupUI = () => {
+var injectBackupUI = () => {
     if (document.getElementById('backup-ui-container')) return;
     const container = document.createElement('div');
     container.id = 'backup-ui-container';
@@ -274,7 +272,7 @@ function renderButtons() {
     if (tacticEl) tacticEl.innerHTML = tacticList.map(t => buildCardHtml(t, false)).join('');
 }
 
-function toggleState(id, type) {
+window.toggleState = function(id, type) {
     const list = (type === 'hero') ? heroList : tacticList;
     const target = list.find(x => x.id === id);
     if (target) { target.isOwned = !target.isOwned; renderButtons(); window.saveDataToLocalStorage(); }
