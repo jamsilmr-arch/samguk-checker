@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (전역 변수 충돌 방지 var 적용 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (호치, 후적박발 유실 데이터 복구 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -64,6 +64,7 @@ var heroList = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
+// 🚨 [데이터 복원] '호치', '후적박발' 누락 데이터 100% 반영 (총 78종)
 var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
@@ -98,8 +99,8 @@ var tacticList = [
     { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 0 },
@@ -135,9 +136,11 @@ var tacticList = [
     { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hochi', name: '호치', group: 'tactic', isOwned: false, star: 0 }, 
     { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_hujeok', name: '후적박발', group: 'tactic', isOwned: false, star: 0 }, 
     { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
