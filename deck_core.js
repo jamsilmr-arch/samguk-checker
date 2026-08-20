@@ -1,40 +1,38 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (주혼 특기 3옵션 추천 및 UI 렌더링 픽스 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (전역 변수 충돌 방지 var 적용 및 렌더링 픽스 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 스코어링 업데이트)");
 
-const cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 // ==========================================================================
 // LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전 (57종)
 // ==========================================================================
-const FB_OFF_META = {
+var FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], "손권":["웅거","궁병/기병","wu","SC"], "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], "육항":["청백충근","창병/궁병","wu","SH"], "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
-const FB_OFFICERS = Object.keys(FB_OFF_META);
+var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-const FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
+var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 [주혼 특기 추가] 12열 배열 구조로 전면 확장 (투구, 갑옷, 장신구 특기 반영)
-const EQ_PRESETS = {
+var EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","용맹","명광갑","무용 피해 가함","창병 배반, 공심 상승","금왕","치룡패","무용 피해 가함","창병 배반, 공심 상승","양렬"],
     PCm: ["백옥잠","연격률","창병 피해 가함","신속","세린갑","무용 피해 가함","창병 배반, 공심 상승","치밀","쌍호뉴","연격률","창병 배반, 공심 상승","포위"],
     SC:  ["진현관","강공, 기습 상승","창병 피해 가함","기책","명재복","모략 피해 가함","창병 배반, 공심 상승","치밀","박산로","공심","창병 배반, 공심 상승","모산"],
-    TC:  ["연함규","피해 감소","창병 피해 가함","권어","청등갑","피해 감소","창병 피해 감소","무환","사남패","피해 감소","창병 배반, 공심 상승","천우"],
+    TC:  ["연함규","피해 감소","창병 치유 효과 상승","권어","청등갑","피해 감소","창병 피해 감소","무환","사남패","피해 감소","창병 배반, 공심 상승","천우"],
     SH:  ["연함규","피해 감소","치유 효과 부여","원촉","청등갑","피해 감소","창병 치유 효과 상승","지원","사남패","치유 효과 받음","창병 피해 감소","감림"],
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 [주혼 특기 추가] 사마의, 조조, 조조(제왕), 가후 맞춤형 종결 세팅 (attr3 추가)
-const FB_EQUIP_OVERRIDES = {
+var FB_EQUIP_OVERRIDES = {
     "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "응변" } },
     "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천우" } },
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } }
 };
 
-const FB_EQUIP_MAP = new Proxy({}, {
+var FB_EQUIP_MAP = new Proxy({}, {
     get: (_, name) => {
         if (FB_EQUIP_OVERRIDES[name]) return FB_EQUIP_OVERRIDES[name];
         const meta = FB_OFF_META[name] || ["","방패병","qun","PC"];
@@ -47,7 +45,7 @@ const FB_EQUIP_MAP = new Proxy({}, {
     }
 });
 
-const STAT_KEY_RULES = [
+var STAT_KEY_RULES = [
     { k: 'damageTakenRed', words: ['피해 감소', '피감', '피해감소', '저항'] },
     { k: 'physicalDmg', words: ['무용 피해 가함', '무용피해가함', '무용 피해 상승', '무용피해상승'] },
     { k: 'strategyDmg', words: ['모략 피해 가함', '모략피해가함', '모략 피해 상승', '모략피해상승'] },
@@ -60,7 +58,7 @@ const STAT_KEY_RULES = [
     { k: 'armorPen', words: ['파갑', '간파'] }
 ];
 
-const internalBondRules = [
+var internalBondRules = [
     {name:"도원결의",req:2,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},
     {name:"오호상장",req:2,heroes:["관우","장비","조운","황충","마초"],effect:"강공 8%"},
     {name:"연환계",req:2,heroes:["동탁","여포","초선","황충"],effect:"피해가함 4%, 치유효과 4%"},
@@ -74,7 +72,7 @@ const internalBondRules = [
     {name:"호위경주",req:2,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"}
 ];
 
-const DYNAMIC_TACTIC_POOLS = {
+var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
     "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
@@ -83,7 +81,7 @@ const DYNAMIC_TACTIC_POOLS = {
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
-const tacticAlternativesMap = {
+var tacticAlternativesMap = {
     "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
     "횡징폭렴":["간담상조","동구적개","동장철벽"],
     "동장철벽":["간담상조","견불가최","천시지리","동구적개"], 
@@ -118,16 +116,16 @@ const tacticAlternativesMap = {
     "명찰추호":["동촉기선", "요사여신", "양의화생", "지변규려"]
 };
 
-const internalTacticStatMap = {
+var internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6},"후적박발":{strategyDmg:15,leech:5},
     "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5}
 };
 
-const defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
-const metaHawkRandomAttributesMap = new Proxy({
+var metaHawkRandomAttributesMap = new Proxy({
     "rank1_1":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank1_2":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     "rank1_3":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
@@ -141,7 +139,7 @@ const metaHawkRandomAttributesMap = new Proxy({
     "var_gangyu_gwanu_yubi":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 모략 +12%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
-const metaHawkRecommendationMap = new Proxy({
+var metaHawkRecommendationMap = new Proxy({
     "rank1_1":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
     "rank1_2":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
     "rank1_3":{name:"열공-전광",skill:"허저 및 악진의 물리 피해 극대화"},
@@ -551,7 +549,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     return fb;
 }
 
-const FORMATIONS = {
+var FORMATIONS = {
     "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
     "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
     "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
@@ -560,8 +558,8 @@ const FORMATIONS = {
     "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] }
 };
 
-let dynamicPresetDecks = [];
-let draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
+var dynamicPresetDecks = [];
+var draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
 
 window.handleOfficerDragStart = (e, dIdx, oIdx) => { 
     draggedDeckOriginIdx = dIdx; 
@@ -598,7 +596,7 @@ window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
     renderDeckBuilder();
 };
 
-let modalPopupEl = null, currentPopupTitle = null;
+var modalPopupEl = null, currentPopupTitle = null;
 function openModalPopup(e, title, meta1, desc1) {
     e.stopPropagation();
     if (!modalPopupEl) {
@@ -625,13 +623,12 @@ function openModalPopup(e, title, meta1, desc1) {
     modalPopupEl.style.left = `${Math.min(rect.right + window.scrollX + 10, window.innerWidth - 290)}px`;
 }
 
-// 🚨 [주혼 특기 추가] 3옵션 특기가 포함된 UI 팝업 렌더링 픽스
 window.showEquipPopup = function(e, attr1, attr2, attr3) {
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
     openModalPopup(e, "⚒️ 장비 추가 속성 및 특기", `🔹 1차: ${attr1}<br>🔹 2차: ${attr2}`, `🔸 특기: <span style="color:#f59e0b;font-weight:bold;">${attr3}</span>`);
 };
 
-const injectCustomUIStyles = () => {
+var injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
     style.id = 'deck-custom-ui-styles';
@@ -667,18 +664,6 @@ const injectCustomUIStyles = () => {
     `;
     document.head.appendChild(style);
 };
-
-const defaultPresetDecks = Array.from({ length: 5 }, (_, i) => ({
-    title: `${i + 1}군`,
-    formation: "구행진",
-    unitType: "",
-    originIdx: i,
-    officers: [
-        { name: "", chosenTactics: ["", ""] },
-        { name: "", chosenTactics: ["", ""] },
-        { name: "", chosenTactics: ["", ""] }
-    ]
-}));
 
 function loadDeckTextData() {
     try {
@@ -892,7 +877,6 @@ function renderDeckBuilder() {
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
-                // 🚨 [주혼 특기 추가] 3번 속성(attr3) 렌더링 픽스
                 const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
 
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
@@ -905,8 +889,8 @@ function renderDeckBuilder() {
             });
 
             const isCustom = !match || match.maxScore < 1.5;
-            const metaIdForHawk = isCustom ? "custom" : matchMeta.bestMeta.id;
-            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
+            const metaIdForHawk = isCustom ? "custom" : match.bestMeta.id;
+            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { attributes: null };
             const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
