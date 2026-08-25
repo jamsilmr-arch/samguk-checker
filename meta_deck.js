@@ -3,13 +3,13 @@ console.log("[시스템 분석] meta_deck.js 메타 덱 데이터 허브 기동"
 
 var analyzedMetaArchetypes = [
     // 🏆 [최상위 랭커 0티어 절대 메타] - 스크린샷 10장 전수 검사 기반 1:1 완벽 매핑
-    {id:"rank0_gun_jangbo", priority: 100, name:"[1위 1군] 좌자·장녕·장보 구행궁병", concept:"[1위 원본]", formation:"구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
-    {id:"rank0_gun_hwang", priority: 100, name:"[1위 1군] 좌자·장녕·황보숭 구행궁병", concept:"[1위 원본]", formation:"구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
-    {id:"rank0_wei_sima_gu", priority: 100, name:"[1위 2군] 조조·사마의·가후 구행방패", concept:"[1위 원본]", formation:"구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
-    {id:"rank0_wei_sima_gi", priority: 100, name:"[1위 2군] 조조(제왕)·가후·사마의 기형방패", concept:"[1위 원본]", formation:"기형진", officers:[{name:"조조(제왕)", chosenTactics:["군령여산","강유겸제","진퇴유도"]}, {name:"가후", chosenTactics:["경달권변","안영찰채","여자동포"]}, {name:"사마의", chosenTactics:["응시낭고","반객위주","후적박발"]}]},
-    {id:"rank0_shu_macho_an", priority: 100, name:"[1위 3군] 마초·서서·위연 안행창병", concept:"[1위 원본]", formation:"안행진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"서서", chosenTactics:["절절학문","문치무공","유비무환"]}, {name:"위연", chosenTactics:["실병제위","동구적개","진퇴유도"]}]},
-    {id:"rank0_shu_macho_chu", priority: 100, name:"[1위 3군] 마초·위연·유비(제왕) 추형창병", concept:"[1위 원본]", formation:"추형진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"위연", chosenTactics:["실병제위","간담상조","진퇴유도"]}, {name:"유비(제왕)", chosenTactics:["재주복주","유좌유용","문치무공"]}]},
-    {id:"rank0_wei_jangryo", priority: 100, name:"[1위 4군] 장료·조조(제왕)·악진 호도창병", concept:"[1위 원본]", formation:"호도진", officers:[{name:"장료", chosenTactics:["함진살적","반객위주","질풍노도"]}, {name:"조조(제왕)", chosenTactics:["군령여산","간담상조","진퇴유도"]}, {name:"악진", chosenTactics:["분용당선","분성지계","만천과해"]}]}
+    {id:"rank0_gun_jangbo", priority: 100, name:"[1위 1군] 좌자·장녕·장보 구행 궁병", concept:"[1위 원본]", formation:"구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
+    {id:"rank0_gun_hwang", priority: 100, name:"[1위 1군] 좌자·장녕·황보숭 구행 궁병", concept:"[1위 원본]", formation:"구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
+    {id:"rank0_wei_sima_gu", priority: 100, name:"[1위 2군] 조조·사마의·가후 구행 방패", concept:"[1위 원본]", formation:"구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
+    {id:"rank0_wei_sima_gi", priority: 100, name:"[1위 2군] 조조(제왕)·가후·사마의 기형 방패", concept:"[1위 원본]", formation:"기형진", officers:[{name:"조조(제왕)", chosenTactics:["군령여산","강유겸제","진퇴유도"]}, {name:"가후", chosenTactics:["경달권변","안영찰채","여자동포"]}, {name:"사마의", chosenTactics:["응시낭고","반객위주","후적박발"]}]},
+    {id:"rank0_shu_macho_an", priority: 100, name:"[1위 3군] 마초·서서·위연 안행 창병", concept:"[1위 원본]", formation:"안행진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"서서", chosenTactics:["절절학문","문치무공","유비무환"]}, {name:"위연", chosenTactics:["실병제위","동구적개","진퇴유도"]}]},
+    {id:"rank0_shu_macho_chu", priority: 100, name:"[1위 3군] 마초·위연·유비(제왕) 추형 창병", concept:"[1위 원본]", formation:"추형진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"위연", chosenTactics:["실병제위","간담상조","진퇴유도"]}, {name:"유비(제왕)", chosenTactics:["재주복주","유좌유용","문치무공"]}]},
+    {id:"rank0_wei_jangryo", priority: 100, name:"[1위 4군] 장료·조조(제왕)·악진 호도 창병", concept:"[1위 원본]", formation:"호도진", officers:[{name:"장료", chosenTactics:["함진살적","반객위주","질풍노도"]}, {name:"조조(제왕)", chosenTactics:["군령여산","간담상조","진퇴유도"]}, {name:"악진", chosenTactics:["분용당선","분성지계","만천과해"]}]}
 ];
 
 var metaDeckUnitTypeMap = {
