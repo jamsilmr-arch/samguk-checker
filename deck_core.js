@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (황보숭, 공손찬 신규 0티어 메타 알고리즘 편입 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (유비무환 편입 및 랭커 원본 덱 100% 매핑 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -14,16 +14,17 @@ var FB_OFF_META = {
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
+// 🚨 [필수 누락 보완] '유비무환' 전법 엔진 내 강제 편입 완료
+var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 [메타 업데이트] 황보숭/장녕 덱 및 공손찬 기병 덱 정식 편입
 var BUILTIN_META_DECKS = [
-    { id: "meta_wei_sima", name: "[위] 사마의 반격 방패", priority: 100, formation: "추형진", officers: [ {name:"가후", chosenTactics:["만천과해","혼수모어"]}, {name:"조조", chosenTactics:["이퇴위진","간담상조"]}, {name:"사마의", chosenTactics:["반객위주","후적박발"]} ] },
-    { id: "meta_qun_hwang_jang", name: "[군] 황보숭 장녕 진형", priority: 98, formation: "구행진", officers: [ {name:"황보숭", chosenTactics:["초선차전","동장철벽"]}, {name:"좌자", chosenTactics:["안영찰채","유좌유용"]}, {name:"장녕", chosenTactics:["수상개화","양의화생"]} ] },
-    { id: "meta_shu_macho", name: "[촉] 마초 질풍 창병", priority: 95, formation: "안행진", officers: [ {name:"마초", chosenTactics:["일고작기","용맹무쌍"]}, {name:"위연", chosenTactics:["실병제위","횡징폭렴"]}, {name:"유비", chosenTactics:["여자동포","강유겸제"]} ] },
-    { id: "meta_wu_yukson", name: "[오] 육손 연소 궁병", priority: 90, formation: "구행진", officers: [ {name:"손권", chosenTactics:["기문둔갑","간담상조"]}, {name:"육항", chosenTactics:["수상개화","요사여신"]}, {name:"육손", chosenTactics:["천리추격","체천행도"]} ] },
-    { id: "meta_qun_gongson", name: "[군] 공손찬 위진 기병", priority: 88, formation: "방원진", officers: [ {name:"동탁", chosenTactics:["혼수모어","강유겸제"]}, {name:"공손찬", chosenTactics:["극적제승","암전난방"]}, {name:"원소", chosenTactics:["견진연봉","위위구조"]} ] },
-    { id: "meta_qun_yeopo", name: "[군] 여포 무쌍 기병", priority: 85, formation: "기형진", officers: [ {name:"여포", chosenTactics:["용왕직전","만부막적"]}, {name:"동탁", chosenTactics:["혼수모어","강유겸제"]}, {name:"원소", chosenTactics:["견진연봉","위위구조"]} ] }
+    {id:"rank0_gun_jangbo", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
+    {id:"rank0_gun_hwang", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
+    {id:"rank0_wei_sima_gu", priority: 100, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
+    {id:"rank0_wei_sima_gi", priority: 100, formation: "기형진", officers:[{name:"조조(제왕)", chosenTactics:["군령여산","강유겸제","진퇴유도"]}, {name:"가후", chosenTactics:["경달권변","안영찰채","여자동포"]}, {name:"사마의", chosenTactics:["응시낭고","반객위주","후적박발"]}]},
+    {id:"rank0_shu_macho_an", priority: 100, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"서서", chosenTactics:["절절학문","문치무공","유비무환"]}, {name:"위연", chosenTactics:["실병제위","동구적개","진퇴유도"]}]},
+    {id:"rank0_shu_macho_chu", priority: 100, formation: "추형진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"위연", chosenTactics:["실병제위","간담상조","진퇴유도"]}, {name:"유비(제왕)", chosenTactics:["재주복주","유좌유용","문치무공"]}]},
+    {id:"rank0_wei_jangryo", priority: 100, formation: "호도진", officers:[{name:"장료", chosenTactics:["함진살적","반객위주","질풍노도"]}, {name:"조조(제왕)", chosenTactics:["군령여산","간담상조","진퇴유도"]}, {name:"악진", chosenTactics:["분용당선","분성지계","만천과해"]}]}
 ];
 
 var EQ_PRESETS = {
@@ -87,72 +88,74 @@ var DYNAMIC_TACTIC_POOLS = {
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
     "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
-    "SH": ["안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
+    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["기문둔갑", "만천과해", "수상개화", "태청단경", "이일대로", "천시지리", "진퇴유도", "유좌유용", "금창신"]
 };
 
 var tacticAlternativesMap = {
-    "간담상조":["횡징폭렴","동장철벽","안영찰채","위위구조","이퇴위진"], 
-    "횡징폭렴":["간담상조","동구적개","동장철벽"],
+    "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
+    "횡징폭렴":["유비무환","간담상조","동구적개","동장철벽"],
     "동장철벽":["간담상조","견불가최","천시지리","동구적개"], 
-    "전위위안":["간담상조","태청단경","현호제세","제곤부위","안영찰채","만천과해"],
-    "이퇴위진":["미우주무","천시지리","진퇴유도"], 
+    "전위위안":["간담상조","태청단경","현호제세","제곤부위","만천과해"],
+    "이퇴위진":["유비무환","미우주무","천시지리","진퇴유도"], 
     "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
-    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍","승승장구"], 
+    "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍"], 
     "혼수모어":["사면초가","이간계","안영찰채"],
-    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍","후적박발"], 
-    "유좌유용":["휴양생식","제곤부위","안영찰채"],
+    "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], 
+    "유좌유용":["유비무환","휴양생식","제곤부위","안영찰채"],
     "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], 
-    "안영찰채":["간담상조","위위구조","미우주무","전위위안","유좌유용"],
+    "안영찰채":["유비무환","간담상조","위위구조","미우주무","유좌유용"],
     "여자동포":["동구적개","천시지리"], 
-    "양의화생":["기문둔갑","화소적벽","수상개화","명찰추호"],
-    "수상개화":["요사여신","사생취의","양의화생","후적박발"], 
-    "요사여신":["수상개화","사생취의","반객위주","후적박발"],
+    "양의화생":["기문둔갑","화소적벽","명찰추호"],
+    "수상개화":["요사여신","사생취의","후적박발"], 
+    "요사여신":["수상개화","사생취의","후적박발"],
     "분성지계":["화소적벽","기문둔갑"], 
-    "체천행도":["반객위주","질풍노도","천리추격"], 
+    "체천행도":["반객위주","천리추격"], 
     "금창신":["동구적개","강유겸제","간담상조"],
     "만천과해":["전위위안","태청단경","휴양생식"], 
-    "토적격문":["진퇴유도","간담상조","이퇴위진"], 
+    "토적격문":["진퇴유도","이퇴위진"], 
     "위위구조":["간담상조","진퇴유도","홍수첨향"],
     "견진연봉":["동장철벽","순수견양"], 
     "용왕직전":["천리추격","암전난방"], 
     "만부막적":["용왕직전","천리추격"], 
     "일고작기":["사생취의","용맹무쌍"],
-    "부동여산":["용맹무쌍", "만부막적", "일고작기", "용왕직전", "사생취의", "질풍노도"], 
-    "이아환아":["선등함진", "횡징폭렴", "반객위주", "동구적개"],
+    "부동여산":["용맹무쌍", "만부막적", "일고작기", "질풍노도"], 
+    "이아환아":["선등함진", "동구적개"],
     "호치":["만부막적", "용왕직전", "용맹무쌍"],
-    "홍수첨향":["현호제세","미우주무","휴양생식","제곤부위"],
-    "후적박발":["요사여신", "수상개화", "사생취의", "반객위주"],
-    "명찰추호":["동촉기선", "요사여신", "양의화생", "지변규려"]
+    "홍수첨향":["유비무환","현호제세","미우주무","휴양생식","제곤부위"],
+    "후적박발":["요사여신", "수상개화", "반객위주"],
+    "명찰추호":["동촉기선", "지변규려"],
+    "유비무환":["안영찰채", "간담상조", "태청단경", "휴양생식", "홍수첨향"]
 };
 
+// 🚨 '유비무환' 스코어링 강제 할당 완료
 var internalTacticStatMap = {
     "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6},"후적박발":{strategyDmg:15,leech:5},
-    "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5}
+    "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5},"유비무환":{healGiven:8,damageTakenRed:8}
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 var metaHawkRandomAttributesMap = new Proxy({
-    "meta_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "meta_qun_hwang_jang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "meta_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "meta_wu_yukson":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 발동률 +5%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 행동 시 디버프 1개 해제",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "meta_qun_janggak":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "meta_qun_gongson":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 능동 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
-    "meta_qun_yeopo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}}
+    "rank0_gun_jangbo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank0_gun_hwang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank0_wei_sima_gu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank0_wei_sima_gi":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank0_shu_macho_an":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank0_shu_macho_chu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank0_wei_jangryo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 var metaHawkRecommendationMap = new Proxy({
-    "meta_wei_sima":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
-    "meta_qun_hwang_jang":{name:"삭풍-성모",skill:"황보숭 탱킹 기반 장녕/좌자 콤보 유지력 극대화"},
-    "meta_shu_macho":{name:"열공-전광",skill:"마초 용맹무쌍/질풍노도 돌파력 강화"},
-    "meta_wu_yukson":{name:"능소-진시",skill:"육손 체천행도 연격 폭딜 보정"},
-    "meta_qun_janggak":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
-    "meta_qun_gongson":{name:"능소-진시",skill:"공손찬 위진새북 선공 및 동탁/원소 시너지"},
-    "meta_qun_yeopo":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"}
+    "rank0_gun_jangbo":{name:"결운-호생",skill:"장보 장벽 유지력 극대화 및 좌자 회피 백업"},
+    "rank0_gun_hwang":{name:"열공-여천",skill:"황보숭 뎀감망 및 장녕/좌자 콤보 유지력 극대화"},
+    "rank0_wei_sima_gu":{name:"열공-여천",skill:"사마의 모략 폭딜 펌핑 및 조조 방어막 극대화"},
+    "rank0_wei_sima_gi":{name:"능소-전우",skill:"사마의 피격 뎀감 및 가후 CC 안정성 보정"},
+    "rank0_shu_macho_an":{name:"결운-호생",skill:"마초 확산 타격 및 서서 피감 치유 강화"},
+    "rank0_shu_macho_chu":{name:"능소-진시",skill:"마초 용맹무쌍/질풍노도 돌파력 펌핑"},
+    "rank0_wei_jangryo":{name:"능소-진시",skill:"장료 함진살적 적 주장 암살 확률 폭증"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId) {
@@ -744,7 +747,20 @@ window.autoFixDeck = oIdx => {
 
     if (filledCount === 0) {
         let bestMeta = null, highestOwnedCount = -1;
-        for (const meta of BUILTIN_META_DECKS) {
+        
+        let archetypes = [];
+        if (window.getMetaDeckData) {
+            const metaData = window.getMetaDeckData();
+            if (metaData && metaData.analyzedMetaArchetypes && metaData.analyzedMetaArchetypes.length > 0) {
+                archetypes = metaData.analyzedMetaArchetypes;
+            }
+        }
+        if (archetypes.length === 0) archetypes = BUILTIN_META_DECKS;
+        else {
+            BUILTIN_META_DECKS.forEach(bm => { if (!archetypes.some(a => a.id === bm.id)) archetypes.push(bm); });
+        }
+
+        for (const meta of archetypes) {
             let ownedCount = meta.officers.filter(mo => hMap[cStr(mo.name)]?.isOwned && !higherHeroes.has(cStr(mo.name))).length;
             let currentScore = ownedCount + (meta.priority || 0);
             if (currentScore > highestOwnedCount) { highestOwnedCount = currentScore; bestMeta = meta; }
