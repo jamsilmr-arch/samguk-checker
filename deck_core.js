@@ -197,8 +197,10 @@ window.getTacticListBridge = function() {
 };
 
 window.getOfficerNamesBridge = function() {
-    const list = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : FB_OFFICERS;
-    return [...list].sort((a, b) => a.localeCompare(b, 'ko'));
+    const externalList = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : [];
+    // 외부 도감 데이터와 내부 FB_OFFICERS 데이터를 강제 병합하여 중복 제거 (누락 방지)
+    const mergedList = [...new Set([...externalList, ...FB_OFFICERS])];
+    return mergedList.sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 function getOfficerEquipment(officerName, deckUnitType = "") {
