@@ -4,6 +4,13 @@
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     const patchHistoryData = [
+         {
+            date: "2026-08-29",
+            logs: [
+                "법정&심구고루 데이터 추가
+                "메타덱 천공 랭킹 1~10위 덱 반영"
+            ]
+        },
         {
             date: "2026-08-25",
             logs: [
