@@ -1,4 +1,4 @@
-// [시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원 및 3옵션 장비 API 연동 완료)
+// [시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원 및 법정 버그 픽스 완료)
 console.log("[시스템 분석] dogam.js 전서버 랭커 엔진 기동 (전체 데이터 복원)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -22,6 +22,7 @@ var heroDogamData = [
     { id: 'h_gangyu', name: '강유', group: 'shu', role: '추격 (50%)', location: '후열', skill: '담대여두', skillDesc: '홀수 턴에 적군 단체의 무용을 64 강탈하여 무용 피해(계수 184%)를 가하고, 짝수 턴에 모략을 64 강탈하여 모략 피해(계수 184%)를 가합니다.', stats: { martial: 556, tactical: 622, command: 574, speed: 475 }, unit: '방패병/기병', eq: 'SC', tacs: ["천리추격", "일고작기"] },
     { id: 'h_madae', name: '마대', group: 'shu', role: '능동 (35%)', location: '전열', skill: '습참', skillDesc: '1턴 준비 후 적군 2명에게 무용 피해(계수 210%)를 가하고 대상이 가하는 피해를 25% 차단합니다(2턴 지속).', stats: { martial: 485, tactical: 485, command: 568, speed: 552 }, unit: '창병/방패병', eq: 'PC', tacs: ["일고작기", "만전제발"] },
     { id: 'h_macho', name: '마초', group: 'shu', role: '패시브 (100%)', location: '전열', skill: '출수법', skillDesc: '자신의 물리 피해가 34% 증가하고 일반 공격 피해의 54%를 주위 적군에게 확산 전이시킵니다.', stats: { martial: 646, tactical: 414, command: 539, speed: 564 }, unit: '창병/기병', eq: 'PCm', tacs: ["용맹무쌍", "질풍노도"] },
+    { id: 'h_beopjeong', name: '법정', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '애자필보', skillDesc: '턴 시작 시, 60% 확률(모략 영향)로 자신이 받는 무용 및 모략 피해를 30% 감소시키고 아군 전체에게 절반의 효과를 부여하며, 이후 30% 확률로 적군 1명에게 제어 효과 1개(겁전, 피곤)를 부여합니다. 또한 35% 확률(모략 영향)로 통솔이 가장 낮은 아군에게 축세 1중첩을 부여합니다.', stats: { martial: 48, tactical: 92, command: 81, speed: 65 }, unit: '방패병/궁병', eq: 'SS', tacs: ["태청단경", "심구고루"] },
     { id: 'h_seoseo', name: '서서', group: 'shu', role: '지휘 (100%)', location: '후열', skill: '절절학문', skillDesc: '아군이 능동 전법을 발동할 때마다 60% 확률로 아군 전체의 공격력을 14% 증폭(최대 3중첩)합니다.', stats: { martial: 545, tactical: 598, command: 503, speed: 570 }, unit: '창병/궁병', eq: 'SS', tacs: ["문치무공", "전위위안"] },
     { id: 'h_samaga', name: '사마가', group: 'shu', role: '추격 (35%)', location: '전열', skill: '만왕', skillDesc: '일반 공격 후 45% 확률로 대상에게 무용 피해(계수 175%)를 가하고 2턴간 공황 및 약화 상태로 만듭니다.', stats: { martial: 556, tactical: 372, command: 461, speed: 487 }, unit: '창병/방패병', eq: 'PC', tacs: ["만전제발", "용왕직전"] },
     { id: 'h_wuyeon', name: '위연', group: 'shu', role: '패시브 (70%)', location: '전열', skill: '실병제위', skillDesc: '준비 턴이 필요한 능동 전법의 대기 시간을 75% 확률로 즉시 삭제하고 자신의 가하는 피해를 15% 증가시킵니다.', stats: { martial: 604, tactical: 503, command: 622, speed: 362 }, unit: '창병/궁병', eq: 'PC', tacs: ["홍수첨향", "이퇴위진"] },
@@ -54,15 +55,13 @@ var heroDogamData = [
     { id: 'h_ugil', name: '우길', group: 'qun', role: '지휘 (70%)', location: '후열', skill: '태평경', skillDesc: '2턴 시작 시 적군 전체에게 수공(계수 72%, 모략 영향, 4턴 지속)을 걸어 지속적인 모략 피해 줍니다.', stats: { martial: 443, tactical: 592, command: 527, speed: 516 }, unit: '창병/궁병', eq: 'SS', tacs: ["진퇴유도", "기문둔갑"] },
     { id: 'h_wonso', name: '원소', group: 'qun', role: '지휘 (100%)', location: '후열', skill: '사소도', skillDesc: '1턴 준비 후 적 2명에게 물리 피해(계수 126%) 및 화상(계수 60%)을 입히고 아군 전체 통솔 80 증가.', stats: { martial: 515, tactical: 521, command: 634, speed: 493 }, unit: '방패병/기병', eq: 'TC', tacs: ["견진연봉", "위위구조"] },
     { id: 'h_janggak', name: '장각', group: 'qun', role: '능동 (50%)', location: '후열', skill: '황천당립', skillDesc: '1턴 준비 후 무작위 적에게 5회의 천벌 벼락 모략 타격(계수 136%)을 가하고 30% 확률로 공황 부여.', stats: { martial: 473, tactical: 610, command: 616, speed: 368 }, unit: '궁병/기병', eq: 'SC', tacs: ["사면초가", "화소적벽"] },
-    { id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', skillDesc: '적군 단체의 모략과 통솔을 38 흡수하여 아군에게 공유하고 강력한 모략 피해(계수 184%)를 줍니다.', stats: { martial: 461, tactical: 598, command: 556, speed: 457 }, unit: '궁병/방패병', eq: 'SS', tacs: ["수상개화", "양의화생"] },
+    { id: 'h_jangnyeong', name: '장녕', group: 'qun', role: '능동 (50%)', location: '후열', skill: '천의난위', skillDesc: '적군 단체의 모략과 통솔을 38 흡수하여 아군에게 공유하고 강력 모략 피해(계수 184%)를 줍니다.', stats: { martial: 461, tactical: 598, command: 556, speed: 457 }, unit: '궁병/방패병', eq: 'SS', tacs: ["수상개화", "양의화생"] },
     { id: 'h_jangbo', name: '장보', group: 'qun', role: '능동 (50%)', location: '후열', skill: '요풍사기', skillDesc: '적 전체에 모래바람 모략 피해(계수 106%)를 입히고 아군 전체에게 장벽 2중첩(피해 40% 흡수)을 부여합니다.', stats: { martial: 414, tactical: 562, command: 551, speed: 433 }, unit: '궁병/방패병', eq: 'SS', tacs: ["강유겸제", "진퇴유도"] },
     { id: 'h_jwaja', name: '좌자', group: 'qun', role: '패시브 (100%)', location: '후열', skill: '화겁생기', skillDesc: '전투 첫 2턴 간 아군 전체에게 회피 35%를 부여하고 3~5턴 동안 매 턴 병력을 회복(치료율 68%)시킵니다.', stats: { martial: 437, tactical: 658, command: 497, speed: 403 }, unit: '궁병/방패병', eq: 'SH', tacs: ["안영찰채", "유좌유용"] },
     { id: 'h_chaemunhui', name: '채문희', group: 'qun', role: '능동 (70%)', location: '후열', skill: '비분시', skillDesc: '아군 2명의 병력을 회복(치료율 122%, 모략 영향)시키고 50% 확률로 가하는 피해 26% 증가 또는 받는 피해 26% 감소.', stats: { martial: 372, tactical: 598, command: 509, speed: 558 }, unit: '궁병/기병', eq: 'SH', tacs: ["간담상조", "강유겸제"] },
     { id: 'h_choseon', name: '초선', group: 'qun', role: '능동 (50%)', location: '후열', skill: '폐월', skillDesc: '적군 단체를 매혹하여 자신이 입는 피해의 35%를 해당 적이 대신 분담하게 만들고 대상의 통솔/무용을 감소.', stats: { martial: 372, tactical: 592, command: 556, speed: 433 }, unit: '창병/기병', eq: 'SH', tacs: ["혼수모어", "위위구조"] },
     { id: 'h_hwata', name: '화타', group: 'qun', role: '능동 (50%)', location: '후열', skill: '청낭제세', skillDesc: '전투 전반기(1~4턴) 동안 아군 2명의 통솔을 40 증가시키고 피격 시 50% 확률로 즉각 병력 회복.', stats: { martial: 372, tactical: 598, command: 432, speed: 362 }, unit: '궁병/방패병', eq: 'SH', tacs: ["간담상조", "휴양생식"] },
-    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '강직불아', skillDesc: '매 턴 60% 확률(통솔 영향)로 자신 및 속도가 낮은 아군에게 패시브 전법 피해 20% 감소 부여 및 병력 회복(치료율 120%). 전열 아군 1명에게 받는 피해 10% 감소(대상 속도 낮으면 20% 추가) 부여.', stats: { martial: 545, tactical: 545, command: 719, speed: 498 }, unit: '궁병/창병', eq: 'TC', tacs: ["초선차전", "동장철벽"] },
-    {name: '법정', faction: '촉', unit: '방패병/궁병', cost: 6, role: '서포터/제어', skill: '애자필보', skillDesc: '턴 시작 시, 60% 확률(모략 영향)로 자신이 받는 무용 및 모략 피해를 30% 감소시키고 아군 전체에게 절반의 효과를 부여하며, 이후 30% 확률로 적군 1명에게 제어 효과 1개(겁전, 피곤)를 부여합니다. 또한 35% 확률(모략 영향)로 통솔이 가장 낮은 아군에게 축세 1중첩을 부여합니다.', stats: { force: 48.0, strategy: 92.0, leadership: 81.0, speed: 65.0 }
-    },
+    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', role: '지휘 (100%)', location: '전열', skill: '강직불아', skillDesc: '매 턴 60% 확률(통솔 영향)로 자신 및 속도가 낮은 아군에게 패시브 전법 피해 20% 감소 부여 및 병력 회복(치료율 120%). 전열 아군 1명에게 받는 피해 10% 감소(대상 속도 낮으면 20% 추가) 부여.', stats: { martial: 545, tactical: 545, command: 719, speed: 498 }, unit: '궁병/창병', eq: 'TC', tacs: ["초선차전", "동장철벽"] }
 ];
 
 // 🚨 12열 배열 구조 (투구, 갑옷, 장신구 주혼 3옵션 포함)
@@ -78,8 +77,9 @@ var EQ_PRESETS = {
 var masterHeroLookupMap = {};
 heroDogamData.forEach(h => { if (h?.name) masterHeroLookupMap[cStr(h.name)] = h; });
 
-// 🚨 [에러 수정] 32명의 핵심 무장 주혼 특기(attr3) 종결 스코어링 1:1 매핑 포함
+// 🚨 [에러 수정] 33명의 핵심 무장 주혼 특기(attr3) 종결 스코어링 1:1 매핑 포함
 var masterEquipmentMap = {
+    "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "마초": { helmet: { name: "백옥잠", attr1: "연격률", attr2: "창병 피해 가함", attr3: "용맹" }, armor: { name: "세린갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "치밀" }, accessory: { name: "쌍호뉴", attr1: "연격률", attr2: "창병 배반, 공심 상승", attr3: "포위" } },
     "위연": { helmet: { name: "호분관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "위명" }, armor: { name: "명광갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "치룡패", attr1: "무용 피해 가함", attr2: "창병 피해 감소", attr3: "양렬" } },
     "서서": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "창병 피해 가함", attr3: "원촉" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "지원" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "창병 피해 감소", attr3: "감림" } },
