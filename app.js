@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (호치, 후적박발 유실 데이터 복구 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (법정, 심구고루, 애자필보 복구 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -21,6 +21,7 @@ var heroList = [
     { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 0, transcend: false },
+    { id: 'h_beopjeong', name: '법정', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 0, transcend: false },
@@ -64,7 +65,7 @@ var heroList = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
-// 🚨 [데이터 복원] '호치', '후적박발' 누락 데이터 100% 반영 (총 78종)
+// 🚨 [데이터 복원] 신규 전법 누락 데이터 100% 반영 (총 80종)
 var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
@@ -101,9 +102,11 @@ var tacticList = [
     { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_simgu', name: '심구고루', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_aeja', name: '애자필보', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false, star: 0 },
