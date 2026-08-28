@@ -1,4 +1,4 @@
-// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (패치 히스토리 스크롤 및 모달창 높이 고정 픽스 완료)
+// [시스템 분석] navbar.js - 글로벌 테마 변수 매트릭스 및 패치 히스토리 연동 엔진 (문법 오류 크래시 완벽 픽스)
 (function() {
     const savedTheme = localStorage.getItem('samguk_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -7,9 +7,9 @@
          {
             date: "2026-08-29",
             logs: [
-                "법정&심구고루 데이터 추가
+                "법정&심구고루 데이터 추가",
                 "메타덱 천공 랭킹 1~10위 덱 반영"
-        ]
+            ]
         },
         {
             date: "2026-08-25",
@@ -160,7 +160,6 @@
                 #global-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
                 .history-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(3px); }
                 
-                /* 🚨 [핵심 교정] 히스토리 모달 높이 고정 및 스크롤바 디자인 추가 */
                 .history-modal { background: var(--bg-panel); border: 1px solid var(--border-main); border-radius: 8px; width: 90%; max-width: 600px; height: 70vh; min-height: 400px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; }
                 .history-modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: var(--bg-header); flex-shrink: 0; }
                 .history-modal-header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
@@ -168,7 +167,6 @@
                 .history-modal-close:hover { color: var(--danger-text); }
                 .history-modal-body { padding: 20px; overflow-y: auto; color: var(--text-desc); font-size: 13px; line-height: 1.6; flex-grow: 1; }
                 
-                /* 🚨 웹킷 기반 커스텀 스크롤바 주입 (테마 연동) */
                 .history-modal-body::-webkit-scrollbar { width: 8px; }
                 .history-modal-body::-webkit-scrollbar-track { background: var(--bg-inner); border-radius: 4px; }
                 .history-modal-body::-webkit-scrollbar-thumb { background: var(--border-input); border-radius: 4px; border: 1px solid var(--bg-inner); }
