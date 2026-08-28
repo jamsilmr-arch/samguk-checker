@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (법정-강유 브루저 0티어 메타 추가)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (AI 스마트 메타 튜닝 및 강제 오버라이드 엔진 탑재 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -13,7 +13,6 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,애자필보,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 강유를 메인 딜러로 기용하는 미래시 0티어 방패덱 추가
 var BUILTIN_META_DECKS = [
     {id:"meta_shu_beopjeong_gang", priority: 160, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","심구고루","간담상조"]}, {name:"강유", chosenTactics:["담대여두","천리추격","반객위주"]}]},
     {id:"rank0_shu_beopjeong_je", priority: 110, formation: "구행진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","태청단경","금창신"]}, {name:"제갈량", chosenTactics:["초선차전","명찰추호","양의화생"]}]},
@@ -35,7 +34,6 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 강유 및 법정 덱 핵심 멤버의 장비를 '방패병' 사양으로 완벽히 고정
 var FB_EQUIP_OVERRIDES = {
     "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
@@ -776,8 +774,10 @@ window.autoFixDeck = oIdx => {
             });
             return { name: mo.name, chosenTactics: fixedTacs };
         });
+        
+        applyAITuning(targetDeck, tMap, higherTacs);
         localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder(); 
-        return alert(`[AI 교정 완료] 보유 풀 기반 최적 메타 덱(${bestMeta.name}) 자동 편성 성공!`);
+        return alert(`[AI 교정 완료] 보유 풀 기반 최적 메타 덱(${bestMeta.name}) 자동 편성 성공! (스마트 튜닝 개입 완료)`);
     }
 
     let currentRoster = targetDeck.officers.filter(o => o.name.trim() !== "");
@@ -869,10 +869,52 @@ window.autoFixDeck = oIdx => {
             }
         }
     });
+
+    applyAITuning(targetDeck, tMap, higherTacs);
     
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder(); 
-    alert(`[AI 다이나믹 교정 완료] 장수별 최적 포지션(진형) 배치 및 전법 할당 성공!`);
+    alert(`[AI 다이나믹 교정 완료] 장수별 최적 포지션(진형) 배치 및 전법 할당 성공! (스마트 튜닝 개입 완료)`);
 };
+
+// 🚨 AI 스마트 튜닝 엔진
+function applyAITuning(targetDeck, tMap, higherTacs) {
+    targetDeck.officers.forEach(o => {
+        if (!o.name) return;
+        
+        // 1. 사마의 랭커 세팅(요사여신) -> 진 종결(후적박발) 강제 교정
+        if (o.name === "사마의" && o.chosenTactics.includes("요사여신")) {
+            if (tMap["후적박발"]?.isOwned && !higherTacs.has("후적박발")) {
+                o.chosenTactics[o.chosenTactics.indexOf("요사여신")] = "후적박발";
+                higherTacs.add("후적박발");
+            }
+        }
+        
+        // 2. 신규 0티어 전법 '심구고루'를 구형 탱커/서포터 세팅에 강제 이식
+        if (["조조", "조조(제왕)", "유비(제왕)", "황보숭", "손견", "법정"].includes(o.name)) {
+            if (tMap["심구고루"]?.isOwned && !higherTacs.has("심구고루") && !o.chosenTactics.includes("심구고루")) {
+                const weakTacs = ["여자동포", "강유겸제", "유좌유용", "동장철벽", "진퇴유도"];
+                for (let i=0; i<2; i++) {
+                    if (weakTacs.includes(o.chosenTactics[i])) {
+                        o.chosenTactics[i] = "심구고루";
+                        higherTacs.add("심구고루");
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. '감로' 메타 카운터: 확률형 CC(혼수모어) 배제 및 생존기(안영찰채/유비무환) 대체
+        if (o.chosenTactics.includes("혼수모어")) {
+             if (tMap["안영찰채"]?.isOwned && !higherTacs.has("안영찰채") && !o.chosenTactics.includes("안영찰채")) {
+                 o.chosenTactics[o.chosenTactics.indexOf("혼수모어")] = "안영찰채";
+                 higherTacs.add("안영찰채");
+             } else if (tMap["유비무환"]?.isOwned && !higherTacs.has("유비무환") && !o.chosenTactics.includes("유비무환")) {
+                 o.chosenTactics[o.chosenTactics.indexOf("혼수모어")] = "유비무환";
+                 higherTacs.add("유비무환");
+             }
+        }
+    });
+}
 
 window.moveDeckAction = (cIdx, dir) => {
     const tIdx = cIdx + dir; if (tIdx < 0 || tIdx >= dynamicPresetDecks.length) return;
