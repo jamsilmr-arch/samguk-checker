@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (수동 전법 고정 해제 및 강제 덮어쓰기 최적화 완료)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유비무환 누락 방지 강제 병합 및 AI 튜닝 해방 패치)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -178,12 +178,11 @@ window.getOfficerDogamData = function(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 };
 
+// 🚨 유비무환 등 신규/누락 전법을 드롭다운에 강제 표시하기 위한 병합 브릿지 함수
 window.getTacticListBridge = function() {
-    if (window.getAllTacticsFromDogam) {
-        const list = window.getAllTacticsFromDogam();
-        if (list && list.length > 0) return list;
-    }
-    return FB_TACTICS;
+    const externalList = (window.getAllTacticsFromDogam && window.getAllTacticsFromDogam()?.length > 5) ? window.getAllTacticsFromDogam() : [];
+    const mergedList = [...new Set([...externalList, ...FB_TACTICS])];
+    return mergedList.sort((a, b) => a.localeCompare(b, 'ko'));
 };
 
 window.getOfficerNamesBridge = function() {
@@ -837,8 +836,7 @@ window.autoFixDeck = oIdx => {
         const role = FB_OFF_META[o.name]?.[3] || "PC";
         const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
 
-        // 🚨 기존에 존재하던 유저 수동 전법 고정(if (!o.chosenTactics[i])) 논리 삭제.
-        // 모든 빈칸 및 수동 설정칸을 메타 우선순위에 따라 강제로 덮어씌움.
+        // 🚨 기존에 존재하던 유저 수동 전법 고정 논리 완전 제거
         for (let i = 0; i < 2; i++) {
             let foundTac = "";
             
