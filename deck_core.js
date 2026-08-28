@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (AI 스마트 메타 튜닝 및 강제 오버라이드 엔진 탑재 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (AI 스마트 튜닝 소유권 제한 해제 및 강제 오버라이드 패치)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -20,6 +20,7 @@ var BUILTIN_META_DECKS = [
     {id:"rank0_gun_hwang", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
     {id:"rank0_wei_sima_gu", priority: 100, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
     {id:"rank0_wei_sima_gi", priority: 100, formation: "기형진", officers:[{name:"조조(제왕)", chosenTactics:["군령여산","강유겸제","진퇴유도"]}, {name:"가후", chosenTactics:["경달권변","안영찰채","여자동포"]}, {name:"사마의", chosenTactics:["응시낭고","반객위주","후적박발"]}]},
+    {id:"rank1_wei_sima_chu", priority: 100, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고","수상개화","요사여신"]}, {name:"조조", chosenTactics:["효웅","유좌유용","강유겸제"]}, {name:"가후", chosenTactics:["경달권변","혼수모어","만천과해"]}]},
     {id:"rank0_shu_macho_an", priority: 100, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"서서", chosenTactics:["절절학문","문치무공","유비무환"]}, {name:"위연", chosenTactics:["실병제위","동구적개","진퇴유도"]}]},
     {id:"rank0_shu_macho_chu", priority: 100, formation: "추형진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"위연", chosenTactics:["실병제위","간담상조","진퇴유도"]}, {name:"유비(제왕)", chosenTactics:["재주복주","유좌유용","문치무공"]}]},
     {id:"rank0_wei_jangryo", priority: 100, formation: "호도진", officers:[{name:"장료", chosenTactics:["함진살적","반객위주","질풍노도"]}, {name:"조조(제왕)", chosenTactics:["군령여산","간담상조","진퇴유도"]}, {name:"악진", chosenTactics:["분용당선","분성지계","만천과해"]}]}
@@ -128,7 +129,8 @@ var tacticAlternativesMap = {
     "홍수첨향":["유비무환","현호제세","미우주무","휴양생식","제곤부위"],
     "후적박발":["요사여신", "수상개화", "반객위주"],
     "명찰추호":["동촉기선", "지변규려"],
-    "유비무환":["안영찰채", "간담상조", "태청단경", "휴양생식", "홍수첨향"]
+    "유비무환":["안영찰채", "간담상조", "태청단경", "휴양생식", "홍수첨향"],
+    "심구고루":["간담상조", "유좌유용", "동장철벽"]
 };
 
 var internalTacticStatMap = {
@@ -876,22 +878,26 @@ window.autoFixDeck = oIdx => {
     alert(`[AI 다이나믹 교정 완료] 장수별 최적 포지션(진형) 배치 및 전법 할당 성공! (스마트 튜닝 개입 완료)`);
 };
 
-// 🚨 AI 스마트 튜닝 엔진
+// 🚨 AI 스마트 튜닝 엔진 (무소유 강제 오버라이드 100% 해방)
 function applyAITuning(targetDeck, tMap, higherTacs) {
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
-        // 1. 사마의 랭커 세팅(요사여신) -> 진 종결(후적박발) 강제 교정
-        if (o.name === "사마의" && o.chosenTactics.includes("요사여신")) {
-            if (tMap["후적박발"]?.isOwned && !higherTacs.has("후적박발")) {
-                o.chosenTactics[o.chosenTactics.indexOf("요사여신")] = "후적박발";
+        // 1. 사마의 랭커 세팅(수상개화, 요사여신) -> 진 종결(후적박발, 반객위주) 강제 교정
+        if (o.name === "사마의") {
+            if (o.chosenTactics.includes("수상개화")) {
+                o.chosenTactics[o.chosenTactics.indexOf("수상개화")] = "후적박발";
                 higherTacs.add("후적박발");
+            }
+            if (o.chosenTactics.includes("요사여신") && !higherTacs.has("반객위주")) {
+                o.chosenTactics[o.chosenTactics.indexOf("요사여신")] = "반객위주";
+                higherTacs.add("반객위주");
             }
         }
         
         // 2. 신규 0티어 전법 '심구고루'를 구형 탱커/서포터 세팅에 강제 이식
-        if (["조조", "조조(제왕)", "유비(제왕)", "황보숭", "손견", "법정"].includes(o.name)) {
-            if (tMap["심구고루"]?.isOwned && !higherTacs.has("심구고루") && !o.chosenTactics.includes("심구고루")) {
+        if (["조조", "조조(제왕)", "유비(제왕)", "황보숭", "손견", "법정", "동탁"].includes(o.name)) {
+            if (!o.chosenTactics.includes("심구고루") && !higherTacs.has("심구고루")) {
                 const weakTacs = ["여자동포", "강유겸제", "유좌유용", "동장철벽", "진퇴유도"];
                 for (let i=0; i<2; i++) {
                     if (weakTacs.includes(o.chosenTactics[i])) {
@@ -903,15 +909,22 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             }
         }
 
-        // 3. '감로' 메타 카운터: 확률형 CC(혼수모어) 배제 및 생존기(안영찰채/유비무환) 대체
-        if (o.chosenTactics.includes("혼수모어")) {
-             if (tMap["안영찰채"]?.isOwned && !higherTacs.has("안영찰채") && !o.chosenTactics.includes("안영찰채")) {
-                 o.chosenTactics[o.chosenTactics.indexOf("혼수모어")] = "안영찰채";
-                 higherTacs.add("안영찰채");
-             } else if (tMap["유비무환"]?.isOwned && !higherTacs.has("유비무환") && !o.chosenTactics.includes("유비무환")) {
-                 o.chosenTactics[o.chosenTactics.indexOf("혼수모어")] = "유비무환";
-                 higherTacs.add("유비무환");
-             }
+        // 3. '감로' 메타 카운터: 확률형 CC 및 애매한 서브힐 배제, 절대 생존기(안영찰채/유비무환) 강제 주입
+        if (o.name === "가후" || o.name === "좌자" || o.name === "서서" || o.name === "제갈량") {
+            const weakTacs = ["혼수모어", "만천과해", "전위위안", "이퇴위진"];
+            const godTacs = ["유비무환", "안영찰채"];
+            
+            godTacs.forEach(gt => {
+                if (!o.chosenTactics.includes(gt) && !higherTacs.has(gt)) {
+                    for (let i=0; i<2; i++) {
+                        if (weakTacs.includes(o.chosenTactics[i])) {
+                            o.chosenTactics[i] = gt;
+                            higherTacs.add(gt);
+                            break;
+                        }
+                    }
+                }
+            });
         }
     });
 }
