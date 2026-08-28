@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (AI 스마트 튜닝 소유권 제한 해제 및 강제 오버라이드 패치)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (수동 전법 고정 해제 및 강제 덮어쓰기 최적화 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -837,37 +837,35 @@ window.autoFixDeck = oIdx => {
         const role = FB_OFF_META[o.name]?.[3] || "PC";
         const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
 
+        // 🚨 기존에 존재하던 유저 수동 전법 고정(if (!o.chosenTactics[i])) 논리 삭제.
+        // 모든 빈칸 및 수동 설정칸을 메타 우선순위에 따라 강제로 덮어씌움.
         for (let i = 0; i < 2; i++) {
-            if (!o.chosenTactics[i]) { 
-                let foundTac = "";
-                
-                if (isMetaMember && metaTacs[i]) {
-                    const mt = metaTacs[i];
-                    if (!higherTacs.has(cStr(mt))) foundTac = mt;
-                    else {
-                        const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set(), o.name, targetDeck.unitType, false);
-                        if (alt) foundTac = alt;
-                    }
+            let foundTac = "";
+            
+            if (isMetaMember && metaTacs[i]) {
+                const mt = metaTacs[i];
+                if (!higherTacs.has(cStr(mt))) foundTac = mt;
+                else {
+                    const alt = getOwnedAlternativeTactic(mt, Array.from(higherTacs), tMap, new Set(), o.name, targetDeck.unitType, false);
+                    if (alt) foundTac = alt;
                 }
+            }
 
-                if (!foundTac) {
-                    for (const cand of pool) {
-                        if (tMap[cStr(cand)]?.isOwned && !higherTacs.has(cStr(cand))) { foundTac = cand; break; }
-                    }
+            if (!foundTac) {
+                for (const cand of pool) {
+                    if (tMap[cStr(cand)]?.isOwned && !higherTacs.has(cStr(cand))) { foundTac = cand; break; }
                 }
+            }
 
-                if (!foundTac) {
-                    for (const cand of pool) {
-                        if (!higherTacs.has(cStr(cand))) { foundTac = cand; break; }
-                    }
+            if (!foundTac) {
+                for (const cand of pool) {
+                    if (!higherTacs.has(cStr(cand))) { foundTac = cand; break; }
                 }
+            }
 
-                if (foundTac) {
-                    o.chosenTactics[i] = foundTac;
-                    higherTacs.add(cStr(foundTac));
-                }
-            } else {
-                higherTacs.add(cStr(o.chosenTactics[i])); 
+            if (foundTac) {
+                o.chosenTactics[i] = foundTac;
+                higherTacs.add(cStr(foundTac));
             }
         }
     });
