@@ -1,11 +1,8 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (법정 메타덱 추가 및 장비/전법 AI 교정 완벽 패치)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 기동 (법정-강유 브루저 0티어 메타 추가)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
-// ==========================================================================
-// LAYER 1: 초경량 자가 치유(Self-Healing) 통합 마스터 사전 (58종)
-// ==========================================================================
 var FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
@@ -14,13 +11,12 @@ var FB_OFF_META = {
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 [필수 누락 보완] 신규 전법 강제 편입 완료
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,애자필보,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,축호과간,태청단경,토적격문,현호제세,호령삼군,호치,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 법정 메타덱 추가 (AI 교정 시 빈 슬롯 채움 용도)
+// 🚨 강유를 메인 딜러로 기용하는 미래시 0티어 방패덱 추가
 var BUILTIN_META_DECKS = [
+    {id:"meta_shu_beopjeong_gang", priority: 160, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","심구고루","간담상조"]}, {name:"강유", chosenTactics:["담대여두","천리추격","반객위주"]}]},
     {id:"rank0_shu_beopjeong_je", priority: 110, formation: "구행진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","태청단경","금창신"]}, {name:"제갈량", chosenTactics:["초선차전","명찰추호","양의화생"]}]},
-    {id:"rank0_shu_beopjeong_hwang", priority: 105, formation: "안행진", officers:[{name:"조운", chosenTactics:["칠진칠출","만부막적","용맹무쌍"]}, {name:"법정", chosenTactics:["애자필보","동장철벽","진퇴유도"]}, {name:"황충", chosenTactics:["적혈도","반객위주","축세대발"]}]},
     {id:"rank0_gun_jangbo", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
     {id:"rank0_gun_hwang", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
     {id:"rank0_wei_sima_gu", priority: 100, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
@@ -39,12 +35,13 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 법정 전용 장비 오버라이드 (물리 장비 방지 및 서포터 장비 강제 할당)
+// 🚨 강유 및 법정 덱 핵심 멤버의 장비를 '방패병' 사양으로 완벽히 고정
 var FB_EQUIP_OVERRIDES = {
     "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
+    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
     "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "응변" } },
     "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
-    "조조(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천우" } },
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } }
 };
 
@@ -147,27 +144,13 @@ var internalTacticStatMap = {
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 var metaHawkRandomAttributesMap = new Proxy({
-    "rank0_shu_beopjeong_je":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 모략 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank0_shu_beopjeong_hwang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank0_gun_jangbo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank0_gun_hwang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank0_wei_sima_gu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank0_wei_sima_gi":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
-    "rank0_shu_macho_an":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank0_shu_macho_chu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank0_wei_jangryo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
+    "meta_shu_beopjeong_gang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank0_shu_beopjeong_je":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 모략 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 var metaHawkRecommendationMap = new Proxy({
-    "rank0_shu_beopjeong_je":{name:"결운-호생",skill:"법정, 제갈량의 방어/유지력 극한 펌핑"},
-    "rank0_shu_beopjeong_hwang":{name:"열공-여천",skill:"황충의 크리티컬 폭딜 안정성 확보"},
-    "rank0_gun_jangbo":{name:"결운-호생",skill:"장보 장벽 유지력 극대화 및 좌자 회피 백업"},
-    "rank0_gun_hwang":{name:"열공-여천",skill:"황보숭 뎀감망 및 장녕/좌자 콤보 유지력 극대화"},
-    "rank0_wei_sima_gu":{name:"열공-여천",skill:"사마의 모략 폭딜 펌핑 및 조조 방어막 극대화"},
-    "rank0_wei_sima_gi":{name:"능소-전우",skill:"사마의 피격 뎀감 및 가후 CC 안정성 보정"},
-    "rank0_shu_macho_an":{name:"결운-호생",skill:"마초 확산 타격 및 서서 피감 치유 강화"},
-    "rank0_shu_macho_chu":{name:"능소-진시",skill:"마초 용맹무쌍/질풍노도 돌파력 펌핑"},
-    "rank0_wei_jangryo":{name:"능소-진시",skill:"장료 함진살적 적 주장 암살 확률 폭증"}
+    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"},
+    "rank0_shu_beopjeong_je":{name:"결운-호생",skill:"법정, 제갈량의 방어/유지력 극한 펌핑"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId) {
@@ -203,7 +186,6 @@ window.getTacticListBridge = function() {
     return FB_TACTICS;
 };
 
-// 🚨 드롭다운 강제 동기화 브릿지 패치 완료
 window.getOfficerNamesBridge = function() {
     const externalList = (window.getAllOfficerNamesFromDogam && window.getAllOfficerNamesFromDogam()?.length > 5) ? window.getAllOfficerNamesFromDogam() : [];
     const mergedList = [...new Set([...externalList, ...FB_OFFICERS])];
