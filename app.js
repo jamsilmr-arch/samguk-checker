@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (오염된 고유 전법 3종 삭제 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (유비무환 추가 및 오염 전법 3종 삭제 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -65,7 +65,7 @@ var heroList = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
-// 🚨 고유 전법(애자필보, 축호과간, 호치) 인벤토리 렌더링 풀에서 영구 삭제 (78종 정규화)
+// 🚨 고유 전법 영구 삭제 및 [유비무환] 추가 (총 79종 정규화)
 var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
@@ -115,6 +115,7 @@ var tacticList = [
     { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_yubi', name: '유비무환', group: 'tactic', isOwned: false, star: 0 }, // 🚨 유비무환 추가 완료
     { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false, star: 0 },
