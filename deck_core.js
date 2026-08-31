@@ -13,18 +13,24 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
+// 🚨 [데이터 교정] 과거 10종의 구형 덱 폐기 및 최신 1~6위 랭커 덱(16종)으로 완벽 동기화 완료
 var BUILTIN_META_DECKS = [
-    // 🚨 강유 연격/추격 최적화 완료 (일고작기 + 천리추격)
-    {id:"meta_shu_beopjeong_gang", priority: 160, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","심구고루","간담상조"]}, {name:"강유", chosenTactics:["담대여두","일고작기","천리추격"]}]},
-    {id:"rank0_shu_beopjeong_je", priority: 110, formation: "구행진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","태청단경","금창신"]}, {name:"제갈량", chosenTactics:["초선차전","명찰추호","양의화생"]}]},
-    {id:"rank0_gun_jangbo", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
-    {id:"rank0_gun_hwang", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
-    {id:"rank0_wei_sima_gu", priority: 100, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅","진퇴유도","간담상조"]}, {name:"사마의", chosenTactics:["응시낭고","후적박발","반객위주"]}, {name:"가후", chosenTactics:["경달권변","유비무환","안영찰채"]}]},
-    {id:"rank0_wei_sima_gi", priority: 100, formation: "기형진", officers:[{name:"조조(제왕)", chosenTactics:["군령여산","강유겸제","진퇴유도"]}, {name:"가후", chosenTactics:["경달권변","안영찰채","여자동포"]}, {name:"사마의", chosenTactics:["응시낭고","반객위주","후적박발"]}]},
-    {id:"rank1_wei_sima_chu", priority: 100, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고","수상개화","요사여신"]}, {name:"조조", chosenTactics:["효웅","유좌유용","강유겸제"]}, {name:"가후", chosenTactics:["경달권변","혼수모어","만천과해"]}]},
-    {id:"rank0_shu_macho_an", priority: 100, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"서서", chosenTactics:["절절학문","문치무공","유비무환"]}, {name:"위연", chosenTactics:["실병제위","동구적개","진퇴유도"]}]},
-    {id:"rank0_shu_macho_chu", priority: 100, formation: "추형진", officers:[{name:"마초", chosenTactics:["출수법","용맹무쌍","반객위주"]}, {name:"위연", chosenTactics:["실병제위","간담상조","진퇴유도"]}, {name:"유비(제왕)", chosenTactics:["재주복주","유좌유용","문치무공"]}]},
-    {id:"rank0_wei_jangryo", priority: 100, formation: "호도진", officers:[{name:"장료", chosenTactics:["함진살적","반객위주","질풍노도"]}, {name:"조조(제왕)", chosenTactics:["군령여산","간담상조","진퇴유도"]}, {name:"악진", chosenTactics:["분용당선","분성지계","만천과해"]}]}
+    {id:"rank1_shu_macho", priority: 130, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "이퇴위진", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
+    {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "유좌유용", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
+    {id:"rank1_gun_jang", priority: 128, formation: "구행진", officers:[{name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}]},
+    {id:"rank2_gun_yeopo", priority: 125, formation: "방원진", officers:[{name:"원소", chosenTactics:["사소도", "견진연봉", "위위구조"]}, {name:"동탁", chosenTactics:["전권난정", "강유겸제", "홍수첨향"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]}]},
+    {id:"rank2_wei_sima_hujuk", priority: 124, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "간담상조", "기문둔갑"]}, {name:"가후", chosenTactics:["경달권변", "만천과해", "혼수모어"]}]},
+    {id:"rank2_shu_macho_simgu", priority: 123, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "심구고루", "유좌유용"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
+    {id:"rank3_shu_macho", priority: 120, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]}]},
+    {id:"rank3_gun_jang_simgu", priority: 119, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "후적박발", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]}]},
+    {id:"rank3_wei_sima_gu", priority: 118, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "위위구조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
+    {id:"rank4_shu_seo", priority: 115, formation: "구행진", officers:[{name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}]},
+    {id:"rank4_wu_son", priority: 114, formation: "안행진", officers:[{name:"육항", chosenTactics:["청백충근", "요사여신", "양의화생"]}, {name:"손권", chosenTactics:["웅거", "안영찰채", "여자동포"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]}]},
+    {id:"rank4_wei_sima", priority: 113, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}]},
+    {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
+    {id:"rank6_wei_ak", priority: 109, formation: "기형진", officers:[{name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "심구고루", "견불가최"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]}]},
+    {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
+    {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "반객위주"]}]}
 ];
 
 var EQ_PRESETS = {
