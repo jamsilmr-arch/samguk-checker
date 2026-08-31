@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유비무환 누락 방지 강제 병합 및 AI 튜닝 해방 패치)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (강유 연격 메타 완벽 교정 및 오버라이드 엔진)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -11,11 +11,11 @@ var FB_OFF_META = {
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 장수 고유 전법 3종(애자필보, 축호과간, 호치) 삭제 완료 (총 78종 계승 전법)
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var BUILTIN_META_DECKS = [
-    {id:"meta_shu_beopjeong_gang", priority: 160, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","심구고루","간담상조"]}, {name:"강유", chosenTactics:["담대여두","천리추격","반객위주"]}]},
+    // 🚨 강유 연격/추격 최적화 완료 (일고작기 + 천리추격)
+    {id:"meta_shu_beopjeong_gang", priority: 160, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","심구고루","간담상조"]}, {name:"강유", chosenTactics:["담대여두","일고작기","천리추격"]}]},
     {id:"rank0_shu_beopjeong_je", priority: 110, formation: "구행진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주","유비무환","안영찰채"]}, {name:"법정", chosenTactics:["애자필보","태청단경","금창신"]}, {name:"제갈량", chosenTactics:["초선차전","명찰추호","양의화생"]}]},
     {id:"rank0_gun_jangbo", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","양의화생","명찰추호"]}, {name:"장보", chosenTactics:["요풍사기","진퇴유도","여자동포"]}]},
     {id:"rank0_gun_hwang", priority: 100, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기","유비무환","안영찰채"]}, {name:"장녕", chosenTactics:["천의난위","명찰추호","양의화생"]}, {name:"황보숭", chosenTactics:["강직불아","진퇴유도","강유겸제"]}]},
@@ -179,7 +179,6 @@ window.getOfficerDogamData = function(officerName) {
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
 };
 
-// 🚨 유비무환 등 신규/누락 전법을 드롭다운에 강제 표시하기 위한 병합 브릿지 함수
 window.getTacticListBridge = function() {
     const externalList = (window.getAllTacticsFromDogam && window.getAllTacticsFromDogam()?.length > 5) ? window.getAllTacticsFromDogam() : [];
     const mergedList = [...new Set([...externalList, ...FB_TACTICS])];
@@ -837,7 +836,6 @@ window.autoFixDeck = oIdx => {
         const role = FB_OFF_META[o.name]?.[3] || "PC";
         const pool = DYNAMIC_TACTIC_POOLS[role] || DYNAMIC_TACTIC_POOLS["PC"];
 
-        // 🚨 기존에 존재하던 유저 수동 전법 고정 논리 완전 제거
         for (let i = 0; i < 2; i++) {
             let foundTac = "";
             
@@ -875,12 +873,11 @@ window.autoFixDeck = oIdx => {
     alert(`[AI 다이나믹 교정 완료] 장수별 최적 포지션(진형) 배치 및 전법 할당 성공! (스마트 튜닝 개입 완료)`);
 };
 
-// 🚨 AI 스마트 튜닝 엔진 (무소유 강제 오버라이드 100% 해방)
 function applyAITuning(targetDeck, tMap, higherTacs) {
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
-        // 1. 사마의 랭커 세팅(수상개화, 요사여신) -> 진 종결(후적박발, 반객위주) 강제 교정
+        // 1. 사마의 랭커 세팅 -> 후적박발/반객위주 (제어면역 깡딜) 강제 교정
         if (o.name === "사마의") {
             if (o.chosenTactics.includes("수상개화")) {
                 o.chosenTactics[o.chosenTactics.indexOf("수상개화")] = "후적박발";
@@ -906,7 +903,7 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             }
         }
 
-        // 3. '감로' 메타 카운터: 확률형 CC 및 애매한 서브힐 배제, 절대 생존기(안영찰채/유비무환) 강제 주입
+        // 3. '감로' 메타 카운터: 확률형 CC 배제 및 절대 생존기 강제 주입
         if (o.name === "가후" || o.name === "좌자" || o.name === "서서" || o.name === "제갈량") {
             const weakTacs = ["혼수모어", "만천과해", "전위위안", "이퇴위진"];
             const godTacs = ["유비무환", "안영찰채"];
@@ -922,6 +919,20 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
                     }
                 }
             });
+        }
+
+        // 4. 강유 연격/추격 메커니즘 필수 전법 '일고작기' 강제 주입
+        if (o.name === "강유") {
+            if (!o.chosenTactics.includes("일고작기") && !higherTacs.has("일고작기")) {
+                const weakTacs = ["반객위주", "체천행도", "강유겸제"];
+                for (let i=0; i<2; i++) {
+                    if (weakTacs.includes(o.chosenTactics[i])) {
+                        o.chosenTactics[i] = "일고작기";
+                        higherTacs.add("일고작기");
+                        break;
+                    }
+                }
+            }
         }
     });
 }
