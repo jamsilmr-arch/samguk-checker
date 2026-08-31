@@ -91,6 +91,7 @@ var tacticList = [
     { id: 't_myeongchal', name: '명찰추호', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_miu', name: '유비무환', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_budong', name: '부동여산', group: 'tactic', isOwned: false, star: 0 },
