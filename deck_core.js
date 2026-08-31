@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (최신 1~6위 메타덱 16종 연동, 강유 AI 튜닝 복구 및 전투매 ID 동기화 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 덱 심구고루 강제 배제 및 고모략 전용 튜닝 픽스 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -7,18 +7,16 @@ var FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], 
-    "손권":["웅거","궁병/기병","wu","TC"], // 🚨 손권: 전열 탱커(TC)로 롤 변경
+    "손권":["웅거","궁병/기병","wu","TC"], 
     "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], 
-    "육항":["청백충근","창병/궁병","wu","SC"], // 🚨 육항: 모략 딜러(SC)로 롤 변경
+    "육항":["청백충근","창병/궁병","wu","SC"], 
     "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 고유 전법(애자필보, 축호과간, 호치) 인벤토리 렌더링 풀에서 영구 삭제 (78종 정규화)
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 육항 종결 덱(손권 캐리 메타) 데이터 추가 완료
 var BUILTIN_META_DECKS = [
     {id:"rank1_shu_macho", priority: 130, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "이퇴위진", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
     {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "유좌유용", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
@@ -30,7 +28,6 @@ var BUILTIN_META_DECKS = [
     {id:"rank3_gun_jang_simgu", priority: 119, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "후적박발", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]}]},
     {id:"rank3_wei_sima_gu", priority: 118, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "위위구조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
     {id:"rank4_shu_seo", priority: 115, formation: "구행진", officers:[{name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}]},
-    // 🚨 4위 육항 덱: 손권 캐리형 메타로 업데이트 완료
     {id:"rank4_wu_son", priority: 114, formation: "구행진", officers:[{name:"손권", chosenTactics:["웅거", "횡징폭렴", "여자동포"]}, {name:"육항", chosenTactics:["청백충근", "수상개화", "요사여신"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]}]},
     {id:"rank4_wei_sima", priority: 113, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}]},
     {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
@@ -55,9 +52,7 @@ var FB_EQUIP_OVERRIDES = {
     "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "응변" } },
     "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
-    // 🚨 손권 (전열 탱커용 절대 방어 세팅)
     "손권": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "궁병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "궁병 피해 감소", attr3: "천우" } },
-    // 🚨 육항 (후열 모략 폭딜 세팅)
     "육항": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "궁병 배반, 공심 상승", attr3: "응변" } }
 };
 
@@ -160,7 +155,6 @@ var internalTacticStatMap = {
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
-// 🚨 육항 종결 덱 전투매 매핑 업데이트 완료 (능소 - 전우)
 var metaHawkRandomAttributesMap = new Proxy({
     "rank1_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "rank1_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
@@ -181,7 +175,6 @@ var metaHawkRandomAttributesMap = new Proxy({
     "meta_shu_beopjeong_gang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
-// 🚨 육항 종결 덱 전투매 매핑 업데이트 완료 (능소 - 전우)
 var metaHawkRecommendationMap = new Proxy({
     "rank1_shu_macho":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
     "rank1_wei_sima":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/가후 호위"},
@@ -922,6 +915,8 @@ window.autoFixDeck = oIdx => {
 };
 
 function applyAITuning(targetDeck, tMap, higherTacs) {
+    const hasSimaYi = targetDeck.officers.some(o => o.name === "사마의");
+
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
@@ -937,10 +932,19 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             }
         }
         
-        // 2. 신규 0티어 전법 '심구고루'를 구형 탱커/서포터 세팅에 강제 이식
-        if (["조조", "조조(제왕)", "유비(제왕)", "황보숭", "손견", "법정", "동탁"].includes(o.name)) {
+        // 2. 사마의 덱 전열 조조 절대방어망 교정 (심구고루 강제 배제 및 강유겸제 확정)
+        if (hasSimaYi && (o.name === "조조" || o.name === "조조(제왕)")) {
+            if (o.chosenTactics.includes("심구고루")) {
+                o.chosenTactics[o.chosenTactics.indexOf("심구고루")] = "강유겸제";
+                higherTacs.delete("심구고루");
+                higherTacs.add("강유겸제");
+            }
+        }
+
+        // 3. 신규 0티어 전법 '심구고루'를 [고모략 서포터/탱커]에만 제한적 이식 (일반 조조, 손견 등 통솔 탱커 제외)
+        if (["법정", "유비(제왕)", "좌자", "제갈량"].includes(o.name)) {
             if (!o.chosenTactics.includes("심구고루") && !higherTacs.has("심구고루")) {
-                const weakTacs = ["여자동포", "강유겸제", "유좌유용", "동장철벽", "진퇴유도"];
+                const weakTacs = ["여자동포", "유좌유용", "동장철벽", "진퇴유도"]; // 강유겸제 제외
                 for (let i=0; i<2; i++) {
                     if (weakTacs.includes(o.chosenTactics[i])) {
                         o.chosenTactics[i] = "심구고루";
@@ -951,7 +955,7 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             }
         }
 
-        // 3. '감로' 메타 카운터: 확률형 CC 배제 및 절대 생존기 강제 주입
+        // 4. '감로' 메타 카운터: 확률형 CC 배제 및 절대 생존기 강제 주입
         if (o.name === "가후" || o.name === "좌자" || o.name === "서서" || o.name === "제갈량") {
             const weakTacs = ["혼수모어", "만천과해", "전위위안", "이퇴위진"];
             const godTacs = ["유비무환", "안영찰채"];
@@ -969,7 +973,7 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             });
         }
 
-        // 4. 강유 연격/추격 메커니즘 필수 전법 '일고작기' 강제 주입
+        // 5. 강유 연격/추격 메커니즘 필수 전법 '일고작기' 강제 주입
         if (o.name === "강유") {
             if (!o.chosenTactics.includes("일고작기") && !higherTacs.has("일고작기")) {
                 const weakTacs = ["반객위주", "체천행도", "강유겸제"];
