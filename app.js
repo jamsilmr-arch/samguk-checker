@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (법정, 심구고루, 애자필보 복구 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (오염된 고유 전법 3종 삭제 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -65,7 +65,7 @@ var heroList = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
-// 🚨 [데이터 복원] 신규 전법 누락 데이터 100% 반영 (총 80종)
+// 🚨 고유 전법(애자필보, 축호과간, 호치) 인벤토리 렌더링 풀에서 영구 삭제 (78종 정규화)
 var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
@@ -106,7 +106,6 @@ var tacticList = [
     { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_aeja', name: '애자필보', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false, star: 0 },
@@ -134,12 +133,10 @@ var tacticList = [
     { id: 't_cheonsi', name: '천시지리', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_checheon', name: '체천행도', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_chukho', name: '축호과간', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hochi', name: '호치', group: 'tactic', isOwned: false, star: 0 }, 
     { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
