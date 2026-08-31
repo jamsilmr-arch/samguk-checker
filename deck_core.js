@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 덱 심구고루 강제 배제 및 고모략 전용 튜닝 픽스 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 덱 조조 간담상조 강제 튜닝 픽스 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -932,12 +932,16 @@ function applyAITuning(targetDeck, tMap, higherTacs) {
             }
         }
         
-        // 2. 사마의 덱 전열 조조 절대방어망 교정 (심구고루 강제 배제 및 강유겸제 확정)
+        // 2. 사마의 덱 전열 조조 절대방어망 교정 (심구고루 강제 배제 및 강유겸제+간담상조 확정)
         if (hasSimaYi && (o.name === "조조" || o.name === "조조(제왕)")) {
             if (o.chosenTactics.includes("심구고루")) {
                 o.chosenTactics[o.chosenTactics.indexOf("심구고루")] = "강유겸제";
                 higherTacs.delete("심구고루");
                 higherTacs.add("강유겸제");
+            }
+            if (o.chosenTactics.includes("유좌유용") && !higherTacs.has("간담상조")) {
+                o.chosenTactics[o.chosenTactics.indexOf("유좌유용")] = "간담상조";
+                higherTacs.add("간담상조");
             }
         }
 
