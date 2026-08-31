@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (강유 연격 메타 완벽 교정 및 오버라이드 엔진)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동 (신규 무장 및 전법 종결 덱 세팅 업데이트)");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (최신 1~6위 메타덱 16종 연동, 강유 AI 튜닝 복구 및 전투매 ID 동기화 완료)
+console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -11,9 +11,10 @@ var FB_OFF_META = {
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
+// 🚨 고유 전법(애자필보, 축호과간, 호치) 인벤토리 렌더링 풀에서 영구 삭제 (78종 정규화)
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 [데이터 교정] 과거 10종의 구형 덱 폐기 및 최신 1~6위 랭커 덱(16종)으로 완벽 동기화 완료
+// 🚨 최신 16종 메타 덱 연동 (기존 10종 rank0_ 롤백 데이터 교정)
 var BUILTIN_META_DECKS = [
     {id:"rank1_shu_macho", priority: 130, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "이퇴위진", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
     {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "유좌유용", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
@@ -30,7 +31,7 @@ var BUILTIN_META_DECKS = [
     {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
     {id:"rank6_wei_ak", priority: 109, formation: "기형진", officers:[{name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "심구고루", "견불가최"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]}]},
     {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
-    {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "반객위주"]}]}
+    {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]}]} // 강유 일고작기 기본 반영
 ];
 
 var EQ_PRESETS = {
@@ -150,14 +151,45 @@ var internalTacticStatMap = {
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
+// 🚨 [데이터 교정] 최신 16종 메타 덱 매핑 동기화 완료
 var metaHawkRandomAttributesMap = new Proxy({
-    "meta_shu_beopjeong_gang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
-    "rank0_shu_beopjeong_je":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 치유 효과 부여 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 모략 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}}
+    "rank1_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank1_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_gun_jang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_wei_heo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_gun_yeopo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
+    "rank2_wei_sima_hujuk":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_shu_macho_simgu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank3_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank3_gun_jang_simgu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank3_wei_sima_gu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank4_shu_seo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank4_wu_son":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 발동률 +5%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank4_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank6_gun_jwa":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank6_wei_ak":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank6_wei_jo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "meta_shu_beopjeong_gang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
 }, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 var metaHawkRecommendationMap = new Proxy({
-    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"},
-    "rank0_shu_beopjeong_je":{name:"결운-호생",skill:"법정, 제갈량의 방어/유지력 극한 펌핑"}
+    "rank1_shu_macho":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "rank1_wei_sima":{name:"결운-호생",skill:"사마의 모략 폭딜 및 조조/가후 호위"},
+    "rank1_gun_jang":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
+    "rank1_wei_heo":{name:"열공-전광",skill:"허저 통솔 강탈 후 연격 물리 폭딜"},
+    "rank2_gun_yeopo":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"},
+    "rank2_wei_sima_hujuk":{name:"능소-진시",skill:"사마의 후적박발 모략 폭딜 펌핑"},
+    "rank2_shu_macho_simgu":{name:"열공-전광",skill:"위연 도발 보호 아래 마초 확산 폭딜"},
+    "rank3_shu_macho":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"},
+    "rank3_gun_jang_simgu":{name:"삭풍-성모",skill:"심구고루 좌자 방어망 및 장녕 후적박발 지원"},
+    "rank3_wei_sima_gu":{name:"결운-호생",skill:"사마의 모략 회심 및 조조/가후 3중 힐 지원"},
+    "rank4_shu_seo":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"},
+    "rank4_wu_son":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"},
+    "rank4_wei_sima":{name:"능소-진시",skill:"사마의 수상개화 모략 치명타 폭딜"},
+    "rank6_gun_jwa":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
+    "rank6_wei_ak":{name:"열공-여천",skill:"조조(제왕) 도발 탱킹 및 장료/악진 암살"},
+    "rank6_wei_jo":{name:"결운-호생",skill:"사마의 요사여신 모략 폭딜 및 가후 생존"},
+    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId) {
