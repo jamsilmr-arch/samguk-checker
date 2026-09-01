@@ -31,18 +31,17 @@ var BUILTIN_META_DECKS = [
     {id:"rank4_wu_son", priority: 114, formation: "구행진", officers:[{name:"손권", chosenTactics:["웅거", "횡징폭렴", "여자동포"]}, {name:"육항", chosenTactics:["청백충근", "수상개화", "요사여신"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]}]},
     {id:"rank4_wei_sima", priority: 113, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}]},
     {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
-    // 🚨 [deck_core.js 수정] 6위 장료 악진 조조 덱: 방원진 기반 연격 종결 메타로 교정
-// BUILTIN_META_DECKS 배열 내부의 rank6_wei_ak 항목 교체
-{
-    id: "rank6_wei_ak", 
-    priority: 109, 
-    formation: "방원진", // 기형진의 역설을 제거하고 연격 28%를 제공하는 방원진으로 교정
-    officers: [
-        { name: "악진", chosenTactics: ["분용당선", "견진연봉", "위위구조"] }, // 모략 힐 전법 삭제, 견진+위위 투입
-        { name: "조조(제왕)", chosenTactics: ["군령여산", "강유겸제", "견불가최"] }, // 안정적 피감망 구축
-        { name: "장료", chosenTactics: ["함진살적", "반객위주", "질풍노도"] } // 후열에서 78% 연격 폭딜
-    ]
-},
+// 🚨 6위 장료 덱: 기형진의 역설을 제거하고 방원진 기반 연격 종결 메타로 영구 교정
+    {
+        id: "rank6_wei_ak", 
+        priority: 109, 
+        formation: "방원진", 
+        officers: [
+            { name: "악진", chosenTactics: ["분용당선", "견진연봉", "위위구조"] }, 
+            { name: "조조(제왕)", chosenTactics: ["군령여산", "강유겸제", "견불가최"] }, 
+            { name: "장료", chosenTactics: ["함진살적", "반객위주", "질풍노도"] } 
+        ]
+    },
     {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
     {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]}]}
 ];
