@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유저 배치 절대 우위 및 진형 시너지 동적 편성 패치 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (누락된 전법 풀/스탯 맵 변수 복구 및 동적 엔진 안정화 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -84,6 +84,16 @@ var internalBondRules = [
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
 
+// 🚨 누락되었던 핵심 전법 데이터 복원 완료
+var DYNAMIC_TACTIC_POOLS = {
+    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
+    "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
+    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
+    "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
+    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
+    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
+};
+
 var tacticAlternativesMap = {
     "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
     "횡징폭렴":["유비무환","간담상조","동구적개","동장철벽"],
@@ -128,10 +138,6 @@ var internalTacticStatMap = {
     "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5},"유비무환":{healGiven:8,damageTakenRed:8},
     "심구고루":{damageTakenRed:15, healGiven:10},"애자필보":{damageTakenRed:15}
 };
-
-var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
@@ -363,7 +369,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
-// 🚨 절대 우위 점수(50000점) 적용 및 메타덱 역전 현상 차단
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     
@@ -381,7 +386,6 @@ function getBestMetaMatch(curNamesClean) {
         let score = 0;
         let matchCount = 0;
         
-        // 1. 유저가 수동으로 올린 무장이 포함된 덱에 절대 점수 부여 (+50000)
         curNamesClean.forEach(co => { 
             if (meta.officers.some(mo => cStr(mo.name) === co)) {
                 score += 50000;
@@ -389,8 +393,6 @@ function getBestMetaMatch(curNamesClean) {
             } 
         });
 
-        // 2. 유저가 배치한 무장이 해당 메타덱에 1명도 없다면 극단적 페널티 (-100000)
-        // (이로 인해 공손찬을 놨는데 사마의덱으로 바뀌는 엉뚱한 현상 완벽 차단)
         if (curNamesClean.length > 0 && matchCount === 0) {
             score -= 100000;
         }
@@ -406,7 +408,7 @@ function getBestMetaMatch(curNamesClean) {
 function calculateStrictDeckScore(deck) {
     const curNamesClean = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNamesClean);
-    if (!match || match.maxScore < 10000) return 0; // 유저 의도와 맞지 않으면 0점
+    if (!match || match.maxScore < 10000) return 0;
     
     let score = 100;
     if (cStr(deck.formation) !== cStr(match.bestMeta.formation)) score -= 10;
@@ -647,7 +649,6 @@ window.autoFixDeck = oIdx => {
             let score = 0;
             let matchCount = 0;
             
-            // 🚨 핵심 수정 1: 유저가 픽한 무장이 있으면 절대 점수 부여 (+50000)
             currentOfficers.forEach(co => { 
                 if (meta.officers.some(mo => cStr(mo.name) === co)) {
                     score += 50000;
@@ -655,7 +656,6 @@ window.autoFixDeck = oIdx => {
                 } 
             });
 
-            // 🚨 핵심 수정 2: 유저가 배치한 무장이 1명이라도 있는데 매칭이 0명이면 이 메타덱은 완전 폐기 (-100000)
             if (currentOfficers.length > 0 && matchCount === 0) {
                 score -= 100000;
             }
@@ -679,12 +679,10 @@ window.autoFixDeck = oIdx => {
             }
         });
     } else {
-        // 🚨 핵심 수정 3: 비주류 무장이거나 메타 매칭 실패 시, 동일 진영(Faction) 무장으로 자동 편성
         if (currentOfficers.length > 0) {
             let baseFaction = FB_OFF_META[currentOfficers[0]]?.[2] || "qun";
             let placed = [...currentOfficers];
             
-            // 상위 부대 사용 무장 추적
             const higherHeroes = new Set();
             dynamicPresetDecks.forEach(d => {
                 if (d.originIdx < oIdx) d.officers.forEach(ho => { if (ho.name) higherHeroes.add(cStr(ho.name)); });
@@ -775,6 +773,7 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
+    alert(`[AI 유연 교정 완료] 메타 데이터를 '참고(Reference)'하여 최적의 밸런스를 계산했습니다. 메타에 얽매이지 않고 현재 진형과 역할군에 맞춰 유연하게 추천합니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
