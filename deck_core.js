@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (절대 0티어 우선 락온 및 전투매 동적 매칭 패치 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유저 배치 절대 우위 및 진형 시너지 동적 편성 패치 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -12,7 +12,6 @@ var FB_OFF_META = {
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 현실 타협덱(설거지 덱)의 오염을 원천 차단하는 [절대 0티어 종결 정답지] 하드코딩 (우선순위 9999)
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
     { id: "absolute_macho", priority: 9999, name: "[절대 종결] 마초 안행 창병", concept: "[0티어 정답지]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
@@ -85,15 +84,6 @@ var internalBondRules = [
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
 
-var DYNAMIC_TACTIC_POOLS = {
-    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
-    "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
-    "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
-    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
-    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
-};
-
 var tacticAlternativesMap = {
     "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
     "횡징폭렴":["유비무환","간담상조","동구적개","동장철벽"],
@@ -139,7 +129,10 @@ var internalTacticStatMap = {
     "심구고루":{damageTakenRed:15, healGiven:10},"애자필보":{damageTakenRed:15}
 };
 
-// 🚨 전투매 동적 추천 알고리즘 (ID 기반이 아닌 "무장" 기반 스캔으로 전투매 누락 원천 차단)
+var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
     
@@ -286,7 +279,7 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
         }
     }
     if (hasOfficer && isPerfect) {
-        return `<div class="feedback-item success" style="border:1px solid var(--success-text);background:var(--success-bg);padding:8px;margin-top:10px;">✨ <strong>[최종 검증 완료: Perfect Synergy]</strong> 전서버 랭커 상위 1% 공방 밸런스를 달성했습니다.</div>`;
+        return `<div class="feedback-item success" style="border:1px solid var(--success-text);background:var(--success-bg);padding:8px;margin-top:10px;">✨ <strong>[최종 검증 완료: Perfect Synergy]</strong> 전서버 랭커 수준의 공방 밸런스를 달성했습니다.</div>`;
     }
     return "";
 }
@@ -315,43 +308,6 @@ function calculateActivatedBond(officers) {
         return new Set(heroesInDeck).size >= r.req;
     });
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
-}
-
-function getOwnedAlternativeOfficer(missingName, curNames, heroDataMap, deckUnitType = "", alreadyRecommended = new Set()) {
-    const cleanMissing = cStr(missingName);
-    const allNames = window.getOfficerNamesBridge();
-    const missingMeta = FB_OFF_META[cleanMissing];
-    if (!missingMeta) return null;
-
-    const mUnit = missingMeta[1] || "", mFac = missingMeta[2] || "", mRole = missingMeta[3] || "";
-    let candidates = [];
-    
-    Object.keys(heroDataMap).forEach(cleanCand => {
-        if (!heroDataMap[cleanCand]?.isOwned || curNames.some(cn => cStr(cn) === cleanCand) || cleanCand === cleanMissing || alreadyRecommended.has(cleanCand)) return;
-        const candMeta = FB_OFF_META[cleanCand];
-        if (!candMeta) return;
-
-        let score = 0;
-        const cUnit = candMeta[1] || "", cFac = candMeta[2] || "", cRole = candMeta[3] || "";
-
-        if (mFac === cFac) score += 50; 
-        if (deckUnitType && deckUnitType !== "자동 판별" && deckUnitType !== "") {
-            if (cUnit.includes(deckUnitType)) score += 40; 
-        } else {
-            const mUnits = mUnit.split('/');
-            if (mUnits.some(u => cUnit.includes(u))) score += 40;
-        }
-        if (mRole === cRole) score += 30; 
-
-        candidates.push({ name: allNames.find(n => cStr(n) === cleanCand) || cleanCand, score: score });
-    });
-
-    candidates.sort((a, b) => b.score - a.score);
-    if (candidates.length > 0) {
-        alreadyRecommended.add(cStr(candidates[0].name));
-        return candidates[0].name;
-    }
-    return null;
 }
 
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
@@ -407,11 +363,10 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
-// 🚨 메타덱 스코어 역전 현상 해결: 절대 0티어 강제 락온 및 위치 점수 제거
+// 🚨 절대 우위 점수(50000점) 적용 및 메타덱 역전 현상 차단
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
     
-    // 0티어 원본 덱을 항상 배열 최상단에 고정
     let archetypes = [...ABSOLUTE_ENDGAME_DECKS];
     if (window.getMetaDeckData) {
         const metaData = window.getMetaDeckData();
@@ -420,20 +375,38 @@ function getBestMetaMatch(curNamesClean) {
         }
     }
 
-    let bestMeta = archetypes[0], maxScore = -1;
+    let bestMeta = null, maxScore = -999999;
+    
     archetypes.forEach(meta => {
-        // 위치(idx) 비교 점수 삭제 -> 순서 상관없이 무장이 포함되어 있기만 하면 1000점 부여
-        let baseScore = meta.officers.reduce((acc, mo) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1000 : 0), 0);
-        let finalScore = baseScore > 0 ? baseScore + (meta.priority || 0) : baseScore;
-        if (finalScore > maxScore) { maxScore = finalScore; bestMeta = meta; }
+        let score = 0;
+        let matchCount = 0;
+        
+        // 1. 유저가 수동으로 올린 무장이 포함된 덱에 절대 점수 부여 (+50000)
+        curNamesClean.forEach(co => { 
+            if (meta.officers.some(mo => cStr(mo.name) === co)) {
+                score += 50000;
+                matchCount++;
+            } 
+        });
+
+        // 2. 유저가 배치한 무장이 해당 메타덱에 1명도 없다면 극단적 페널티 (-100000)
+        // (이로 인해 공손찬을 놨는데 사마의덱으로 바뀌는 엉뚱한 현상 완벽 차단)
+        if (curNamesClean.length > 0 && matchCount === 0) {
+            score -= 100000;
+        }
+
+        score += (meta.priority || 0);
+
+        if (score > maxScore) { maxScore = score; bestMeta = meta; }
     });
+
     return { bestMeta, maxScore };
 }
 
 function calculateStrictDeckScore(deck) {
     const curNamesClean = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNamesClean);
-    if (!match || match.maxScore === 0) return 0;
+    if (!match || match.maxScore < 10000) return 0; // 유저 의도와 맞지 않으면 0점
     
     let score = 100;
     if (cStr(deck.formation) !== cStr(match.bestMeta.formation)) score -= 10;
@@ -445,10 +418,10 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNames);
-    const isCustom = !match || match.maxScore < 1000;
+    const isCustom = !match || match.maxScore < 10000;
 
     if (isCustom) {
-        fb.logs.push({ type: 'info', text: `💡 <strong>[오리지널 시너지]</strong> 메타를 초월한 독자적인 조합입니다. AI가 역할군에 맞춰 분석합니다.` });
+        fb.logs.push({ type: 'info', text: `💡 <strong>[오리지널 시너지]</strong> 메타를 초월한 독자적인 조합입니다. 진영과 역할군에 맞춰 전법을 배정했습니다.` });
     } else {
         const { bestMeta: meta } = match;
         fb.logs.push({ type: 'info', text: `🎯 <strong>${meta.name || meta.id}</strong> 기반 처방입니다.` });
@@ -462,7 +435,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
 
     const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean);
     const forbiddenTacs = [...new Set([...allEquipTacs, ...higherTierUsedTacs.map(t => cStr(t))])];
-    const recommendedTacs = new Set(), recommendedOfficers = new Set();
+    const recommendedTacs = new Set();
 
     deck.officers.forEach((off, oIdx) => {
         const hName = off?.name?.toString().trim() || "", cleanHName = cStr(hName);
@@ -474,9 +447,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
 
         const isHeroOwned = !!heroDataMap[cleanHName]?.isOwned;
         if (!isHeroOwned) {
-            const altHero = getOwnedAlternativeOfficer(cleanHName, curNames, heroDataMap, deck.unitType, recommendedOfficers);
-            const altText = altHero ? `<span style="color:var(--success-text);font-weight:bold;">[${altHero}]</span>` : `<span style="color:var(--text-muted);">[대체 불가]</span>`;
-            fb.logs.push({ type: 'warning', text: `[${hName}] 미보유 ➔ 대체 무장 추천: ${altText}` });
+            fb.logs.push({ type: 'warning', text: `[${hName}] 미보유 상태입니다.` });
         }
 
         const metaIdx = (!isCustom) ? match.bestMeta.officers.findIndex(mo => cStr(mo.name) === cleanHName) : -1;
@@ -588,10 +559,10 @@ function initGuideModal() {
                     <button onclick="closeGuideModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; line-height:1;">&times;</button>
                 </div>
                 <div style="color:var(--text-main); font-size:13px; line-height:1.6;">
-                    <p><strong>1. 🎯 0티어 메타 자동 락온</strong><br>덱에 원하는 핵심 장수를 1~2명만 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. 시스템이 전서버 상위 1% 랭커 데이터를 스캔하여 가장 강력한 진형과 부족한 장수를 자동으로 채워줍니다.</p>
-                    <p><strong>2. 🛡️ 0티어 종결 전법 최우선 할당</strong><br>상위 부대의 전법 중복 사용 여부를 따지지 않고, 해당 무장과 진형에 가장 완벽한 0티어 종결 전법을 무조건 1순위로 강제 장착합니다. (역할군이 파괴되는 역상성 세팅 완벽 차단)</p>
-                    <p><strong>3. 🛠️ 피드백 패널을 통한 튜닝</strong><br>AI가 교정을 마치면, 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용/미보유)</span>을 확인하세요. 시스템이 제시하는 <b>녹색 대체 전법</b>을 참고해 본인의 보유 상황에 맞게 수동으로 슬롯을 변경하면 덱이 완성됩니다.</p>
-                    <p><strong>4. 🦅 커스텀 시너지 보존</strong><br>메타에 없는 비주류 무장을 배치하고 교정을 눌러도, AI가 무장을 지우지 않고 해당 무장의 역할군에 맞는 최적의 전법을 찾아 오리지널 덱을 지원합니다.</p>
+                    <p><strong>1. 🎯 배치 무장 절대 락온 (우선권 보장)</strong><br>원하는 핵심 장수를 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. AI는 유저의 배치를 최우선적으로 존중하며 해당 장수가 포함된 메타덱을 즉시 찾아 채워줍니다.</p>
+                    <p><strong>2. 🛡️ 0티어 종결 전법 무조건 장착</strong><br>상위 부대의 전법 중복 사용 여부와 상관없이, 해당 무장과 진형에 가장 완벽한 0티어 종결 전법을 무조건 1순위로 장착합니다. (역할군이 파괴되는 엉뚱한 전법 세팅 완벽 차단)</p>
+                    <p><strong>3. 🛠️ 피드백 패널을 통한 튜닝</strong><br>교정이 끝나면 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용/미보유)</span>을 확인하세요. 시스템이 제시하는 <b>녹색 대체 전법</b>을 참고해 본인 상황에 맞게 수동으로 변경하면 완성됩니다.</p>
+                    <p><strong>4. 🦅 진영(Faction) 기반 스마트 튜닝</strong><br>메타에 없는 비주류 무장(예: 공손찬, 육항 등)을 배치하면, 엉뚱한 진영의 메타 무장을 가져오지 않고 <b>동일 진영</b> 내에서 가장 시너지가 높은 무장과 전법으로 자동 편성합니다.</p>
                 </div>
                 <div style="margin-top:20px; text-align:right;">
                     <button onclick="closeGuideModal()" style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-main); padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:bold; transition: background 0.2s;">확인했습니다</button>
@@ -659,23 +630,36 @@ window.autoFixDeck = oIdx => {
     (Array.isArray(saved.heroes) ? saved.heroes : Object.values(saved.heroes || {})).forEach(x => { if(x && x.name) hMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
 
     let currentOfficers = targetDeck.officers.map(o => cStr(o.name)).filter(Boolean);
-    let bestMeta = null;
-    let maxScore = -1;
-
-    if (currentOfficers.length > 0) {
-        // 우선순위 9999로 설정된 ABSOLUTE_ENDGAME_DECKS를 포함하여 메타 검사 진행
-        const META_DECKS = [...ABSOLUTE_ENDGAME_DECKS];
-        if (window.getMetaDeckData) {
-            const metaData = window.getMetaDeckData();
-            if (metaData && metaData.analyzedMetaArchetypes) {
-                META_DECKS.push(...metaData.analyzedMetaArchetypes);
-            }
+    
+    const META_DECKS = [...ABSOLUTE_ENDGAME_DECKS];
+    if (window.getMetaDeckData) {
+        const metaData = window.getMetaDeckData();
+        if (metaData && metaData.analyzedMetaArchetypes) {
+            META_DECKS.push(...metaData.analyzedMetaArchetypes);
         }
+    }
 
+    let bestMeta = null;
+    let maxScore = -999999;
+
+    if (currentOfficers.length > 0 || META_DECKS.length > 0) {
         for (const meta of META_DECKS) {
             let score = 0;
-            // 무장이 포함되어 있으면 위치와 무관하게 고정 점수 부여 (배치 순서 오작동 방지)
-            currentOfficers.forEach(co => { if (meta.officers.some(mo => cStr(mo.name) === co)) score += 2000; });
+            let matchCount = 0;
+            
+            // 🚨 핵심 수정 1: 유저가 픽한 무장이 있으면 절대 점수 부여 (+50000)
+            currentOfficers.forEach(co => { 
+                if (meta.officers.some(mo => cStr(mo.name) === co)) {
+                    score += 50000;
+                    matchCount++;
+                } 
+            });
+
+            // 🚨 핵심 수정 2: 유저가 배치한 무장이 1명이라도 있는데 매칭이 0명이면 이 메타덱은 완전 폐기 (-100000)
+            if (currentOfficers.length > 0 && matchCount === 0) {
+                score -= 100000;
+            }
+
             meta.officers.forEach(mo => { if (hMap[cStr(mo.name)]?.isOwned) score += 10; });
             score += (meta.priority || 0);
 
@@ -683,7 +667,7 @@ window.autoFixDeck = oIdx => {
         }
     }
 
-    let isMetaDriven = (bestMeta && maxScore >= 2000);
+    let isMetaDriven = (bestMeta && maxScore >= 10000);
 
     if (isMetaDriven) {
         targetDeck.formation = bestMeta.formation;
@@ -694,6 +678,30 @@ window.autoFixDeck = oIdx => {
                 if (missingMetaOff) { o.name = missingMetaOff.name; placed.push(cStr(missingMetaOff.name)); }
             }
         });
+    } else {
+        // 🚨 핵심 수정 3: 비주류 무장이거나 메타 매칭 실패 시, 동일 진영(Faction) 무장으로 자동 편성
+        if (currentOfficers.length > 0) {
+            let baseFaction = FB_OFF_META[currentOfficers[0]]?.[2] || "qun";
+            let placed = [...currentOfficers];
+            
+            // 상위 부대 사용 무장 추적
+            const higherHeroes = new Set();
+            dynamicPresetDecks.forEach(d => {
+                if (d.originIdx < oIdx) d.officers.forEach(ho => { if (ho.name) higherHeroes.add(cStr(ho.name)); });
+            });
+
+            targetDeck.officers.forEach(o => {
+                if (!o.name) {
+                    let cand = FB_OFFICERS.find(name => FB_OFF_META[name]?.[2] === baseFaction && hMap[name]?.isOwned && !placed.includes(name) && !higherHeroes.has(name));
+                    if (!cand) cand = FB_OFFICERS.find(name => FB_OFF_META[name]?.[2] === baseFaction && !placed.includes(name) && !higherHeroes.has(name));
+                    if (cand) { o.name = cand; placed.push(cand); }
+                }
+            });
+        } else {
+            let defaultMeta = ABSOLUTE_ENDGAME_DECKS[0];
+            targetDeck.formation = defaultMeta.formation;
+            targetDeck.officers = defaultMeta.officers.map(mo => ({ name: mo.name, chosenTactics: ["", ""] }));
+        }
     }
 
     let usedInCurrentDeck = new Set();
@@ -767,7 +775,6 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[AI 종결 전법 매칭 완료] 상위 부대 중복 여부와 관계없이 0티어 종결 전법을 우선 배치했습니다. 중복 전법은 피드백 패널의 대체 추천을 참고하세요.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
