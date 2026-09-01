@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 덱 조조 간담상조 강제 튜닝 픽스 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의/육항/장료 0티어 종결 메타 통합 및 AI 강제 튜닝 완벽 적용)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -7,9 +7,9 @@ var FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], 
-    "손권":["웅거","궁병/기병","wu","TC"], 
+    "손권":["웅거","궁병/기병","wu","TC"], // 🚨 손권 딜탱(TC) 롤 변경 
     "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], 
-    "육항":["청백충근","창병/궁병","wu","SC"], 
+    "육항":["청백충근","창병/궁병","wu","SC"], // 🚨 육항 서브 딜러(SC) 롤 변경
     "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
@@ -17,31 +17,24 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
+// 🚨 사마의, 육항, 장료 덱 완벽 교정된 메타 데이터 통합
 var BUILTIN_META_DECKS = [
     {id:"rank1_shu_macho", priority: 130, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "이퇴위진", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
     {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "유좌유용", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
     {id:"rank1_gun_jang", priority: 128, formation: "구행진", officers:[{name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}]},
     {id:"rank2_gun_yeopo", priority: 125, formation: "방원진", officers:[{name:"원소", chosenTactics:["사소도", "견진연봉", "위위구조"]}, {name:"동탁", chosenTactics:["전권난정", "강유겸제", "홍수첨향"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]}]},
-    {id:"rank2_wei_sima_hujuk", priority: 124, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "간담상조", "기문둔갑"]}, {name:"가후", chosenTactics:["경달권변", "만천과해", "혼수모어"]}]},
+    {id:"rank2_wei_sima_hujuk", priority: 124, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "간담상조", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "안영찰채", "유비무환"]}]},
     {id:"rank2_shu_macho_simgu", priority: 123, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "심구고루", "유좌유용"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
     {id:"rank3_shu_macho", priority: 120, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]}]},
     {id:"rank3_gun_jang_simgu", priority: 119, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "후적박발", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]}]},
     {id:"rank3_wei_sima_gu", priority: 118, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "위위구조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
     {id:"rank4_shu_seo", priority: 115, formation: "구행진", officers:[{name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}]},
+    // 🚨 4위 육항 덱: 손권 메인 탱킹 및 육항 모략 딜러 롤 변경 완료
     {id:"rank4_wu_son", priority: 114, formation: "구행진", officers:[{name:"손권", chosenTactics:["웅거", "횡징폭렴", "여자동포"]}, {name:"육항", chosenTactics:["청백충근", "수상개화", "요사여신"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]}]},
     {id:"rank4_wei_sima", priority: 113, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}]},
     {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
-// 🚨 6위 장료 덱: 기형진의 역설을 제거하고 방원진 기반 연격 종결 메타로 영구 교정
-    {
-        id: "rank6_wei_ak", 
-        priority: 109, 
-        formation: "방원진", 
-        officers: [
-            { name: "악진", chosenTactics: ["분용당선", "견진연봉", "위위구조"] }, 
-            { name: "조조(제왕)", chosenTactics: ["군령여산", "강유겸제", "견불가최"] }, 
-            { name: "장료", chosenTactics: ["함진살적", "반객위주", "질풍노도"] } 
-        ]
-    },
+    // 🚨 6위 장료 덱: 기형진 및 모략 스탯 낭비 폐기, 방원진 연격 종결 세팅 적용 완료
+    {id:"rank6_wei_ak", priority: 109, formation: "방원진", officers:[{name:"악진", chosenTactics:["분용당선", "견진연봉", "위위구조"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "간담상조"]}, {name:"장료", chosenTactics:["함진살적", "반객위주", "질풍노도"]}]},
     {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
     {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]}]}
 ];
@@ -55,6 +48,7 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
+// 🚨 손권, 육항 전용 방어구 및 세팅 오버라이드
 var FB_EQUIP_OVERRIDES = {
     "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
@@ -165,6 +159,7 @@ var internalTacticStatMap = {
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
+// 🚨 전투매 매핑 업데이트 (장료 방원진 덱 열공-전광 확정)
 var metaHawkRandomAttributesMap = new Proxy({
     "rank1_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
     "rank1_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
@@ -200,7 +195,7 @@ var metaHawkRecommendationMap = new Proxy({
     "rank4_wu_son":{name:"능소-전우",skill:"손권 생존 및 육항/노숙 모략 방벽 강화"},
     "rank4_wei_sima":{name:"능소-진시",skill:"사마의 수상개화 모략 치명타 폭딜"},
     "rank6_gun_jwa":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
-    "rank6_wei_ak":{name:"열공-여천",skill:"조조(제왕) 도발 탱킹 및 장료/악진 암살"},
+    "rank6_wei_ak":{name:"열공-전광",skill:"방원진 연격 폭격 및 장료 후열 암살"}, // 🚨 6위 장료 덱 매 추천 교정
     "rank6_wei_jo":{name:"결운-호생",skill:"사마의 요사여신 모략 폭딜 및 가후 생존"},
     "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"}
 }, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
@@ -924,79 +919,76 @@ window.autoFixDeck = oIdx => {
     alert(`[AI 다이나믹 교정 완료] 장수별 최적 포지션(진형) 배치 및 전법 할당 성공! (스마트 튜닝 개입 완료)`);
 };
 
+// 🚨 AI 스마트 튜닝: 장료, 사마의, 강유 등 핵심 0티어 덱 강제 교정 로직 완벽 적용
 function applyAITuning(targetDeck, tMap, higherTacs) {
     const hasSimaYi = targetDeck.officers.some(o => o.name === "사마의");
+    const hasZhangLiao = targetDeck.officers.some(o => o.name === "장료");
 
     targetDeck.officers.forEach(o => {
         if (!o.name) return;
         
-        // 1. 사마의 랭커 세팅 -> 후적박발/반객위주 (제어면역 깡딜) 강제 교정
+        // 1. 사마의 랭커 세팅
         if (o.name === "사마의") {
-            if (o.chosenTactics.includes("수상개화")) {
-                o.chosenTactics[o.chosenTactics.indexOf("수상개화")] = "후적박발";
-                higherTacs.add("후적박발");
-            }
-            if (o.chosenTactics.includes("요사여신") && !higherTacs.has("반객위주")) {
-                o.chosenTactics[o.chosenTactics.indexOf("요사여신")] = "반객위주";
-                higherTacs.add("반객위주");
-            }
+            if (o.chosenTactics.includes("수상개화")) { o.chosenTactics[o.chosenTactics.indexOf("수상개화")] = "후적박발"; higherTacs.add("후적박발"); }
+            if (o.chosenTactics.includes("요사여신") && !higherTacs.has("반객위주")) { o.chosenTactics[o.chosenTactics.indexOf("요사여신")] = "반객위주"; higherTacs.add("반객위주"); }
         }
         
-        // 2. 사마의 덱 전열 조조 절대방어망 교정 (심구고루 강제 배제 및 강유겸제+간담상조 확정)
+        // 2. 사마의 덱 전열 조조 절대방어망
         if (hasSimaYi && (o.name === "조조" || o.name === "조조(제왕)")) {
-            if (o.chosenTactics.includes("심구고루")) {
-                o.chosenTactics[o.chosenTactics.indexOf("심구고루")] = "강유겸제";
-                higherTacs.delete("심구고루");
-                higherTacs.add("강유겸제");
+            if (o.chosenTactics.includes("심구고루")) { o.chosenTactics[o.chosenTactics.indexOf("심구고루")] = "강유겸제"; higherTacs.delete("심구고루"); higherTacs.add("강유겸제"); }
+            if (o.chosenTactics.includes("유좌유용") && !higherTacs.has("간담상조")) { o.chosenTactics[o.chosenTactics.indexOf("유좌유용")] = "간담상조"; higherTacs.add("간담상조"); }
+        }
+
+        // 🚨 3. 장료 덱 악진 강제 튜닝 (모략 스탯 금지 -> 연격 방어 세팅 강제)
+        if (hasZhangLiao && o.name === "악진") {
+            if (o.chosenTactics.includes("여자동포") || o.chosenTactics.includes("분성지계")) { 
+                const targetIdx = o.chosenTactics.indexOf("여자동포") !== -1 ? o.chosenTactics.indexOf("여자동포") : o.chosenTactics.indexOf("분성지계");
+                o.chosenTactics[targetIdx] = "견진연봉"; higherTacs.add("견진연봉"); 
             }
-            if (o.chosenTactics.includes("유좌유용") && !higherTacs.has("간담상조")) {
-                o.chosenTactics[o.chosenTactics.indexOf("유좌유용")] = "간담상조";
-                higherTacs.add("간담상조");
+            if (o.chosenTactics.includes("유좌유용") || o.chosenTactics.includes("동구적개")) { 
+                const targetIdx = o.chosenTactics.indexOf("유좌유용") !== -1 ? o.chosenTactics.indexOf("유좌유용") : o.chosenTactics.indexOf("동구적개");
+                o.chosenTactics[targetIdx] = "위위구조"; higherTacs.add("위위구조"); 
             }
         }
 
-        // 3. 신규 0티어 전법 '심구고루'를 [고모략 서포터/탱커]에만 제한적 이식 (일반 조조, 손견 등 통솔 탱커 제외)
+        // 🚨 4. 장료 덱 조조(제왕) 강제 튜닝 (심구고루 금지 -> 강유겸제/간담상조 세팅 강제)
+        if (hasZhangLiao && o.name === "조조(제왕)") {
+            if (o.chosenTactics.includes("심구고루")) { o.chosenTactics[o.chosenTactics.indexOf("심구고루")] = "강유겸제"; higherTacs.delete("심구고루"); higherTacs.add("강유겸제"); }
+            if (o.chosenTactics.includes("견불가최") || o.chosenTactics.includes("진퇴유도")) { 
+                const targetIdx = o.chosenTactics.indexOf("견불가최") !== -1 ? o.chosenTactics.indexOf("견불가최") : o.chosenTactics.indexOf("진퇴유도");
+                o.chosenTactics[targetIdx] = "간담상조"; higherTacs.add("간담상조"); 
+            }
+        }
+
+        // 5. 신규 0티어 전법 '심구고루' 한정 이식
         if (["법정", "유비(제왕)", "좌자", "제갈량"].includes(o.name)) {
             if (!o.chosenTactics.includes("심구고루") && !higherTacs.has("심구고루")) {
-                const weakTacs = ["여자동포", "유좌유용", "동장철벽", "진퇴유도"]; // 강유겸제 제외
+                const weakTacs = ["여자동포", "유좌유용", "동장철벽", "진퇴유도"]; 
                 for (let i=0; i<2; i++) {
-                    if (weakTacs.includes(o.chosenTactics[i])) {
-                        o.chosenTactics[i] = "심구고루";
-                        higherTacs.add("심구고루");
-                        break;
-                    }
+                    if (weakTacs.includes(o.chosenTactics[i])) { o.chosenTactics[i] = "심구고루"; higherTacs.add("심구고루"); break; }
                 }
             }
         }
 
-        // 4. '감로' 메타 카운터: 확률형 CC 배제 및 절대 생존기 강제 주입
+        // 6. 가후 등 확률형 CC 배제
         if (o.name === "가후" || o.name === "좌자" || o.name === "서서" || o.name === "제갈량") {
             const weakTacs = ["혼수모어", "만천과해", "전위위안", "이퇴위진"];
             const godTacs = ["유비무환", "안영찰채"];
-            
             godTacs.forEach(gt => {
                 if (!o.chosenTactics.includes(gt) && !higherTacs.has(gt)) {
                     for (let i=0; i<2; i++) {
-                        if (weakTacs.includes(o.chosenTactics[i])) {
-                            o.chosenTactics[i] = gt;
-                            higherTacs.add(gt);
-                            break;
-                        }
+                        if (weakTacs.includes(o.chosenTactics[i])) { o.chosenTactics[i] = gt; higherTacs.add(gt); break; }
                     }
                 }
             });
         }
 
-        // 5. 강유 연격/추격 메커니즘 필수 전법 '일고작기' 강제 주입
+        // 7. 강유 연격/추격
         if (o.name === "강유") {
             if (!o.chosenTactics.includes("일고작기") && !higherTacs.has("일고작기")) {
                 const weakTacs = ["반객위주", "체천행도", "강유겸제"];
                 for (let i=0; i<2; i++) {
-                    if (weakTacs.includes(o.chosenTactics[i])) {
-                        o.chosenTactics[i] = "일고작기";
-                        higherTacs.add("일고작기");
-                        break;
-                    }
+                    if (weakTacs.includes(o.chosenTactics[i])) { o.chosenTactics[i] = "일고작기"; higherTacs.add("일고작기"); break; }
                 }
             }
         }
