@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유저 배치 의도 절대 우위 락온 패치 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (비주류 커스텀 무장 절대 보존 및 종결 전법 확정 패치 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -763,51 +763,66 @@ window.autoFixDeck = oIdx => {
 
     let currentOfficers = targetDeck.officers.map(o => cStr(o.name)).filter(Boolean);
 
-    // [1단계] 0티어 메타 정답지 1차 락온
+    // [1단계] 메타 정답지 우선 탐색
     let bestMeta = null;
     let maxScore = -1;
 
-    for (const meta of BUILTIN_META_DECKS) {
-        let score = 0;
-        currentOfficers.forEach(co => {
-            if (meta.officers.some(mo => cStr(mo.name) === co)) score += 2000;
-        });
-        meta.officers.forEach(mo => {
-            if (hMap[cStr(mo.name)]?.isOwned) score += 10;
-        });
-        score += (meta.priority || 0);
+    if (currentOfficers.length > 0) {
+        for (const meta of BUILTIN_META_DECKS) {
+            let score = 0;
+            currentOfficers.forEach(co => {
+                if (meta.officers.some(mo => cStr(mo.name) === co)) score += 2000;
+            });
+            meta.officers.forEach(mo => {
+                if (hMap[cStr(mo.name)]?.isOwned) score += 10;
+            });
+            score += (meta.priority || 0);
 
-        if (score > maxScore) {
-            maxScore = score;
-            bestMeta = meta;
+            if (score > maxScore) {
+                maxScore = score;
+                bestMeta = meta;
+            }
         }
     }
 
-    if (!bestMeta) return alert("[AI 계산 실패] 가용 가능한 메타 기반 덱이 없습니다.");
+    // [2단계] 사용자 배치 무장 절대 보존
+    let isMetaDriven = (bestMeta && maxScore >= 2000);
 
-    targetDeck.formation = bestMeta.formation;
-    targetDeck.officers = bestMeta.officers.map(mo => ({ name: mo.name, chosenTactics: ["", ""] }));
+    if (isMetaDriven) {
+        targetDeck.formation = bestMeta.formation;
+        let placed = [...currentOfficers];
+        targetDeck.officers.forEach((o, i) => {
+            if (!o.name) {
+                let missingMetaOff = bestMeta.officers.find(mo => !placed.includes(cStr(mo.name)));
+                if (missingMetaOff) {
+                    o.name = missingMetaOff.name;
+                    placed.push(cStr(missingMetaOff.name));
+                }
+            }
+        });
+    }
 
-    // [2단계] 전법 할당 (중복 무시하고 무조건 0티어 정답 강제 고정)
+    // [3단계] 전법 할당 (상위 부대 중복 무시하고 무조건 0티어 정답 락온)
     let usedInCurrentDeck = new Set();
 
     targetDeck.officers.forEach((o, oIdx) => {
-        const metaOfficer = bestMeta.officers.find(mo => mo.name === o.name);
+        if (!o.name) return;
+        const metaOfficer = bestMeta && isMetaDriven ? bestMeta.officers.find(mo => mo.name === o.name) : null;
         const targetMetaTacs = metaOfficer ? (metaOfficer.chosenTactics.length === 3 ? metaOfficer.chosenTactics.slice(1,3) : metaOfficer.chosenTactics) : ["", ""];
         const role = FB_OFF_META[o.name]?.[3] || "PC";
-        const position = FORMATIONS[targetDeck.formation].pos[oIdx];
+        const position = FORMATIONS[targetDeck.formation]?.pos[oIdx] || "front";
 
         for (let i = 0; i < 2; i++) {
             let idealTac = targetMetaTacs[i];
 
-            // 1) 메타 전법이 있으면 중복 여부 무시하고 무조건 꽂아넣음
+            // 1) 메타 정답 전법이 있으면 중복 여부 상관없이 무조건 꽂아넣음
             if (idealTac) {
                 o.chosenTactics[i] = idealTac;
                 usedInCurrentDeck.add(cStr(idealTac));
                 continue;
             }
 
-            // 2) 커스텀 무장일 경우 동적 계산
+            // 2) 커스텀 무장일 경우에만 동적 계산
             let bestFallback = "";
             let highestScore = -9999;
 
@@ -850,6 +865,7 @@ window.autoFixDeck = oIdx => {
                 if (o.name === "악진" && ["견진연봉", "위위구조"].includes(cTac)) score += 2000;
                 if (o.name === "장료" && ["질풍노도", "반객위주", "일고작기", "함진살적"].includes(cTac)) score += 2000;
                 if (["법정", "유비(제왕)", "제갈량"].includes(o.name) && ["심구고루", "동장철벽", "전위위안", "태청단경", "현호제세", "미우주무"].includes(cTac)) score += 2000;
+                if (o.name === "공손찬" && ["승승장구", "반객위주", "교취호탈"].includes(cTac)) score += 1000;
 
                 if (score > highestScore) {
                     highestScore = score;
