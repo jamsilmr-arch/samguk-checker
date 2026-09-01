@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (가중치 기반 동적 스코어링 AI 교정 시스템 100% 적용 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (하이브리드 메타-계산 AI 교정 시스템 적용 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -15,20 +15,18 @@ var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연�
 
 var BUILTIN_META_DECKS = [
     {id:"rank1_shu_macho", priority: 130, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "이퇴위진", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
-    {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "유좌유용", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
+    {id:"rank1_wei_sima", priority: 129, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]}]},
     {id:"rank1_gun_jang", priority: 128, formation: "구행진", officers:[{name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}]},
     {id:"rank2_gun_yeopo", priority: 125, formation: "방원진", officers:[{name:"원소", chosenTactics:["사소도", "견진연봉", "위위구조"]}, {name:"동탁", chosenTactics:["전권난정", "강유겸제", "홍수첨향"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]}]},
-    {id:"rank2_wei_sima_hujuk", priority: 124, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "간담상조", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "안영찰채", "유비무환"]}]},
+    {id:"rank2_wei_sima_hujuk", priority: 124, formation: "추형진", officers:[{name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]}]},
     {id:"rank2_shu_macho_simgu", priority: 123, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "심구고루", "유좌유용"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}]},
     {id:"rank3_shu_macho", priority: 120, formation: "안행진", officers:[{name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]}]},
     {id:"rank3_gun_jang_simgu", priority: 119, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "후적박발", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]}]},
-    {id:"rank3_wei_sima_gu", priority: 118, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "위위구조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]}]},
+    {id:"rank3_wei_sima_gu", priority: 118, formation: "추형진", officers:[{name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]}]},
     {id:"rank4_shu_seo", priority: 115, formation: "구행진", officers:[{name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}]},
     {id:"rank4_wu_son", priority: 114, formation: "구행진", officers:[{name:"손권", chosenTactics:["웅거", "횡징폭렴", "여자동포"]}, {name:"육항", chosenTactics:["청백충근", "수상개화", "요사여신"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]}]},
-    {id:"rank4_wei_sima", priority: 113, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}]},
     {id:"rank6_gun_jwa", priority: 110, formation: "구행진", officers:[{name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "진퇴유도"]}, {name:"황보숭", chosenTactics:["강직불아", "횡징폭렴", "동구적개"]}]},
     {id:"rank6_wei_ak", priority: 109, formation: "방원진", officers:[{name:"악진", chosenTactics:["분용당선", "견진연봉", "위위구조"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "간담상조"]}, {name:"장료", chosenTactics:["함진살적", "반객위주", "질풍노도"]}]},
-    {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
     {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]}]}
 ];
 
@@ -94,15 +92,6 @@ var internalBondRules = [
     {name:"아애신정",req:2,heroes:["유비","유비(제왕)","법정"],effect:"피해 감소 4%"},
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
-
-var DYNAMIC_TACTIC_POOLS = {
-    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
-    "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
-    "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
-    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
-    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
-};
 
 var tacticAlternativesMap = {
     "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
@@ -757,18 +746,16 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
 }
 
 // ============================================================================
-// 🚨 [신규 엔진] 가중치 기반 동적 스코어링 AI 교정 시스템 (고정 메타 의존성 제거)
+// 🚨 [하이브리드 엔진] 정답 메타 선행 매칭 후 ➔ 잔여 슬롯 가중치 동적 계산
 // ============================================================================
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
     const tMap = {}, hMap = {};
 
-    // 보유 풀 매핑
     (Array.isArray(saved.tactics) ? saved.tactics : Object.values(saved.tactics || {})).forEach(x => { if(x && x.name) tMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
     (Array.isArray(saved.heroes) ? saved.heroes : Object.values(saved.heroes || {})).forEach(x => { if(x && x.name) hMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
 
-    // 상위 부대 사용 전법/장수 추적 (중복 방지)
     const higherTacs = new Set(), higherHeroes = new Set();
     dynamicPresetDecks.sort((a,b) => (a.originIdx||0) - (b.originIdx||0)).forEach(d => {
         if (d.originIdx < oIdx) {
@@ -779,130 +766,109 @@ window.autoFixDeck = oIdx => {
         }
     });
 
-    let currentRoster = targetDeck.officers.filter(o => o.name.trim() !== "");
+    let currentOfficers = targetDeck.officers.map(o => cStr(o.name)).filter(Boolean);
 
-    // [1단계] 빈 슬롯 동적 장수 추천 (역할군 밸런스 계산)
-    if (currentRoster.length < 3) {
-        let neededRoles = { 'TC': 1, 'SC': 1, 'SH': 1 };
-        currentRoster.forEach(o => {
-            const role = FB_OFF_META[o.name]?.[3] || "PC";
-            if (['TC','SS'].includes(role)) neededRoles['TC']--;
-            else if (['SC','PC','PCm'].includes(role)) neededRoles['SC']--;
-            else neededRoles['SH']--;
+    // [1단계] 0티어 메타 정답지 1차 락온 (사용자 배치 기반)
+    let bestMeta = null;
+    let maxScore = -1;
+
+    for (const meta of BUILTIN_META_DECKS) {
+        let score = 0;
+        // 현재 슬롯에 꽂힌 장수가 메타 덱에 있으면 +50점 (사용자 의도 파악)
+        currentOfficers.forEach(co => {
+            if (meta.officers.some(mo => cStr(mo.name) === co)) score += 50;
         });
+        // 메타 덱 요구 장수를 실제로 보유하고 있으면 +10점
+        meta.officers.forEach(mo => {
+            if (hMap[cStr(mo.name)]?.isOwned && !higherHeroes.has(cStr(mo.name))) score += 10;
+        });
+        score += (meta.priority || 0);
 
-        const allHeroes = window.getOfficerNamesBridge();
-        for (let hero of allHeroes) {
-            if (currentRoster.length >= 3) break;
-            if (!hMap[cStr(hero)]?.isOwned || higherHeroes.has(cStr(hero)) || currentRoster.some(o => o.name === hero)) continue;
-
-            const role = FB_OFF_META[hero]?.[3] || "PC";
-            if ((neededRoles['TC'] > 0 && ['TC','SS'].includes(role)) ||
-                (neededRoles['SC'] > 0 && ['SC','PC','PCm'].includes(role)) ||
-                (neededRoles['SH'] > 0 && ['SH'].includes(role))) {
-                currentRoster.push({ name: hero, chosenTactics: ["", ""] });
-                if (['TC','SS'].includes(role)) neededRoles['TC']--;
-                else if (['SC','PC','PCm'].includes(role)) neededRoles['SC']--;
-                else neededRoles['SH']--;
-            }
+        if (score > maxScore) {
+            maxScore = score;
+            bestMeta = meta;
         }
     }
 
-    if (currentRoster.length < 3) return alert("[AI 계산 실패] 가용 가능한 무장이 부족하여 덱을 구성할 수 없습니다.");
+    if (!bestMeta) return alert("[AI 계산 실패] 가용 가능한 메타 기반 덱이 없습니다.");
 
-    // [2단계] 진형 기반 포지션 동적 최적화 배치
-    let frontPool = [], backPool = [];
-    currentRoster.forEach(o => {
-        const role = FB_OFF_META[o.name]?.[3] || "PC";
-        if (["TC", "PC"].includes(role)) frontPool.push(o);
-        else backPool.push(o);
-    });
+    // [2단계] 메타 정답지 기반 진형 및 장수 라인업 100% 강제 고정
+    targetDeck.formation = bestMeta.formation;
+    targetDeck.officers = bestMeta.officers.map(mo => ({ name: mo.name, chosenTactics: ["", ""] }));
 
-    // 사용자가 선택한 진형을 기준으로 포지션 할당 (선택 안했으면 구행진 기본)
-    if (!targetDeck.formation) targetDeck.formation = "구행진";
-    const posReq = FORMATIONS[targetDeck.formation].pos;
-    let newOfficers = [ {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]}, {name:"", chosenTactics:["",""]} ];
-
-    for(let i=0; i<3; i++) {
-        if (posReq[i] === 'front' && frontPool.length > 0) newOfficers[i] = frontPool.shift();
-        else if (posReq[i] === 'back' && backPool.length > 0) newOfficers[i] = backPool.shift();
-        else newOfficers[i] = frontPool.length > 0 ? frontPool.shift() : (backPool.length > 0 ? backPool.shift() : {name:"", chosenTactics:["",""]});
-    }
-    targetDeck.officers = newOfficers;
-
-    // [3단계] 전법 가중치 스코어링 (Core Engine)
+    // [3단계] 전법 하이브리드 할당 (1. 메타 정답 확인 -> 2. 미보유 시 가중치 계산)
     targetDeck.officers.forEach((o, oIdx) => {
-        if (!o.name) return;
+        const metaOfficer = bestMeta.officers.find(mo => mo.name === o.name);
+        const targetMetaTacs = metaOfficer ? (metaOfficer.chosenTactics.length === 3 ? metaOfficer.chosenTactics.slice(1,3) : metaOfficer.chosenTactics) : ["", ""];
         const role = FB_OFF_META[o.name]?.[3] || "PC";
         const position = FORMATIONS[targetDeck.formation].pos[oIdx];
 
         for (let i = 0; i < 2; i++) {
-            // 수동으로 넣은 전법 중 상위 부대가 쓴 건 비움
-            if (o.chosenTactics[i] && higherTacs.has(cStr(o.chosenTactics[i]))) {
-                o.chosenTactics[i] = "";
+            let idealTac = targetMetaTacs[i];
+
+            // 1) 0티어 메타 전법을 보유하고 있고 상위 부대가 안 썼으면 즉시 꽂음
+            if (idealTac && tMap[cStr(idealTac)]?.isOwned && !higherTacs.has(cStr(idealTac))) {
+                o.chosenTactics[i] = idealTac;
+                higherTacs.add(cStr(idealTac));
+                continue;
             }
 
-            // AI가 비어있는 슬롯을 동적으로 채점하여 채움
-            if (!o.chosenTactics[i]) {
-                let bestTactic = "";
-                let highestScore = -9999;
+            // 2) 미보유 또는 빼앗긴 경우: 동적 스코어링 엔진 가동 (대체품 수학적 계산)
+            let bestFallback = "";
+            let highestScore = -9999;
 
-                window.getTacticListBridge().forEach(tac => {
-                    const cTac = cStr(tac);
-                    if (!tMap[cTac]?.isOwned || higherTacs.has(cTac) || o.chosenTactics.includes(tac)) return;
+            window.getTacticListBridge().forEach(tac => {
+                const cTac = cStr(tac);
+                if (!tMap[cTac]?.isOwned || higherTacs.has(cTac) || o.chosenTactics.includes(tac)) return;
 
-                    let score = 0;
-                    const stats = internalTacticStatMap[cTac] || {};
+                let score = 0;
+                const stats = internalTacticStatMap[cTac] || {};
 
-                    // 🎯 A. 역할군 매칭 (역상성 차단)
-                    if (['SC', 'SH', 'SS'].includes(role)) {
-                        if (stats.strategyDmg) score += stats.strategyDmg * 10;
-                        if (stats.healGiven) score += stats.healGiven * 8;
-                        if (stats.physicalDmg) score -= 1000;
-                    } else if (['PC', 'PCm', 'TC'].includes(role)) {
-                        if (stats.physicalDmg) score += stats.physicalDmg * 10;
-                        if (stats.strategyDmg) score -= 1000;
-                    }
-
-                    // 🎯 B. 포지션 및 탱커 생존 시너지
-                    if (role === 'TC') {
-                        if (stats.damageTakenRed) score += stats.damageTakenRed * 15;
-                        if (cTac === "심구고루" && ["조조", "조조(제왕)", "손견", "동탁"].includes(o.name)) score -= 500;
-                    }
-
-                    // 🎯 C. 진형 특별 시너지 (예: 방원진 후열 연격 폭주)
-                    if (targetDeck.formation === '방원진' && position === 'back') {
-                        if (stats.comboRate) score += stats.comboRate * 20;
-                    }
-
-                    // 🎯 D. 하드코딩된 예외 시너지 (인간 메타의 불합리성 보정: +2000점)
-                    if (o.name === "사마의" && ["후적박발", "반객위주"].includes(cTac)) score += 2000;
-                    if (o.name === "강유" && ["일고작기", "천리추격"].includes(cTac)) score += 2000;
-                    if (o.name.includes("조조") && ["강유겸제", "간담상조"].includes(cTac)) score += 2000;
-                    if (o.name === "악진" && ["견진연봉", "위위구조"].includes(cTac)) score += 2000;
-                    if (o.name === "장료" && ["질풍노도", "반객위주", "일고작기"].includes(cTac)) score += 2000;
-                    if (o.name === "가후" && ["유비무환", "안영찰채"].includes(cTac)) score += 2000;
-                    if (["법정", "유비(제왕)", "제갈량"].includes(o.name) && cTac === "심구고루") score += 2000;
-
-                    if (score > highestScore) {
-                        highestScore = score;
-                        bestTactic = tac;
-                    }
-                });
-
-                if (bestTactic) {
-                    o.chosenTactics[i] = bestTactic;
-                    higherTacs.add(cStr(bestTactic));
+                // A. 스탯 역상성 절대 배제
+                if (['SC', 'SH', 'SS'].includes(role)) {
+                    if (stats.strategyDmg) score += stats.strategyDmg * 10;
+                    if (stats.healGiven) score += stats.healGiven * 8;
+                    if (stats.physicalDmg) score -= 1000;
+                } else if (['PC', 'PCm', 'TC'].includes(role)) {
+                    if (stats.physicalDmg) score += stats.physicalDmg * 10;
+                    if (stats.strategyDmg) score -= 1000;
                 }
-            } else {
-                higherTacs.add(cStr(o.chosenTactics[i]));
+
+                // B. 탱커 생존 및 모략 도발(심구고루) 역상성 페널티
+                if (role === 'TC') {
+                    if (stats.damageTakenRed) score += stats.damageTakenRed * 15;
+                    if (cTac === "심구고루" && ["조조", "조조(제왕)", "손견", "동탁"].includes(o.name)) score -= 500;
+                }
+
+                // C. 진형 특별 시너지 (방원진 후열 연격 폭주)
+                if (targetDeck.formation === '방원진' && position === 'back') {
+                    if (stats.comboRate) score += stats.comboRate * 20;
+                }
+
+                // D. 0티어 하드코딩 예외 시너지 (인간 메타 보정)
+                if (o.name === "사마의" && ["후적박발", "반객위주"].includes(cTac)) score += 2000;
+                if ((o.name === "조조" || o.name === "조조(제왕)") && ["강유겸제", "진퇴유도", "간담상조"].includes(cTac)) score += 2000;
+                if (o.name === "가후" && ["유비무환", "혼수모어", "안영찰채"].includes(cTac)) score += 2000;
+                if (o.name === "강유" && ["일고작기", "천리추격"].includes(cTac)) score += 2000;
+                if (o.name === "악진" && ["견진연봉", "위위구조"].includes(cTac)) score += 2000;
+                if (o.name === "장료" && ["질풍노도", "반객위주", "일고작기", "함진살적"].includes(cTac)) score += 2000;
+
+                if (score > highestScore) {
+                    highestScore = score;
+                    bestFallback = tac;
+                }
+            });
+
+            if (bestFallback) {
+                o.chosenTactics[i] = bestFallback;
+                higherTacs.add(cStr(bestFallback));
             }
         }
     });
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[동적 AI 계산 완료] 진형(${targetDeck.formation}) 및 스탯 가중치 연산을 통해 최적의 전법이 자동 장착되었습니다.`);
+    alert(`[AI 하이브리드 교정 완료] 정답 메타(${bestMeta.id})를 기반으로 편성을 100% 고정하고, 누락된 전법만 가중치로 계산하여 장착했습니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
