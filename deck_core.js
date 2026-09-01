@@ -42,7 +42,7 @@ var BUILTIN_META_DECKS = [
         { name: "조조(제왕)", chosenTactics: ["군령여산", "강유겸제", "견불가최"] }, // 안정적 피감망 구축
         { name: "장료", chosenTactics: ["함진살적", "반객위주", "질풍노도"] } // 후열에서 78% 연격 폭딜
     ]
-}
+},
     {id:"rank6_wei_jo", priority: 108, formation: "구행진", officers:[{name:"조조", chosenTactics:["효웅", "간담상조", "혼수모어"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "강유겸제", "이퇴위진"]}]},
     {id:"meta_shu_beopjeong_gang", priority: 150, formation: "추형진", officers:[{name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "안영찰채"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]}]}
 ];
