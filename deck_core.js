@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (종결 전법 무조건 강제 표출 및 중복 피드백 연동 패치 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유저 배치 의도 절대 우위 락온 패치 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -500,7 +500,7 @@ function getBestMetaMatch(curNamesClean) {
 
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
-        let baseScore = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 0.5 : 0), 0);
+        let baseScore = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1000 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 100 : 0), 0);
         let finalScore = baseScore > 0 ? baseScore + (meta.priority || 0) : baseScore;
         if (finalScore >= maxScore) { maxScore = finalScore; bestMeta = meta; }
     });
@@ -523,13 +523,13 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     const match = getBestMetaMatch(curNames);
 
-    const isCustom = !match || match.maxScore < 1.5;
+    const isCustom = !match || match.maxScore < 1000;
 
     if (isCustom) {
         fb.logs.push({ type: 'info', text: `💡 <strong>[오리지널 시너지]</strong> 메타를 초월한 독자적인 조합입니다. AI가 역할군에 맞춰 분석합니다.` });
     } else {
         const { bestMeta: meta } = match;
-        fb.logs.push({ type: 'info', text: `🎯 <strong>${meta.name}</strong> 기반 처방입니다.` });
+        fb.logs.push({ type: 'info', text: `🎯 <strong>${meta.name || meta.id}</strong> 기반 처방입니다.` });
         const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { systemGuideInsights: {} };
         if (metaData.systemGuideInsights && metaData.systemGuideInsights[meta.id]) {
             fb.insight = metaData.systemGuideInsights[meta.id];
@@ -546,7 +546,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         const hName = off?.name?.toString().trim() || "", cleanHName = cStr(hName);
         
         if (!cleanHName) {
-            if (!isCustom && match) fb.logs.push({ type: 'warning', text: `[${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}] 권장 무장 누락: <span style="color:var(--text-highlight);font-weight:bold;">[${match.bestMeta.officers[oIdx]?.name}]</span>`});
+            if (!isCustom && match && match.bestMeta.officers[oIdx]) fb.logs.push({ type: 'warning', text: `[${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}] 권장 무장 누락: <span style="color:var(--text-highlight);font-weight:bold;">[${match.bestMeta.officers[oIdx].name}]</span>`});
             else fb.logs.push({ type: 'warning', text: `[${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}] 무장 슬롯이 비어있습니다. 장수를 선택해주세요.`});
             return;
         }
@@ -770,7 +770,7 @@ window.autoFixDeck = oIdx => {
     for (const meta of BUILTIN_META_DECKS) {
         let score = 0;
         currentOfficers.forEach(co => {
-            if (meta.officers.some(mo => cStr(mo.name) === co)) score += 50;
+            if (meta.officers.some(mo => cStr(mo.name) === co)) score += 2000;
         });
         meta.officers.forEach(mo => {
             if (hMap[cStr(mo.name)]?.isOwned) score += 10;
