@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (누락된 전법 풀/스탯 맵 변수 복구 및 동적 엔진 안정화 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (메타덱 강제 포지셔닝 및 위치 고정 버그 픽스 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -84,16 +84,6 @@ var internalBondRules = [
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
 
-// 🚨 누락되었던 핵심 전법 데이터 복원 완료
-var DYNAMIC_TACTIC_POOLS = {
-    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
-    "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
-    "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
-    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
-    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
-};
-
 var tacticAlternativesMap = {
     "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
     "횡징폭렴":["유비무환","간담상조","동구적개","동장철벽"],
@@ -138,6 +128,10 @@ var internalTacticStatMap = {
     "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5},"유비무환":{healGiven:8,damageTakenRed:8},
     "심구고루":{damageTakenRed:15, healGiven:10},"애자필보":{damageTakenRed:15}
 };
+
+var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
@@ -671,13 +665,20 @@ window.autoFixDeck = oIdx => {
 
     if (isMetaDriven) {
         targetDeck.formation = bestMeta.formation;
-        let placed = [...currentOfficers];
-        targetDeck.officers.forEach((o, i) => {
-            if (!o.name) {
-                let missingMetaOff = bestMeta.officers.find(mo => !placed.includes(cStr(mo.name)));
-                if (missingMetaOff) { o.name = missingMetaOff.name; placed.push(cStr(missingMetaOff.name)); }
-            }
+        
+        // 🚨 핵심 수정: 유저가 미리 장착해둔 전법을 무장 이름 기준으로 백업
+        let userTacticMap = {};
+        targetDeck.officers.forEach(o => {
+            if (o.name) userTacticMap[o.name] = [...o.chosenTactics];
         });
+
+        // 🚨 핵심 수정: 메타덱에 정의된 완벽한 포지션(순서)으로 장수를 강제 재배치하여 역상성 차단
+        targetDeck.officers.forEach((o, i) => {
+            let targetName = bestMeta.officers[i].name;
+            o.name = targetName;
+            o.chosenTactics = userTacticMap[targetName] || ["", ""];
+        });
+        
     } else {
         if (currentOfficers.length > 0) {
             let baseFaction = FB_OFF_META[currentOfficers[0]]?.[2] || "qun";
