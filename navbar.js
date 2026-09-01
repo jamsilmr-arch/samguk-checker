@@ -4,6 +4,13 @@
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     const patchHistoryData = [
+                 {
+            date: "2026-09-02",
+            logs: [
+                "덱 추천 기능 대규모 수정 및 가이드 버튼 추가",
+                "메타덱 천공 랭커 덱 반영"
+            ]
+        },
          {
             date: "2026-08-29",
             logs: [
