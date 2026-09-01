@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (가이드 모달 텍스트 최신 로직 동기화 패치)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (절대 0티어 우선 락온 및 전투매 동적 매칭 패치 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -10,8 +10,17 @@ var FB_OFF_META = {
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
-
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
+
+// 🚨 현실 타협덱(설거지 덱)의 오염을 원천 차단하는 [절대 0티어 종결 정답지] 하드코딩 (우선순위 9999)
+var ABSOLUTE_ENDGAME_DECKS = [
+    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
+    { id: "absolute_macho", priority: 9999, name: "[절대 종결] 마초 안행 창병", concept: "[0티어 정답지]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
+    { id: "absolute_jangnyung", priority: 9999, name: "[절대 종결] 장녕 구행 궁병", concept: "[0티어 정답지]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]} ] },
+    { id: "absolute_yeopo", priority: 9999, name: "[절대 종결] 여포 방원 기병", concept: "[0티어 정답지]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "간담상조", "진퇴유도"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "만부막적", "용왕직전"]} ] },
+    { id: "absolute_jangryo", priority: 9999, name: "[절대 종결] 장료 기형 기병", concept: "[0티어 정답지]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] },
+    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "태청단경"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]} ] }
+];
 
 var EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","용맹","명광갑","무용 피해 가함","창병 배반, 공심 상승","금왕","치룡패","무용 피해 가함","창병 배반, 공심 상승","양렬"],
@@ -130,15 +139,20 @@ var internalTacticStatMap = {
     "심구고루":{damageTakenRed:15, healGiven:10},"애자필보":{damageTakenRed:15}
 };
 
-var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
-
-window.getHawkDataFromGuide = function(metaId) {
-    return {
-        recommendation: metaHawkRecommendationMap[metaId || "custom"],
-        attributes: metaHawkRandomAttributesMap[metaId || "custom"]
-    };
+// 🚨 전투매 동적 추천 알고리즘 (ID 기반이 아닌 "무장" 기반 스캔으로 전투매 누락 원천 차단)
+window.getHawkDataFromGuide = function(metaId, officersArray = []) {
+    const names = officersArray.map(o => cStr(o?.name || o));
+    
+    if (names.includes("사마의")) return { recommendation: {name:"결운-호생", skill:"사마의 모략 폭딜 및 전열 호위"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
+    if (names.includes("마초")) return { recommendation: {name:"열공-전광", skill:"마초 반객위주 확산 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 추격 전법 피해 +15%"} } };
+    if (names.includes("장녕")) return { recommendation: {name:"삭풍-성모", skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
+    if (names.includes("여포") || names.includes("허저")) return { recommendation: {name:"결운-호생", skill:"무력 폭딜 연타 및 아군 견고화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 파갑 +10%"}, attr3:{rank1:"[40Lv 특성] 일반 공격 시 대상 혼란"} } };
+    if (names.includes("강유")) return { recommendation: {name:"열공-여천", skill:"강유의 흡혈 및 피해 감소 생존력 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
+    if (names.includes("장료") || names.includes("악진")) return { recommendation: {name:"열공-전광", skill:"연격 폭격 및 장료 후열 암살"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
+    if (names.includes("육손") || names.includes("육항") || names.includes("손권")) return { recommendation: {name:"능소-진시", skill:"모략 치명타 폭딜 및 방벽 강화"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 치유 효과 부여 +10%"}, attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제"} } };
+    if (names.includes("공손찬") || names.includes("초선")) return { recommendation: {name:"열공-전광", skill:"속도 버프 및 무용 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 속도 +20"}, attr2:{rank1:"[30Lv] 무용 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여"} } };
+    
+    return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: { attr1:{rank1:"[20Lv] 속도/모략 보정"}, attr2:{rank1:"[30Lv] 전투 속성 보정"}, attr3:{rank1:"[40Lv] 행동 시 디버프 해제"} } };
 };
 
 window.getOfficerDogamData = function(officerName) {
@@ -246,6 +260,10 @@ function aggregateIntegratedStats(deck, officerIndex) {
         return new Set(heroesInDeck).size >= r.req;
     }).forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
+    const hawkData = window.getHawkDataFromGuide(matchMeta?.bestMeta?.id, curNames);
+    const hA = hawkData.attributes;
+    if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
+
     const dogamData = window.getOfficerDogamData(hName);
     [dogamData.uniqueTactic, ...(officer.chosenTactics || [])].filter(Boolean).forEach(tacName => {
         const tkMap = internalTacticStatMap[cStr(tacName)];
@@ -255,7 +273,6 @@ function aggregateIntegratedStats(deck, officerIndex) {
 }
 
 function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
-    if (!metaId || metaId === 'custom') return "";
     let isPerfect = true, hasOfficer = false;
     for (let o of deck.officers) {
         const cleanName = cStr(o?.name);
@@ -390,22 +407,25 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
+// 🚨 메타덱 스코어 역전 현상 해결: 절대 0티어 강제 락온 및 위치 점수 제거
 function getBestMetaMatch(curNamesClean) {
     if (!curNamesClean || !curNamesClean.length) return null;
-    let archetypes = [];
+    
+    // 0티어 원본 덱을 항상 배열 최상단에 고정
+    let archetypes = [...ABSOLUTE_ENDGAME_DECKS];
     if (window.getMetaDeckData) {
         const metaData = window.getMetaDeckData();
         if (metaData && metaData.analyzedMetaArchetypes && metaData.analyzedMetaArchetypes.length > 0) {
-            archetypes = metaData.analyzedMetaArchetypes;
+            archetypes = [...archetypes, ...metaData.analyzedMetaArchetypes];
         }
     }
-    if (archetypes.length === 0) return null;
 
     let bestMeta = archetypes[0], maxScore = -1;
     archetypes.forEach(meta => {
-        let baseScore = meta.officers.reduce((acc, mo, idx) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1000 : 0) + (curNamesClean[idx] === cStr(mo.name) ? 100 : 0), 0);
+        // 위치(idx) 비교 점수 삭제 -> 순서 상관없이 무장이 포함되어 있기만 하면 1000점 부여
+        let baseScore = meta.officers.reduce((acc, mo) => acc + (curNamesClean.includes(cStr(mo.name)) ? 1000 : 0), 0);
         let finalScore = baseScore > 0 ? baseScore + (meta.priority || 0) : baseScore;
-        if (finalScore >= maxScore) { maxScore = finalScore; bestMeta = meta; }
+        if (finalScore > maxScore) { maxScore = finalScore; bestMeta = meta; }
     });
     return { bestMeta, maxScore };
 }
@@ -435,6 +455,8 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { systemGuideInsights: {} };
         if (metaData.systemGuideInsights && metaData.systemGuideInsights[meta.id]) {
             fb.insight = metaData.systemGuideInsights[meta.id];
+        } else if (meta.priority === 9999) {
+            fb.insight = "🚨 [절대 0티어 종결 락온] 타협 없는 최고의 공방 시너지를 구축하는 이론상 0티어 덱입니다.";
         }
     }
 
@@ -636,16 +658,23 @@ window.autoFixDeck = oIdx => {
     const hMap = {};
     (Array.isArray(saved.heroes) ? saved.heroes : Object.values(saved.heroes || {})).forEach(x => { if(x && x.name) hMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
 
-    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { analyzedMetaArchetypes: [] };
-    const META_DECKS = metaData.analyzedMetaArchetypes || [];
     let currentOfficers = targetDeck.officers.map(o => cStr(o.name)).filter(Boolean);
-
     let bestMeta = null;
     let maxScore = -1;
 
-    if (currentOfficers.length > 0 && META_DECKS.length > 0) {
+    if (currentOfficers.length > 0) {
+        // 우선순위 9999로 설정된 ABSOLUTE_ENDGAME_DECKS를 포함하여 메타 검사 진행
+        const META_DECKS = [...ABSOLUTE_ENDGAME_DECKS];
+        if (window.getMetaDeckData) {
+            const metaData = window.getMetaDeckData();
+            if (metaData && metaData.analyzedMetaArchetypes) {
+                META_DECKS.push(...metaData.analyzedMetaArchetypes);
+            }
+        }
+
         for (const meta of META_DECKS) {
             let score = 0;
+            // 무장이 포함되어 있으면 위치와 무관하게 고정 점수 부여 (배치 순서 오작동 방지)
             currentOfficers.forEach(co => { if (meta.officers.some(mo => cStr(mo.name) === co)) score += 2000; });
             meta.officers.forEach(mo => { if (hMap[cStr(mo.name)]?.isOwned) score += 10; });
             score += (meta.priority || 0);
@@ -724,7 +753,6 @@ window.autoFixDeck = oIdx => {
                 if (["법정", "유비(제왕)", "제갈량"].includes(o.name) && ["심구고루", "동장철벽", "전위위안", "태청단경", "현호제세", "미우주무"].includes(cTac)) score += 500;
                 if (o.name === "공손찬" && ["승승장구", "반객위주", "교취호탈"].includes(cTac)) score += 300;
 
-                // 🚨 핵심 수정: 메타 전법을 +1500점 가중치로만 처리. (강제 덮어쓰기 삭제)
                 if (targetMetaTacs.includes(tac)) score += 1500;
 
                 if (score > highestScore) { highestScore = score; bestFallback = tac; }
@@ -739,7 +767,7 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[AI 유연 교정 완료] 메타 데이터를 '참고(Reference)'하여 최적의 밸런스를 계산했습니다. 메타에 얽매이지 않고 현재 진형과 역할군에 맞춰 유연하게 추천합니다.`);
+    alert(`[AI 종결 전법 매칭 완료] 상위 부대 중복 여부와 관계없이 0티어 종결 전법을 우선 배치했습니다. 중복 전법은 피드백 패널의 대체 추천을 참고하세요.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
@@ -803,9 +831,7 @@ function renderDeckBuilder() {
                 statsHtmlInner += `<div>${buildIntegratedStatsHtml(stats)}</div>`;
             });
 
-            const isCustom = !match || match.maxScore < 1000;
-            const metaIdForHawk = isCustom ? "custom" : match.bestMeta.id;
-            const hawkData = window.getHawkDataFromGuide ? window.getHawkDataFromGuide(metaIdForHawk) : { recommendation: {name:"범용 전투매", skill:"기본 최적화"} };
+            const hawkData = window.getHawkDataFromGuide(match?.bestMeta?.id, curNames);
             const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
