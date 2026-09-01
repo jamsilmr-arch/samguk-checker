@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (메타 참고형 유연한 AI 동적 스코어링 엔진 통합 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (가이드 모달 텍스트 최신 로직 동기화 패치)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -567,7 +567,7 @@ function initGuideModal() {
                 </div>
                 <div style="color:var(--text-main); font-size:13px; line-height:1.6;">
                     <p><strong>1. 🎯 0티어 메타 자동 락온</strong><br>덱에 원하는 핵심 장수를 1~2명만 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. 시스템이 전서버 상위 1% 랭커 데이터를 스캔하여 가장 강력한 진형과 부족한 장수를 자동으로 채워줍니다.</p>
-                    <p><strong>2. 🛡️ 역할군 기반 스마트 전법 할당</strong><br>1군부터 5군까지 순서대로 교정을 진행하세요. 상위 부대가 먼저 챙겨간 전법을 피해 남은 전법 중 가장 효율이 높은 전법을 수학적으로 역산하여 자동 장착합니다. (딜러가 힐을 들거나, 탱커가 딜을 드는 역상성 세팅 완벽 차단)</p>
+                    <p><strong>2. 🛡️ 0티어 종결 전법 최우선 할당</strong><br>상위 부대의 전법 중복 사용 여부를 따지지 않고, 해당 무장과 진형에 가장 완벽한 0티어 종결 전법을 무조건 1순위로 강제 장착합니다. (역할군이 파괴되는 역상성 세팅 완벽 차단)</p>
                     <p><strong>3. 🛠️ 피드백 패널을 통한 튜닝</strong><br>AI가 교정을 마치면, 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용/미보유)</span>을 확인하세요. 시스템이 제시하는 <b>녹색 대체 전법</b>을 참고해 본인의 보유 상황에 맞게 수동으로 슬롯을 변경하면 덱이 완성됩니다.</p>
                     <p><strong>4. 🦅 커스텀 시너지 보존</strong><br>메타에 없는 비주류 무장을 배치하고 교정을 눌러도, AI가 무장을 지우지 않고 해당 무장의 역할군에 맞는 최적의 전법을 찾아 오리지널 덱을 지원합니다.</p>
                 </div>
@@ -672,8 +672,10 @@ window.autoFixDeck = oIdx => {
 
     targetDeck.officers.forEach((o, oIdx) => {
         if (!o.name) return;
+        
         const metaOfficer = bestMeta && isMetaDriven ? bestMeta.officers.find(mo => mo.name === o.name) : null;
         const targetMetaTacs = metaOfficer ? (metaOfficer.chosenTactics.length === 3 ? metaOfficer.chosenTactics.slice(1,3) : metaOfficer.chosenTactics) : ["", ""];
+        
         const role = FB_OFF_META[o.name]?.[3] || "PC";
         const position = FORMATIONS[targetDeck.formation]?.pos[oIdx] || "front";
 
@@ -722,6 +724,7 @@ window.autoFixDeck = oIdx => {
                 if (["법정", "유비(제왕)", "제갈량"].includes(o.name) && ["심구고루", "동장철벽", "전위위안", "태청단경", "현호제세", "미우주무"].includes(cTac)) score += 500;
                 if (o.name === "공손찬" && ["승승장구", "반객위주", "교취호탈"].includes(cTac)) score += 300;
 
+                // 🚨 핵심 수정: 메타 전법을 +1500점 가중치로만 처리. (강제 덮어쓰기 삭제)
                 if (targetMetaTacs.includes(tac)) score += 1500;
 
                 if (score > highestScore) { highestScore = score; bestFallback = tac; }
