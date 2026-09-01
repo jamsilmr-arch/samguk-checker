@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (누락된 DYNAMIC_TACTIC_POOLS 변수 복구 및 하이브리드 엔진 통합 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (역할군 파괴 방지 및 하이브리드 엔진 무결성 패치 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -93,7 +93,6 @@ var internalBondRules = [
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
 
-// 🚨 누락되었던 전법 풀 객체 100% 복구 완료
 var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
@@ -834,20 +833,26 @@ window.autoFixDeck = oIdx => {
                 let score = 0;
                 const stats = internalTacticStatMap[cTac] || {};
 
-                // A. 스탯 역상성 절대 배제
-                if (['SC', 'SH', 'SS'].includes(role)) {
-                    if (stats.strategyDmg) score += stats.strategyDmg * 10;
-                    if (stats.healGiven) score += stats.healGiven * 8;
+                // 🚨 A. 역할군 세분화 매칭 (역상성 및 포지션 파괴 절대 차단)
+                if (role === 'SC') { // 모략 딜러 (사마의, 강유 등)
+                    if (stats.strategyDmg) score += stats.strategyDmg * 15;
                     if (stats.physicalDmg) score -= 1000;
-                } else if (['PC', 'PCm', 'TC'].includes(role)) {
-                    if (stats.physicalDmg) score += stats.physicalDmg * 10;
+                    if (stats.healGiven) score -= 800; // 딜러가 힐을 들지 못하게 강력 차단
+                } else if (['SH', 'SS'].includes(role)) { // 모략 서포터/힐러 (법정, 유비, 가후 등)
+                    if (stats.healGiven) score += stats.healGiven * 15;
+                    if (stats.damageTakenRed) score += stats.damageTakenRed * 12;
+                    if (stats.strategyDmg) score -= 800; // 서포터가 공격기를 들지 못하게 강력 차단
+                    if (stats.physicalDmg) score -= 1000;
+                } else if (['PC', 'PCm'].includes(role)) { // 무용 딜러 (마초, 장료 등)
+                    if (stats.physicalDmg) score += stats.physicalDmg * 15;
+                    if (stats.comboRate) score += stats.comboRate * 15;
                     if (stats.strategyDmg) score -= 1000;
-                }
-
-                // B. 탱커 생존 및 모략 도발(심구고루) 역상성 페널티
-                if (role === 'TC') {
-                    if (stats.damageTakenRed) score += stats.damageTakenRed * 15;
-                    if (cTac === "심구고루" && ["조조", "조조(제왕)", "손견", "동탁"].includes(o.name)) score -= 500;
+                    if (stats.healGiven) score -= 800; // 딜러가 힐을 들지 못하게 강력 차단
+                } else if (role === 'TC') { // 퓨어 탱커 (조조, 손견 등)
+                    if (stats.damageTakenRed) score += stats.damageTakenRed * 20;
+                    if (stats.strategyDmg) score -= 1000;
+                    if (stats.physicalDmg) score -= 800; // 탱커도 어중간한 딜 금지
+                    if (cTac === "심구고루" && ["조조", "조조(제왕)", "손견", "동탁"].includes(o.name)) score -= 1000; // 모략 계수 도발 역상성 차단
                 }
 
                 // C. 진형 특별 시너지 (방원진 후열 연격 폭주)
@@ -862,6 +867,7 @@ window.autoFixDeck = oIdx => {
                 if (o.name === "강유" && ["일고작기", "천리추격"].includes(cTac)) score += 2000;
                 if (o.name === "악진" && ["견진연봉", "위위구조"].includes(cTac)) score += 2000;
                 if (o.name === "장료" && ["질풍노도", "반객위주", "일고작기", "함진살적"].includes(cTac)) score += 2000;
+                if (["법정", "유비(제왕)", "제갈량"].includes(o.name) && ["심구고루", "동장철벽", "전위위안", "태청단경", "현호제세", "미우주무"].includes(cTac)) score += 2000;
 
                 if (score > highestScore) {
                     highestScore = score;
@@ -878,7 +884,7 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[AI 하이브리드 교정 완료] 정답 메타(${bestMeta.id})를 기반으로 편성을 100% 고정하고, 누락된 전법만 가중치로 계산하여 장착했습니다.`);
+    alert(`[AI 하이브리드 교정 완료] 역할군 붕괴(딜러의 힐 장착 등)를 완벽히 차단하고, 최적화된 전법을 할당했습니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
