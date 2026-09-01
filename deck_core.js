@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (비주류 커스텀 무장 절대 보존 및 종결 전법 확정 패치 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신규 사용자용 인게임 가이드 팝업 모달 통합 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -696,6 +696,33 @@ window.showEquipPopup = function(e, attr1, attr2, attr3) {
     openModalPopup(e, "⚒️ 장비 추가 속성 및 특기", `🔹 1차: ${attr1}<br>🔹 2차: ${attr2}`, `🔸 특기: <span style="color:#f59e0b;font-weight:bold;">${attr3}</span>`);
 };
 
+// 🚨 인게임 가이드 모달 로직 추가
+function initGuideModal() {
+    if (document.getElementById('guide-modal-overlay')) return;
+    const modalHtml = `
+        <div id="guide-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
+            <div style="background:var(--bg-panel); border:1px solid var(--border-accent); border-radius:8px; width:90%; max-width:500px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-main); padding-bottom:10px; margin-bottom:15px;">
+                    <h3 style="margin:0; color:var(--text-highlight);">💡 AI 덱 교정 시스템 사용 가이드</h3>
+                    <button onclick="closeGuideModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+                </div>
+                <div style="color:var(--text-main); font-size:13px; line-height:1.6;">
+                    <p><strong>1. 🎯 0티어 메타 자동 락온</strong><br>덱에 원하는 핵심 장수를 1~2명만 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. 시스템이 전서버 상위 1% 랭커 데이터를 스캔하여 가장 강력한 진형과 부족한 장수를 자동으로 채워줍니다.</p>
+                    <p><strong>2. 🛡️ 역할군 기반 스마트 전법 할당</strong><br>1군부터 5군까지 순서대로 교정을 진행하세요. 상위 부대가 먼저 챙겨간 전법을 피해 남은 전법 중 가장 효율이 높은 전법을 수학적으로 역산하여 자동 장착합니다. (딜러가 힐을 들거나, 탱커가 딜을 드는 역상성 세팅 완벽 차단)</p>
+                    <p><strong>3. 🛠️ 피드백 패널을 통한 튜닝</strong><br>AI가 교정을 마치면, 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용/미보유)</span>을 확인하세요. 시스템이 제시하는 <b>녹색 대체 전법</b>을 참고해 본인의 보유 상황에 맞게 수동으로 슬롯을 변경하면 덱이 완성됩니다.</p>
+                    <p><strong>4. 🦅 커스텀 시너지 보존</strong><br>메타에 없는 비주류 무장(예: 공손찬, 육항 등)을 배치하고 교정을 눌러도, AI가 무장을 지우지 않고 해당 무장의 역할군에 맞는 최적의 전법을 찾아 오리지널 덱을 지원합니다.</p>
+                </div>
+                <div style="margin-top:20px; text-align:right;">
+                    <button onclick="closeGuideModal()" style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-main); padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:bold; transition: background 0.2s;">확인했습니다</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+window.openGuideModal = () => { document.getElementById('guide-modal-overlay').style.display = 'flex'; };
+window.closeGuideModal = () => { document.getElementById('guide-modal-overlay').style.display = 'none'; };
+
 var injectCustomUIStyles = () => {
     if (document.getElementById('deck-custom-ui-styles')) return;
     const style = document.createElement('style');
@@ -763,7 +790,6 @@ window.autoFixDeck = oIdx => {
 
     let currentOfficers = targetDeck.officers.map(o => cStr(o.name)).filter(Boolean);
 
-    // [1단계] 메타 정답지 우선 탐색
     let bestMeta = null;
     let maxScore = -1;
 
@@ -785,7 +811,6 @@ window.autoFixDeck = oIdx => {
         }
     }
 
-    // [2단계] 사용자 배치 무장 절대 보존
     let isMetaDriven = (bestMeta && maxScore >= 2000);
 
     if (isMetaDriven) {
@@ -802,7 +827,6 @@ window.autoFixDeck = oIdx => {
         });
     }
 
-    // [3단계] 전법 할당 (상위 부대 중복 무시하고 무조건 0티어 정답 락온)
     let usedInCurrentDeck = new Set();
 
     targetDeck.officers.forEach((o, oIdx) => {
@@ -815,14 +839,12 @@ window.autoFixDeck = oIdx => {
         for (let i = 0; i < 2; i++) {
             let idealTac = targetMetaTacs[i];
 
-            // 1) 메타 정답 전법이 있으면 중복 여부 상관없이 무조건 꽂아넣음
             if (idealTac) {
                 o.chosenTactics[i] = idealTac;
                 usedInCurrentDeck.add(cStr(idealTac));
                 continue;
             }
 
-            // 2) 커스텀 무장일 경우에만 동적 계산
             let bestFallback = "";
             let highestScore = -9999;
 
@@ -896,6 +918,13 @@ function renderDeckBuilder() {
     const container = document.getElementById('deck-container'); if (!container) return;
     try {
         container.style.display = 'block'; container.innerHTML = '';
+        
+        // 🚨 덱 컨테이너 상단에 가이드 버튼 주입
+        container.insertAdjacentHTML('beforeend', `
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 12px; margin-right: 4px;">
+                <button onclick="openGuideModal()" style="background:#3b82f6; color:#fff; border:none; padding:6px 14px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💡 사용 가이드 보기</button>
+            </div>
+        `);
         
         const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
         const hMap = {}, tMap = {};
@@ -1000,4 +1029,9 @@ if (!window.isOsiHooked) {
 window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk_hobby_data') renderDeckBuilder(); });
 window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
 
-document.addEventListener('DOMContentLoaded', () => { injectCustomUIStyles(); loadDeckTextData(); renderDeckBuilder(); });
+document.addEventListener('DOMContentLoaded', () => { 
+    injectCustomUIStyles(); 
+    initGuideModal(); 
+    loadDeckTextData(); 
+    renderDeckBuilder(); 
+});
