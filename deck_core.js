@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (메타덱 강제 포지셔닝 및 위치 고정 버그 픽스 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (DYNAMIC_TACTIC_POOLS 누락 복구 및 위치 고정 버그 픽스 완결판)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -83,6 +83,16 @@ var internalBondRules = [
     {name:"아애신정",req:2,heroes:["유비","유비(제왕)","법정"],effect:"피해 감소 4%"},
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
+
+// 🚨 누락되었던 3대 핵심 매핑 데이터 완벽 복구 🚨
+var DYNAMIC_TACTIC_POOLS = {
+    "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
+    "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
+    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
+    "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
+    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
+    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
+};
 
 var tacticAlternativesMap = {
     "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
@@ -558,7 +568,7 @@ function initGuideModal() {
                     <p><strong>1. 🎯 배치 무장 절대 락온 (우선권 보장)</strong><br>원하는 핵심 장수를 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. AI는 유저의 배치를 최우선적으로 존중하며 해당 장수가 포함된 메타덱을 즉시 찾아 채워줍니다.</p>
                     <p><strong>2. 🛡️ 0티어 종결 전법 무조건 장착</strong><br>상위 부대의 전법 중복 사용 여부와 상관없이, 해당 무장과 진형에 가장 완벽한 0티어 종결 전법을 무조건 1순위로 장착합니다. (역할군이 파괴되는 엉뚱한 전법 세팅 완벽 차단)</p>
                     <p><strong>3. 🛠️ 피드백 패널을 통한 튜닝</strong><br>교정이 끝나면 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용/미보유)</span>을 확인하세요. 시스템이 제시하는 <b>녹색 대체 전법</b>을 참고해 본인 상황에 맞게 수동으로 변경하면 완성됩니다.</p>
-                    <p><strong>4. 🦅 진영(Faction) 기반 스마트 튜닝</strong><br>메타에 없는 비주류 무장(예: 공손찬, 육항 등)을 배치하면, 엉뚱한 진영의 메타 무장을 가져오지 않고 <b>동일 진영</b> 내에서 가장 시너지가 높은 무장과 전법으로 자동 편성합니다.</p>
+                    <p><strong>4. 🦅 진영(Faction) 기반 스마트 튜닝</strong><br>메타에 없는 비주류 무장을 배치하면, 엉뚱한 진영의 메타 무장을 가져오지 않고 <b>동일 진영</b> 내에서 가장 시너지가 높은 무장과 전법으로 자동 편성합니다.</p>
                 </div>
                 <div style="margin-top:20px; text-align:right;">
                     <button onclick="closeGuideModal()" style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-main); padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:bold; transition: background 0.2s;">확인했습니다</button>
@@ -666,13 +676,11 @@ window.autoFixDeck = oIdx => {
     if (isMetaDriven) {
         targetDeck.formation = bestMeta.formation;
         
-        // 🚨 핵심 수정: 유저가 미리 장착해둔 전법을 무장 이름 기준으로 백업
         let userTacticMap = {};
         targetDeck.officers.forEach(o => {
             if (o.name) userTacticMap[o.name] = [...o.chosenTactics];
         });
 
-        // 🚨 핵심 수정: 메타덱에 정의된 완벽한 포지션(순서)으로 장수를 강제 재배치하여 역상성 차단
         targetDeck.officers.forEach((o, i) => {
             let targetName = bestMeta.officers[i].name;
             o.name = targetName;
