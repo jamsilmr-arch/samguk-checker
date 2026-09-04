@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (유비무환 추가 및 오염 전법 3종 삭제 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신전법 '격안관화' 정규화 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -65,13 +65,13 @@ var heroList = [
     { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
 ];
 
-// 🚨 고유 전법 영구 삭제 및 [유비무환] 추가 (총 79종 정규화)
 var tacticList = [
     { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_gyeokan', name: '격안관화', group: 'tactic', isOwned: false, star: 0 }, // 🚨 신전법 '격안관화' 추가
     { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false, star: 0 },
@@ -115,7 +115,7 @@ var tacticList = [
     { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yubi', name: '유비무환', group: 'tactic', isOwned: false, star: 0 }, // 🚨 유비무환 추가 완료
+    { id: 't_yubi', name: '유비무환', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false, star: 0 },
