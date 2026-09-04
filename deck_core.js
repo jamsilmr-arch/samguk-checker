@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신전법 '격안관화' 스탯 및 매핑 데이터 완벽 통합 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유비·법정·강유 절대 0티어 갱신 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -13,12 +13,12 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var ABSOLUTE_ENDGAME_DECKS = [
+    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
     { id: "absolute_macho", priority: 9999, name: "[절대 종결] 마초 안행 창병", concept: "[0티어 정답지]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
     { id: "absolute_jangnyung", priority: 9999, name: "[절대 종결] 장녕 구행 궁병", concept: "[0티어 정답지]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]} ] },
     { id: "absolute_yeopo", priority: 9999, name: "[절대 종결] 여포 방원 기병", concept: "[0티어 정답지]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "간담상조", "진퇴유도"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "만부막적", "용왕직전"]} ] },
-    { id: "absolute_jangryo", priority: 9999, name: "[절대 종결] 장료 기형 기병", concept: "[0티어 정답지]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] },
-    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "태청단경"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "격안관화"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "백기겁영"]} ] }
+    { id: "absolute_jangryo", priority: 9999, name: "[절대 종결] 장료 기형 기병", concept: "[0티어 정답지]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] }
 ];
 
 var EQ_PRESETS = {
@@ -145,6 +145,9 @@ var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[pr
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
+    
+    // 🚨 강유-법정 하이브리드 덱용 삭풍 매칭 추가
+    if (names.includes("강유") && names.includes("법정")) return { recommendation: {name:"삭풍-설조", skill:"강유 예열을 위한 버퍼진 극강 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
     
     if (names.includes("사마의")) return { recommendation: {name:"결운-호생", skill:"사마의 모략 폭딜 및 전열 호위"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
     if (names.includes("마초")) return { recommendation: {name:"열공-전광", skill:"마초 반객위주 확산 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 추격 전법 피해 +15%"} } };
@@ -782,6 +785,7 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
+    alert(`[AI 유연 교정 완료] 메타 데이터를 '참고(Reference)'하여 최적의 밸런스를 계산했습니다. 메타에 얽매이지 않고 현재 진형과 역할군에 맞춰 유연하게 추천합니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
