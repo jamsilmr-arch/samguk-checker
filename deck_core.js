@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (DYNAMIC_TACTIC_POOLS 누락 복구 및 위치 고정 버그 픽스 완결판)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신전법 '격안관화' 스탯 및 매핑 데이터 완벽 통합 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -10,7 +10,7 @@ var FB_OFF_META = {
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
-var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
+var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
@@ -18,7 +18,7 @@ var ABSOLUTE_ENDGAME_DECKS = [
     { id: "absolute_jangnyung", priority: 9999, name: "[절대 종결] 장녕 구행 궁병", concept: "[0티어 정답지]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]} ] },
     { id: "absolute_yeopo", priority: 9999, name: "[절대 종결] 여포 방원 기병", concept: "[0티어 정답지]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "간담상조", "진퇴유도"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "만부막적", "용왕직전"]} ] },
     { id: "absolute_jangryo", priority: 9999, name: "[절대 종결] 장료 기형 기병", concept: "[0티어 정답지]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] },
-    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "태청단경"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "간담상조"]}, {name:"강유", chosenTactics:["담대여두", "일고작기", "천리추격"]} ] }
+    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "유비무환", "태청단경"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "격안관화"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "백기겁영"]} ] }
 ];
 
 var EQ_PRESETS = {
@@ -84,29 +84,28 @@ var internalBondRules = [
     {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
 ];
 
-// 🚨 누락되었던 3대 핵심 매핑 데이터 완벽 복구 🚨
 var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
     "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
     "TC": ["토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
-    "SH": ["유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
-    "SS": ["금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
+    "SH": ["격안관화", "유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
+    "SS": ["격안관화", "금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
 };
 
 var tacticAlternativesMap = {
-    "간담상조":["유비무환","횡징폭렴","동장철벽","안영찰채","위위구조"], 
-    "횡징폭렴":["유비무환","간담상조","동구적개","동장철벽"],
+    "간담상조":["유비무환","격안관화","횡징폭렴","동장철벽","안영찰채","위위구조"], 
+    "횡징폭렴":["유비무환","격안관화","간담상조","동구적개","동장철벽"],
     "동장철벽":["간담상조","견불가최","천시지리","동구적개"], 
-    "전위위안":["간담상조","태청단경","현호제세","제곤부위","만천과해"],
-    "이퇴위진":["유비무환","미우주무","천시지리","진퇴유도"], 
+    "전위위안":["간담상조","격안관화","태청단경","현호제세","제곤부위","만천과해"],
+    "이퇴위진":["유비무환","격안관화","미우주무","천시지리","진퇴유도"], 
     "용맹무쌍":["만부막적","비사주석","질풍노도","반객위주"],
     "질풍노도":["암전난방","교취호탈","반객위주","용맹무쌍"], 
     "혼수모어":["사면초가","이간계","안영찰채"],
     "반객위주":["일고작기","사생취의","질풍노도","용맹무쌍"], 
-    "유좌유용":["유비무환","휴양생식","제곤부위","안영찰채"],
+    "유좌유용":["유비무환","격안관화","휴양생식","제곤부위","안영찰채"],
     "강유겸제":["동장철벽","천시지리","진퇴유도","금창신"], 
-    "안영찰채":["유비무환","간담상조","위위구조","미우주무","유좌유용"],
+    "안영찰채":["격안관화","유비무환","간담상조","위위구조","미우주무","유좌유용"],
     "여자동포":["동구적개","천시지리"], 
     "양의화생":["기문둔갑","화소적벽","명찰추호"],
     "수상개화":["요사여신","사생취의","후적박발"], 
@@ -116,7 +115,7 @@ var tacticAlternativesMap = {
     "금창신":["동구적개","강유겸제","간담상조"],
     "만천과해":["전위위안","태청단경","휴양생식"], 
     "토적격문":["진퇴유도","이퇴위진"], 
-    "위위구조":["간담상조","진퇴유도","홍수첨향"],
+    "위위구조":["격안관화","간담상조","진퇴유도","홍수첨향"],
     "견진연봉":["동장철벽","순수견양"], 
     "용왕직전":["천리추격","암전난방"], 
     "만부막적":["용왕직전","천리추격"], 
@@ -124,15 +123,16 @@ var tacticAlternativesMap = {
     "부동여산":["용맹무쌍", "만부막적", "일고작기", "질풍노도"], 
     "이아환아":["선등함진", "동구적개"],
     "호치":["만부막적", "용왕직전", "용맹무쌍"],
-    "홍수첨향":["유비무환","현호제세","미우주무","휴양생식","제곤부위"],
+    "홍수첨향":["격안관화","유비무환","현호제세","미우주무","휴양생식","제곤부위"],
     "후적박발":["요사여신", "수상개화", "반객위주"],
     "명찰추호":["동촉기선", "지변규려"],
-    "유비무환":["안영찰채", "간담상조", "태청단경", "휴양생식", "홍수첨향"],
+    "격안관화":["운주유악","유비무환","안영찰채","홍수첨향"],
+    "유비무환":["격안관화","안영찰채", "간담상조", "태청단경", "휴양생식", "홍수첨향"],
     "심구고루":["간담상조", "유좌유용", "동장철벽"]
 };
 
 var internalTacticStatMap = {
-    "재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
+    "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10},"재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
     "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
     "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6},"후적박발":{strategyDmg:15,leech:5},
     "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5},"유비무환":{healGiven:8,damageTakenRed:8},
@@ -782,7 +782,6 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[AI 유연 교정 완료] 메타 데이터를 '참고(Reference)'하여 최적의 밸런스를 계산했습니다. 메타에 얽매이지 않고 현재 진형과 역할군에 맞춰 유연하게 추천합니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
