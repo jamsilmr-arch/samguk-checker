@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (유비·법정·강유 절대 0티어 갱신 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (최신 천공 1위 3세트 최우선 락온 업데이트 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -13,6 +13,9 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var ABSOLUTE_ENDGAME_DECKS = [
+    { id: "rank1_wu_yukson", priority: 10000, name: "[천공 1위] 소교·육손·노숙 구행 기병", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"소교", chosenTactics:["화용욕모", "진퇴유도", "간담상조"]}, {name:"육손", chosenTactics:["지변규려", "천리추격", "체천행도"]}, {name:"노숙", chosenTactics:["탑상책", "격안관화", "분성지계"]} ] },
+    { id: "rank1_gun_jangnyeong", priority: 10000, name: "[천공 1위] 원소·장녕·좌자 구행 방패", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"원소", chosenTactics:["사소도", "강유겸제", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "수상개화"]}, {name:"좌자", chosenTactics:["화겁생기", "심구고루", "유비무환"]} ] },
+    { id: "rank1_wei_heojeo", priority: 10000, name: "[천공 1위] 허저·가후·악진 호도 궁병", concept: "[최신 천공 1위]", formation: "호도진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유좌유용"]}, {name:"악진", chosenTactics:["분용당선", "기문둔갑", "횡징폭렴"]} ] },
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
     { id: "absolute_macho", priority: 9999, name: "[절대 종결] 마초 안행 창병", concept: "[0티어 정답지]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
@@ -320,7 +323,7 @@ function calculateActivatedBond(officers) {
         const heroesInDeck = curNames.filter(n => r.heroes.includes(n));
         return new Set(heroesInDeck).size >= r.req;
     });
-    return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
+    return matched.length ? matched.map(r => `<strong>[${r.name}]</strong>${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
@@ -477,10 +480,10 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                         recommendedTacs.add(ownedAlts[0]); 
                         altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
                     }
-                    if (isHigherUsed) fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백: <span style="color:#fca5a5;text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 대체 추천: ${altText}` });
+                    if (isHigherUsed) fb.logs.push({ type: 'warning', text: `[${hName}]${slotNum}슬롯 공백: <span style="color:#fca5a5;text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 대체 추천: ${altText}` });
                     else fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ 권장 전법: <span style="color:#38bdf8;font-weight:bold;">[${pTac}]</span>` });
                 } else {
-                    fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ AI 교정을 통해 시너지 전법을 추천받으세요.` });
+                    fb.logs.push({ type: 'warning', text: `[${hName}]${slotNum}슬롯 공백 ➔ AI 교정을 통해 시너지 전법을 추천받으세요.` });
                 }
             } else {
                 const isTacOwned = !!tacticDataMap[cT]?.isOwned;
@@ -785,7 +788,6 @@ window.autoFixDeck = oIdx => {
 
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
     renderDeckBuilder();
-    alert(`[AI 유연 교정 완료] 메타 데이터를 '참고(Reference)'하여 최적의 밸런스를 계산했습니다. 메타에 얽매이지 않고 현재 진형과 역할군에 맞춰 유연하게 추천합니다.`);
 };
 
 window.moveDeckAction = (cIdx, dir) => {
@@ -838,7 +840,7 @@ function renderDeckBuilder() {
                 });
 
                 const eq = cName ? getOfficerEquipment(hName, dType) : null;
-                const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
+                const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} /${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
 
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${window.getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
             }).join('');
@@ -884,20 +886,55 @@ function renderDeckBuilder() {
                     </div>
                 </div>
                 <div class="grid-layout">${offHtml}</div>
-                <div class="grid-layout" style="margin-top:6px;">${statsHtmlInner}</div>
-                <div style="margin-top:12px;">${hawkHtml}${fbH}${bondFeedback}${perfectionMsg}</div>
-            </div>`);
-        });
-    } catch(e) { container.innerHTML = `<div style="color:red;padding:20px;">렌더링 에러: ${e.message}</div>`; }
-}
+                [정확도: 높음]
 
-if (!window.isOsiHooked) {
-    var osi = localStorage.setItem;
-    localStorage.setItem = function(k,v) { osi.apply(this,arguments); window.dispatchEvent(new CustomEvent('local-storage-update',{detail:{key:k}})); };
-    window.isOsiHooked = true;
-}
+### 📊 천공 1등덱 갱신 상세 분석 및 시스템 피드백
 
-window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk_hobby_data') renderDeckBuilder(); });
-window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
+`deck_core (2).js`의 크로스 브릿지 엔진 로직과 `meta_deck.js`의 아카이브 데이터를 기준으로, 첨부된 최신 1등 스크린샷 3장의 셋업을 완벽히 객관적으로 분해했습니다. 랭커의 덱이라고 무조건 정답은 아니며, 논리적 모순이 있는 부분은 가감 없이 지적합니다.
 
-document.addEventListener('DOMContentLoaded', () => { injectCustomUIStyles(); initGuideModal(); loadDeckTextData(); renderDeckBuilder(); });
+| 부대 | 기존 전법 / 진형 (`meta_deck.js`) | 갱신된 전법 / 진형 | 설계 검증 및 실전 피드백 |
+| :--- | :--- | :--- | :--- |
+| **1군**<br>(오나라 기병) | 방원진[cite: 2]<br>소교: 화용욕모, 진퇴유도, 분성지계[cite: 2]<br>육손: 지변규려, 천리추격, 체천행도[cite: 2]<br>노숙: 탑상책, 견진연봉, 위위구조[cite: 2] | **구행진**<br>소교: 화용욕모, 진퇴유도, **간담상조**<br>육손: 지변규려, 천리추격, 체천행도<br>노숙: 탑상책, **격안관화, 분성지계** | ⚠️ **설계 모순 존재:** 기존 방원진(후열 연격 28%)을 버리고 구행진(후열 피증 12%)을 채택했습니다[cite: 2]. 육손의 딜을 책임지는 '천리추격'과 '체천행도'는 일반 공격 후 터지는 **추격 전법**입니다[cite: 1, 2]. 연격률 28%를 버리고 피해량 12%를 챙기는 것은 발동 기회 자체를 증발시켜 누적 딜량을 떨어뜨리는 비효율적 셋업입니다. 랭커의 단순 실수이거나 특수한 방어 메타를 뚫기 위한 억지 세팅일 확률이 높습니다. 본인 덱에 적용할 때는 방원진을 유지하는 것이 수학적으로 유리합니다. |
+| **2군**<br>(군웅 방패) | 구행진[cite: 2]<br>원소: 사소도, 간담상조, 강유겸제[cite: 2]<br>장녕: 천의난위, 양의화생, 명찰추호[cite: 2]<br>좌자: 화겁생기, 안영찰채, 유비무환[cite: 2] | 구행진<br>원소: 사소도, 강유겸제, **안영찰채**<br>장녕: 천의난위, 양의화생, **수상개화**<br>좌자: 화겁생기, **심구고루**, 유비무환 | 🎯 **안정성 극한 최적화:** 장녕에게 '수상개화'를 주어 액티브 발동률을 확정적으로 끌어올려 딜 누수를 차단했습니다. 또한 좌자가 '심구고루'로 극악무도한 도발 탱킹(+피감)을 전담하고 원소가 '안영찰채'로 서브 힐을 돕는 구조로 변경되었습니다. 운에 의존하지 않고 확실하게 이기겠다는 매우 정교한 역할 분배입니다. |
+| **3군**<br>(위나라 궁병)| 호도진[cite: 2]<br>허저: 호치, 부동여산, 반객위주[cite: 2]<br>가후: 경달권변, 혼수모어, 유좌유용[cite: 2]<br>악진: 분용당선, 기문둔갑, 횡징폭렴[cite: 2] | 호도진<br>허저: 호치, 부동여산, 반객위주<br>가후: 경달권변, 혼수모어, 유좌유용<br>악진: 분용당선, 기문둔갑, 횡징폭렴 | 🛡️ 현재 환경에서 허저의 스탯 강탈과 반객위주의 시너지를 가장 완벽하게 뽑아내는 위나라 템포덱이므로, 메타 변화 없이 그대로 유지되었습니다[cite: 2]. |
+
+---
+
+### 💻 `meta_deck.js` 업데이트 코드 반영
+
+기존 파일의 `analyzedMetaArchetypes` 내 상단 1세트 데이터와 `systemGuideInsights`를 아래 스크립트로 교체하여 시스템을 최신화하십시오. 
+
+```javascript
+// [meta_deck.js 갱신 적용]
+    // 🏆 [오늘자 천공 랭커 1세트]
+    {
+        id: "rank_today_set1_wu_yuk", priority: 160, name: "[천공 1세트 1군] 소교·육손·노숙 구행 기병", concept: "[추격 발동률 하락 주의]", formation: "구행진",
+        officers: [
+            { name: "소교", chosenTactics: ["화용욕모", "진퇴유도", "간담상조"] },
+            { name: "육손", chosenTactics: ["지변규려", "천리추격", "체천행도"] },
+            { name: "노숙", chosenTactics: ["탑상책", "격안관화", "분성지계"] }
+        ]
+    },
+    {
+        id: "rank_today_set1_gun_jang", priority: 159, name: "[천공 1세트 2군] 원소·장녕·좌자 구행 방패", concept: "[오늘자 최신 메타]", formation: "구행진",
+        officers: [
+            { name: "원소", chosenTactics: ["사소도", "강유겸제", "안영찰채"] },
+            { name: "장녕", chosenTactics: ["천의난위", "양의화생", "수상개화"] },
+            { name: "좌자", chosenTactics: ["화겁생기", "심구고루", "유비무환"] }
+        ]
+    },
+    {
+        id: "rank_today_set1_wei_heo", priority: 158, name: "[천공 1세트 3군] 허저·가후·악진 호도 궁병", concept: "[오늘자 최신 메타]", formation: "호도진",
+        officers: [
+            { name: "허저", chosenTactics: ["호치", "부동여산", "반객위주"] },
+            { name: "가후", chosenTactics: ["경달권변", "혼수모어", "유좌유용"] },
+            { name: "악진", chosenTactics: ["분용당선", "기문둔갑", "횡징폭렴"] }
+        ]
+    },
+
+// ... (이하 기존 코드 유지) ...
+
+// [systemGuideInsights 갱신 내역]
+    "rank_today_set1_wu_yuk": "💡 [오늘자 1세트 1군] 소교와 노숙이 간담상조, 격안관화로 유지력을 담당하고 육손이 추격 폭딜을 넣는 덱. (※ 경고: 랭커 픽이라도 구행진 채택으로 연격률이 빠져 추격 전법 발동 횟수가 감소하므로 방원진 대비 실질 효율이 떨어질 모순이 존재함)",
+    "rank_today_set1_gun_jang": "💡 [오늘자 1세트 2군] 좌자가 '심구고루'로 도발 탱킹을 전담하고, 장녕이 '수상개화'로 액티브 발동률을 확정적으로 확보하여 딜 누수를 원천 차단한 극한의 방어/폭딜 하이브리드 방패덱입니다.",
+    "rank_today_set1_wei_heo": "💡 [오늘자 1세트 3군] 신규 호도진을 채용하여 허저가 통솔 강탈 후 반객위주+부동여산으로 물리 폭딜을 꽂고 가후/악진이 혼란과 피감으로 턴을 버는 위나라 궁병 덱입니다.",
