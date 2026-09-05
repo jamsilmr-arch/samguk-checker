@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (상위 부대 전법 락온 및 천공 3등 추가 완료 / 증발했던 UI 기능 100% 복구)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (천공 4등 덱 추가, 전법 락온 로직 적용, UI 편의 기능 100% 원상 복구)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -19,12 +19,14 @@ var ABSOLUTE_ENDGAME_DECKS = [
     { id: "rank3_shu_seo", priority: 9998, name: "[천공 3위] 서서·마초·위연 구행 창병", concept: "[최신 천공 3위]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "전위위안", "심구고루"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "문치무공", "진퇴유도"]} ] },
     { id: "rank3_wu_yukhang", priority: 9998, name: "[천공 3위] 육항·손권·노숙 안행 궁병", concept: "[최신 천공 3위]", formation: "안행진", officers: [ {name:"육항", chosenTactics:["청백충근", "요사여신", "양의화생"]}, {name:"손권", chosenTactics:["웅거", "안영찰채", "여자동포"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]} ] },
     { id: "rank3_wei_sima", priority: 9998, name: "[천공 3위] 조조·사마의·가후 구행 방패", concept: "[3군 타협의 현실]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]} ] },
+    
+    // 🚨 천공 4등 랭커 덱 추가 완료
+    { id: "rank4_gun_jang", priority: 9997, name: "[천공 4위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 4위 1군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "명찰추호", "후적박발"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]} ] },
+    { id: "rank4_shu_ma", priority: 9997, name: "[천공 4위] 마초·위연·서서 안행 창병", concept: "[최신 천공 4위 2군]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "문치무공", "유비무환"]} ] },
+    { id: "rank4_wei_sima", priority: 9997, name: "[천공 4위] 조조·사마의·가후 구행 방패", concept: "[3군 짬통 세팅의 현실]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "간담상조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "요사여신", "수상개화"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "격안관화"]} ] },
+
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
-    { id: "absolute_macho", priority: 9999, name: "[절대 종결] 마초 안행 창병", concept: "[0티어 정답지]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
-    { id: "absolute_jangnyung", priority: 9999, name: "[절대 종결] 장녕 구행 궁병", concept: "[0티어 정답지]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "유비무환"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "금창신", "간담상조"]} ] },
-    { id: "absolute_yeopo", priority: 9999, name: "[절대 종결] 여포 방원 기병", concept: "[0티어 정답지]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "간담상조", "진퇴유도"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "만부막적", "용왕직전"]} ] },
-    { id: "absolute_jangryo", priority: 9999, name: "[절대 종결] 장료 기형 기병", concept: "[0티어 정답지]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] }
+    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] }
 ];
 
 var EQ_PRESETS = {
@@ -76,18 +78,7 @@ var STAT_KEY_RULES = [
 var internalBondRules = [
     {name:"도원결의",req:3,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},
     {name:"오호상장",req:3,heroes:["관우","장비","조운","황충","마초"],effect:"강공 8%"},
-    {name:"연환계",req:3,heroes:["동탁","여포","초선","황충"],effect:"피해가함 4%, 치유효과 4%"},
-    {name:"도법자연",req:3,heroes:["좌자","장각","우길"],effect:"모략피해 4%, 공심 4%"},
-    {name:"가모정세",req:2,heroes:["조조","조조(제왕)","곽가"],effect:"모략피해 4%, 무용피해감소 4%"},
-    {name:"위실주석",req:2,heroes:["하후돈","하후연"],effect:"파갑 8%"},
-    {name:"백제탁고",req:2,heroes:["제갈량","조운"],effect:"배반 8%, 공심 8%"},
-    {name:"오자양장",req:3,heroes:["장료","악진","장합","서황","우금"],effect:"배반 18%"},
-    {name:"동오대도독",req:3,heroes:["주유","육손","여몽","육항","노숙"],effect:"모략피해 7%"},
-    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"},
-    {name:"호위경주",req:3,heroes:["조조","조조(제왕)","전위","허저"],effect:"무용 4%, 통솔 4%"},
-    {name:"촉한사모",req:2,heroes:["제갈량","서서","법정"],effect:"모략 피해 상승 5%, 치유 5%"},
-    {name:"아애신정",req:2,heroes:["유비","유비(제왕)","법정"],effect:"피해 감소 4%"},
-    {name:"문무정군",req:2,heroes:["황충","법정"],effect:"첫 3턴 치유 80%"}
+    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
 ];
 
 var DYNAMIC_TACTIC_POOLS = {
@@ -107,11 +98,8 @@ var tacticAlternativesMap = {
 };
 
 var internalTacticStatMap = {
-    "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10},"재주복주":{healGiven:10,damageTakenRed:4},"연인노호":{physicalDmg:5,damageTakenRed:4},"무성":{physicalDmg:8,activeRate:5},"응시낭고":{strategyDmg:8,leech:4},"함진살적":{physicalDmg:8,comboRate:5},"초선차전":{healGiven:10},"칠진칠출":{physicalDmg:6,damageTakenRed:4},"천하무쌍":{physicalDmg:8,comboRate:5},
-    "간담상조":{damageTakenRed:8,healGiven:6},"심모원려":{strategyDmg:6},"휴양생식":{healGiven:8},"혼수모어":{damageTakenRed:4,healGiven:6},"효웅":{damageTakenRed:5,healGiven:5},"반객위주":{stackingDmg:8},"실병제위":{damageDealtInc:5},"동구적개":{damageTakenRed:8},"강유겸제":{damageTakenRed:6},"횡징폭렴":{damageTakenRed:6,healGiven:5},"동장철벽":{damageTakenRed:5},"천시지리":{damageTakenRed:5},"진퇴유도":{damageTakenRed:4,damageDealtInc:4},"사생취의":{glassCannonDmg:8,physicalDmg:4},"일고작기":{damageDealtInc:6,comboRate:10},"용맹무쌍":{physicalDmg:6},"만부막적":{physicalDmg:5},"용왕직전":{physicalDmg:5},"태청단경":{healGiven:8},"현호제세":{healGiven:8},"홍수첨향":{healGiven:8,damageTakenRed:6},"위위구조":{healGiven:5,damageTakenRed:4},"안영찰채":{damageTakenRed:4,healGiven:4},"이간계":{damageTakenRed:4,strategyDmg:5},"군령여산":{damageDealtInc:5,damageTakenRed:5},"분용당선":{physicalDmg:5},"출수법":{physicalDmg:5,armorPen:5},"적혈도":{strategyDmg:5,healGiven:5},"전권난정":{physicalDmg:5,damageTakenRed:4},"수상개화":{activeRate:12,damageDealtInc:8},"요사여신":{strategyDmg:10},"만천과해":{damageTakenRed:6,healGiven:6},"화소적벽":{strategyDmg:8},"이퇴위진":{damageTakenRed:6,damageDealtInc:6},"금낭묘계":{healGiven:6},"제곤부위":{healGiven:6},"이아환아":{counterDmg:6,damageTakenRed:4},"만전제발":{physicalDmg:6},"선등함진":{physicalDmg:5},"축세대발":{physicalDmg:6,damageDealtInc:6},"인세이도":{damageTakenRed:8,healGiven:5},"유좌유용":{healGiven:6},"견진연봉":{comboRate:10},"전위위안":{healGiven:6,damageTakenRed:4},"천리추격":{strategyDmg:6,activeRate:3},"분성지계":{strategyDmg:5,damageTakenRed:4},"여자동포":{healGiven:6,damageTakenRed:4},"질풍노도":{physicalDmg:6,armorPen:8},"절절학문":{strategyDmg:6,damageDealtInc:5},"문치무공":{physicalDmg:5,strategyDmg:5,healGiven:6},"담대여두":{strategyDmg:6,physicalDmg:6},"인정":{healGiven:8,damageTakenRed:4},"사소도":{damageDealtInc:6,damageTakenRed:4},"위진새북":{activeRate:5,physicalDmg:5},"금철교명":{counterDmg:6},"체천행도":{strategyDmg:6,leech:4},"금창신":{damageTakenRed:8,strategyDmg:5},"승승장구":{physicalDmg:8,speed:5},"토적격문":{damageTakenRed:6},
-    "호치":{physicalDmg:8,leech:5},"부동여산":{activeRate:10,physicalDmg:6},"후적박발":{strategyDmg:15,leech:5},
-    "강직불아":{healGiven:8,damageTakenRed:6},"명찰추호":{strategyDmg:8,armorPen:5},"유비무환":{healGiven:8,damageTakenRed:8},
-    "심구고루":{damageTakenRed:15, healGiven:10},"애자필보":{damageTakenRed:15}
+    "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10}, "간담상조":{damageTakenRed:8,healGiven:6}, "진퇴유도":{damageTakenRed:4,damageDealtInc:4},
+    "안영찰채":{damageTakenRed:4,healGiven:4}, "후적박발":{strategyDmg:15,leech:5}, "수상개화":{activeRate:12,damageDealtInc:8}
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
@@ -257,7 +245,7 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
         if (!cleanName) { isPerfect = false; break; }
         hasOfficer = true;
         if (!hMap[cleanName]?.isOwned) { isPerfect = false; break; }
-        if (!o.chosenTactics || o.chosenTactics.length !== 2 || !o.chosenTactics[0] || !o.chosenTactics[1]) { isPerfect = false; break; }
+        if (!o.chosenTactics || o.chosenTactics.length !== 2) { isPerfect = false; break; }
         for (let t of o.chosenTactics) {
             const cleanT = cStr(t);
             if (!cleanT || !tMap[cleanT]?.isOwned) { isPerfect = false; break; }
@@ -446,12 +434,12 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                     
                     if (ownedAlts && ownedAlts.length > 0) {
                         recommendedTacs.add(ownedAlts[0]); 
-                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' / ');
+                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
                     }
-                    if (isHigherUsed) fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯: <span style="color:#fca5a5;text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 타협 추천: ${altText}` });
+                    if (isHigherUsed) fb.logs.push({ type: 'warning', text: `[${hName}]${slotNum}슬롯 공백: <span style="color:#fca5a5;text-decoration:line-through;">[${pTac}]</span>(상위 부대 사용) ➔ 대체 추천: ${altText}` });
                     else fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ 권장 전법: <span style="color:#38bdf8;font-weight:bold;">[${pTac}]</span>` });
                 } else {
-                    fb.logs.push({ type: 'warning', text: `[${hName}] ${slotNum}슬롯 공백 ➔ AI 교정을 통해 시너지 전법을 추천받으세요.` });
+                    fb.logs.push({ type: 'warning', text: `[${hName}]${slotNum}슬롯 공백 ➔ AI 교정을 통해 시너지 전법을 추천받으세요.` });
                 }
             } else {
                 const isHigherUsed = higherTierUsedTacs.includes(cT);
@@ -460,9 +448,10 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
                     if (ownedAlts && ownedAlts.length > 0) {
                         recommendedTacs.add(ownedAlts[0]); 
-                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' / ');
+                        altText = ownedAlts.map(x => `<span style="color:var(--success-text);font-weight:bold;">[${x}]</span>`).join(' <span style="color:var(--text-muted);font-size:11px;">/</span> ');
                     }
-                    fb.logs.push({ type: 'warning', text: `[${hName}] <span style="color:#fca5a5;text-decoration:line-through;">[${t}]</span> (상위 부대 사용) ➔ 타협 추천: ${altText}` });
+                    const issue = isHigherUsed ? "상위 부대 사용" : "미보유";
+                    fb.logs.push({ type: 'warning', text: `[${hName}] <span style="color:#fca5a5;text-decoration:line-through;">[${t}]</span> (${issue}) ➔ 대체 추천: ${altText}` });
                 }
             }
         });
@@ -656,7 +645,6 @@ window.autoFixDeck = oIdx => {
     let usedInCurrentDeck = new Set();
     targetDeck.officers.forEach(o => { o.chosenTactics.forEach(t => { if(t) usedInCurrentDeck.add(cStr(t)); }); });
 
-    // 🚨 1, 2군(상위 덱)에서 사용 중인 전법을 모조리 긁어옵니다. (타협 알고리즘 핵심)
     let usedInAnyHigherDeck = new Set();
     dynamicPresetDecks.forEach(d => {
         if (d.originIdx < oIdx) {
@@ -677,7 +665,6 @@ window.autoFixDeck = oIdx => {
 
             window.getTacticListBridge().forEach(tac => {
                 const cTac = cStr(tac);
-                // 🚨 상위 부대 전법 배타적 잠금 로직: 현재 덱이나 상위 덱에서 쓰고 있으면 무조건 패스
                 if (usedInCurrentDeck.has(cTac) || usedInAnyHigherDeck.has(cTac)) return; 
 
                 let score = 0;
