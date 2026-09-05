@@ -27,6 +27,31 @@ var analyzedMetaArchetypes = [
             { name: "악진", chosenTactics: ["분용당선", "기문둔갑", "횡징폭렴"] }
         ]
     },
+    // 🥈 [오늘자 천공 랭커 2세트]
+    {
+        id: "rank_today_set2_shu_macho", priority: 155, name: "[천공 2세트 1군] 마초·위연·서서 안행 창병", concept: "[오늘자 최신 메타]", formation: "안행진",
+        officers: [
+            { name: "마초", chosenTactics: ["출수법", "용맹무쌍", "반객위주"] },
+            { name: "위연", chosenTactics: ["실병제위", "문치무공", "진퇴유도"] },
+            { name: "서서", chosenTactics: ["절절학문", "전위위안", "심구고루"] }
+        ]
+    },
+    {
+        id: "rank_today_set2_wei_sima", priority: 154, name: "[천공 2세트 2군] 사마의·조조·가후 추형 방패", concept: "[액티브 치명 고점형]", formation: "추형진",
+        officers: [
+            { name: "사마의", chosenTactics: ["응시낭고", "수상개화", "요사여신"] },
+            { name: "조조", chosenTactics: ["효웅", "간담상조", "강유겸제"] },
+            { name: "가후", chosenTactics: ["경달권변", "혼수모어", "만천과해"] }
+        ]
+    },
+    {
+        id: "rank_today_set2_gun_hwang", priority: 153, name: "[천공 2세트 3군] 황보숭·장녕·좌자 구행 궁병", concept: "[오늘자 최신 메타]", formation: "구행진",
+        officers: [
+            { name: "황보숭", chosenTactics: ["강직불아", "금창신", "여자동포"] },
+            { name: "장녕", chosenTactics: ["천의난위", "양의화생", "명찰추호"] },
+            { name: "좌자", chosenTactics: ["화겁생기", "안영찰채", "유비무환"] }
+        ]
+    },
 
     // 🥈 [오늘자 천공 랭커 2세트]
     {
