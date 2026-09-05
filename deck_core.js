@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (천공 9~11위 부대 3 데이터 추가 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (천공 12~14위 데이터 추가 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -16,34 +16,21 @@ var ABSOLUTE_ENDGAME_DECKS = [
     { id: "rank1_wu_yukson", priority: 10000, name: "[천공 1위] 소교·육손·노숙 구행 기병", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"소교", chosenTactics:["화용욕모", "진퇴유도", "간담상조"]}, {name:"육손", chosenTactics:["지변규려", "천리추격", "체천행도"]}, {name:"노숙", chosenTactics:["탑상책", "격안관화", "분성지계"]} ] },
     { id: "rank1_gun_jangnyeong", priority: 10000, name: "[천공 1위] 원소·장녕·좌자 구행 방패", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"원소", chosenTactics:["사소도", "강유겸제", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "수상개화"]}, {name:"좌자", chosenTactics:["화겁생기", "심구고루", "유비무환"]} ] },
     { id: "rank1_wei_heojeo", priority: 10000, name: "[천공 1위] 허저·가후·악진 호도 궁병", concept: "[최신 천공 1위]", formation: "호도진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유좌유용"]}, {name:"악진", chosenTactics:["분용당선", "기문둔갑", "횡징폭렴"]} ] },
-    { id: "rank3_shu_seo", priority: 9998, name: "[천공 3위] 서서·마초·위연 구행 창병", concept: "[최신 천공 3위]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "전위위안", "심구고루"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "문치무공", "진퇴유도"]} ] },
-    { id: "rank3_wu_yukhang", priority: 9998, name: "[천공 3위] 육항·손권·노숙 안행 궁병", concept: "[최신 천공 3위]", formation: "안행진", officers: [ {name:"육항", chosenTactics:["청백충근", "요사여신", "양의화생"]}, {name:"손권", chosenTactics:["웅거", "안영찰채", "여자동포"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]} ] },
-    { id: "rank3_wei_sima", priority: 9998, name: "[천공 3위] 조조·사마의·가후 구행 방패", concept: "[3군 타협의 현실]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]} ] },
-    { id: "rank4_gun_jang", priority: 9997, name: "[천공 4위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 4위 1군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "명찰추호", "후적박발"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "여자동포"]} ] },
-    { id: "rank4_shu_ma", priority: 9997, name: "[천공 4위] 마초·위연·서서 안행 창병", concept: "[최신 천공 4위 2군]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "강유겸제", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "문치무공", "유비무환"]} ] },
-    { id: "rank4_wei_sima", priority: 9997, name: "[천공 4위] 조조·사마의·가후 구행 방패", concept: "[3군 짬통 세팅]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "간담상조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "요사여신", "수상개화"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "격안관화"]} ] },
-    { id: "rank5_shu_ma", priority: 9996, name: "[천공 5위] 마초·위연·서서 안행 창병", concept: "[최신 천공 5위 1군]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "심구고루"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] },
-    { id: "rank5_gun_jang", priority: 9996, name: "[천공 5위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 5위 2군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "후적박발", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "홍수첨향", "간담상조"]} ] },
-    { id: "rank5_wei_sima", priority: 9996, name: "[천공 5위] 조조·사마의·가후 구행 방패", concept: "[3군 타협의 끝판왕]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "위위구조", "여자동포"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]} ] },
-    { id: "rank6_gun_jang", priority: 9995, name: "[천공 6위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 6위 1군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "전위위안"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "안영찰채", "간담상조"]} ] },
-    { id: "rank6_wei_sima", priority: 9995, name: "[천공 6위] 사마의·조조·가후 추형 방패", concept: "[최신 천공 6위 2군]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"조조", chosenTactics:["효웅", "여자동포", "강유겸제"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]} ] },
-    { id: "rank6_gun_yeopo", priority: 9995, name: "[천공 6위] 원소·동탁·여포 방원 기병", concept: "[최신 천공 6위 3군]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "진퇴유도", "이퇴위진"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
-    { id: "rank7_gun_jang", priority: 9994, name: "[천공 7위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 7위 1군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "전위위안"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "안영찰채", "간담상조"]} ] },
-    { id: "rank7_wei_akjin", priority: 9994, name: "[천공 7위] 악진·조조(제왕)·장료 기형 기병", concept: "[최신 천공 7위 2군]", formation: "기형진", officers: [ {name:"악진", chosenTactics:["분용당선", "여자동포", "유좌유용"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "강유겸제", "심구고루"]}, {name:"장료", chosenTactics:["함진살적", "질풍노도", "반객위주"]} ] },
-    { id: "rank7_wei_sima", priority: 9994, name: "[천공 7위] 조조·사마의·가후 구행 방패", concept: "[최신 천공 7위 3군]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "격안관화", "횡징폭렴"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "동구적개", "혼수모어"]} ] },
-    { id: "rank8_shu_macho", priority: 9993, name: "[천공 8위] 마초·위연·서서 안행 창병", concept: "[최신 천공 8위 1군]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]}, {name:"서서", chosenTactics:["절절학문", "문치무공", "전위위안"]} ] },
-    { id: "rank8_gun_yeopo", priority: 9993, name: "[천공 8위] 채문희·동탁·여포 방원 기병", concept: "[최신 천공 8위 2군]", formation: "방원진", officers: [ {name:"채문희", chosenTactics:["비분시", "격안관화", "기문둔갑"]}, {name:"동탁", chosenTactics:["전권난정", "유좌유용", "혼수모어"]}, {name:"여포", chosenTactics:["천하무쌍", "만부막적", "용왕직전"]} ] },
-    { id: "rank8_shu_beop", priority: 9993, name: "[천공 8위] 법정·황충·강유 방원 방패", concept: "[최신 천공 8위 3군]", formation: "방원진", officers: [ {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"황충", chosenTactics:["적혈도", "견진연봉", "위위구조"]}, {name:"강유", chosenTactics:["담대여두", "체천행도", "천리추격"]} ] },
+    
+    // 천공 12등 랭커
+    { id: "rank12_gun_yeopo", priority: 9989, name: "[천공 12위] 원소·동탁·여포 방원 기병", concept: "[천공 12위 1군]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "진퇴유도", "이퇴위진"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
+    { id: "rank12_wei_sima", priority: 9989, name: "[천공 12위] 사마의·조조·가후 추형 방패", concept: "[천공 12위 2군]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "홍수첨향", "횡징폭렴"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]} ] },
+    { id: "rank12_gun_jang", priority: 9989, name: "[천공 12위] 좌자·장녕·황보숭 구행 궁병", concept: "[천공 12위 3군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "안영찰채", "간담상조"]} ] },
 
-    // 🚨 천공 9~11위 3군 짬통 세팅 8종 데이터 추가
-    { id: "rank9_shu_beop", priority: 9992, name: "[천공 9위] 법정·황충·강유 방원 방패", concept: "[최신 천공 9위 3군]", formation: "방원진", officers: [ {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"황충", chosenTactics:["적혈도", "격안관화", "진퇴유도"]}, {name:"강유", chosenTactics:["담대여두", "반객위주", "천리추격"]} ] },
-    { id: "rank9_shu_wi", priority: 9992, name: "[천공 9위] 위연·마초·서서 구행 창병", concept: "[최신 천공 9위 3군]", formation: "구행진", officers: [ {name:"위연", chosenTactics:["실병제위", "간담상조", "횡징폭렴"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"서서", chosenTactics:["절절학문", "문치무공", "혼수모어"]} ] },
-    { id: "rank9_gun_jang", priority: 9992, name: "[천공 9위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 9위 3군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "안영찰채", "전위위안"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "여자동포", "강유겸제"]} ] },
-    { id: "rank10_gun_won", priority: 9991, name: "[천공 10위] 원소·동탁·여포 방원 기병", concept: "[최신 천공 10위 3군]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "이퇴위진", "격안관화"]}, {name:"동탁", chosenTactics:["전권난정", "혼수모어", "간담상조"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
-    { id: "rank10_wu_hwang", priority: 9991, name: "[천공 10위] 황개·육항·노숙 구행 궁병", concept: "[최신 천공 10위 3군]", formation: "구행진", officers: [ {name:"황개", chosenTactics:["요원지화", "심구고루", "진퇴유도"]}, {name:"육항", chosenTactics:["청백충근", "수상개화", "명찰추호"]}, {name:"노숙", chosenTactics:["탑상책", "안영찰채", "분성지계"]} ] },
-    { id: "rank10_wei_sima", priority: 9991, name: "[천공 10위] 사마의·조조·가후 안행 방패", concept: "[최신 천공 10위 3군]", formation: "안행진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "동장철벽"]}, {name:"가후", chosenTactics:["경달권변", "만천과해", "유비무환"]} ] },
-    { id: "rank11_gun_jang", priority: 9990, name: "[천공 11위] 좌자·장녕·황보숭 구행 궁병", concept: "[최신 천공 11위 3군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "여자동포"]} ] },
-    { id: "rank11_gun_dong", priority: 9990, name: "[천공 11위] 동탁·원소·여포 방원 기병", concept: "[최신 천공 11위 3군]", formation: "방원진", officers: [ {name:"동탁", chosenTactics:["전권난정", "격안관화", "강유겸제"]}, {name:"원소", chosenTactics:["사소도", "간담상조", "견진연봉"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
+    // 천공 13등 랭커 (길드 마스터)
+    { id: "rank13_shu_seo", priority: 9988, name: "[천공 13위] 서서·마초·위연 구행 창병", concept: "[천공 13위 1군]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]} ] },
+    { id: "rank13_shu_beop", priority: 9988, name: "[천공 13위] 유비(제왕)·법정·강유 추형 방패", concept: "[천공 13위 2군]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
+    { id: "rank13_shu_gwan", priority: 9988, name: "[천공 13위] 관우·황충·유비 안행 궁병", concept: "[기형적 짬통 세팅]", formation: "안행진", officers: [ {name:"관우", chosenTactics:["무성", "수상개화", "질풍노도"]}, {name:"황충", chosenTactics:["적혈도", "강유겸제", "횡징폭렴"]}, {name:"유비", chosenTactics:["인정", "이퇴위진", "유좌유용"]} ] },
+
+    // 천공 14등 랭커
+    { id: "rank14_shu_seo", priority: 9987, name: "[천공 14위] 서서·마초·위연 구행 창병", concept: "[천공 14위 1군]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "문치무공", "혼수모어"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]} ] },
+    { id: "rank14_shu_hwang", priority: 9987, name: "[천공 14위] 황충·법정·강유 방원 방패", concept: "[천공 14위 2군]", formation: "방원진", officers: [ {name:"황충", chosenTactics:["적혈도", "견진연봉", "위위구조"]}, {name:"법정", chosenTactics:["애자필보", "유비무환", "격안관화"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
+    { id: "rank14_shu_gwan", priority: 9987, name: "[천공 14위] 관우·장비·유비(제왕) 추형 방패", concept: "[천공 14위 3군]", formation: "추형진", officers: [ {name:"관우", chosenTactics:["무성", "부동여산", "질풍노도"]}, {name:"장비", chosenTactics:["연인노호", "홍수첨향", "이아환아"]}, {name:"유비(제왕)", chosenTactics:["재주복주", "이퇴위진", "강유겸제"]} ] },
 
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] }
@@ -278,7 +265,7 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
 }
 
 function buildIntegratedStatsHtml(stats) {
-    if (!stats) return ''; // 🚨 빈 슬롯 예외 처리 (null 참조 에러 해결)
+    if (!stats) return '';
     let arr = [];
     if (stats.damageTakenRed > 0) arr.push(`피감 <span style="color:var(--success-text)">${stats.damageTakenRed.toFixed(1)}%</span>`);
     if (stats.damageDealtInc > 0) arr.push(`피증 <span style="color:#f87171">${stats.damageDealtInc.toFixed(1)}%</span>`);
