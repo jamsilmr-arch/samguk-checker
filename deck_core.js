@@ -1,9 +1,11 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (천공 12~14위 데이터 추가 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신무장 '견희' 및 창병 폭딜 0티어 덱 반영)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 var FB_OFF_META = {
+    // 🚨 견희 데이터 추가 🚨
+    "견희":["신복옥의","창병/기병","wei","SH"],
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], "손권":["웅거","궁병/기병","wu","TC"], "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], "육항":["청백충근","창병/궁병","wu","SC"], "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
@@ -13,24 +15,16 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var ABSOLUTE_ENDGAME_DECKS = [
+    // 🚨 허저-견희 신규 0티어 메타 락온 🚨
+    { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "안영찰채"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "진퇴유도", "강유겸제"]} ] },
+    
     { id: "rank1_wu_yukson", priority: 10000, name: "[천공 1위] 소교·육손·노숙 구행 기병", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"소교", chosenTactics:["화용욕모", "진퇴유도", "간담상조"]}, {name:"육손", chosenTactics:["지변규려", "천리추격", "체천행도"]}, {name:"노숙", chosenTactics:["탑상책", "격안관화", "분성지계"]} ] },
     { id: "rank1_gun_jangnyeong", priority: 10000, name: "[천공 1위] 원소·장녕·좌자 구행 방패", concept: "[최신 천공 1위]", formation: "구행진", officers: [ {name:"원소", chosenTactics:["사소도", "강유겸제", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "수상개화"]}, {name:"좌자", chosenTactics:["화겁생기", "심구고루", "유비무환"]} ] },
     { id: "rank1_wei_heojeo", priority: 10000, name: "[천공 1위] 허저·가후·악진 호도 궁병", concept: "[최신 천공 1위]", formation: "호도진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유좌유용"]}, {name:"악진", chosenTactics:["분용당선", "기문둔갑", "횡징폭렴"]} ] },
     
-    // 천공 12등 랭커
-    { id: "rank12_gun_yeopo", priority: 9989, name: "[천공 12위] 원소·동탁·여포 방원 기병", concept: "[천공 12위 1군]", formation: "방원진", officers: [ {name:"원소", chosenTactics:["사소도", "진퇴유도", "이퇴위진"]}, {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
-    { id: "rank12_wei_sima", priority: 9989, name: "[천공 12위] 사마의·조조·가후 추형 방패", concept: "[천공 12위 2군]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "홍수첨향", "횡징폭렴"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "만천과해"]} ] },
-    { id: "rank12_gun_jang", priority: 9989, name: "[천공 12위] 좌자·장녕·황보숭 구행 궁병", concept: "[천공 12위 3군]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "심구고루"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "안영찰채", "간담상조"]} ] },
-
-    // 천공 13등 랭커 (길드 마스터)
-    { id: "rank13_shu_seo", priority: 9988, name: "[천공 13위] 서서·마초·위연 구행 창병", concept: "[천공 13위 1군]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]} ] },
-    { id: "rank13_shu_beop", priority: 9988, name: "[천공 13위] 유비(제왕)·법정·강유 추형 방패", concept: "[천공 13위 2군]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "rank13_shu_gwan", priority: 9988, name: "[천공 13위] 관우·황충·유비 안행 궁병", concept: "[기형적 짬통 세팅]", formation: "안행진", officers: [ {name:"관우", chosenTactics:["무성", "수상개화", "질풍노도"]}, {name:"황충", chosenTactics:["적혈도", "강유겸제", "횡징폭렴"]}, {name:"유비", chosenTactics:["인정", "이퇴위진", "유좌유용"]} ] },
-
-    // 천공 14등 랭커
-    { id: "rank14_shu_seo", priority: 9987, name: "[천공 14위] 서서·마초·위연 구행 창병", concept: "[천공 14위 1군]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "문치무공", "혼수모어"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "간담상조"]} ] },
-    { id: "rank14_shu_hwang", priority: 9987, name: "[천공 14위] 황충·법정·강유 방원 방패", concept: "[천공 14위 2군]", formation: "방원진", officers: [ {name:"황충", chosenTactics:["적혈도", "견진연봉", "위위구조"]}, {name:"법정", chosenTactics:["애자필보", "유비무환", "격안관화"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "rank14_shu_gwan", priority: 9987, name: "[천공 14위] 관우·장비·유비(제왕) 추형 방패", concept: "[천공 14위 3군]", formation: "추형진", officers: [ {name:"관우", chosenTactics:["무성", "부동여산", "질풍노도"]}, {name:"장비", chosenTactics:["연인노호", "홍수첨향", "이아환아"]}, {name:"유비(제왕)", chosenTactics:["재주복주", "이퇴위진", "강유겸제"]} ] },
+    { id: "rank3_shu_seo", priority: 9998, name: "[천공 3위] 서서·마초·위연 구행 창병", concept: "[최신 천공 3위]", formation: "구행진", officers: [ {name:"서서", chosenTactics:["절절학문", "전위위안", "심구고루"]}, {name:"마초", chosenTactics:["출수법", "용맹무쌍", "질풍노도"]}, {name:"위연", chosenTactics:["실병제위", "문치무공", "진퇴유도"]} ] },
+    { id: "rank3_wu_yukhang", priority: 9998, name: "[천공 3위] 육항·손권·노숙 안행 궁병", concept: "[최신 천공 3위]", formation: "안행진", officers: [ {name:"육항", chosenTactics:["청백충근", "요사여신", "양의화생"]}, {name:"손권", chosenTactics:["웅거", "안영찰채", "여자동포"]}, {name:"노숙", chosenTactics:["탑상책", "분성지계", "만천과해"]} ] },
+    { id: "rank3_wei_sima", priority: 9998, name: "[천공 3위] 조조·사마의·가후 구행 방패", concept: "[3군 타협의 현실]", formation: "구행진", officers: [ {name:"조조", chosenTactics:["효웅", "유좌유용", "간담상조"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]} ] },
 
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "강유겸제", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] }
@@ -46,6 +40,7 @@ var EQ_PRESETS = {
 };
 
 var FB_EQUIP_OVERRIDES = {
+    "견희": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 부여", attr2: "창병 피해 감소", attr3: "감림" } },
     "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
     "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
