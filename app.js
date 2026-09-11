@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신전법 '격안관화' 정규화 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신무장 '견희' 데이터 주입 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -16,6 +16,8 @@ var heroList = [
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_heojeo', name: '허저', group: 'wei', isOwned: false, star: 0, transcend: false },
+    // 🚨 견희 데이터 추가 🚨
+    { id: 'h_gyeonhui', name: '견희', group: 'wei', isOwned: false, star: 0, transcend: false },
     
     { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
     { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
@@ -71,7 +73,7 @@ var tacticList = [
     { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gyeokan', name: '격안관화', group: 'tactic', isOwned: false, star: 0 }, // 🚨 신전법 '격안관화' 추가
+    { id: 't_gyeokan', name: '격안관화', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false, star: 0 },
