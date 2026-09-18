@@ -1,4 +1,4 @@
-// [시스템 분석] meta_deck.js - 전서버 실전 메타 덱 데이터베이스 (유저 서버 병종별 최신 1~3위 통합 렌더링 및 초기화 완료)
+// [시스템 분석] meta_deck.js - 전서버 실전 메타 덱 데이터베이스 (유저 서버 창/기/방/궁 1~3위 총 11종 완전 통합 렌더링 완료)
 console.log("[시스템 분석] meta_deck.js 커스텀 메타 덱 데이터 허브 기동");
 
 var analyzedMetaArchetypes = [
@@ -14,7 +14,12 @@ var analyzedMetaArchetypes = [
 
     // 🛡️ [방패병 메타 1~2위]
     { id: "shield_rank1", priority: 9994, name: "[서버 1위] 조조(제왕)·사마의·가후 구행 방패", concept: "[방패병 1위]", formation: "구행진", officers: [ {name:"조조(제왕)", chosenTactics:["군령여산", "간담상조", "안영찰채"]}, {name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
-    { id: "shield_rank2", priority: 9993, name: "[서버 2위] 가후·사마의·조조 구행 방패", concept: "[방패병 2위]", formation: "구행진", officers: [ {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}, {name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "진퇴유도", "안영찰채"]} ] }
+    { id: "shield_rank2", priority: 9993, name: "[서버 2위] 가후·사마의·조조 구행 방패", concept: "[방패병 2위]", formation: "구행진", officers: [ {name:"가후", chosenTactics:["경달권변", "혼수모어", "유비무환"]}, {name:"사마의", chosenTactics:["응시낭고", "반객위주", "후적박발"]}, {name:"조조", chosenTactics:["효웅", "진퇴유도", "안영찰채"]} ] },
+
+    // 🏹 [궁병 메타 1~3위]
+    { id: "bow_rank1", priority: 9992, name: "[서버 1위] 좌자·장녕·황보숭 구행 궁병", concept: "[궁병 1위]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "간담상조"]} ] },
+    { id: "bow_rank2", priority: 9991, name: "[서버 2위] 장녕·좌자·황보숭 추형 궁병", concept: "[궁병 2위]", formation: "추형진", officers: [ {name:"장녕", chosenTactics:["천의난위", "명찰추호", "양의화생"]}, {name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "간담상조"]} ] },
+    { id: "bow_rank3", priority: 9990, name: "[서버 3위] 좌자·장녕·황보숭 구행 궁병", concept: "[궁병 3위]", formation: "구행진", officers: [ {name:"좌자", chosenTactics:["화겁생기", "전위위안", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "간담상조"]} ] }
 ];
 
 var metaDeckUnitTypeMap = {};
@@ -34,7 +39,10 @@ var systemGuideInsights = {
     "cav_rank2": "💡 [신전법 채용] 동탁에게 신전법 '불노자위'를 쥐여주어 1~3턴 극한의 피감을 챙기고, 4~5턴에 폭힐과 함께 공손찬/원소의 스윕을 노리는 최신 실험 덱입니다.",
     "cav_rank3": "💡 [방원진 여포] 동탁과 원소가 전열에서 확정 피감막을 콘크리트처럼 두르고, 여포가 방원진의 연격률 버프를 받아 난사하는 원맨 캐리 덱입니다.",
     "shield_rank1": "🚨 [기형적 진형 배치] 사마의가 후적박발/반객위주를 들어 딜량은 훌륭하나, '구행진(전/후/전)' 배치로 인해 맷집이 약한 가후가 전열에서 쳐맞고 끔살당하는 랭커의 치명적인 함정 세팅입니다. 무조건 '추형진'으로 바꿔야 합니다.",
-    "shield_rank2": "🚨 [기형적 진형 배치] 역시 구행진을 채용하여 가후와 조조가 전열에 섭니다. 조조에게 0티어 피감기인 진퇴유도가 들어간 점은 1위 덱보다 낫지만, 구행진 배치는 여전히 사마의 덱의 방어 메커니즘을 거스르는 심각한 실수입니다."
+    "shield_rank2": "🚨 [기형적 진형 배치] 역시 구행진을 채용하여 가후와 조조가 전열에 섭니다. 조조에게 0티어 피감기인 진퇴유도가 들어간 점은 1위 덱보다 낫지만, 구행진 배치는 여전히 사마의 덱의 방어 메커니즘을 거스르는 심각한 실수입니다.",
+    "bow_rank1": "💡 [장녕 종결 세팅] 신규 전투매 '창림(질풍)'을 빠르게 채용하여 장녕의 액티브 폭딜 계수를 60%나 펌핑한 현 궁병 메타의 가장 완벽한 정답지입니다.",
+    "bow_rank2": "⚠️ [매 세팅 미스] 추형진으로 좌자를 전열 탱커로 세운 판단은 좋으나, 모략 덱임에도 전투매를 물리 덱용인 '열공-여천'으로 사용하여 심각한 화력 누수가 발생하고 있습니다.",
+    "bow_rank3": "⚠️ [전법 타협] 좌자에게 유비무환 대신 전위위안을 주었고, 매 역시 '열공-여천'으로 타협하여 1위 덱에 비해 전체적인 체급과 폭발력이 크게 떨어지는 하위 호환 세팅입니다."
 };
 
 window.getMetaDeckData = function() {
@@ -45,7 +53,7 @@ function renderMetaDeckPage() {
     const container = document.getElementById('meta-deck-container');
     if (!container) return;
     
-    container.innerHTML = `<h2 style="color:var(--text-highlight); border-bottom:2px solid var(--border-main); padding-bottom:10px;">전서버 실전 메타 덱 아카이브 (유저 서버 최신 1~3위 8종 락온)</h2>`;
+    container.innerHTML = `<h2 style="color:var(--text-highlight); border-bottom:2px solid var(--border-main); padding-bottom:10px;">전서버 실전 메타 덱 아카이브 (유저 서버 최신 창/기/방/궁 1~3위 락온)</h2>`;
     
     analyzedMetaArchetypes.forEach(deck => {
         const officersHtml = deck.officers.map(o => `
