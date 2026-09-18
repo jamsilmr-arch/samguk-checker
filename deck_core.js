@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신전법 '포전인옥', '불노자위' 데이터 정규화 및 AI 알고리즘 연동)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (신무장 견희 / 신전법 2종 / 절품 장비 / 신규 매 '창림' 알고리즘 전면 최신화 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -12,8 +12,7 @@ var FB_OFF_META = {
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// 🚨 배열 목록에 신규 전법(포전인옥, 불노자위) 추가 🚨
-var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식,불노자위".split(',');
+var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "포전인옥"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]} ] },
@@ -87,7 +86,6 @@ var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
     "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
-    // 🚨 불노자위 및 포전인옥 동적 풀 주입 완료
     "TC": ["불노자위", "토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["불노자위", "포전인옥", "격안관화", "유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["불노자위", "포전인옥", "격안관화", "금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
@@ -100,7 +98,6 @@ var tacticAlternativesMap = {
     "안영찰채":["불노자위","포전인옥","격안관화","유비무환","간담상조","만천과해"]
 };
 
-// 🚨 불노자위 연산 계수 정규화 추가
 var internalTacticStatMap = {
     "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10}, "간담상조":{damageTakenRed:8,healGiven:6}, "진퇴유도":{damageTakenRed:4,damageDealtInc:4},
     "안영찰채":{damageTakenRed:4,healGiven:4}, "후적박발":{strategyDmg:15,leech:5}, "수상개화":{activeRate:12,damageDealtInc:8},
@@ -108,25 +105,76 @@ var internalTacticStatMap = {
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
-window.getHawkDataFromGuide = function(metaId, officersArray = []) {
-    const names = officersArray.map(o => cStr(o?.name || o));
-    if (names.includes("강유") && names.includes("법정")) return { recommendation: {name:"삭풍-설조", skill:"강유 예열을 위한 버퍼진 극강 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("사마의")) return { recommendation: {name:"결운-호생", skill:"사마의 모략 폭딜 및 전열 호위"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("마초")) return { recommendation: {name:"열공-전광", skill:"마초 반객위주 확산 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 추격 전법 피해 +15%"} } };
-    if (names.includes("장녕")) return { recommendation: {name:"삭풍-성모", skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("여포") || names.includes("허저")) return { recommendation: {name:"결운-호생", skill:"무력 폭딜 연타 및 아군 견고화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 파갑 +10%"}, attr3:{rank1:"[40Lv 특성] 일반 공격 시 대상 혼란"} } };
-    if (names.includes("강유")) return { recommendation: {name:"열공-여천", skill:"강유의 흡혈 및 피해 감소 생존력 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
-    if (names.includes("장료") || names.includes("악진")) return { recommendation: {name:"열공-전광", skill:"연격 폭격 및 장료 후열 암살"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
-    if (names.includes("육손") || names.includes("육항") || names.includes("손권")) return { recommendation: {name:"능소-진시", skill:"모략 치명타 폭딜 및 방벽 강화"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 치유 효과 부여 +10%"}, attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제"} } };
-    if (names.includes("공손찬") || names.includes("초선")) return { recommendation: {name:"열공-전광", skill:"속도 버프 및 무용 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 속도 +20"}, attr2:{rank1:"[30Lv] 무용 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여"} } };
+// 🚨 신규 '창림' 품종 메타 스펙 완벽 동기화 (질풍/맹우 매핑)
+var metaHawkRandomAttributesMap = new Proxy({
+    "new_meta_wei_spear":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 연격률 +10%"},attr3:{rank1:"[40Lv 특성] 가하는 능동 전법 피해 계수 2배(60%) 상승",rank2:"[40Lv 특성] 일반 공격 시 대상 혼란",rank3:"[40Lv 특성] 첫 턴 선공 부여"}},
+    "absolute_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 행동 시 디버프 1개 해제"}},
+    "rank1_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 행동 시 디버프 1개 해제"}},
+    "rank2_wei_sima_hujuk":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 가하는 능동 전법 피해 계수 2배(60%) 상승",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
     
-    return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: { attr1:{rank1:"[20Lv] 속도/모략 보정"}, attr2:{rank1:"[30Lv] 전투 속성 보정"}, attr3:{rank1:"[40Lv] 행동 시 디버프 해제"} } };
+    "rank1_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank1_gun_jang":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank1_wei_heo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 무용 피해 가함 +10%",rank2:"[30Lv] 파갑 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank2_gun_yeopo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +8%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 일반 공격 시 대상 혼란(1턴)"}},
+    "rank2_shu_macho_simgu":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank3_shu_macho":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank3_gun_jang_simgu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank3_wei_sima_gu":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank4_shu_seo":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 연격률 +10%",rank2:"[30Lv] 확산 피해 +12%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 추격(돌격) 전법 피해 +15%",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank4_wu_son":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 발동률 +5%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 치유 효과 부여 +12%",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank4_wei_sima":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank6_gun_jwa":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 속도 +20"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "rank6_wei_ak":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 속도 +20",rank3:"[20Lv] 통솔 +10%"},attr2:{rank1:"[30Lv] 파갑 +10%",rank2:"[30Lv] 연격률 +10%",rank3:"[30Lv] 무용 피해 가함 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}},
+    "rank6_wei_jo":{attr1:{rank1:"[20Lv] 모략 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 피해 감소 +8%",rank3:"[30Lv] 치유 효과 부여 +10%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 피격 시 50% 확률 저항 1중첩",rank3:"[40Lv 특성] 저항 획득률 +6%"}},
+    "meta_shu_beopjeong_gang":{attr1:{rank1:"[20Lv] 무용 +12%",rank2:"[20Lv] 통솔 +10%",rank3:"[20Lv] 전능 +6%"},attr2:{rank1:"[30Lv] 모략 피해 가함 +10%",rank2:"[30Lv] 무용 피해 가함 +10%",rank3:"[30Lv] 피해 감소 +8%"},attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제",rank2:"[40Lv 특성] 첫 턴 선공 부여",rank3:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"}}
+}, { get: (target, prop) => target[prop] || defaultHawkAttr });
+
+// 🚨 메타 덱에 신규 전투매 창림(질풍/맹우) 완벽 매핑
+var metaHawkRecommendationMap = new Proxy({
+    "new_meta_wei_spear":{name:"창림-질풍",skill:"허저 능동 전법 폭딜 60% 펌핑 및 피해 경감"},
+    "absolute_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank1_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 무한 유지력 및 철갑 탱킹"},
+    "rank2_wei_sima_hujuk":{name:"창림-질풍",skill:"사마의 후적박발 액티브 60% 폭딜 펌핑"},
+    
+    "rank1_shu_macho":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "rank1_gun_jang":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
+    "rank1_wei_heo":{name:"열공-전광",skill:"허저 통솔 강탈 후 연격 물리 폭딜"},
+    "rank2_gun_yeopo":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"},
+    "rank2_shu_macho_simgu":{name:"열공-전광",skill:"위연 도발 보호 아래 마초 확산 폭딜"},
+    "rank3_shu_macho":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"},
+    "rank3_gun_jang_simgu":{name:"삭풍-성모",skill:"심구고루 좌자 방어망 및 장녕 후적박발 지원"},
+    "rank3_wei_sima_gu":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank4_shu_seo":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"},
+    "rank4_wu_son":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"},
+    "rank4_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank6_gun_jwa":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
+    "rank6_wei_ak":{name:"열공-여천",skill:"조조(제왕) 도발 탱킹 및 장료/악진 암살"},
+    "rank6_wei_jo":{name:"결운-호생",skill:"사마의 요사여신 모략 폭딜 및 가후 생존"},
+    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"}
+}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
+window.getHawkDataFromGuide = function(metaId) {
+    return {
+        recommendation: metaHawkRecommendationMap[metaId || "custom"],
+        attributes: metaHawkRandomAttributesMap[metaId || "custom"]
+    };
 };
 
-window.getOfficerDogamData = function(officerName) {
+function initGuideEngine() {
+    renderGuideContent('equip');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGuideEngine);
+} else {
+    initGuideEngine();
+}
+
+window.switchGuideTab = switchGuideTab;
+window.getEquipmentRecommendationFromGuide = getEquipmentRecommendationFromGuide;
+
+function getOfficerDogamData(officerName) {
     if (window.getOfficerDataFromDogam) { 
         const d = window.getOfficerDataFromDogam(officerName); 
         if (d && (d.uniqueTactic || d.skill)) {
@@ -142,7 +190,8 @@ window.getOfficerDogamData = function(officerName) {
     }
     const [uTac = "고유 전법 누락", uUnit = "방패병", uFac = "qun"] = FB_OFF_META[officerName] || [];
     return { role: "-", location: "-", uniqueTactic: uTac, skillDesc: "", unitSuitability: uUnit, faction: uFac, stats: null };
-};
+}
+window.getOfficerDogamData = getOfficerDogamData;
 
 window.getTacticListBridge = function() {
     const externalList = (window.getAllTacticsFromDogam && window.getAllTacticsFromDogam()?.length > 5) ? window.getAllTacticsFromDogam() : [];
@@ -155,35 +204,6 @@ window.getOfficerNamesBridge = function() {
     const mergedList = [...new Set([...externalList, ...FB_OFFICERS])];
     return mergedList.sort((a, b) => a.localeCompare(b, 'ko'));
 };
-
-function getOfficerEquipment(officerName, deckUnitType = "") {
-    const cleanName = cStr(officerName);
-    const dogamInfo = window.getOfficerDogamData(officerName);
-    const unitPrefix = (deckUnitType && deckUnitType !== "자동 판별") ? deckUnitType : (dogamInfo.unitSuitability?.split('/')[0] || "방패병");
-    
-    let rawEq = window.getOfficerEquipmentFromDogam ? window.getOfficerEquipmentFromDogam(officerName) : null;
-    if (!rawEq && FB_EQUIP_MAP[cleanName]) {
-        const mEq = FB_EQUIP_MAP[cleanName];
-        rawEq = { helmet: { ...mEq.helmet }, armor: { ...mEq.armor }, accessory: { ...mEq.accessory } };
-    }
-
-    if (rawEq) {
-        const eq = { helmet: { ...rawEq.helmet }, armor: { ...rawEq.armor }, accessory: { ...rawEq.accessory } };
-        ['helmet', 'armor', 'accessory'].forEach(part => {
-            ['attr1', 'attr2', 'attr3'].forEach(attr => {
-                let val = eq[part][attr];
-                if (val && val.match(/(창병|기병|궁병|방패병)/)) {
-                    val = val.replace(/(창병|기병|궁병|방패병)\s*/g, `${unitPrefix} `);
-                    eq[part][attr] = val.replace(unitPrefix === "창병" ? "강공, 기습 증가" : "강공, 기습 상승", unitPrefix === "창병" ? "강공, 기습 상승" : "강공, 기습 증가").trim();
-                }
-            });
-        });
-        return eq;
-    }
-
-    const p = EQ_PRESETS["PC"];
-    return { helmet: { name: p[0], attr1: p[1], attr2: p[2], attr3: p[3] }, armor: { name: p[4], attr1: p[5], attr2: p[6], attr3: p[7] }, accessory: { name: p[8], attr1: p[9], attr2: p[10], attr3: p[11] } };
-}
 
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
@@ -341,53 +361,6 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     return results.length > 0 ? results[0] : null;
 }
 
-function getBestMetaMatch(curNamesClean) {
-    if (!curNamesClean || !curNamesClean.length) return null;
-    
-    let archetypes = [...ABSOLUTE_ENDGAME_DECKS];
-    if (window.getMetaDeckData) {
-        const metaData = window.getMetaDeckData();
-        if (metaData && metaData.analyzedMetaArchetypes && metaData.analyzedMetaArchetypes.length > 0) {
-            archetypes = [...archetypes, ...metaData.analyzedMetaArchetypes];
-        }
-    }
-
-    let bestMeta = null, maxScore = -999999;
-    
-    archetypes.forEach(meta => {
-        let score = 0;
-        let matchCount = 0;
-        
-        curNamesClean.forEach(co => { 
-            if (meta.officers.some(mo => cStr(mo.name) === co)) {
-                score += 50000;
-                matchCount++;
-            } 
-        });
-
-        if (curNamesClean.length > 0 && matchCount === 0) {
-            score -= 100000;
-        }
-
-        score += (meta.priority || 0);
-
-        if (score > maxScore) { maxScore = score; bestMeta = meta; }
-    });
-
-    return { bestMeta, maxScore };
-}
-
-function calculateStrictDeckScore(deck) {
-    const curNamesClean = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
-    const match = getBestMetaMatch(curNamesClean);
-    if (!match || match.maxScore < 10000) return 0;
-    
-    let score = 100;
-    if (cStr(deck.formation) !== cStr(match.bestMeta.formation)) score -= 10;
-    match.bestMeta.officers.forEach((metaOff) => { if (!curNamesClean.includes(cStr(metaOff.name))) score -= 30; });
-    return Math.max(score, 0);
-}
-
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
@@ -463,136 +436,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         });
     });
     return fb;
-}
-
-var FORMATIONS = {
-    "일자진": { eff: "전열: 피해 감소 6.0% | 후열: -", pos: ["front","front","front"] },
-    "구행진": { eff: "전열: 피해 감소 5.0% | 후열: 피해 증가 12.0%", pos: ["front","back","front"] },
-    "추형진": { eff: "전열: 피해 감소 6.0% | 후열: 피해 증가 8.0%", pos: ["back","front","back"] },
-    "기형진": { eff: "전열: 피해 증가 12.0% | 후열: 피해 감소 5.0%", pos: ["back","back","front"] },
-    "방원진": { eff: "전열: 피해 감소 5.0% | 후열: 연격률 28.0%", pos: ["front","front","back"] },
-    "안행진": { eff: "전열: 피해 감소 5.0% | 후열: 강공/기습 12.0%", pos: ["back","front","front"] },
-    "호도진": { eff: "전열: 방어 시 회복 | 후열: 피해 증가", pos: ["front","front","back"] }
-};
-
-var dynamicPresetDecks = [];
-var draggedDeckOriginIdx = null, draggedOfficerSlotIdx = null;
-
-var defaultPresetDecks = Array.from({ length: 5 }, (_, i) => ({
-    title: `${i + 1}군`,
-    formation: "구행진",
-    unitType: "",
-    originIdx: i,
-    officers: [ { name: "", chosenTactics: ["", ""] }, { name: "", chosenTactics: ["", ""] }, { name: "", chosenTactics: ["", ""] } ]
-}));
-
-window.handleOfficerDragStart = (e, dIdx, oIdx) => { draggedDeckOriginIdx = dIdx; draggedOfficerSlotIdx = oIdx; e.target.style.opacity = '0.5'; };
-window.handleOfficerDragEnd = e => { e.target.style.opacity = '1'; document.querySelectorAll('.officer-slot').forEach(el => el.style.border = 'none'); draggedDeckOriginIdx = null; draggedOfficerSlotIdx = null; };
-window.handleOfficerDragOver = e => { e.preventDefault(); e.currentTarget.style.border = '2px dashed var(--border-accent)'; };
-window.handleOfficerDragLeave = e => { e.preventDefault(); e.currentTarget.style.border = 'none'; };
-window.handleOfficerDrop = (e, tDIdx, tOIdx) => {
-    e.preventDefault(); e.currentTarget.style.border = 'none';
-    if (draggedDeckOriginIdx === null || draggedOfficerSlotIdx === null) return;
-    const srcD = dynamicPresetDecks.find(x => x.originIdx === draggedDeckOriginIdx);
-    const tgtD = dynamicPresetDecks.find(x => x.originIdx === tDIdx);
-    if (!srcD || !tgtD) return;
-    const temp = srcD.officers[draggedOfficerSlotIdx];
-    srcD.officers[draggedOfficerSlotIdx] = tgtD.officers[tOIdx];
-    tgtD.officers[tOIdx] = temp;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); 
-    renderDeckBuilder();
-};
-
-var modalPopupEl = null, currentPopupTitle = null;
-function openModalPopup(e, title, meta1, desc1) {
-    e.stopPropagation();
-    if (!modalPopupEl) {
-        modalPopupEl = document.createElement('div');
-        modalPopupEl.id = 'tactic-popup-modal';
-        document.body.appendChild(modalPopupEl);
-        document.addEventListener('click', (evt) => { if (!evt.target.closest('#tactic-popup-modal')) { modalPopupEl.style.display = 'none'; currentPopupTitle = null; } });
-    }
-    if (modalPopupEl.style.display === 'block' && currentPopupTitle === title) { modalPopupEl.style.display = 'none'; currentPopupTitle = null; return; }
-    currentPopupTitle = title;
-    modalPopupEl.innerHTML = `<div class="p-title" style="color:var(--text-highlight);font-weight:bold;border-bottom:1px solid var(--border-main);padding-bottom:6px;">${title}</div><div class="p-meta" style="color:var(--text-muted);margin-top:8px;font-size:11px;">${meta1}</div><div class="p-desc" style="margin-top:6px;color:var(--text-desc);line-height:1.5;">${desc1}</div>`;
-    modalPopupEl.style.display = 'block';
-    const rect = e.currentTarget.getBoundingClientRect();
-    modalPopupEl.style.top = `${rect.top + window.scrollY - 10}px`;
-    modalPopupEl.style.left = `${Math.min(rect.right + window.scrollX + 10, window.innerWidth - 290)}px`;
-}
-window.showEquipPopup = function(e, attr1, attr2, attr3) { if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return; openModalPopup(e, "⚒️ 장비 추가 속성 및 특기", `🔹 1차: ${attr1}<br>🔹 2차: ${attr2}`, `🔸 특기: <span style="color:#f59e0b;font-weight:bold;">${attr3}</span>`); };
-
-function initGuideModal() {
-    if (document.getElementById('guide-modal-overlay')) return;
-    const modalHtml = `
-        <div id="guide-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(2px);">
-            <div style="background:var(--bg-panel); border:1px solid var(--border-accent); border-radius:8px; width:90%; max-width:500px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-main); padding-bottom:10px; margin-bottom:15px;">
-                    <h3 style="margin:0; color:var(--text-highlight);">💡 AI 덱 교정 시스템 사용 가이드</h3>
-                    <button onclick="closeGuideModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; line-height:1;">&times;</button>
-                </div>
-                <div style="color:var(--text-main); font-size:13px; line-height:1.6;">
-                    <p><strong>1. 🎯 배치 무장 절대 락온 (우선권 보장)</strong><br>원하는 핵심 장수를 배치하고 <span style="color:#8b5cf6; font-weight:bold;">[✨ AI 교정]</span>을 누르세요. AI는 유저의 배치를 최우선적으로 존중하며 해당 장수가 포함된 메타덱을 즉시 찾아 채워줍니다.</p>
-                    <p><strong>2. 🛡️ 0티어 종결 전법 무조건 장착</strong><br>상위 부대의 전법 중복 사용 여부와 상관없이, 해당 무장과 진형에 가장 완벽한 0티어 종결 전법을 무조건 1순위로 장착합니다.</p>
-                    <p><strong>3. 🛠️ 피드백 패널을 통한 타협 튜닝</strong><br>교정이 끝나면 각 부대 하단의 <span style="color:#fca5a5;">빨간색 피드백(상위 부대 사용)</span>을 확인하세요. 상위 부대가 이미 0티어 전법을 가져갔다면, 시스템이 제시하는 <b>대체 추천 전법</b>을 참고해 본인 상황에 맞게 수동으로 타협 변경하면 완성됩니다.</p>
-                </div>
-                <div style="margin-top:20px; text-align:right;">
-                    <button onclick="closeGuideModal()" style="background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-main); padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:bold; transition: background 0.2s;">확인했습니다</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-window.openGuideModal = () => { document.getElementById('guide-modal-overlay').style.display = 'flex'; };
-window.closeGuideModal = () => { document.getElementById('guide-modal-overlay').style.display = 'none'; };
-
-var injectCustomUIStyles = () => {
-    if (document.getElementById('deck-custom-ui-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'deck-custom-ui-styles';
-    style.innerHTML = `
-        .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
-        .deck-header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .deck-header-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .deck-header-actions { display: flex; gap: 6px; }
-        @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } .deck-header-wrapper { flex-direction: column; align-items: flex-start; gap: 10px; } .deck-card { padding: 10px !important; } }
-        .deck-card select { background-color: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); border-radius: 4px; padding: 6px 24px 6px 10px; font-size: 13px; width: 100%; box-sizing: border-box; font-family: inherit; transition: background-color 0.3s, color 0.3s; }
-        .hawk-recommend-box { margin-top: 10px; padding: 12px; background-color: var(--bg-inner); border-left: 4px solid #3b82f6; border-radius: 6px; font-size: 13px; color: var(--text-desc); line-height: 1.5; transition: background-color 0.3s; }
-        .equipment-box { margin-top: 6px; padding: 6px; border: 1px solid var(--border-main); border-radius: 4px; background-color: var(--bg-inner); font-size: 11px; color: var(--text-desc); transition: background-color 0.3s, border-color 0.3s; }
-        .integrated-stats-box { margin-top: 6px; padding: 8px; border-radius: 4px; background-color: var(--bg-inner); border: 1px solid var(--border-main); font-size: 11px; transition: background-color 0.3s, border-color 0.3s; }
-        .unit-badge { display: inline-block; background-color: rgba(245, 158, 11, 0.15); color: var(--text-highlight); font-size: 10px; padding: 3px 6px; border-radius: 4px; margin: 4px 0; }
-        .feedback-item.success { color: var(--success-text); } .feedback-item.warning { color: var(--text-highlight); } .feedback-item.info { color: var(--text-muted); }
-        #tactic-popup-modal { display: none; position: absolute; z-index: 9999; background: var(--bg-panel); border: 1px solid var(--border-main); padding: 12px; border-radius: 6px; width: 280px; color: var(--text-main); font-size: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .tactic-row { padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; cursor: default; }
-        .tactic-row select { width: 80%; margin: 0 auto; display: block; }
-        .tactic-row.owned select { border: 1px solid var(--success-text); color: var(--success-text); background-color: var(--success-bg); }
-        select option { background-color: var(--bg-panel) !important; color: var(--text-main) !important; font-weight: bold !important; }
-        .tactic-row.missing { border: 1px dashed #f87171 !important; background-color: rgba(248, 113, 113, 0.05) !important; }
-        .tactic-row.missing select { border: none; color: #fca5a5; background-color: transparent; }
-    `;
-    document.head.appendChild(style);
-};
-
-function loadDeckTextData() {
-    try {
-        const parsed = JSON.parse(localStorage.getItem('samguk_deck_text'));
-        if (parsed?.length) {
-            dynamicPresetDecks = parsed.slice(0, 5).map((d, i) => ({ ...defaultPresetDecks[i], ...d, originIdx: d.originIdx ?? i }));
-            while(dynamicPresetDecks.length < 5) dynamicPresetDecks.push({...defaultPresetDecks[dynamicPresetDecks.length], originIdx: dynamicPresetDecks.length});
-            return localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks));
-        }
-    } catch (e) {}
-    dynamicPresetDecks = JSON.parse(JSON.stringify(defaultPresetDecks));
-}
-
-function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
-    const d = dynamicPresetDecks.find(x => x.originIdx === oIdx);
-    if (!d) return;
-    if (prop === 'reset') { d.formation = "구행진"; d.unitType = ""; d.officers.forEach(o => { o.name = ""; o.chosenTactics = ["", ""]; }); }
-    else if (offIdx !== null) slotIdx !== null ? d.officers[offIdx].chosenTactics[slotIdx] = val : d.officers[offIdx].name = val;
-    else d[prop] = val;
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
 window.autoFixDeck = oIdx => {
@@ -696,117 +539,3 @@ window.autoFixDeck = oIdx => {
     renderDeckBuilder();
     alert(`[AI 유연 교정 완료] 상위 부대(1·2군)가 사용 중인 전법을 완벽히 배제하고, 차선책(타협의 현실)을 계산하여 1순위로 채워 넣었습니다.`);
 };
-
-window.moveDeckAction = (cIdx, dir) => {
-    const tIdx = cIdx + dir; if (tIdx < 0 || tIdx >= dynamicPresetDecks.length) return;
-    [dynamicPresetDecks[cIdx], dynamicPresetDecks[tIdx]] = [dynamicPresetDecks[tIdx], dynamicPresetDecks[cIdx]];
-    dynamicPresetDecks.forEach((d, i) => { d.originIdx = i; d.title = `${i + 1}군`; });
-    localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
-};
-
-function renderDeckBuilder() {
-    const container = document.getElementById('deck-container'); if (!container) return;
-    try {
-        container.style.display = 'block'; container.innerHTML = '';
-        container.insertAdjacentHTML('beforeend', `
-            <div style="display:flex; justify-content:flex-end; margin-bottom: 12px; margin-right: 4px;">
-                <button onclick="openGuideModal()" style="background:#3b82f6; color:#fff; border:none; padding:6px 14px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💡 사용 가이드 보기</button>
-            </div>
-        `);
-        
-        const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
-        const hMap = {}, tMap = {};
-        const heroesList = Array.isArray(saved.heroes) ? saved.heroes : Object.values(saved.heroes || {});
-        const tacticsList = Array.isArray(saved.tactics) ? saved.tactics : Object.values(saved.tactics || {});
-        
-        heroesList.forEach(x => { if(x && x.name) hMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
-        tacticsList.forEach(x => { if(x && x.name) tMap[cStr(x.name)] = { isOwned: !!x.isOwned }; });
-
-        let accumulatedHigherTacs = new Set();
-        dynamicPresetDecks.sort((a,b) => (a.originIdx||0) - (b.originIdx||0)).forEach((deck, aIdx) => {
-            const curNames = deck.officers.map(o => o?.name?.trim().replace(/\s+/g,'')).filter(Boolean);
-            const match = getBestMetaMatch(curNames);
-            
-            const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { metaDeckUnitTypeMap: {} };
-            let dType = deck.unitType || (match?.bestMeta ? metaData.metaDeckUnitTypeMap[match.bestMeta.id] : "창병");
-
-            const offHtml = deck.officers.map((off, oIdx) => {
-                const hName = off?.name?.trim() || "", cName = cStr(hName);
-                const dg = cName ? window.getOfficerDogamData(hName) : null;
-                const isHeroOwned = cName ? !!hMap[cName]?.isOwned : false;
-                const heroCssClass = isHeroOwned ? 'owned' : 'missing';
-                const heroSpanColor = isHeroOwned ? 'var(--text-main)' : '#fca5a5';
-                
-                let tRows = `<div class="tactic-row ${heroCssClass}" style="border-left:3px solid var(--border-accent);"><span style="color:${heroSpanColor}; font-weight:bold;">⭐ ${dg?.uniqueTactic||'고유 전법'}</span></div>`;
-                
-                (off.chosenTactics||[]).forEach((t, sIdx) => {
-                    const cT = cStr(t);
-                    const isOwn = cT ? !!tMap[cT]?.isOwned : false;
-                    const cssClass = cT ? (isOwn ? 'owned' : 'missing') : 'missing';
-                    tRows += `<div class="tactic-row ${cssClass}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${window.getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
-                });
-
-                const eq = cName ? getOfficerEquipment(hName, dType) : null;
-                const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
-
-                return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${window.getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
-            }).join('');
-
-            let statsHtmlInner = "";
-            deck.officers.forEach((off, oIdx) => {
-                const stats = aggregateIntegratedStats(deck, oIdx);
-                statsHtmlInner += `<div>${buildIntegratedStatsHtml(stats)}</div>`;
-            });
-
-            const hawkData = window.getHawkDataFromGuide(match?.bestMeta?.id, curNames);
-            const hawkRec = hawkData.recommendation;
-            const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
-
-            const fb = generateStructuredFeedback(deck, hMap, tMap, Array.from(accumulatedHigherTacs));
-            const perfectionMsg = evaluateDeckPerfection(deck, match?.bestMeta?.id, hMap, tMap);
-            let fbH = fb.logs.map(l=>`<div class="feedback-item ${l.type}">${l.text}</div>`).join('');
-
-            deck.officers.forEach(o => (o?.chosenTactics || []).forEach(t => { if (t && cStr(t)) accumulatedHigherTacs.add(cStr(t)); }));
-            
-            const bondFeedback = `<div class="feedback-item info" style="margin-top:6px;">🤝 <strong>활성화 인연:</strong> <span style="color:var(--text-highlight);">${calculateActivatedBond(deck.officers)}</span></div>`;
-
-            container.insertAdjacentHTML('beforeend', `<div class="deck-card" style="background-color:var(--bg-panel);border:1px solid var(--border-main);border-radius:8px;padding:16px;margin-bottom:16px; transition: background-color 0.3s, border-color 0.3s;">
-                <div class="deck-header-wrapper">
-                    <div class="deck-header-controls">
-                        <button onclick="moveDeckAction(${aIdx},-1)" style="visibility:${aIdx>0?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▲</button>
-                        <button onclick="moveDeckAction(${aIdx},1)" style="visibility:${aIdx<dynamicPresetDecks.length-1?'visible':'hidden'}; background:var(--bg-inner); color:var(--text-main); border:1px solid var(--border-main); border-radius:3px; cursor:pointer; padding:2px 8px; font-size:12px;">▼</button>
-                        <span contenteditable="true" style="color:var(--text-main);font-weight:bold;font-size:18px;" onblur="updateDeckState(${deck.originIdx},'title',this.innerText.replace(/\\[추천도:.*?\\]/g,'').trim()||'${deck.title}')">${deck.title}</span>
-                        
-                        <select onchange="updateDeckState(${deck.originIdx},'formation',this.value)" style="margin-left:8px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#38bdf8; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
-                            ${Object.keys(FORMATIONS).map(f => `<option value="${f}" ${deck.formation===f?'selected':''}>${f}</option>`).join('')}
-                        </select>
-                        <select onchange="updateDeckState(${deck.originIdx},'unitType',this.value)" style="margin-left:4px; width:auto; padding:2px 6px; font-weight:bold; background:var(--bg-inner); color:#f59e0b; border:1px solid var(--border-main); border-radius:4px; font-size:12px; cursor:pointer;">
-                            <option value="">병종 자동 판별</option>
-                            ${['창병','기병','궁병','방패병'].map(u => `<option value="${u}" ${deck.unitType===u?'selected':''}>${u}</option>`).join('')}
-                        </select>
-                        
-                        <span style="color:var(--text-highlight);font-size:13px;margin-left:8px;">[추천도: ${calculateStrictDeckScore(deck)}점]</span>
-                    </div>
-                    <div class="deck-header-actions">
-                        <button onclick="autoFixDeck(${deck.originIdx})" style="background:#8b5cf6;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">✨ AI 교정</button> 
-                        <button onclick="updateDeckState(${deck.originIdx},'reset')" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">초기화</button>
-                    </div>
-                </div>
-                <div class="grid-layout">${offHtml}</div>
-                <div class="grid-layout" style="margin-top:6px;">${statsHtmlInner}</div>
-                <div style="margin-top:12px;">${hawkHtml}${fbH}${bondFeedback}${perfectionMsg}</div>
-            </div>`);
-        });
-    } catch(e) { container.innerHTML = `<div style="color:red;padding:20px;">렌더링 에러: ${e.message}</div>`; }
-}
-
-if (!window.isOsiHooked) {
-    var osi = localStorage.setItem;
-    localStorage.setItem = function(k,v) { osi.apply(this,arguments); window.dispatchEvent(new CustomEvent('local-storage-update',{detail:{key:k}})); };
-    window.isOsiHooked = true;
-}
-
-window.addEventListener('local-storage-update', e => { if(e.detail.key==='samguk_hobby_data') renderDeckBuilder(); });
-window.addEventListener('storage', e => { if(e.key==='samguk_hobby_data') renderDeckBuilder(); });
-
-document.addEventListener('DOMContentLoaded', () => { injectCustomUIStyles(); initGuideModal(); loadDeckTextData(); renderDeckBuilder(); });
