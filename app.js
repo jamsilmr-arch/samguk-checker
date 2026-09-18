@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신무장 '견희' 데이터 주입 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신전법 '포전인옥', '불노자위' 추가 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -16,7 +16,6 @@ var heroList = [
     { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
     { id: 'h_heojeo', name: '허저', group: 'wei', isOwned: false, star: 0, transcend: false },
-    // 🚨 견희 데이터 추가 🚨
     { id: 'h_gyeonhui', name: '견희', group: 'wei', isOwned: false, star: 0, transcend: false },
     
     { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
@@ -146,7 +145,10 @@ var tacticList = [
     { id: 't_hujeok', name: '후적박발', group: 'tactic', isOwned: false, star: 0 }, 
     { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 }
+    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 },
+    // 🚨 신규 전법 데이터 추가 🚨
+    { id: 't_pojeon', name: '포전인옥', group: 'tactic', isOwned: false, star: 0 },
+    { id: 't_bulno', name: '불노자위', group: 'tactic', isOwned: false, star: 0 }
 ];
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
