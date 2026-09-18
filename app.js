@@ -1,4 +1,4 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (신전법 '포전인옥', '불노자위' 추가 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (가나다순 자동 정렬 알고리즘 적용 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
 var heroList = [
@@ -146,10 +146,14 @@ var tacticList = [
     { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 },
-    // 🚨 신규 전법 데이터 추가 🚨
     { id: 't_pojeon', name: '포전인옥', group: 'tactic', isOwned: false, star: 0 },
     { id: 't_bulno', name: '불노자위', group: 'tactic', isOwned: false, star: 0 }
 ];
+
+// [추가됨] 무장 및 전법 리스트 가나다순(알파벳/한글) 자동 정렬 로직
+heroList.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+tacticList.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+// [추가됨 끝]
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -273,10 +277,12 @@ function renderButtons() {
     const heroGroups = { wei: 'hero-container-wei', shu: 'hero-container-shu', wu: 'hero-container-wu', qun: 'hero-container-qun' };
     Object.entries(heroGroups).forEach(([group, containerId]) => {
         const el = document.getElementById(containerId);
+        // [수정됨] 무장 그룹 내부에서도 가나다 순으로 자동 필터링 렌더링 적용 완료
         if (el) el.innerHTML = heroList.filter(h => h.group === group).map(h => buildCardHtml(h, true)).join('');
     });
 
     const tacticEl = document.getElementById('tactic-container');
+    // [수정됨] 전법 리스트 전체 가나다 순 렌더링 적용 완료
     if (tacticEl) tacticEl.innerHTML = tacticList.map(t => buildCardHtml(t, false)).join('');
 }
 
