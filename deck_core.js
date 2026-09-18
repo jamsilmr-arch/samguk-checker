@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (ReferenceError 크래시 해결 및 클린 렌더링 복구 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 주혼/전투매 강제 교정 및 유저 맞춤형 기형 세팅 경고 AI 주입 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -29,8 +29,22 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
+var FB_EQUIP_OVERRIDES = {
+    "견희": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 부여", attr2: "창병 피해 감소", attr3: "감림" } },
+    "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
+    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
+    // 🚨 사마의 장신구 주혼 응변(평타 버프) -> 모산(모략 폭딜) 영구 락온 강제 교정 완료
+    "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "모산" } },
+    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
+    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
+    "손권": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "궁병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "궁병 피해 감소", attr3: "천우" } },
+    "육항": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "궁병 배반, 공심 상승", attr3: "응변" } }
+};
+
 var FB_EQUIP_MAP = new Proxy({}, {
     get: (_, name) => {
+        if (FB_EQUIP_OVERRIDES[name]) return FB_EQUIP_OVERRIDES[name];
         const meta = FB_OFF_META[name] || ["","방패병","qun","PC"];
         const p = EQ_PRESETS[meta[3] || "PC"], u = meta[1].split('/')[0];
         return {
@@ -83,13 +97,38 @@ var internalTacticStatMap = {
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
+
 var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
-var metaHawkRecommendationMap = new Proxy({}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
+var metaHawkRecommendationMap = new Proxy({
+    "new_meta_wei_spear":{name:"창림-질풍",skill:"허저 능동 전법 폭딜 60% 펌핑 및 피해 경감"},
+    "absolute_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank1_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 무한 유지력 및 철갑 탱킹"},
+    "rank2_wei_sima_hujuk":{name:"창림-질풍",skill:"사마의 후적박발 액티브 60% 폭딜 펌핑"},
+    
+    "rank1_shu_macho":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
+    "rank1_gun_jang":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
+    "rank1_wei_heo":{name:"열공-전광",skill:"허저 통솔 강탈 후 연격 물리 폭딜"},
+    "rank2_gun_yeopo":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"},
+    "rank2_shu_macho_simgu":{name:"열공-전광",skill:"위연 도발 보호 아래 마초 확산 폭딜"},
+    "rank3_shu_macho":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"},
+    "rank3_gun_jang_simgu":{name:"삭풍-성모",skill:"심구고루 좌자 방어망 및 장녕 후적박발 지원"},
+    "rank3_wei_sima_gu":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank4_shu_seo":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"},
+    "rank4_wu_son":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"},
+    "rank4_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
+    "rank6_gun_jwa":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
+    "rank6_wei_ak":{name:"열공-여천",skill:"조조(제왕) 도발 탱킹 및 장료/악진 암살"},
+    "rank6_wei_jo":{name:"결운-호생",skill:"사마의 요사여신 모략 폭딜 및 가후 생존"},
+    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"}
+}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
+    // 🚨 사마의 전투매 결운-호생 -> 창림-맹우 영구 락온 강제 교정 완료
+    if (names.includes("사마의")) return { recommendation: {name:"창림-맹우", skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화"} } };
+    
     if (names.includes("강유") && names.includes("법정")) return { recommendation: {name:"삭풍-설조", skill:"강유 예열을 위한 버퍼진 극강 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("사마의")) return { recommendation: {name:"결운-호생", skill:"사마의 모략 폭딜 및 전열 호위"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
     if (names.includes("마초")) return { recommendation: {name:"열공-전광", skill:"마초 반객위주 확산 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 추격 전법 피해 +15%"} } };
     if (names.includes("장녕")) return { recommendation: {name:"삭풍-성모", skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
     if (names.includes("여포") || names.includes("허저")) return { recommendation: {name:"결운-호생", skill:"무력 폭딜 연타 및 아군 견고화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 파갑 +10%"}, attr3:{rank1:"[40Lv 특성] 일반 공격 시 대상 혼란"} } };
@@ -98,7 +137,9 @@ window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     if (names.includes("육손") || names.includes("육항") || names.includes("손권")) return { recommendation: {name:"능소-진시", skill:"모략 치명타 폭딜 및 방벽 강화"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 치유 효과 부여 +10%"}, attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제"} } };
     if (names.includes("공손찬") || names.includes("초선")) return { recommendation: {name:"열공-전광", skill:"속도 버프 및 무용 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 속도 +20"}, attr2:{rank1:"[30Lv] 무용 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여"} } };
     
-    return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: { attr1:{rank1:"[20Lv] 속도/모략 보정"}, attr2:{rank1:"[30Lv] 전투 속성 보정"}, attr3:{rank1:"[40Lv] 행동 시 디버프 해제"} } };
+    const rec = metaHawkRecommendationMap[metaId];
+    if (rec && rec.name !== "범용 전투매") return { recommendation: rec, attributes: defaultHawkAttr };
+    return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: defaultHawkAttr };
 };
 
 window.getOfficerDogamData = function(officerName) {
@@ -363,9 +404,11 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
+// 🚨 유저 맞춤형 팩트 폭격 피드백 엔진 주입
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
+    const cForm = cStr(deck.formation);
     const match = getBestMetaMatch(curNames);
     const isCustom = !match || match.maxScore < 10000;
 
@@ -382,6 +425,24 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         }
     }
 
+    // 🚨 특정 덱 0티어 락온 성공 피드백 강제 주입
+    if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
+        fb.logs.push({ type: 'success', text: `✨ <strong>[1군 정석 완성]</strong> 진형(추형진)과 전법 배분은 드디어 1군 정답지에 도달했습니다. 엔진 차원에서 사마의 주혼(모산)과 전투매(창림-맹우)를 영구 락온했습니다.` });
+    }
+    if (curNames.includes("유비(제왕)") && curNames.includes("법정") && curNames.includes("강유") && cForm === "추형진") {
+        fb.logs.push({ type: 'success', text: `✨ <strong>[합격점: 2군 정석]</strong> 이 덱은 완벽합니다. 추형진 전/후열 배치, 장비 주혼, 삭풍-설조 매 세팅까지 흠잡을 데 없는 0티어 정석입니다.` });
+    }
+
+    // 🚨 구행진 전열 함정 경고 주입
+    if (cForm === "구행진") {
+        const front1 = cStr(deck.officers[0]?.name);
+        const front2 = cStr(deck.officers[2]?.name);
+        const squishies = ["주유", "소교", "대교", "육손", "곽가", "가후", "장녕", "채문희"];
+        if (squishies.includes(front1) || squishies.includes(front2)) {
+            fb.logs.push({ type: 'warning', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
+        }
+    }
+
     const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean);
     const forbiddenTacs = [...new Set([...allEquipTacs, ...higherTierUsedTacs.map(t => cStr(t))])];
     const recommendedTacs = new Set();
@@ -394,6 +455,10 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
             return;
         }
 
+        const role = FB_OFF_META[cleanHName]?.[3] || "";
+        const isPhysical = role === 'PC' || role === 'PCm' || role === 'TC';
+        const magicTacs = ["기문둔갑", "낙정하석"];
+
         const isHeroOwned = !!heroDataMap[cleanHName]?.isOwned;
         if (!isHeroOwned && Object.keys(heroDataMap).length > 0) {
             fb.logs.push({ type: 'warning', text: `[${hName}] 미보유 상태입니다.` });
@@ -405,6 +470,15 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         (off.chosenTactics || []).forEach((t, i) => {
             const cT = cStr(t);
             const slotNum = i + 2;
+
+            // 🚨 무지성 자동편성 짬통 세팅 경고 주입
+            if (cT && isPhysical && magicTacs.includes(cT)) {
+                fb.logs.push({ type: 'warning', text: `🚨 <strong>[무지성 자동편성]</strong> 순수 물리 딜러인 [${hName}]에게 모략 데미지 전법인 [${t}]이 장착되었습니다. 빈칸 채우기용 쓰레기통(짬통) 세팅입니다.` });
+            }
+            // 🚨 포전인옥 패시브 오용 경고 주입
+            if (cleanHName === "주유" && cT === "포전인옥") {
+                fb.logs.push({ type: 'warning', text: `🚨 <strong>[포전인옥 치명적 오용]</strong> 주유의 고유기 '봉화연천'은 패시브 전법이라 포전인옥의 액티브 발동률 증가 버프가 허공으로 증발합니다. 효율 0%입니다.` });
+            }
 
             if (!cT) {
                 if (!isCustom && targetMetaTacs[i]) {
@@ -538,6 +612,7 @@ var injectCustomUIStyles = () => {
         .integrated-stats-box { margin-top: 6px; padding: 8px; border-radius: 4px; background-color: var(--bg-inner); border: 1px solid var(--border-main); font-size: 11px; transition: background-color 0.3s, border-color 0.3s; }
         .unit-badge { display: inline-block; background-color: rgba(245, 158, 11, 0.15); color: var(--text-highlight); font-size: 10px; padding: 3px 6px; border-radius: 4px; margin: 4px 0; }
         .feedback-item.success { color: var(--success-text); } .feedback-item.warning { color: var(--text-highlight); } .feedback-item.info { color: var(--text-muted); }
+        .feedback-item.error { color: #ef4444; }
         #tactic-popup-modal { display: none; position: absolute; z-index: 9999; background: var(--bg-panel); border: 1px solid var(--border-main); padding: 12px; border-radius: 6px; width: 280px; color: var(--text-main); font-size: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .tactic-row { padding: 6px 12px; border-radius: 4px; margin-bottom: 4px; transition: all 0.2s; cursor: default; }
         .tactic-row select { width: 80%; margin: 0 auto; display: block; }
