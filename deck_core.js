@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (사마의 주혼/전투매 강제 교정 및 유저 맞춤형 기형 세팅 경고 AI 주입 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (가후 투구 2차 속성 힐량 교정 및 사마의 주혼 최적화 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -34,10 +34,10 @@ var FB_EQUIP_OVERRIDES = {
     "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
     "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
     "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
-    // 🚨 사마의 장신구 주혼 응변(평타 버프) -> 모산(모략 폭딜) 영구 락온 강제 교정 완료
     "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "모산" } },
     "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
-    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 가함", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
+    // 🚨 가후 투구 2차 속성 (피해 가함 -> 치유 효과 상승) 락온 강제 교정 완료
+    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
     "손권": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "궁병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "궁병 피해 감소", attr3: "천우" } },
     "육항": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "궁병 배반, 공심 상승", attr3: "응변" } }
 };
@@ -97,7 +97,6 @@ var internalTacticStatMap = {
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-
 var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
 var metaHawkRecommendationMap = new Proxy({
@@ -125,7 +124,6 @@ var metaHawkRecommendationMap = new Proxy({
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
-    // 🚨 사마의 전투매 결운-호생 -> 창림-맹우 영구 락온 강제 교정 완료
     if (names.includes("사마의")) return { recommendation: {name:"창림-맹우", skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화"} } };
     
     if (names.includes("강유") && names.includes("법정")) return { recommendation: {name:"삭풍-설조", skill:"강유 예열을 위한 버퍼진 극강 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
@@ -404,7 +402,6 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-// 🚨 유저 맞춤형 팩트 폭격 피드백 엔진 주입
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
@@ -425,7 +422,6 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         }
     }
 
-    // 🚨 특정 덱 0티어 락온 성공 피드백 강제 주입
     if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[1군 정석 완성]</strong> 진형(추형진)과 전법 배분은 드디어 1군 정답지에 도달했습니다. 엔진 차원에서 사마의 주혼(모산)과 전투매(창림-맹우)를 영구 락온했습니다.` });
     }
@@ -433,13 +429,12 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         fb.logs.push({ type: 'success', text: `✨ <strong>[합격점: 2군 정석]</strong> 이 덱은 완벽합니다. 추형진 전/후열 배치, 장비 주혼, 삭풍-설조 매 세팅까지 흠잡을 데 없는 0티어 정석입니다.` });
     }
 
-    // 🚨 구행진 전열 함정 경고 주입
     if (cForm === "구행진") {
         const front1 = cStr(deck.officers[0]?.name);
         const front2 = cStr(deck.officers[2]?.name);
         const squishies = ["주유", "소교", "대교", "육손", "곽가", "가후", "장녕", "채문희"];
         if (squishies.includes(front1) || squishies.includes(front2)) {
-            fb.logs.push({ type: 'warning', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
+            fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
         }
     }
 
@@ -471,13 +466,11 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
             const cT = cStr(t);
             const slotNum = i + 2;
 
-            // 🚨 무지성 자동편성 짬통 세팅 경고 주입
             if (cT && isPhysical && magicTacs.includes(cT)) {
-                fb.logs.push({ type: 'warning', text: `🚨 <strong>[무지성 자동편성]</strong> 순수 물리 딜러인 [${hName}]에게 모략 데미지 전법인 [${t}]이 장착되었습니다. 빈칸 채우기용 쓰레기통(짬통) 세팅입니다.` });
+                fb.logs.push({ type: 'error', text: `🚨 <strong>[무지성 자동편성]</strong> 순수 물리 딜러인 [${hName}]에게 모략 데미지 전법인 [${t}]이 장착되었습니다. 빈칸 채우기용 쓰레기통(짬통) 세팅입니다.` });
             }
-            // 🚨 포전인옥 패시브 오용 경고 주입
             if (cleanHName === "주유" && cT === "포전인옥") {
-                fb.logs.push({ type: 'warning', text: `🚨 <strong>[포전인옥 치명적 오용]</strong> 주유의 고유기 '봉화연천'은 패시브 전법이라 포전인옥의 액티브 발동률 증가 버프가 허공으로 증발합니다. 효율 0%입니다.` });
+                fb.logs.push({ type: 'error', text: `🚨 <strong>[포전인옥 치명적 오용]</strong> 주유의 고유기 '봉화연천'은 패시브 전법이라 포전인옥의 액티브 발동률 증가 버프가 허공으로 증발합니다. 효율 0%입니다.` });
             }
 
             if (!cT) {
