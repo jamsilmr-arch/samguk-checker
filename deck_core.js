@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (데이터 무손실 압축 및 정크 보일러플레이트 코드 제거 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (전투매 매핑 충돌 버그 해결 및 AI 로직 내부 캡슐화 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -29,7 +29,6 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 무장별 장비 세팅 배열 매핑으로 데이터 압축 정리
 const rawEqOverrides = [
     ["견희", "연함규|피해 감소|창병 치유 효과 상승|원촉", "청등갑|피해 감소|창병 피해 감소|비호", "사남패|치유 효과 부여|창병 피해 감소|감림"],
     ["법정", "진현관|피해 감소|방패병 피해 감소|신속", "명재복|피해 감소|방패병 치유 효과 상승|천안", "박산로|치유 효과 받음|방패병 피해 감소|천우"],
@@ -108,7 +107,6 @@ var internalTacticStatMap = {
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
-// 🚨 전투매 랭커 추천 데이터 맵 압축 배열화
 const rawHawkMeta = [
     ["new_meta_wei_spear", "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%|통솔 +10%|속도 +20", "파갑 +10%|무용 피해 가함 +10%|연격률 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|일반 공격 시 대상 혼란|첫 턴 선공 부여"],
     ["absolute_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
@@ -146,14 +144,13 @@ rawHawkMeta.forEach(r => {
 metaHawkRandomAttributesMap = new Proxy(metaHawkRandomAttributesMap, { get: (target, prop) => target[prop] || defaultHawkAttr });
 metaHawkRecommendationMap = new Proxy(metaHawkRecommendationMap, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
-// 🚨 무장별 강제 락온 매핑 데이터 압축 배열화
 const manualHawkRules = [
     [["사마의"], "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존", "모략 +12%", "모략 피해 가함 +10%", "아군 전체에게 [축예] 부여 확정화"],
     [["강유", "법정"], "삭풍-설조", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
     [["마초"], "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
     [["장녕"], "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
     [["여포"], "결운-호생", "무력 폭딜 연타 및 아군 견고화", "무용 +12%", "파갑 +10%", "일반 공격 시 대상 혼란"],
-    [["허저"], "결운-호생", "무력 폭딜 연타 및 아군 견고화", "무용 +12%", "파갑 +10%", "일반 공격 시 대상 혼란"],
+    [["허저"], "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%", "파갑 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승"],
     [["강유"], "열공-여천", "강유의 흡혈 및 피해 감소 생존력 강화", "무용 +12%", "모략 피해 가함 +10%", "피해 가한 후 병력 10% 흡혈"],
     [["장료"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
     [["악진"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
@@ -164,9 +161,9 @@ const manualHawkRules = [
     [["초선"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"]
 ];
 
-window.getHawkDataFromGuide = function(metaId, officersArray = []) {
+// 🚨 네임스페이스 충돌 방지를 위한 내부 캡슐화 헬퍼 (guide.js 오버라이드 방어)
+const getEngineHawkData = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
-    
     for (let rule of manualHawkRules) {
         if (rule[0].every(n => names.includes(n))) {
             return {
@@ -179,11 +176,11 @@ window.getHawkDataFromGuide = function(metaId, officersArray = []) {
             };
         }
     }
-    
     const rec = metaHawkRecommendationMap[metaId];
     if (rec && rec.name !== "범용 전투매") return { recommendation: rec, attributes: metaHawkRandomAttributesMap[metaId] };
     return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: defaultHawkAttr };
 };
+window.getHawkDataFromGuide = getEngineHawkData;
 
 window.getOfficerDogamData = function(officerName) {
     if (window.getOfficerDataFromDogam) { 
@@ -290,7 +287,7 @@ function aggregateIntegratedStats(deck, officerIndex) {
         return new Set(heroesInDeck).size >= r.req;
     }).forEach(bond => { if (bond.heroes.includes(hName)) parseAndAdd(bond.effect); });
 
-    const hawkData = window.getHawkDataFromGuide(matchMeta?.bestMeta?.id, curNames);
+    const hawkData = getEngineHawkData(matchMeta?.bestMeta?.id, curNames);
     const hA = hawkData.attributes;
     if (hA) { parseAndAdd(hA.attr1.rank1); parseAndAdd(hA.attr2.rank1); parseAndAdd(hA.attr3.rank1); }
 
@@ -846,7 +843,7 @@ function renderDeckBuilder() {
                 statsHtmlInner += `<div>${buildIntegratedStatsHtml(stats)}</div>`;
             });
 
-            const hawkData = window.getHawkDataFromGuide(match?.bestMeta?.id, curNames);
+            const hawkData = getEngineHawkData(match?.bestMeta?.id, curNames);
             const hawkRec = hawkData.recommendation;
             const hawkHtml = `<div class="hawk-recommend-box">🦅 <strong>추천 전투매: <span style="color:var(--text-highlight);">${hawkRec.name}</span></strong><br>💡 <span style="color:var(--text-muted);">${hawkRec.skill}</span></div>`;
 
