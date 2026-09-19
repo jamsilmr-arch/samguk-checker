@@ -1,157 +1,19 @@
-// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (누락된 신전법 '포전인옥', '불노자위' 복구 및 가나다순 자동 정렬 완료)
+// [시스템 분석] app.js 인벤토리 초월 연동 및 자동 백업 엔진 (데이터 무손실 압축 및 정크 보일러플레이트 코드 제거 완료)
 console.log("[시스템 분석] app.js 구글 계정 동기화 및 로컬 파일 백업 엔진 기동");
 
+var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+
+// 🚨 데이터 무손실 압축 매핑 로직 적용 (중복 프로퍼티 제거)
 var heroList = [
-    { id: 'h_gahu', name: '가후', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_gwa_ga', name: '곽가', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_samy', name: '사마의', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_sunuk', name: '순욱', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_akjin', name: '악진', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jeonwi', name: '전위', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jeonguk', name: '정욱', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jojo_sp', name: '조조(제왕)', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jojo', name: '조조', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jangryo', name: '장료', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_janghap', name: '장합', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hahoudon', name: '하후돈', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hahouyeon', name: '하후연', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_heojeo', name: '허저', group: 'wei', isOwned: false, star: 0, transcend: false },
-    { id: 'h_gyeonhui', name: '견희', group: 'wei', isOwned: false, star: 0, transcend: false },
-    
-    { id: 'h_gwanu', name: '관우', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_gangyu', name: '강유', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_madae', name: '마대', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_macho', name: '마초', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_beopjeong', name: '법정', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_seoseo', name: '서서', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_samaga', name: '사마가', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_wuyeon', name: '위연', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yubi', name: '유비', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yubi_sp', name: '유비(제왕)', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jangbi', name: '장비', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jegaryang', name: '제갈량', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_joun', name: '조운', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwangchung', name: '황충', group: 'shu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwangworyeong', name: '황월영', group: 'shu', isOwned: false, star: 0, transcend: false },
-    
-    { id: 'h_daegyo', name: '대교', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_nosuk', name: '노숙', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_sogyo', name: '소교', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_songyeon', name: '손견', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_songwon', name: '손권', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_sonsanghyang', name: '손상향', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_sonchaek', name: '손책', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_songwon_sp', name: '손권(제왕)', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yeomong', name: '여몽', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yukson', name: '육손', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yukhang', name: '육항', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_juyu', name: '주유', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jutae', name: '주태', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jeongbo', name: '정보', group: 'wu', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwanggae', name: '황개', group: 'wu', isOwned: false, star: 0, transcend: false },
-    
-    { id: 'h_gongsonchan', name: '공손찬', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_dongtak', name: '동탁', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_anryang', name: '안량', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_yeopo', name: '여포', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_ugil', name: '우길', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_wonso', name: '원소', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_janggak', name: '장각', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jangnyeong', name: '장녕', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jangbo', name: '장보', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_jwaja', name: '좌자', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_chaemunhui', name: '채문희', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_choseon', name: '초선', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwata', name: '화타', group: 'qun', isOwned: false, star: 0, transcend: false },
-    { id: 'h_hwangbosung', name: '황보숭', group: 'qun', isOwned: false, star: 0, transcend: false }
-];
+    ...[['h_gahu','가후'],['h_gwa_ga','곽가'],['h_samy','사마의'],['h_sunuk','순욱'],['h_akjin','악진'],['h_jeonwi','전위'],['h_jeonguk','정욱'],['h_jojo_sp','조조(제왕)'],['h_jojo','조조'],['h_jangryo','장료'],['h_janghap','장합'],['h_hahoudon','하후돈'],['h_hahouyeon','하후연'],['h_heojeo','허저'],['h_gyeonhui','견희']].map(h => ({id:h[0], name:h[1], group:'wei'})),
+    ...[['h_gwanu','관우'],['h_gangyu','강유'],['h_madae','마대'],['h_macho','마초'],['h_beopjeong','법정'],['h_seoseo','서서'],['h_samaga','사마가'],['h_wuyeon','위연'],['h_yubi','유비'],['h_yubi_sp','유비(제왕)'],['h_jangbi','장비'],['h_jegaryang','제갈량'],['h_joun','조운'],['h_hwangchung','황충'],['h_hwangworyeong','황월영']].map(h => ({id:h[0], name:h[1], group:'shu'})),
+    ...[['h_daegyo','대교'],['h_nosuk','노숙'],['h_sogyo','소교'],['h_songyeon','손견'],['h_songwon','손권'],['h_sonsanghyang','손상향'],['h_sonchaek','손책'],['h_songwon_sp','손권(제왕)'],['h_yeomong','여몽'],['h_yukson','육손'],['h_yukhang','육항'],['h_juyu','주유'],['h_jutae','주태'],['h_jeongbo','정보'],['h_hwanggae','황개']].map(h => ({id:h[0], name:h[1], group:'wu'})),
+    ...[['h_gongsonchan','공손찬'],['h_dongtak','동탁'],['h_anryang','안량'],['h_yeopo','여포'],['h_ugil','우길'],['h_wonso','원소'],['h_janggak','장각'],['h_jangnyeong','장녕'],['h_jangbo','장보'],['h_jwaja','좌자'],['h_chaemunhui','채문희'],['h_choseon','초선'],['h_hwata','화타'],['h_hwangbosung','황보숭']].map(h => ({id:h[0], name:h[1], group:'qun'}))
+].map(h => ({...h, isOwned:false, star:0, transcend:false}));
 
 var tacticList = [
-    { id: 't_gandam', name: '간담상조', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gajeong', name: '가정지전', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gajeong_t', name: '강유겸제', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gyeonbul', name: '견불가최', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gyeonjin', name: '견진연봉', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gyeokan', name: '격안관화', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gonggi', name: '공기불비', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gwaha', name: '과하탁교', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gyochwi', name: '교취호탈', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geukjeok', name: '극적제승', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geumnang', name: '금낭묘계', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geumjeok', name: '금적금왕', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geumchang', name: '금창신', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_geumcheol', name: '금철교명', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_gimun', name: '기문둔갑', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_nakjeong', name: '낙정하석', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_donggu', name: '동구적개', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_dongjang', name: '동장철벽', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_dongchok', name: '동촉기선', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_manbu', name: '만부막적', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_manjeon', name: '만전제발', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_mancheon', name: '만천과해', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_myeongchal', name: '명찰추호', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_munchi', name: '문치무공', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_miu', name: '미우주무', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_bangaek', name: '반객위주', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_byeongryang', name: '병량촌단', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_budong', name: '부동여산', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_bunseong', name: '분성지계', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_bisa', name: '비사주석', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_samyeon', name: '사면초가', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_sasaeng', name: '사생취의', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_seondeung', name: '선등함진', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_susang', name: '수상개화', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_sunsu', name: '순수견양', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_seungseung', name: '승승장구', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_simgu', name: '심구고루', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_simmo', name: '심모원려', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_anyoung', name: '안영찰채', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_amjeon', name: '암전난방', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yangui', name: '양의화생', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yangcho', name: '양초선행', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yeoja', name: '여자동포', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yosa', name: '요사여신', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yongmaeng', name: '용맹무쌍', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yongwang', name: '용왕직전', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_unju', name: '운주유악', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_wonseong', name: '원성재도', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_wiwi', name: '위위구조', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yubi', name: '유비무환', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_yujwa', name: '유좌유용', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_igan', name: '이간계', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_iahwan', name: '이아환아', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_iil', name: '이일대로', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_itoe', name: '이퇴위진', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_ilgo', name: '일고작기', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_inse', name: '인세이도', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jangsu_j', name: '전위위안', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jegon', name: '제곤부위', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jungjeong', name: '중정기고', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jiin', name: '지인선임', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jintoe', name: '진퇴유도', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jinhwa', name: '진화타겁', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_jilpung', name: '질풍노도', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_cheonri', name: '천리추격', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_cheonsi', name: '천시지리', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_checheon', name: '체천행도', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_chukse', name: '축세대발', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_taecheong', name: '태청단경', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_tojeok', name: '토적격문', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hyeonho', name: '현호제세', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_horyeong', name: '호령삼군', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_horyeong_m', name: '혼수모어', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hongsu', name: '홍수첨향', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hwaso', name: '화소적벽', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hujeok', name: '후적박발', group: 'tactic', isOwned: false, star: 0 }, 
-    { id: 't_hoengso', name: '횡소천군', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_hoengjing', name: '횡징폭렴', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_huyang', name: '휴양생식', group: 'tactic', isOwned: false, star: 0 },
-    // 🚨 누락되었던 신전법 2종 리스트 복구 완료
-    { id: 't_pojeon', name: '포전인옥', group: 'tactic', isOwned: false, star: 0 },
-    { id: 't_bulno', name: '불노자위', group: 'tactic', isOwned: false, star: 0 }
-];
-
-var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
+    ['t_gandam','간담상조'],['t_gajeong','가정지전'],['t_gajeong_t','강유겸제'],['t_gyeonbul','견불가최'],['t_gyeonjin','견진연봉'],['t_gyeokan','격안관화'],['t_gonggi','공기불비'],['t_gwaha','과하탁교'],['t_gyochwi','교취호탈'],['t_geukjeok','극적제승'],['t_geumnang','금낭묘계'],['t_geumjeok','금적금왕'],['t_geumchang','금창신'],['t_geumcheol','금철교명'],['t_gimun','기문둔갑'],['t_nakjeong','낙정하석'],['t_donggu','동구적개'],['t_dongjang','동장철벽'],['t_dongchok','동촉기선'],['t_manbu','만부막적'],['t_manjeon','만전제발'],['t_mancheon','만천과해'],['t_myeongchal','명찰추호'],['t_munchi','문치무공'],['t_miu','미우주무'],['t_bangaek','반객위주'],['t_byeongryang','병량촌단'],['t_budong','부동여산'],['t_bunseong','분성지계'],['t_bisa','비사주석'],['t_samyeon','사면초가'],['t_sasaeng','사생취의'],['t_seondeung','선등함진'],['t_susang','수상개화'],['t_sunsu','순수견양'],['t_seungseung','승승장구'],['t_simgu','심구고루'],['t_simmo','심모원려'],['t_anyoung','안영찰채'],['t_amjeon','암전난방'],['t_yangui','양의화생'],['t_yangcho','양초선행'],['t_yeoja','여자동포'],['t_yosa','요사여신'],['t_yongmaeng','용맹무쌍'],['t_yongwang','용왕직전'],['t_unju','운주유악'],['t_wonseong','원성재도'],['t_wiwi','위위구조'],['t_yubi','유비무환'],['t_yujwa','유좌유용'],['t_igan','이간계'],['t_iahwan','이아환아'],['t_iil','이일대로'],['t_itoe','이퇴위진'],['t_ilgo','일고작기'],['t_inse','인세이도'],['t_jangsu_j','전위위안'],['t_jegon','제곤부위'],['t_jungjeong','중정기고'],['t_jiin','지인선임'],['t_jintoe','진퇴유도'],['t_jinhwa','진화타겁'],['t_jilpung','질풍노도'],['t_cheonri','천리추격'],['t_cheonsi','천시지리'],['t_checheon','체천행도'],['t_chukse','축세대발'],['t_taecheong','태청단경'],['t_tojeok','토적격문'],['t_hyeonho','현호제세'],['t_horyeong','호령삼군'],['t_horyeong_m','혼수모어'],['t_hongsu','홍수첨향'],['t_hwaso','화소적벽'],['t_hujeok','후적박발'],['t_hoengso','횡소천군'],['t_hoengjing','횡징폭렴'],['t_huyang','휴양생식'],['t_pojeon','포전인옥'],['t_bulno','불노자위']
+].map(t => ({ id: t[0], name: t[1], group: 'tactic', isOwned: false, star: 0 }));
 
 var injectAppStyles = () => {
     if (document.getElementById('app-custom-styles')) return;
@@ -197,23 +59,35 @@ var injectBackupUI = () => {
 };
 
 window.exportDataToFile = function() {
-    const data = { heroes: heroList, tactics: tacticList };
-    const dataStr = JSON.stringify(data, null, 2);
+    const dataStr = JSON.stringify({ heroes: heroList, tactics: tacticList }, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     
     const a = document.createElement('a');
     a.href = url;
-    
     const d = new Date();
-    const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}`;
-    a.download = `삼국지왕전_백업_${dateStr}.json`;
+    a.download = `삼국지왕전_백업_${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}.json`;
     
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 };
+
+// 🚨 중복 정크 코드를 제거하기 위한 공통 데이터 병합(Sync) 헬퍼 함수
+function syncListData(sourceArr, targetList, isHero) {
+    const src = Array.isArray(sourceArr) ? sourceArr : Object.values(sourceArr || {});
+    const map = src.reduce((acc, obj) => { if(obj?.name) acc[cStr(obj.name)] = obj; return acc; }, {});
+    
+    targetList.forEach(item => {
+        const sItem = map[cStr(item.name)];
+        if(sItem) {
+            item.isOwned = !!sItem.isOwned;
+            item.star = (sItem.star !== undefined && sItem.star !== null) ? parseInt(sItem.star, 10) : 0;
+            if (isHero) item.transcend = !!sItem.transcend;
+        }
+    });
+}
 
 window.triggerImportData = function() {
     let fileInput = document.getElementById('samguk-file-input');
@@ -233,19 +107,8 @@ window.triggerImportData = function() {
                     const parsed = JSON.parse(event.target.result);
                     if (!parsed.heroes && !parsed.tactics) throw new Error("유효하지 않은 데이터 형식입니다.");
                     
-                    const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
-                    const hMap = heroesSource.reduce((acc, sh) => { if (sh?.name) acc[cStr(sh.name)] = sh; return acc; }, {});
-                    heroList.forEach(h => {
-                        const sh = hMap[cStr(h.name)];
-                        if (sh) { h.isOwned = !!sh.isOwned; h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0; h.transcend = !!sh.transcend; }
-                    });
-                    
-                    const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
-                    const tMap = tacticsSource.reduce((acc, st) => { if (st?.name) acc[cStr(st.name)] = st; return acc; }, {});
-                    tacticList.forEach(t => {
-                        const st = tMap[cStr(t.name)];
-                        if (st) { t.isOwned = !!st.isOwned; t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0; }
-                    });
+                    syncListData(parsed.heroes, heroList, true);
+                    syncListData(parsed.tactics, tacticList, false);
                     
                     window.saveDataToLocalStorage();
                     renderButtons();
@@ -263,7 +126,6 @@ window.triggerImportData = function() {
 };
 
 function renderButtons() {
-    // 🚨 배열을 렌더링 직전에 무조건 가나다순으로 자동 정렬 강제 수행
     heroList.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
     tacticList.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
 
@@ -304,8 +166,7 @@ window.toggleTranscend = function(event, id) {
 };
 
 window.saveDataToLocalStorage = function() {
-    const data = { heroes: heroList, tactics: tacticList };
-    localStorage.setItem('samguk_hobby_data', JSON.stringify(data));
+    localStorage.setItem('samguk_hobby_data', JSON.stringify({ heroes: heroList, tactics: tacticList }));
 };
 
 function loadSavedData() {
@@ -314,19 +175,8 @@ function loadSavedData() {
         if (!saved) return;
         const parsed = JSON.parse(saved);
         
-        const heroesSource = Array.isArray(parsed.heroes) ? parsed.heroes : Object.values(parsed.heroes || {});
-        const hMap = heroesSource.reduce((acc, sh) => { if (sh?.name) acc[cStr(sh.name)] = sh; return acc; }, {});
-        heroList.forEach(h => {
-            const sh = hMap[cStr(h.name)];
-            if (sh) { h.isOwned = !!sh.isOwned; h.star = (sh.star !== undefined && sh.star !== null) ? parseInt(sh.star, 10) : 0; h.transcend = !!sh.transcend; }
-        });
-        
-        const tacticsSource = Array.isArray(parsed.tactics) ? parsed.tactics : Object.values(parsed.tactics || {});
-        const tMap = tacticsSource.reduce((acc, st) => { if (st?.name) acc[cStr(st.name)] = st; return acc; }, {});
-        tacticList.forEach(t => {
-            const st = tMap[cStr(t.name)];
-            if (st) { t.isOwned = !!st.isOwned; t.star = (st.star !== undefined && st.star !== null) ? parseInt(st.star, 10) : 0; }
-        });
+        syncListData(parsed.heroes, heroList, true);
+        syncListData(parsed.tactics, tacticList, false);
     } catch(e) { console.error("[시스템 에러] 인벤토리 복구 필터 우회 가동:", e); }
 }
 
