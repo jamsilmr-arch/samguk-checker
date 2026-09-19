@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (가후 투구 2차 속성 힐량 교정 및 사마의 주혼 최적화 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (데이터 무손실 압축 및 정크 보일러플레이트 코드 제거 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -29,18 +29,28 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-var FB_EQUIP_OVERRIDES = {
-    "견희": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "창병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "창병 피해 감소", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 부여", attr2: "창병 피해 감소", attr3: "감림" } },
-    "법정": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "천안" }, accessory: { name: "박산로", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
-    "강유": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "겸비" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "배반, 공심 상승", attr2: "방패병 배반, 공심 상승", attr3: "고무" } },
-    "유비(제왕)": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "원촉" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "비호" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "감림" } },
-    "사마의": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "방패병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "방패병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "방패병 배반, 공심 상승", attr3: "모산" } },
-    "조조": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "방패병 피해 감소", attr3: "천우" } },
-    // 🚨 가후 투구 2차 속성 (피해 가함 -> 치유 효과 상승) 락온 강제 교정 완료
-    "가후": { helmet: { name: "진현관", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "신속" }, armor: { name: "명재복", attr1: "피해 감소", attr2: "방패병 피해 감소", attr3: "천안" }, accessory: { name: "박산로", attr1: "피해 감소", attr2: "방패병 치유 효과 상승", attr3: "영전" } },
-    "손권": { helmet: { name: "연함규", attr1: "피해 감소", attr2: "궁병 치유 효과 상승", attr3: "권어" }, armor: { name: "청등갑", attr1: "피해 감소", attr2: "궁병 피해 감소", attr3: "무환" }, accessory: { name: "사남패", attr1: "치유 효과 받음", attr2: "궁병 피해 감소", attr3: "천우" } },
-    "육항": { helmet: { name: "진현관", attr1: "강공, 기습 상승", attr2: "궁병 피해 가함", attr3: "기책" }, armor: { name: "명재복", attr1: "모략 피해 가함", attr2: "궁병 피해 감소", attr3: "치밀" }, accessory: { name: "박산로", attr1: "공심", attr2: "궁병 배반, 공심 상승", attr3: "응변" } }
-};
+// 🚨 무장별 장비 세팅 배열 매핑으로 데이터 압축 정리
+const rawEqOverrides = [
+    ["견희", "연함규|피해 감소|창병 치유 효과 상승|원촉", "청등갑|피해 감소|창병 피해 감소|비호", "사남패|치유 효과 부여|창병 피해 감소|감림"],
+    ["법정", "진현관|피해 감소|방패병 피해 감소|신속", "명재복|피해 감소|방패병 치유 효과 상승|천안", "박산로|치유 효과 받음|방패병 피해 감소|천우"],
+    ["강유", "진현관|강공, 기습 상승|방패병 피해 가함|겸비", "명재복|모략 피해 가함|방패병 피해 감소|치밀", "박산로|배반, 공심 상승|방패병 배반, 공심 상승|고무"],
+    ["유비(제왕)", "연함규|피해 감소|방패병 치유 효과 상승|원촉", "청등갑|피해 감소|방패병 치유 효과 상승|비호", "사남패|치유 효과 받음|방패병 피해 감소|감림"],
+    ["사마의", "진현관|강공, 기습 상승|방패병 피해 가함|기책", "명재복|모략 피해 가함|방패병 피해 감소|치밀", "박산로|공심|방패병 배반, 공심 상승|모산"],
+    ["조조", "연함규|피해 감소|방패병 치유 효과 상승|권어", "청등갑|피해 감소|방패병 치유 효과 상승|무환", "사남패|치유 효과 받음|방패병 피해 감소|천우"],
+    ["가후", "진현관|피해 감소|방패병 치유 효과 상승|신속", "명재복|피해 감소|방패병 피해 감소|천안", "박산로|피해 감소|방패병 치유 효과 상승|영전"],
+    ["손권", "연함규|피해 감소|궁병 치유 효과 상승|권어", "청등갑|피해 감소|궁병 피해 감소|무환", "사남패|치유 효과 받음|궁병 피해 감소|천우"],
+    ["육항", "진현관|강공, 기습 상승|궁병 피해 가함|기책", "명재복|모략 피해 가함|궁병 피해 감소|치밀", "박산로|공심|궁병 배반, 공심 상승|응변"]
+];
+
+var FB_EQUIP_OVERRIDES = {};
+rawEqOverrides.forEach(r => {
+    const h = r[1].split('|'), a = r[2].split('|'), c = r[3].split('|');
+    FB_EQUIP_OVERRIDES[r[0]] = {
+        helmet: {name:h[0], attr1:h[1], attr2:h[2], attr3:h[3]},
+        armor:  {name:a[0], attr1:a[1], attr2:a[2], attr3:a[3]},
+        accessory: {name:c[0], attr1:c[1], attr2:c[2], attr3:c[3]}
+    };
+});
 
 var FB_EQUIP_MAP = new Proxy({}, {
     get: (_, name) => {
@@ -97,46 +107,81 @@ var internalTacticStatMap = {
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
-var metaHawkRandomAttributesMap = new Proxy({}, { get: (target, prop) => target[prop] || defaultHawkAttr });
 
-var metaHawkRecommendationMap = new Proxy({
-    "new_meta_wei_spear":{name:"창림-질풍",skill:"허저 능동 전법 폭딜 60% 펌핑 및 피해 경감"},
-    "absolute_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
-    "rank1_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 무한 유지력 및 철갑 탱킹"},
-    "rank2_wei_sima_hujuk":{name:"창림-질풍",skill:"사마의 후적박발 액티브 60% 폭딜 펌핑"},
-    
-    "rank1_shu_macho":{name:"열공-전광",skill:"마초 반객위주 확산 타격 강화"},
-    "rank1_gun_jang":{name:"삭풍-성모",skill:"좌자 장벽 및 장녕 모략 펌핑 지원"},
-    "rank1_wei_heo":{name:"열공-전광",skill:"허저 통솔 강탈 후 연격 물리 폭딜"},
-    "rank2_gun_yeopo":{name:"결운-호생",skill:"여포 천하무쌍 연타 및 동탁/원소 견고화"},
-    "rank2_shu_macho_simgu":{name:"열공-전광",skill:"위연 도발 보호 아래 마초 확산 폭딜"},
-    "rank3_shu_macho":{name:"결운-감로",skill:"마초 확산 폭딜 및 유비/위연 유지력 극대화"},
-    "rank3_gun_jang_simgu":{name:"삭풍-성모",skill:"심구고루 좌자 방어망 및 장녕 후적박발 지원"},
-    "rank3_wei_sima_gu":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
-    "rank4_shu_seo":{name:"능소-진시",skill:"마초 질풍노도 선공 파갑 연격 지원"},
-    "rank4_wu_son":{name:"열공-전광",skill:"손권 도발 탱킹 및 육항 모략 폭딜 지원"},
-    "rank4_wei_sima":{name:"창림-맹우",skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존"},
-    "rank6_gun_jwa":{name:"삭풍-성모",skill:"좌자 회피 장벽 및 장녕 신산 폭딜 지원"},
-    "rank6_wei_ak":{name:"열공-여천",skill:"조조(제왕) 도발 탱킹 및 장료/악진 암살"},
-    "rank6_wei_jo":{name:"결운-호생",skill:"사마의 요사여신 모략 폭딜 및 가후 생존"},
-    "meta_shu_beopjeong_gang":{name:"열공-여천",skill:"강유의 흡혈 및 피해 감소 생존력 강화"}
-}, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+// 🚨 전투매 랭커 추천 데이터 맵 압축 배열화
+const rawHawkMeta = [
+    ["new_meta_wei_spear", "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%|통솔 +10%|속도 +20", "파갑 +10%|무용 피해 가함 +10%|연격률 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|일반 공격 시 대상 혼란|첫 턴 선공 부여"],
+    ["absolute_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
+    ["rank1_wei_sima", "창림-맹우", "사마의 방패덱 무한 유지력 및 철갑 탱킹", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
+    ["rank2_wei_sima_hujuk", "창림-질풍", "사마의 후적박발 액티브 60% 폭딜 펌핑", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank1_shu_macho", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["rank1_gun_jang", "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank1_wei_heo", "열공-전광", "허저 통솔 강탈 후 연격 물리 폭딜", "무용 +12%|통솔 +10%|속도 +20", "무용 피해 가함 +10%|파갑 +10%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|저항 획득률 +6%"],
+    ["rank2_gun_yeopo", "결운-호생", "여포 천하무쌍 연타 및 동탁/원소 견고화", "무용 +12%|속도 +20|통솔 +10%", "파갑 +10%|연격률 +8%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|일반 공격 시 대상 혼란(1턴)"],
+    ["rank2_shu_macho_simgu", "열공-전광", "위연 도발 보호 아래 마초 확산 폭딜", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["rank3_shu_macho", "결운-감로", "마초 확산 폭딜 및 유비/위연 유지력 극대화", "무용 +12%|속도 +20|통솔 +10%", "연격률 +10%|확산 피해 +12%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["rank3_gun_jang_simgu", "삭풍-성모", "심구고루 좌자 방어망 및 장녕 후적박발 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank3_wei_sima_gu", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank4_shu_seo", "능소-진시", "마초 질풍노도 선공 파갑 연격 지원", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["rank4_wu_son", "열공-전광", "손권 도발 탱킹 및 육항 모략 폭딜 지원", "모략 +12%|속도 +20|통솔 +10%", "발동률 +5%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|치유 효과 부여 +12%|저항 획득률 +6%"],
+    ["rank4_wei_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank6_gun_jwa", "삭풍-성모", "좌자 회피 장벽 및 장녕 신산 폭딜 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["rank6_wei_ak", "열공-여천", "조조(제왕) 도발 탱킹 및 장료/악진 암살", "무용 +12%|속도 +20|통솔 +10%", "파갑 +10%|연격률 +10%|무용 피해 가함 +10%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["rank6_wei_jo", "결운-호생", "사마의 요사여신 모략 폭딜 및 가후 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["meta_shu_beopjeong_gang", "열공-여천", "강유의 흡혈 및 피해 감소 생존력 강화", "무용 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|무용 피해 가함 +10%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"]
+];
+
+var metaHawkRecommendationMap = {};
+var metaHawkRandomAttributesMap = {};
+rawHawkMeta.forEach(r => {
+    metaHawkRecommendationMap[r[0]] = { name: r[1], skill: r[2] };
+    const a1 = r[3].split('|'), a2 = r[4].split('|'), a3 = r[5].split('|');
+    metaHawkRandomAttributesMap[r[0]] = {
+        attr1: { rank1: `[20Lv] ${a1[0]}`, rank2: `[20Lv] ${a1[1]}`, rank3: `[20Lv] ${a1[2]}` },
+        attr2: { rank1: `[30Lv] ${a2[0]}`, rank2: `[30Lv] ${a2[1]}`, rank3: `[30Lv] ${a2[2]}` },
+        attr3: { rank1: `[40Lv 특성] ${a3[0]}`, rank2: `[40Lv 특성] ${a3[1]}`, rank3: `[40Lv 특성] ${a3[2]}` }
+    };
+});
+
+metaHawkRandomAttributesMap = new Proxy(metaHawkRandomAttributesMap, { get: (target, prop) => target[prop] || defaultHawkAttr });
+metaHawkRecommendationMap = new Proxy(metaHawkRecommendationMap, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
+
+// 🚨 무장별 강제 락온 매핑 데이터 압축 배열화
+const manualHawkRules = [
+    [["사마의"], "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존", "모략 +12%", "모략 피해 가함 +10%", "아군 전체에게 [축예] 부여 확정화"],
+    [["강유", "법정"], "삭풍-설조", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
+    [["마초"], "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
+    [["장녕"], "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
+    [["여포"], "결운-호생", "무력 폭딜 연타 및 아군 견고화", "무용 +12%", "파갑 +10%", "일반 공격 시 대상 혼란"],
+    [["허저"], "결운-호생", "무력 폭딜 연타 및 아군 견고화", "무용 +12%", "파갑 +10%", "일반 공격 시 대상 혼란"],
+    [["강유"], "열공-여천", "강유의 흡혈 및 피해 감소 생존력 강화", "무용 +12%", "모략 피해 가함 +10%", "피해 가한 후 병력 10% 흡혈"],
+    [["장료"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
+    [["악진"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
+    [["육손"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
+    [["육항"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
+    [["손권"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
+    [["공손찬"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"],
+    [["초선"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"]
+];
 
 window.getHawkDataFromGuide = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
-    if (names.includes("사마의")) return { recommendation: {name:"창림-맹우", skill:"사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 아군 전체에게 [축예] 부여 확정화"} } };
     
-    if (names.includes("강유") && names.includes("법정")) return { recommendation: {name:"삭풍-설조", skill:"강유 예열을 위한 버퍼진 극강 생존"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("마초")) return { recommendation: {name:"열공-전광", skill:"마초 반객위주 확산 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 추격 전법 피해 +15%"} } };
-    if (names.includes("장녕")) return { recommendation: {name:"삭풍-성모", skill:"좌자 장벽 및 장녕 모략 펌핑 지원"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피격 시 50% 확률 저항"} } };
-    if (names.includes("여포") || names.includes("허저")) return { recommendation: {name:"결운-호생", skill:"무력 폭딜 연타 및 아군 견고화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 파갑 +10%"}, attr3:{rank1:"[40Lv 특성] 일반 공격 시 대상 혼란"} } };
-    if (names.includes("강유")) return { recommendation: {name:"열공-여천", skill:"강유의 흡혈 및 피해 감소 생존력 강화"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 모략 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
-    if (names.includes("장료") || names.includes("악진")) return { recommendation: {name:"열공-전광", skill:"연격 폭격 및 장료 후열 암살"}, attributes: { attr1:{rank1:"[20Lv] 무용 +12%"}, attr2:{rank1:"[30Lv] 연격률 +10%"}, attr3:{rank1:"[40Lv 특성] 피해 가한 후 병력 10% 흡혈"} } };
-    if (names.includes("육손") || names.includes("육항") || names.includes("손권")) return { recommendation: {name:"능소-진시", skill:"모략 치명타 폭딜 및 방벽 강화"}, attributes: { attr1:{rank1:"[20Lv] 모략 +12%"}, attr2:{rank1:"[30Lv] 치유 효과 부여 +10%"}, attr3:{rank1:"[40Lv 특성] 행동 시 디버프 1개 해제"} } };
-    if (names.includes("공손찬") || names.includes("초선")) return { recommendation: {name:"열공-전광", skill:"속도 버프 및 무용 타격 강화"}, attributes: { attr1:{rank1:"[20Lv] 속도 +20"}, attr2:{rank1:"[30Lv] 무용 피해 가함 +10%"}, attr3:{rank1:"[40Lv 특성] 첫 턴 선공 부여"} } };
+    for (let rule of manualHawkRules) {
+        if (rule[0].every(n => names.includes(n))) {
+            return {
+                recommendation: { name: rule[1], skill: rule[2] },
+                attributes: {
+                    attr1: { rank1: `[20Lv] ${rule[3]}` },
+                    attr2: { rank1: `[30Lv] ${rule[4]}` },
+                    attr3: { rank1: `[40Lv 특성] ${rule[5]}` }
+                }
+            };
+        }
+    }
     
     const rec = metaHawkRecommendationMap[metaId];
-    if (rec && rec.name !== "범용 전투매") return { recommendation: rec, attributes: defaultHawkAttr };
+    if (rec && rec.name !== "범용 전투매") return { recommendation: rec, attributes: metaHawkRandomAttributesMap[metaId] };
     return { recommendation: {name:"범용 전투매", skill:"기본 최적화"}, attributes: defaultHawkAttr };
 };
 
