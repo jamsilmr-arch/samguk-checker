@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (전투매 매핑 충돌 버그 해결 및 AI 로직 내부 캡슐화 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (마초 0티어 덱 데이터 주입 및 사마의 수상개화 메타 픽스 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -14,10 +14,12 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
+// 🚨 마초 안행진 종결 덱 신규 편입 및 사마의 수상개화 업데이트 완료
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "포전인옥"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]} ] },
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] }
+    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
+    { id: "absolute_macho", priority: 9998, name: "[절대 종결] 마초·위연·서서 안행 창병", concept: "[마초 안행진 확산 폭딜]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "반객위주", "용맹무쌍"]}, {name:"위연", chosenTactics:["실병제위", "동구적개", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] }
 ];
 
 var EQ_PRESETS = {
@@ -86,7 +88,7 @@ var internalBondRules = [
 var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["후적박발", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "수상개화"],
+    "SC": ["수상개화", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "후적박발"],
     "TC": ["불노자위", "토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["불노자위", "포전인옥", "격안관화", "유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["불노자위", "포전인옥", "격안관화", "금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
@@ -110,6 +112,7 @@ var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: 
 const rawHawkMeta = [
     ["new_meta_wei_spear", "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%|통솔 +10%|속도 +20", "파갑 +10%|무용 피해 가함 +10%|연격률 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|일반 공격 시 대상 혼란|첫 턴 선공 부여"],
     ["absolute_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
+    ["absolute_macho", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
     ["rank1_wei_sima", "창림-맹우", "사마의 방패덱 무한 유지력 및 철갑 탱킹", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
     ["rank2_wei_sima_hujuk", "창림-질풍", "사마의 후적박발 액티브 60% 폭딜 펌핑", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
     ["rank1_shu_macho", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
@@ -161,7 +164,6 @@ const manualHawkRules = [
     [["초선"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"]
 ];
 
-// 🚨 네임스페이스 충돌 방지를 위한 내부 캡슐화 헬퍼 (guide.js 오버라이드 방어)
 const getEngineHawkData = function(metaId, officersArray = []) {
     const names = officersArray.map(o => cStr(o?.name || o));
     for (let rule of manualHawkRules) {
@@ -459,16 +461,24 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { systemGuideInsights: {} };
         if (metaData && metaData.systemGuideInsights && metaData.systemGuideInsights[meta.id]) {
             fb.insight = metaData.systemGuideInsights[meta.id];
-        } else if (meta.priority === 9999) {
-            fb.insight = "🚨 [절대 0티어 종결 락온] 타협 없는 최고의 공방 시너지를 구축하는 이론상 0티어 덱입니다.";
+        } else if (meta.priority >= 9998) {
+            fb.insight = "🚨 [절대 종결 락온] 타협 없는 최고의 공방 시너지를 구축하는 이론상 0티어 덱입니다.";
         }
     }
 
     if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[1군 정석 완성]</strong> 진형(추형진)과 전법 배분은 드디어 1군 정답지에 도달했습니다. 엔진 차원에서 사마의 주혼(모산)과 전투매(창림-맹우)를 영구 락온했습니다.` });
+        const simaTacs = deck.officers.find(o => cStr(o.name) === "사마의")?.chosenTactics || [];
+        if (simaTacs.map(cStr).includes("수상개화")) {
+            fb.logs.push({ type: 'success', text: `🔥 <strong>[수상개화 탑재 완료]</strong> 사마의의 능동 딜 사이클이 완벽하게 가속됩니다. 미러전 압살 준비가 끝났습니다.` });
+        }
     }
     if (curNames.includes("유비(제왕)") && curNames.includes("법정") && curNames.includes("강유") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[합격점: 2군 정석]</strong> 이 덱은 완벽합니다. 추형진 전/후열 배치, 장비 주혼, 삭풍-설조 매 세팅까지 흠잡을 데 없는 0티어 정석입니다.` });
+    }
+    // 🚨 마초덱 추가 피드백 로직
+    if (curNames.includes("마초") && curNames.includes("위연") && curNames.includes("서서") && cForm === "안행진") {
+        fb.logs.push({ type: 'success', text: `✨ <strong>[마초덱 정답지 도달]</strong> 안행진 후열 마초 배치를 통해 확산 폭딜 메커니즘이 완벽하게 조립되었습니다.` });
     }
 
     if (cForm === "구행진") {
