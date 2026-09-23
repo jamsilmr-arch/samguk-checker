@@ -1,4 +1,4 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (마초·유비(제왕)·서서 0티어 변형 덱 신규 주입 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (자동 판별 시 가후 등 다중 병종 무장의 장비 텍스트 매핑 오류 수정 완료)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
@@ -14,16 +14,28 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 마초·제유비·서서 0티어 정석 데이터 추가 완료
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "포전인옥"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]} ] },
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
+    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
     { id: "absolute_macho", priority: 9998, name: "[절대 종결] 마초·위연·서서 안행 창병", concept: "[마초 안행진 확산 폭딜]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "반객위주", "용맹무쌍"]}, {name:"위연", chosenTactics:["실병제위", "동구적개", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] },
     { id: "absolute_macho_emp_liu", priority: 9997, name: "[절대 종결] 마초·유비(제왕)·서서 안행 창병", concept: "[마초 폭딜 + 제유비 유지력]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "반객위주", "용맹무쌍"]}, {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] },
     { id: "meta_shu_gwan_gang_yu", priority: 9995, name: "[정석 교정] 관우·강유·유비 추형 창병", concept: "[관우 딜탱 + 강유 지속딜]", formation: "추형진", officers: [ {name:"관우", chosenTactics:["무성", "승승장구", "질풍노도"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "일고작기"]}, {name:"유비", chosenTactics:["인정", "유비무환", "혼수모어"]} ] },
-    { id: "meta_wei_ha_ha_gyeon", priority: 9994, name: "[정석 교정] 하후연·하후돈·견희 안행 기병", concept: "[하후돈 고기방패 + 하후연 폭딜]", formation: "안행진", officers: [ {name:"하후연", chosenTactics:["충용", "일고작기", "암전난방"]}, {name:"하후돈", chosenTactics:["발시담정", "토적격문", "동구적개"]}, {name:"견희", chosenTactics:["신복옥의", "포전인옥", "안영찰채"]} ] }
+    { id: "meta_wei_ha_ha_gyeon", priority: 9994, name: "[정석 교정] 하후연·조조·견희 안행 기병", concept: "[조조 고기방패 + 하후연 폭딜]", formation: "안행진", officers: [ {name:"하후연", chosenTactics:["충용", "일고작기", "교취호탈"]}, {name:"조조", chosenTactics:["효웅", "토적격문", "이퇴위진"]}, {name:"견희", chosenTactics:["신복옥의", "여자동포", "휴양생식"]} ] }
 ];
+
+// 🚨 덱 병종 자동 판별 보정 엔진 추가 (가후 장비 오류 핵심 픽스)
+function getDeckUnitType(deck, matchMeta) {
+    if (deck.unitType && deck.unitType !== "자동 판별") return deck.unitType;
+    if (matchMeta && matchMeta.bestMeta) {
+        const n = matchMeta.bestMeta.name;
+        if (n.includes("방패")) return "방패병";
+        if (n.includes("창병")) return "창병";
+        if (n.includes("기병")) return "기병";
+        if (n.includes("궁병")) return "궁병";
+    }
+    return "방패병"; // 기본 폴백
+}
 
 var EQ_PRESETS = {
     PC:  ["호분관","강공, 기습 상승","창병 피해 가함","용맹","명광갑","무용 피해 가함","창병 배반, 공심 상승","금왕","치룡패","무용 피해 가함","창병 배반, 공심 상승","양렬"],
@@ -258,8 +270,7 @@ function aggregateIntegratedStats(deck, officerIndex) {
     const curNames = deck.officers.map(o => cStr(o?.name)).filter(Boolean);
     const matchMeta = getBestMetaMatch(curNames);
     
-    const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { metaDeckUnitTypeMap: {} };
-    const currentDeckUnit = (deck.unitType && deck.unitType !== "자동 판별") ? deck.unitType : (matchMeta?.bestMeta ? metaData.metaDeckUnitTypeMap[matchMeta.bestMeta.id] : "창병");
+    const currentDeckUnit = getDeckUnitType(deck, matchMeta);
 
     function parseAndAdd(textObj) {
         if (!textObj) return;
@@ -472,7 +483,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         }
     }
 
-    if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
+    if (curNames.includes("사마의") && curNames.includes("조조(제왕)") && curNames.includes("가후") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[1군 정석 완성]</strong> 진형(추형진)과 전법 배분은 드디어 1군 정답지에 도달했습니다. 엔진 차원에서 사마의 주혼(모산)과 전투매(창림-맹우)를 영구 락온했습니다.` });
         const simaTacs = deck.officers.find(o => cStr(o.name) === "사마의")?.chosenTactics || [];
         if (simaTacs.map(cStr).includes("수상개화")) {
@@ -485,10 +496,9 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     if (curNames.includes("관우") && curNames.includes("강유") && curNames.includes("유비") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[하이브리드 정석 도달]</strong> 유비에게 물리 전법을 주던 짬통 세팅을 탈피했습니다. 관우가 전열에서 버티는 안정적인 0티어 덱이 완성되었습니다.` });
     }
-    if (curNames.includes("하후연") && curNames.includes("하후돈") && curNames.includes("견희") && cForm === "안행진") {
-        fb.logs.push({ type: 'success', text: `✨ <strong>[위나라 기병 정답지]</strong> 하후돈 전열 도발, 하후연 후열 폭딜의 완벽한 밸런스가 맞춰졌습니다. 빈 전법 슬롯을 채우고 학살을 시작하십시오.` });
+    if (curNames.includes("하후연") && curNames.includes("조조") && curNames.includes("견희") && cForm === "안행진") {
+        fb.logs.push({ type: 'success', text: `✨ <strong>[위나라 기병 정답지]</strong> 조조 전열 도발, 하후연 후열 폭딜의 완벽한 밸런스가 맞춰졌습니다. 빈 전법 슬롯을 채우고 학살을 시작하십시오.` });
     }
-    // 🚨 마초덱 추가 피드백 로직
     if (curNames.includes("마초") && curNames.includes("위연") && curNames.includes("서서") && cForm === "안행진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[마초덱 정답지 도달]</strong> 안행진 후열 마초 배치를 통해 확산 폭딜 메커니즘이 완벽하게 조립되었습니다.` });
     }
@@ -544,7 +554,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
                 if (!isCustom && targetMetaTacs[i]) {
                     const pTac = targetMetaTacs[i];
                     const isHigherUsed = higherTierUsedTacs.includes(cStr(pTac));
-                    const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
+                    const ownedAlts = getOwnedAlternativeTactic(pTac, forbiddenTacs, tacticDataMap, recommendedTacs, hName, getDeckUnitType(deck, match), true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
                     
                     if (ownedAlts && ownedAlts.length > 0) {
@@ -559,7 +569,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
             } else {
                 const isHigherUsed = higherTierUsedTacs.includes(cT);
                 if (isHigherUsed) {
-                    const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, deck.unitType, true);
+                    const ownedAlts = getOwnedAlternativeTactic(cT, forbiddenTacs, tacticDataMap, recommendedTacs, hName, getDeckUnitType(deck, match), true);
                     let altText = `<span style="color:var(--text-muted);">[대체 불가]</span>`;
                     if (ownedAlts && ownedAlts.length > 0) {
                         recommendedTacs.add(ownedAlts[0]); 
@@ -837,8 +847,7 @@ function renderDeckBuilder() {
             const curNames = deck.officers.map(o => o?.name?.trim().replace(/\s+/g,'')).filter(Boolean);
             const match = getBestMetaMatch(curNames);
             
-            const metaData = window.getMetaDeckData ? window.getMetaDeckData() : { metaDeckUnitTypeMap: {} };
-            let dType = deck.unitType || (match?.bestMeta ? metaData.metaDeckUnitTypeMap[match.bestMeta.id] : "창병");
+            const currentDeckUnit = getDeckUnitType(deck, match);
 
             const offHtml = deck.officers.map((off, oIdx) => {
                 const hName = off?.name?.trim() || "", cName = cStr(hName);
@@ -856,7 +865,7 @@ function renderDeckBuilder() {
                     tRows += `<div class="tactic-row ${cssClass}"><select onchange="updateDeckState(${deck.originIdx},'tac',this.value,${oIdx},${sIdx})"><option value="">선택 안함</option>${window.getTacticListBridge().map(tx=>`<option value="${tx}" ${cT===cStr(tx)?'selected':''}>${tx}</option>`).join('')}</select></div>`;
                 });
 
-                const eq = cName ? getOfficerEquipment(hName, dType) : null;
+                const eq = cName ? getOfficerEquipment(hName, currentDeckUnit) : null;
                 const eqH = eq ? `<div class="equipment-box"><div>🪖 ${eq.helmet.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.helmet.attr1}', '${eq.helmet.attr2}', '${eq.helmet.attr3}')">[${eq.helmet.attr1} / ${eq.helmet.attr2} / <span style="color:#f59e0b">${eq.helmet.attr3}</span>]</span></div><div>🛡️ ${eq.armor.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.armor.attr1}', '${eq.armor.attr2}', '${eq.armor.attr3}')">[${eq.armor.attr1} / ${eq.armor.attr2} / <span style="color:#f59e0b">${eq.armor.attr3}</span>]</span></div><div>📿 ${eq.accessory.name} <span class="eq-attr" onclick="showEquipPopup(event, '${eq.accessory.attr1}', '${eq.accessory.attr2}', '${eq.accessory.attr3}')">[${eq.accessory.attr1} / ${eq.accessory.attr2} / <span style="color:#f59e0b">${eq.accessory.attr3}</span>]</span></div></div>` : '';
 
                 return `<div class="officer-slot" draggable="true" ondragstart="handleOfficerDragStart(event,${deck.originIdx},${oIdx})" ondragover="handleOfficerDragOver(event)" ondragleave="handleOfficerDragLeave(event)" ondrop="handleOfficerDrop(event,${deck.originIdx},${oIdx})" ondragend="handleOfficerDragEnd(event)"><div style="display:flex;justify-content:space-between;"><span style="color:var(--text-highlight);font-size:11px;">${FORMATIONS[deck.formation]?.pos[oIdx]==='front'?'전열':'후열'}</span><select onchange="updateDeckState(${deck.originIdx},'off',this.value,${oIdx})"><option value="">선택 안함</option>${window.getOfficerNamesBridge().map(hx=>`<option value="${hx}" ${hName===hx?'selected':''}>${hx}</option>`).join('')}</select></div>${eqH}<div>${tRows}</div></div>`;
