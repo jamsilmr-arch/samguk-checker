@@ -7,7 +7,8 @@ var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 var heroList = [
     ...[['h_gahu','가후'],['h_gwa_ga','곽가'],['h_samy','사마의'],['h_sunuk','순욱'],['h_akjin','악진'],['h_jeonwi','전위'],['h_jeonguk','정욱'],['h_jojo_sp','조조(제왕)'],['h_jojo','조조'],['h_jangryo','장료'],['h_janghap','장합'],['h_hahoudon','하후돈'],['h_hahouyeon','하후연'],['h_heojeo','허저'],['h_gyeonhui','견희']].map(h => ({id:h[0], name:h[1], group:'wei'})),
     ...[['h_gwanu','관우'],['h_gangyu','강유'],['h_madae','마대'],['h_macho','마초'],['h_beopjeong','법정'],['h_seoseo','서서'],['h_samaga','사마가'],['h_wuyeon','위연'],['h_yubi','유비'],['h_yubi_sp','유비(제왕)'],['h_jangbi','장비'],['h_jegaryang','제갈량'],['h_joun','조운'],['h_hwangchung','황충'],['h_hwangworyeong','황월영']].map(h => ({id:h[0], name:h[1], group:'shu'})),
-    ...[['h_daegyo','대교'],['h_nosuk','노숙'],['h_sogyo','소교'],['h_songyeon','손견'],['h_songwon','손권'],['h_sonsanghyang','손상향'],['h_sonchaek','손책'],['h_songwon_sp','손권(제왕)'],['h_yeomong','여몽'],['h_yukson','육손'],['h_yukhang','육항'],['h_juyu','주유'],['h_jutae','주태'],['h_jeongbo','정보'],['h_hwanggae','황개']].map(h => ({id:h[0], name:h[1], group:'wu'})),
+    // [수정됨] 오나라 진영 배열 마지막에 'h_yukson_sp' 육손SP 추가 완료
+    ...[['h_daegyo','대교'],['h_nosuk','노숙'],['h_sogyo','소교'],['h_songyeon','손견'],['h_songwon','손권'],['h_sonsanghyang','손상향'],['h_sonchaek','손책'],['h_songwon_sp','손권(제왕)'],['h_yeomong','여몽'],['h_yukson','육손'],['h_yukhang','육항'],['h_juyu','주유'],['h_jutae','주태'],['h_jeongbo','정보'],['h_hwanggae','황개'],['h_yukson_sp','육손SP']].map(h => ({id:h[0], name:h[1], group:'wu'})),
     ...[['h_gongsonchan','공손찬'],['h_dongtak','동탁'],['h_anryang','안량'],['h_yeopo','여포'],['h_ugil','우길'],['h_wonso','원소'],['h_janggak','장각'],['h_jangnyeong','장녕'],['h_jangbo','장보'],['h_jwaja','좌자'],['h_chaemunhui','채문희'],['h_choseon','초선'],['h_hwata','화타'],['h_hwangbosung','황보숭']].map(h => ({id:h[0], name:h[1], group:'qun'}))
 ].map(h => ({...h, isOwned:false, star:0, transcend:false}));
 
