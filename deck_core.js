@@ -8,14 +8,16 @@ var FB_OFF_META = {
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], "손권":["웅거","궁병/기병","wu","TC"], "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], "육항":["청백충근","창병/궁병","wu","SC"], "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
+    "육손SP":["화공이릉","기병/창병","wu","SC"], // [추가됨] 육손SP 메타 정보 등록
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
+// [추가됨] 열화장천 전법 텍스트 등록
+var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,열화장천,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 1군 종결 덱의 탱커를 '조조(제왕)'에서 '조조'로 롤백
 var ABSOLUTE_ENDGAME_DECKS = [
+    { id: "absolute_wududu_sp", priority: 10005, name: "[신규 0티어] 여몽·주유·육손SP 방원 기병", concept: "[화상 연쇄 + 방원진 추격 폭딜]", formation: "방원진", officers: [ {name:"여몽", chosenTactics:["백의도강", "견불가최", "동장철벽"]}, {name:"주유", chosenTactics:["봉화연천", "화소적벽", "분성지계"]}, {name:"육손SP", chosenTactics:["화공이릉", "열화장천", "천리추격"]} ] },
     { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "포전인옥"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]} ] },
     { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
@@ -46,8 +48,9 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 가후의 백옥잠 세팅 유지 및 조조의 갑옷을 '세린갑'으로 전격 교체 (속도 450 컷 확보)
+// 🚨 육손SP 연격/추격 특화 전용 장비 오버라이드 포함
 const rawEqOverrides = [
+    ["육손SP", "백옥잠|연격률|기병 피해 가함|기책", "명재복|모략 피해 가함|기병 피해 감소|치밀", "박산로|기습|기병 배반, 공심 상승|포위"], 
     ["견희", "연함규|피해 감소|창병 치유 효과 상승|원촉", "청등갑|피해 감소|창병 피해 감소|비호", "사남패|치유 효과 부여|창병 피해 감소|감림"],
     ["법정", "진현관|피해 감소|방패병 피해 감소|신속", "명재복|피해 감소|방패병 치유 효과 상승|천안", "박산로|치유 효과 받음|방패병 피해 감소|천우"],
     ["강유", "진현관|강공, 기습 상승|방패병 피해 가함|겸비", "명재복|모략 피해 가함|방패병 피해 감소|치밀", "박산로|배반, 공심 상승|방패병 배반, 공심 상승|고무"],
@@ -98,13 +101,14 @@ var STAT_KEY_RULES = [
 var internalBondRules = [
     {name:"도원결의",req:3,heroes:["유비","유비(제왕)","관우","장비"],effect:"저항 10%"},
     {name:"오호상장",req:3,heroes:["관우","장비","조운","황충","마초"],effect:"강공 8%"},
-    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"}
+    {name:"군신상기",req:2,heroes:["조조","조조(제왕)","사마의"],effect:"모략피해 4%, 공심 4%"},
+    {name:"동오대도독",req:2,heroes:["여몽","육항","노숙","육손","육손SP","주유"],effect:"모략피해 7%"} 
 ];
 
 var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["수상개화", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "후적박발"],
+    "SC": ["수상개화", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "후적박발", "열화장천"], 
     "TC": ["불노자위", "토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["불노자위", "포전인옥", "격안관화", "유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["불노자위", "포전인옥", "격안관화", "금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
@@ -114,13 +118,16 @@ var tacticAlternativesMap = {
     "간담상조":["불노자위","유비무환","격안관화","횡징폭렴","동장철벽","안영찰채","위위구조"], 
     "진퇴유도":["불노자위","간담상조","동구적개","유좌유용","천시지리"],
     "후적박발":["수상개화","요사여신","반객위주"],
-    "안영찰채":["불노자위","포전인옥","격안관화","유비무환","간담상조","만천과해"]
+    "안영찰채":["불노자위","포전인옥","격안관화","유비무환","간담상조","만천과해"],
+    "열화장천":["천리추격","사면초가","심모원려"] 
 };
 
+// [수정됨] 점수 연산 고도화를 위해 기존 스탯 밸류 상향 및 세분화
 var internalTacticStatMap = {
     "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10}, "간담상조":{damageTakenRed:8,healGiven:6}, "진퇴유도":{damageTakenRed:4,damageDealtInc:4},
     "안영찰채":{damageTakenRed:4,healGiven:4}, "후적박발":{strategyDmg:15,leech:5}, "수상개화":{activeRate:12,damageDealtInc:8},
-    "포전인옥":{healGiven:15, activeRate:10, strategyDmg:10}, "불노자위":{damageTakenRed:20, healGiven:14, damageDealtInc:12}
+    "포전인옥":{healGiven:15, activeRate:10, strategyDmg:10}, "불노자위":{damageTakenRed:20, healGiven:14, damageDealtInc:12},
+    "열화장천":{strategyDmg:20, damageDealtInc:10, activeRate:5} // 열화장천 깡스탯 상향
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
@@ -165,6 +172,7 @@ metaHawkRandomAttributesMap = new Proxy(metaHawkRandomAttributesMap, { get: (tar
 metaHawkRecommendationMap = new Proxy(metaHawkRecommendationMap, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 const manualHawkRules = [
+    [["육손SP"], "능소-진시", "육손SP 방원진 연격 및 추격 폭딜 극대화", "모략 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
     [["사마의"], "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존", "모략 +12%", "모략 피해 가함 +10%", "아군 전체에게 [축예] 부여 확정화"],
     [["강유", "법정"], "삭풍-설조", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
     [["마초"], "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
@@ -262,6 +270,7 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
     return { helmet: { name: p[0], attr1: p[1], attr2: p[2], attr3: p[3] }, armor: { name: p[4], attr1: p[5], attr2: p[6], attr3: p[7] }, accessory: { name: p[8], attr1: p[9], attr2: p[10], attr3: p[11] } };
 }
 
+// 👉 [누락되었던 필수 연산 함수들 정상 복원 1/5]
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
     if (!officer || !officer.name) return null;
@@ -319,6 +328,7 @@ function aggregateIntegratedStats(deck, officerIndex) {
     return stats;
 }
 
+// 👉 [누락되었던 필수 연산 함수들 정상 복원 2/5]
 function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
     let isPerfect = true, hasOfficer = false;
     for (let o of deck.officers) {
@@ -338,6 +348,7 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
     return "";
 }
 
+// 👉 [누락되었던 필수 연산 함수들 정상 복원 3/5]
 function buildIntegratedStatsHtml(stats) {
     if (!stats) return '';
     let arr = [];
@@ -354,6 +365,7 @@ function buildIntegratedStatsHtml(stats) {
     return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:var(--text-highlight);font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div style="display:flex;flex-wrap:wrap;gap:4px 8px;line-height:1.4;">${arr.map(s=>`<span>${s}</span>`).join('')}</div></div>`;
 }
 
+// 👉 [누락되었던 필수 연산 함수들 정상 복원 4/5]
 function calculateActivatedBond(officers) {
     const curNames = officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     if (!curNames.length) return "활성화 효과 없음";
@@ -364,6 +376,7 @@ function calculateActivatedBond(officers) {
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
+// 👉 [누락되었던 필수 연산 함수들 정상 복원 5/5]
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -470,6 +483,7 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     const cForm = cStr(deck.formation);
     const match = getBestMetaMatch(curNames);
     const isCustom = !match || match.maxScore < 10000;
+    const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean); 
 
     if (isCustom) {
         fb.logs.push({ type: 'info', text: `💡 <strong>[오리지널 시너지]</strong> 메타를 초월한 독자적인 조합입니다. 진영과 역할군에 맞춰 전법을 배정했습니다.` });
@@ -482,6 +496,14 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
         } else if (meta.priority >= 9994) {
             fb.insight = "🚨 [0티어 정석 락온] 타협 없는 최고의 공방 시너지를 구축하는 이론상 종결 덱입니다.";
         }
+    }
+
+    if (curNames.includes("육손SP") && cForm === "방원진") {
+        fb.logs.push({ type: 'success', text: `✨ <strong>[오도독 추격 정석]</strong> 방원진 후열의 연격률 버프(28%)를 육손SP가 독식하여 매 턴 [열화장천]과 [천리추격]을 기관총처럼 난사하는 0티어 화력망이 구축되었습니다.` });
+    }
+
+    if (allEquipTacs.includes("열화장천") && !allEquipTacs.includes("화소적벽") && !allEquipTacs.includes("분성지계") && !curNames.includes("주유") && !curNames.includes("황개") && !curNames.includes("육손")) {
+         fb.logs.push({ type: 'warning', text: `🔥 <strong>[화상 시너지 누락]</strong> [열화장천]은 적이 '화상' 상태일 때 피해량이 60% 폭증합니다. 주유나 육손을 기용하거나 '화소적벽' 같은 화상 전법을 파티에 추가하십시오.` });
     }
 
     if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
@@ -510,13 +532,12 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     if (cForm === "구행진") {
         const front1 = cStr(deck.officers[0]?.name);
         const front2 = cStr(deck.officers[2]?.name);
-        const squishies = ["주유", "소교", "대교", "육손", "곽가", "가후", "장녕", "채문희", "유비", "서서"];
+        const squishies = ["주유", "소교", "대교", "육손", "곽가", "가후", "장녕", "채문희", "유비", "서서", "육손SP"];
         if (squishies.includes(front1) || squishies.includes(front2)) {
             fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
         }
     }
 
-    const allEquipTacs = deck.officers.flatMap(o => o?.chosenTactics?.map(t => cStr(t))).filter(Boolean);
     const forbiddenTacs = [...new Set([...allEquipTacs, ...higherTierUsedTacs.map(t => cStr(t))])];
     const recommendedTacs = new Set();
 
@@ -797,10 +818,35 @@ window.autoFixDeck = oIdx => {
                 let score = 0;
                 const stats = internalTacticStatMap[cTac] || {};
 
-                if (role === 'SC') { if (stats.strategyDmg) score += stats.strategyDmg * 15; if (stats.physicalDmg) score -= 1000; } 
-                else if (['SH', 'SS'].includes(role)) { if (stats.healGiven) score += stats.healGiven * 15; if (stats.damageTakenRed) score += stats.damageTakenRed * 12; if (stats.strategyDmg) score -= 800; } 
-                else if (['PC', 'PCm'].includes(role)) { if (stats.physicalDmg) score += stats.physicalDmg * 15; if (stats.strategyDmg) score -= 1000; } 
-                else if (role === 'TC') { if (stats.damageTakenRed) score += stats.damageTakenRed * 20; if (stats.strategyDmg) score -= 1000; }
+                // 👉 [수정됨] AI 교정 엔진 점수 연산 고도화 (각 역할군별 전법 스탯 가중치 세분화)
+                if (role === 'SC') { 
+                    if (stats.strategyDmg) score += stats.strategyDmg * 15; 
+                    if (stats.damageDealtInc) score += stats.damageDealtInc * 12;
+                    if (stats.activeRate) score += stats.activeRate * 10;
+                    if (stats.physicalDmg) score -= 1000; 
+                } 
+                else if (['SH', 'SS'].includes(role)) { 
+                    if (stats.healGiven) score += stats.healGiven * 15; 
+                    if (stats.damageTakenRed) score += stats.damageTakenRed * 12; 
+                    if (stats.strategyDmg) score -= 800; 
+                } 
+                else if (['PC', 'PCm'].includes(role)) { 
+                    if (stats.physicalDmg) score += stats.physicalDmg * 15; 
+                    if (stats.damageDealtInc) score += stats.damageDealtInc * 12;
+                    if (stats.comboRate) score += stats.comboRate * 15;
+                    if (stats.armorPen) score += stats.armorPen * 10;
+                    if (stats.strategyDmg) score -= 1000; 
+                } 
+                else if (role === 'TC') { 
+                    if (stats.damageTakenRed) score += stats.damageTakenRed * 20; 
+                    if (stats.healGiven) score += stats.healGiven * 10;
+                    if (stats.strategyDmg) score -= 1000; 
+                }
+
+                // 👉 [수정됨] 무장별 고유 메커니즘 특화 시너지 가산점 (100% 강제가 아닌, 가장 적합한 무장에게 최고점 600점 부여)
+                if (cTac === "열화장천" && ["육손SP", "육손", "주유", "황개"].includes(o.name)) score += 600; // 화상 및 추격 시너지 극대화
+                if (cTac === "수상개화" && ["사마의", "장각", "장녕"].includes(o.name)) score += 400; // 액티브 발동 의존도 높은 마법 딜러
+                if (cTac === "반객위주" && ["사마의", "마초"].includes(o.name)) score += 400; // 턴 누적/확산 딜러
 
                 if (targetMetaTacs.includes(tac)) score += 1500;
                 if (score > highestScore) { highestScore = score; bestFallback = tac; }
