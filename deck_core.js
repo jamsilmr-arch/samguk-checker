@@ -1,30 +1,30 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (일반 조조 롤백 및 세린갑 속도 세팅 반영 완료)
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (최상위 1~9위 랭커 종결 덱 기반 AI 교정 엔진 고도화)
 console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
 var FB_OFF_META = {
-    "견희":["신복옥의","창병/기병","wei","SH"],
+    "견희":["신복옥의","방패병/기병","wei","SH"],
     "가후":["경달권변","궁병/방패병","wei","SS"], "곽가":["산무유책","궁병/방패병","wei","SH"], "사마의":["응시낭고","방패병/궁병","wei","SC"], "순욱":["거중지중","궁병/창병","wei","SH"], "악진":["분용당선","창병/궁병","wei","PC"], "전위":["축호과간","창병/방패병","wei","TC"], "정욱":["십면매복","방패병/궁병","wei","SC"], "조조(제왕)":["군령여산","창병/방패병","wei","TC"], "조조":["효웅","방패병/기병","wei","TC"], "장료":["함진살적","창병/기병","wei","PCm"], "장합":["교변병기","방패병/창병","wei","TC"], "하후돈":["발시담정","창병/방패병","wei","TC"], "하후연":["충용","창병/기병","wei","PCm"], "허저":["호치","창병/궁병","wei","TC"],
     "관우":["무성","창병/기병","shu","PC"], "강유":["담대여두","방패병/기병","shu","SC"], "마대":["습참","창병/방패병","shu","PC"], "마초":["출수법","창병/기병","shu","PCm"], "법정":["애자필보","방패병/궁병","shu","SS"], "서서":["절절학문","창병/궁병","shu","SS"], "사마가":["만왕","창병/방패병","shu","PC"], "위연":["실병제위","창병/궁병","shu","PC"], "유비":["인정","창병/기병","shu","SH"], "유비(제왕)":["재주복주","창병/방패병","shu","SH"], "장비":["연인노호","창병/방패병","shu","TC"], "제갈량":["초선차전","궁병/방패병","shu","SH"], "조운":["칠진칠출","창병/방패병","shu","PC"], "황충":["적혈도","창병/방패병","shu","PC"], "황월영":["묘산천기","궁병/방패병","shu","SH"],
     "대교":["정수유심","창병/궁병","wu","SH"], "노숙":["탑상책","궁병/기병","wu","SH"], "소교":["화용욕모","궁병/기병","wu","SH"], "손견":["강동맹호","창병/방패병","wu","TC"], "손권":["웅거","궁병/기병","wu","TC"], "손상향":["효희","궁병/기병","wu","PCm"], "손책":["강동패주","창병/방패병","wu","PC"], "손권(제왕)":["겸권상계","창병/궁병","wu","SS"], "여몽":["백의도강","방패병/궁병","wu","SS"], "육손":["지변규려","창병/기병","wu","SC"], "육항":["청백충근","창병/궁병","wu","SC"], "주유":["봉화연천","창병/궁병","wu","SC"], "주태":["청라산개","기병/방패병","wu","TC"], "정보":["칠척사모","기병/방패병","wu","TC"], "황개":["요원지화","방패병/궁병","wu","TC"],
-    "육손SP":["화공이릉","기병/창병","wu","SC"], // [추가됨] 육손SP 메타 정보 등록
+    "육손SP":["화공이릉","기병/창병","wu","SC"],
     "공손찬":["위진새북","기병/창병","qun","PCm"], "동탁":["전권난정","방패병/기병","qun","TC"], "안량":["효장","창병/기병","qun","PC"], "여포":["천하무쌍","궁병/기병","qun","PCm"], "우길":["태평경","창병/궁병","qun","SS"], "원소":["사소도","방패병/기병","qun","TC"], "장각":["황천당립","궁병/기병","qun","SC"], "장녕":["천의난위","궁병/방패병","qun","SS"], "장보":["요풍사기","궁병/방패병","qun","SS"], "좌자":["화겁생기","궁병/방패병","qun","SH"], "채문희":["비분시","궁병/기병","qun","SH"], "초선":["폐월","창병/기병","qun","SH"], "화타":["청낭제세","궁병/방패병","qun","SH"], "황보숭":["강직불아","궁병/창병","qun","TC"]
 };
 var FB_OFFICERS = Object.keys(FB_OFF_META);
 
-// [추가됨] 열화장천 전법 텍스트 등록
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,열화장천,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
+// 🚨 1위~9위 랭커 데이터 기반 절대 종결 덱 베스트 7종 우선권 탑재
 var ABSOLUTE_ENDGAME_DECKS = [
-    { id: "absolute_wududu_sp", priority: 10005, name: "[신규 0티어] 여몽·주유·육손SP 방원 기병", concept: "[화상 연쇄 + 방원진 추격 폭딜]", formation: "방원진", officers: [ {name:"여몽", chosenTactics:["백의도강", "견불가최", "동장철벽"]}, {name:"주유", chosenTactics:["봉화연천", "화소적벽", "분성지계"]}, {name:"육손SP", chosenTactics:["화공이릉", "열화장천", "천리추격"]} ] },
-    { id: "new_meta_wei_spear", priority: 10001, name: "[신규 0티어] 허저·견희·조조(제왕) 창병", concept: "[허저+견희 물리 폭딜]", formation: "방원진", officers: [ {name:"허저", chosenTactics:["호치", "부동여산", "만부막적"]}, {name:"견희", chosenTactics:["신복옥의", "유비무환", "포전인옥"]}, {name:"조조(제왕)", chosenTactics:["군령여산", "불노자위", "진퇴유도"]} ] },
-    { id: "absolute_beopjeong", priority: 9999, name: "[절대 종결] 유비·법정·강유 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "격안관화"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "유비무환"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
-    { id: "absolute_sima", priority: 9999, name: "[절대 종결] 사마의 추형 방패", concept: "[0티어 정답지]", formation: "추형진", officers: [ {name:"사마의", chosenTactics:["응시낭고", "수상개화", "반객위주"]}, {name:"조조", chosenTactics:["효웅", "불노자위", "진퇴유도"]}, {name:"가후", chosenTactics:["경달권변", "유비무환", "혼수모어"]} ] },
-    { id: "absolute_macho", priority: 9998, name: "[절대 종결] 마초·위연·서서 안행 창병", concept: "[마초 안행진 확산 폭딜]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "반객위주", "용맹무쌍"]}, {name:"위연", chosenTactics:["실병제위", "동구적개", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] },
-    { id: "absolute_macho_emp_liu", priority: 9997, name: "[절대 종결] 마초·유비(제왕)·서서 안행 창병", concept: "[마초 폭딜 + 제유비 유지력]", formation: "안행진", officers: [ {name:"마초", chosenTactics:["출수법", "반객위주", "용맹무쌍"]}, {name:"유비(제왕)", chosenTactics:["재주복주", "안영찰채", "진퇴유도"]}, {name:"서서", chosenTactics:["절절학문", "유비무환", "문치무공"]} ] },
-    { id: "meta_shu_gwan_gang_yu", priority: 9995, name: "[정석 교정] 관우·강유·유비 추형 창병", concept: "[관우 딜탱 + 강유 지속딜]", formation: "추형진", officers: [ {name:"관우", chosenTactics:["무성", "승승장구", "질풍노도"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "일고작기"]}, {name:"유비", chosenTactics:["인정", "유비무환", "혼수모어"]} ] },
-    { id: "meta_wei_ha_ha_gyeon", priority: 9994, name: "[정석 교정] 하후연·조조·견희 안행 기병", concept: "[조조 고기방패 + 하후연 폭딜]", formation: "안행진", officers: [ {name:"하후연", chosenTactics:["충용", "일고작기", "교취호탈"]}, {name:"조조", chosenTactics:["효웅", "토적격문", "이퇴위진"]}, {name:"견희", chosenTactics:["신복옥의", "여자동포", "휴양생식"]} ] }
+    { id: "meta_rank1_wududu", priority: 10010, name: "[전서버 1위] 노숙·정보·육손SP 방원 기병", concept: "[열화장천 연격 폭격]", formation: "방원진", unitType: "기병", officers: [ {name:"노숙", chosenTactics:["탑상책", "분성지계", "격안관화"]}, {name:"정보", chosenTactics:["칠척사모", "진퇴유도", "불노자위"]}, {name:"육손SP", chosenTactics:["화공이릉", "천리추격", "열화장천"]} ] },
+    { id: "meta_rank6_sima", priority: 10009, name: "[절대 종결] 조조·사마의·가후 구행 방패", concept: "[유지력 딜탱의 끝]", formation: "구행진", unitType: "방패병", officers: [ {name:"조조", chosenTactics:["효웅", "심구고루", "강유겸제"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "포전인옥"]} ] },
+    { id: "meta_rank6_macho", priority: 10008, name: "[절대 종결] 마초·위연·서서 안행 창병", concept: "[마초 안행진 확산 폭딜]", formation: "안행진", unitType: "창병", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "불노자위"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
+    { id: "meta_rank7_beopjeong", priority: 10007, name: "[절대 종결] 유비(제왕)·법정·강유 추형 방패", concept: "[촉방패 완전체]", formation: "추형진", unitType: "방패병", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "격안관화", "견진연봉"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "전위위안"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
+    { id: "meta_rank9_qun_bow", priority: 10006, name: "[절대 종결] 좌자·장녕·황보숭 구행 궁병", concept: "[회피 및 스탯 강탈]", formation: "구행진", unitType: "궁병", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "간담상조"]} ] },
+    { id: "meta_rank1_wei_spear", priority: 10005, name: "[절대 종결] 견희·허저·전위 구행 방패", concept: "[물리 반격 및 딜탱]", formation: "구행진", unitType: "방패병", officers: [ {name:"견희", chosenTactics:["신복옥의", "유비무환", "심구고루"]}, {name:"허저", chosenTactics:["호치", "부동여산", "수상개화"]}, {name:"전위", chosenTactics:["축호과간", "간담상조", "문치무공"]} ] },
+    { id: "meta_rank9_qun_cav", priority: 10004, name: "[절대 종결] 동탁·원소·여포 방원 기병", concept: "[방원진 1캐리 폭딜]", formation: "방원진", unitType: "기병", officers: [ {name:"동탁", chosenTactics:["전권난정", "견진연봉", "위위구조"]}, {name:"원소", chosenTactics:["사소도", "횡징폭렴", "이퇴위진"]}, {name:"여포", chosenTactics:["천하무쌍", "용왕직전", "만부막적"]} ] },
+    { id: "meta_wei_ha_ha_gyeon", priority: 10003, name: "[정석 교정] 하후연·조조·견희 안행 기병", concept: "[조조 고기방패 + 하후연 폭딜]", formation: "안행진", unitType: "기병", officers: [ {name:"하후연", chosenTactics:["충용", "일고작기", "교취호탈"]}, {name:"조조", chosenTactics:["효웅", "토적격문", "이퇴위진"]}, {name:"견희", chosenTactics:["신복옥의", "여자동포", "휴양생식"]} ] }
 ];
 
 function getDeckUnitType(deck, matchMeta) {
@@ -48,9 +48,8 @@ var EQ_PRESETS = {
     SS:  ["진현관","피해 감소","방패병 피해 감소","신속","명재복","피해 감소","방패병 치유 효과 상승","천안","박산로","피해 감소","방패병 피해 감소","천우"]
 };
 
-// 🚨 육손SP 연격/추격 특화 전용 장비 오버라이드 포함
 const rawEqOverrides = [
-    ["육손SP", "백옥잠|연격률|기병 피해 가함|기책", "명재복|모략 피해 가함|기병 피해 감소|치밀", "박산로|기습|기병 배반, 공심 상승|포위"], 
+    ["육손SP", "백옥잠|연격률|기병 피해 가함|기책", "명재복|모략 피해 가함|기병 피해 감소|치밀", "박산로|기습|기병 배반, 공심 상승|포위"],
     ["견희", "연함규|피해 감소|창병 치유 효과 상승|원촉", "청등갑|피해 감소|창병 피해 감소|비호", "사남패|치유 효과 부여|창병 피해 감소|감림"],
     ["법정", "진현관|피해 감소|방패병 피해 감소|신속", "명재복|피해 감소|방패병 치유 효과 상승|천안", "박산로|치유 효과 받음|방패병 피해 감소|천우"],
     ["강유", "진현관|강공, 기습 상승|방패병 피해 가함|겸비", "명재복|모략 피해 가함|방패병 피해 감소|치밀", "박산로|배반, 공심 상승|방패병 배반, 공심 상승|고무"],
@@ -122,38 +121,24 @@ var tacticAlternativesMap = {
     "열화장천":["천리추격","사면초가","심모원려"] 
 };
 
-// [수정됨] 점수 연산 고도화를 위해 기존 스탯 밸류 상향 및 세분화
 var internalTacticStatMap = {
     "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10}, "간담상조":{damageTakenRed:8,healGiven:6}, "진퇴유도":{damageTakenRed:4,damageDealtInc:4},
     "안영찰채":{damageTakenRed:4,healGiven:4}, "후적박발":{strategyDmg:15,leech:5}, "수상개화":{activeRate:12,damageDealtInc:8},
     "포전인옥":{healGiven:15, activeRate:10, strategyDmg:10}, "불노자위":{damageTakenRed:20, healGiven:14, damageDealtInc:12},
-    "열화장천":{strategyDmg:20, damageDealtInc:10, activeRate:5} // 열화장천 깡스탯 상향
+    "열화장천":{strategyDmg:20, damageDealtInc:10, activeRate:5},
+    "요사여신":{strategyDmg:22}, "강유겸제":{damageTakenRed:25}
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 const rawHawkMeta = [
-    ["new_meta_wei_spear", "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%|통솔 +10%|속도 +20", "파갑 +10%|무용 피해 가함 +10%|연격률 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|일반 공격 시 대상 혼란|첫 턴 선공 부여"],
-    ["absolute_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
-    ["absolute_macho", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["absolute_macho_emp_liu", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank1_wei_sima", "창림-맹우", "사마의 방패덱 무한 유지력 및 철갑 탱킹", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|행동 시 디버프 1개 해제"],
-    ["rank2_wei_sima_hujuk", "창림-질풍", "사마의 후적박발 액티브 60% 폭딜 펌핑", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank1_shu_macho", "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank1_gun_jang", "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank1_wei_heo", "열공-전광", "허저 통솔 강탈 후 연격 물리 폭딜", "무용 +12%|통솔 +10%|속도 +20", "무용 피해 가함 +10%|파갑 +10%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|저항 획득률 +6%"],
-    ["rank2_gun_yeopo", "결운-호생", "여포 천하무쌍 연타 및 동탁/원소 견고화", "무용 +12%|속도 +20|통솔 +10%", "파갑 +10%|연격률 +8%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|일반 공격 시 대상 혼란(1턴)"],
-    ["rank2_shu_macho_simgu", "열공-전광", "위연 도발 보호 아래 마초 확산 폭딜", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank3_shu_macho", "결운-감로", "마초 확산 폭딜 및 유비/위연 유지력 극대화", "무용 +12%|속도 +20|통솔 +10%", "연격률 +10%|확산 피해 +12%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank3_gun_jang_simgu", "삭풍-성모", "심구고루 좌자 방어망 및 장녕 후적박발 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank3_wei_sima_gu", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank4_shu_seo", "능소-진시", "마초 질풍노도 선공 파갑 연격 지원", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank4_wu_son", "열공-전광", "손권 도발 탱킹 및 육항 모략 폭딜 지원", "모략 +12%|속도 +20|통솔 +10%", "발동률 +5%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|치유 효과 부여 +12%|저항 획득률 +6%"],
-    ["rank4_wei_sima", "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "아군 전체에게 [축예] 부여 확정화|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank6_gun_jwa", "삭풍-성모", "좌자 회피 장벽 및 장녕 신산 폭딜 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["rank6_wei_ak", "열공-여천", "조조(제왕) 도발 탱킹 및 장료/악진 암살", "무용 +12%|속도 +20|통솔 +10%", "파갑 +10%|연격률 +10%|무용 피해 가함 +10%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
-    ["rank6_wei_jo", "결운-호생", "사마의 요사여신 모략 폭딜 및 가후 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
-    ["meta_shu_beopjeong_gang", "열공-여천", "강유의 흡혈 및 피해 감소 생존력 강화", "무용 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|무용 피해 가함 +10%|피해 감소 +8%", "행동 시 디버프 1개 해제|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"]
+    ["meta_rank1_wududu", "능소-진시", "전서버 1위 덱: 물리 피격 저항 및 육손SP 방원진 연격 폭격", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|연격률 +10%", "피격 시 50% 확률 저항|행동 시 디버프 1개 해제|저항 획득률 +6%"],
+    ["meta_rank6_sima", "능소-진시", "사마의 구행진 종결: 물리 피격 저항 및 1턴 폭사 방지", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "피격 시 50% 확률 저항|아군 전체에게 [축예] 부여 확정화|저항 획득률 +6%"],
+    ["meta_rank6_macho", "열공-전광", "마초 안행진 확산 폭딜", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
+    ["meta_rank7_beopjeong", "결운-감로", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|피해 가한 후 병력 10% 흡혈"],
+    ["meta_rank9_qun_bow", "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%|통솔 +10%|속도 +20", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|저항 획득률 +6%"],
+    ["meta_rank1_wei_spear", "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%|통솔 +10%|속도 +20", "파갑 +10%|무용 피해 가함 +10%|연격률 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승|일반 공격 시 대상 혼란|첫 턴 선공 부여"],
+    ["meta_rank9_qun_cav", "결운-호생", "여포 천하무쌍 연타 및 동탁/원소 견고화", "무용 +12%|속도 +20|통솔 +10%", "파갑 +10%|연격률 +8%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|일반 공격 시 대상 혼란(1턴)"]
 ];
 
 var metaHawkRecommendationMap = {};
@@ -172,23 +157,16 @@ metaHawkRandomAttributesMap = new Proxy(metaHawkRandomAttributesMap, { get: (tar
 metaHawkRecommendationMap = new Proxy(metaHawkRecommendationMap, { get: (target, prop) => target[prop] || {name:"범용 전투매", skill:"기본 최적화"} });
 
 const manualHawkRules = [
+    [["육손SP", "정보", "노숙"], "능소-진시", "전서버 1위 덱: 물리 피격 저항 및 육손SP 방원진 연격 폭격", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
+    [["조조", "사마의", "가후"], "능소-진시", "사마의 구행진 종결: 물리 피격 저항 및 1턴 폭사 방지", "모략 +12%", "피해 감소 +8%", "피격 시 50% 확률 저항"],
     [["육손SP"], "능소-진시", "육손SP 방원진 연격 및 추격 폭딜 극대화", "모략 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
-    [["사마의"], "창림-맹우", "사마의 방패덱 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존", "모략 +12%", "모략 피해 가함 +10%", "아군 전체에게 [축예] 부여 확정화"],
+    [["사마의"], "창림-맹우", "사마의 5턴 무한 힐(축예) 및 철갑(금탕) 0티어 생존", "모략 +12%", "모략 피해 가함 +10%", "아군 전체에게 [축예] 부여 확정화"],
     [["강유", "법정"], "삭풍-설조", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
-    [["마초"], "열공-전광", "마초 반객위주 확산 타격 강화", "무용 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
+    [["마초"], "열공-전광", "마초 안행진 확산 타격 강화", "무용 +12%", "연격률 +10%", "추격 전법 피해 +15%"],
     [["관우", "강유", "유비"], "열공-전광", "관우/강유 하이브리드 폭딜 및 유비 유지력", "무용 +12%", "무용 피해 가함 +10%", "피해 가한 후 병력 10% 흡혈"],
-    [["하후연", "하후돈", "견희"], "열공-전광", "하후돈 도발 탱킹 및 하후연 폭딜", "무용 +12%", "연격률 +10%", "첫 턴 선공 부여"],
     [["장녕"], "삭풍-성모", "좌자 장벽 및 장녕 모략 펌핑 지원", "모략 +12%", "모략 피해 가함 +10%", "피격 시 50% 확률 저항"],
     [["여포"], "결운-호생", "무력 폭딜 연타 및 아군 견고화", "무용 +12%", "파갑 +10%", "일반 공격 시 대상 혼란"],
-    [["허저"], "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%", "파갑 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승"],
-    [["강유"], "열공-여천", "강유의 흡혈 및 피해 감소 생존력 강화", "무용 +12%", "모략 피해 가함 +10%", "피해 가한 후 병력 10% 흡혈"],
-    [["장료"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
-    [["악진"], "열공-전광", "연격 폭격 및 장료 후열 암살", "무용 +12%", "연격률 +10%", "피해 가한 후 병력 10% 흡혈"],
-    [["육손"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
-    [["육항"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
-    [["손권"], "능소-진시", "모략 치명타 폭딜 및 방벽 강화", "모략 +12%", "치유 효과 부여 +10%", "행동 시 디버프 1개 해제"],
-    [["공손찬"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"],
-    [["초선"], "열공-전광", "속도 버프 및 무용 타격 강화", "속도 +20", "무용 피해 가함 +10%", "첫 턴 선공 부여"]
+    [["허저"], "창림-질풍", "허저 능동 전법 폭딜 60% 펌핑 및 피해 경감", "무용 +12%", "파갑 +10%", "가하는 능동 전법 피해 계수 2배(60%) 상승"]
 ];
 
 const getEngineHawkData = function(metaId, officersArray = []) {
@@ -270,7 +248,6 @@ function getOfficerEquipment(officerName, deckUnitType = "") {
     return { helmet: { name: p[0], attr1: p[1], attr2: p[2], attr3: p[3] }, armor: { name: p[4], attr1: p[5], attr2: p[6], attr3: p[7] }, accessory: { name: p[8], attr1: p[9], attr2: p[10], attr3: p[11] } };
 }
 
-// 👉 [누락되었던 필수 연산 함수들 정상 복원 1/5]
 function aggregateIntegratedStats(deck, officerIndex) {
     const officer = deck.officers[officerIndex];
     if (!officer || !officer.name) return null;
@@ -328,7 +305,6 @@ function aggregateIntegratedStats(deck, officerIndex) {
     return stats;
 }
 
-// 👉 [누락되었던 필수 연산 함수들 정상 복원 2/5]
 function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
     let isPerfect = true, hasOfficer = false;
     for (let o of deck.officers) {
@@ -348,7 +324,6 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
     return "";
 }
 
-// 👉 [누락되었던 필수 연산 함수들 정상 복원 3/5]
 function buildIntegratedStatsHtml(stats) {
     if (!stats) return '';
     let arr = [];
@@ -365,7 +340,6 @@ function buildIntegratedStatsHtml(stats) {
     return arr.length === 0 ? '' : `<div class="integrated-stats-box"><div style="color:var(--text-highlight);font-weight:bold;margin-bottom:4px;font-size:10px;">📊 통합 전투 속성 (추정치)</div><div style="display:flex;flex-wrap:wrap;gap:4px 8px;line-height:1.4;">${arr.map(s=>`<span>${s}</span>`).join('')}</div></div>`;
 }
 
-// 👉 [누락되었던 필수 연산 함수들 정상 복원 4/5]
 function calculateActivatedBond(officers) {
     const curNames = officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
     if (!curNames.length) return "활성화 효과 없음";
@@ -376,7 +350,6 @@ function calculateActivatedBond(officers) {
     return matched.length ? matched.map(r => `<strong>[${r.name}]</strong> ${r.effect}`).join(" / ") : "활성화 효과 없음";
 }
 
-// 👉 [누락되었던 필수 연산 함수들 정상 복원 5/5]
 function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, recommendedTacs = new Set(), officerName = "", deckUnitType = "", returnList = false) {
     const cleanMissing = cStr(missingTacName);
     let role = "PC";
@@ -503,21 +476,28 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     }
 
     if (allEquipTacs.includes("열화장천") && !allEquipTacs.includes("화소적벽") && !allEquipTacs.includes("분성지계") && !curNames.includes("주유") && !curNames.includes("황개") && !curNames.includes("육손")) {
-         fb.logs.push({ type: 'warning', text: `🔥 <strong>[화상 시너지 누락]</strong> [열화장천]은 적이 '화상' 상태일 때 피해량이 60% 폭증합니다. 주유나 육손을 기용하거나 '화소적벽' 같은 화상 전법을 파티에 추가하십시오.` });
+         fb.logs.push({ type: 'warning', text: `🔥 <strong>[화상 시너지 누락]</strong> [열화장천]은 적이 '화상' 상태일 때 피해량이 60% 폭증합니다. 노숙(분성지계)이나 주유를 기용하여 화상 전법을 파티에 추가하십시오.` });
     }
 
-    if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후") && cForm === "추형진") {
-        fb.logs.push({ type: 'success', text: `✨ <strong>[1군 정석 완성]</strong> 진형(추형진)과 전법 배분은 드디어 1군 정답지에 도달했습니다. 엔진 차원에서 사마의 주혼(모산)과 전투매(창림-맹우)를 영구 락온했습니다.` });
-        const simaTacs = deck.officers.find(o => cStr(o.name) === "사마의")?.chosenTactics || [];
-        if (simaTacs.map(cStr).includes("수상개화")) {
-            fb.logs.push({ type: 'success', text: `🔥 <strong>[수상개화 탑재 완료]</strong> 사마의의 능동 딜 사이클이 완벽하게 가속됩니다. 미러전 압살 준비가 끝났습니다.` });
+    // [수정됨] 사마의 구행진 절대 종결 분석 피드백 반영
+    if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후")) {
+        if (cForm === "구행진") {
+            const caoCaoTacs = deck.officers.find(o => cStr(o.name) === "조조" || cStr(o.name) === "조조(제왕)")?.chosenTactics.map(cStr) || [];
+            const hasMitigation = caoCaoTacs.includes("강유겸제") || caoCaoTacs.includes("간담상조") || caoCaoTacs.includes("심구고루");
+            if (hasMitigation) {
+                fb.logs.push({ type: 'success', text: `✨ <strong>[사마의 구행진 종결]</strong> 조조에게 0티어 피감기(강유겸제/간담상조/심구고루)를 주어 가후의 전열 객사 리스크를 완전히 지운 완벽한 형태의 절대 종결 덱입니다.` });
+            } else {
+                fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 구행진 전열에 가후를 세웠지만, 조조에게 0티어 확정 피감기(강유겸제, 간담상조 등)가 없어 1턴 폭딜에 가후가 객사할 확률이 높습니다.` });
+            }
+            const jiaXuTacs = deck.officers.find(o => cStr(o.name) === "가후")?.chosenTactics.map(cStr) || [];
+            if (jiaXuTacs.includes("포전인옥")) {
+                fb.logs.push({ type: 'success', text: `🔥 <strong>[포전인옥 탑재 완료]</strong> 사마의 덱의 진정한 핵심 엔진인 가후의 '포전인옥'이 장착되었습니다. 유지력과 딜 고점이 수직 상승합니다.` });
+            }
         }
     }
+    
     if (curNames.includes("유비(제왕)") && curNames.includes("법정") && curNames.includes("강유") && cForm === "추형진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[합격점: 2군 정석]</strong> 이 덱은 완벽합니다. 추형진 전/후열 배치, 장비 주혼, 삭풍-설조 매 세팅까지 흠잡을 데 없는 0티어 정석입니다.` });
-    }
-    if (curNames.includes("관우") && curNames.includes("강유") && curNames.includes("유비") && cForm === "추형진") {
-        fb.logs.push({ type: 'success', text: `✨ <strong>[하이브리드 정석 도달]</strong> 유비에게 물리 전법을 주던 짬통 세팅을 탈피했습니다. 관우가 전열에서 버티는 안정적인 0티어 덱이 완성되었습니다.` });
     }
     if (curNames.includes("하후연") && curNames.includes("조조") && curNames.includes("견희") && cForm === "안행진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[위나라 기병 정답지]</strong> 조조 전열 도발, 하후연 후열 폭딜의 완벽한 밸런스가 맞춰졌습니다. 빈 전법 슬롯을 채우고 학살을 시작하십시오.` });
@@ -525,16 +505,16 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     if (curNames.includes("마초") && curNames.includes("위연") && curNames.includes("서서") && cForm === "안행진") {
         fb.logs.push({ type: 'success', text: `✨ <strong>[마초덱 정답지 도달]</strong> 안행진 후열 마초 배치를 통해 확산 폭딜 메커니즘이 완벽하게 조립되었습니다.` });
     }
-    if (curNames.includes("마초") && curNames.includes("유비(제왕)") && curNames.includes("서서") && cForm === "안행진") {
-        fb.logs.push({ type: 'success', text: `✨ <strong>[마초+제유비 종결 완성]</strong> 위연 대신 유비(제왕)를 투입하여 덱의 안정성과 유지력(힐+허약)을 극한으로 끌어올린 0티어 변형 창병덱입니다.` });
-    }
 
     if (cForm === "구행진") {
         const front1 = cStr(deck.officers[0]?.name);
         const front2 = cStr(deck.officers[2]?.name);
         const squishies = ["주유", "소교", "대교", "육손", "곽가", "가후", "장녕", "채문희", "유비", "서서", "육손SP"];
         if (squishies.includes(front1) || squishies.includes(front2)) {
-            fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
+            // 가후 제외 (위에서 별도 처리됨)
+            if (front1 !== "가후" && front2 !== "가후") {
+                fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 맷집이 종잇장인 퓨어 딜러/서포터([${squishies.includes(front1)?front1:front2}])를 구행진 전열(앞줄)에 세웠습니다. 마초 평타에 1턴 만에 산화합니다.` });
+            }
         }
     }
 
@@ -818,7 +798,6 @@ window.autoFixDeck = oIdx => {
                 let score = 0;
                 const stats = internalTacticStatMap[cTac] || {};
 
-                // 👉 [수정됨] AI 교정 엔진 점수 연산 고도화 (각 역할군별 전법 스탯 가중치 세분화)
                 if (role === 'SC') { 
                     if (stats.strategyDmg) score += stats.strategyDmg * 15; 
                     if (stats.damageDealtInc) score += stats.damageDealtInc * 12;
@@ -843,10 +822,11 @@ window.autoFixDeck = oIdx => {
                     if (stats.strategyDmg) score -= 1000; 
                 }
 
-                // 👉 [수정됨] 무장별 고유 메커니즘 특화 시너지 가산점 (100% 강제가 아닌, 가장 적합한 무장에게 최고점 600점 부여)
-                if (cTac === "열화장천" && ["육손SP", "육손", "주유", "황개"].includes(o.name)) score += 600; // 화상 및 추격 시너지 극대화
-                if (cTac === "수상개화" && ["사마의", "장각", "장녕"].includes(o.name)) score += 400; // 액티브 발동 의존도 높은 마법 딜러
-                if (cTac === "반객위주" && ["사마의", "마초"].includes(o.name)) score += 400; // 턴 누적/확산 딜러
+                if (cTac === "열화장천" && ["육손SP", "육손", "주유", "황개"].includes(o.name)) score += 600; 
+                if (cTac === "포전인옥" && ["가후"].includes(o.name)) score += 600;
+                if (cTac === "수상개화" && ["사마의", "장각", "장녕"].includes(o.name)) score += 400; 
+                if (cTac === "요사여신" && ["사마의"].includes(o.name)) score += 400; 
+                if (cTac === "반객위주" && ["사마의", "마초"].includes(o.name)) score += 400; 
 
                 if (targetMetaTacs.includes(tac)) score += 1500;
                 if (score > highestScore) { highestScore = score; bestFallback = tac; }
