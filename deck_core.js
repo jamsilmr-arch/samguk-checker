@@ -1,5 +1,5 @@
-// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (랭커 타협 덱 배제 및 진(眞) 종결 덱 기반 AI 교정 고도화)
-console.log("[시스템 분석] deck_core.js 무결성 엔진 기동");
+// [시스템 분석] deck_core.js - 초경량 크로스 브릿지 엔진 (랭커 허세 전법 배제 및 사마의 실전 '후적/반객' 메타 AI 강제 락온)
+console.log("[시스템 분석] deck_core.js 실전성 100% 무결성 엔진 기동");
 
 var cStr = s => s?.toString().trim().replace(/\s+/g, '') || "";
 
@@ -15,11 +15,11 @@ var FB_OFFICERS = Object.keys(FB_OFF_META);
 
 var FB_TACTICS = "가정지전,간담상조,강유겸제,견불가최,견진연봉,격안관화,공기불비,과하탁교,교취호탈,극적제승,금낭묘계,금적금왕,금창신,금철교명,기문둔갑,낙정하석,동구적개,동장철벽,동촉기선,만부막적,만전제발,만천과해,명찰추호,문치무공,미우주무,반객위주,병량촌단,부동여산,불노자위,분성지계,비사주석,사면초가,사생취의,선등함진,수상개화,순수견양,승승장구,심구고루,심모원려,안영찰채,암전난방,양의화생,양초선행,여자동포,열화장천,요사여신,용맹무쌍,용왕직전,운주유악,원성재도,위위구조,유비무환,유좌유용,이간계,이아환아,이일대로,이퇴위진,일고작기,인세이도,전위위안,제곤부위,중정기고,지인선임,진퇴유도,진화타겁,질풍노도,천리추격,천시지리,체천행도,축세대발,태청단경,토적격문,포전인옥,현호제세,호령삼군,혼수모어,홍수첨향,화소적벽,후적박발,횡소천군,횡징폭렴,휴양생식".split(',');
 
-// 🚨 랭커들의 심구고루 등 '스탯 불일치 짬통 타협 전법'을 배제하고 메커니즘 기반 진(眞) 종결 덱으로 재구성
+// 🚨 사마의 종결덱 사마의 전법을 랭커 허세(수상/요사)에서 실전 확정깡딜(후적/반객)로 전면 롤백
 var ABSOLUTE_ENDGAME_DECKS = [
     { id: "meta_rank1_wududu", priority: 10010, name: "[전서버 1위] 노숙·정보·육손SP 방원 기병", concept: "[열화장천 연격 폭격]", formation: "방원진", unitType: "기병", officers: [ {name:"노숙", chosenTactics:["탑상책", "분성지계", "격안관화"]}, {name:"정보", chosenTactics:["칠척사모", "진퇴유도", "불노자위"]}, {name:"육손SP", chosenTactics:["화공이릉", "천리추격", "열화장천"]} ] },
-    // 👉 [수정됨] 조조에게 스탯 효율이 극악인 '심구고루'를 배제하고 통솔 비례 피감기인 '강유겸제'와 '간담상조'를 강제 할당
-    { id: "meta_sima_true_endgame", priority: 10009, name: "[진(眞) 절대 종결] 조조·사마의·가후 구행 방패", concept: "[랭커 타협 배제 완벽 시너지]", formation: "구행진", unitType: "방패병", officers: [ {name:"조조", chosenTactics:["효웅", "간담상조", "강유겸제"]}, {name:"사마의", chosenTactics:["응시낭고", "수상개화", "요사여신"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "포전인옥"]} ] },
+    // 👉 [수정됨] 사마의 전법 실전성 100% 롤백 (후적박발, 반객위주 고정)
+    { id: "meta_sima_true_endgame", priority: 10009, name: "[진(眞) 절대 종결] 조조·사마의·가후 구행 방패", concept: "[실전 압축 확정 깡딜]", formation: "구행진", unitType: "방패병", officers: [ {name:"조조", chosenTactics:["효웅", "심구고루", "강유겸제"]}, {name:"사마의", chosenTactics:["응시낭고", "후적박발", "반객위주"]}, {name:"가후", chosenTactics:["경달권변", "혼수모어", "포전인옥"]} ] },
     { id: "meta_rank6_macho", priority: 10008, name: "[절대 종결] 마초·위연·서서 안행 창병", concept: "[마초 안행진 확산 폭딜]", formation: "안행진", unitType: "창병", officers: [ {name:"마초", chosenTactics:["출수법", "용맹무쌍", "반객위주"]}, {name:"위연", chosenTactics:["실병제위", "진퇴유도", "불노자위"]}, {name:"서서", chosenTactics:["절절학문", "전위위안", "문치무공"]} ] },
     { id: "meta_rank7_beopjeong", priority: 10007, name: "[절대 종결] 유비(제왕)·법정·강유 추형 방패", concept: "[촉방패 완전체]", formation: "추형진", unitType: "방패병", officers: [ {name:"유비(제왕)", chosenTactics:["재주복주", "격안관화", "견진연봉"]}, {name:"법정", chosenTactics:["애자필보", "심구고루", "전위위안"]}, {name:"강유", chosenTactics:["담대여두", "천리추격", "체천행도"]} ] },
     { id: "meta_rank9_qun_bow", priority: 10006, name: "[절대 종결] 좌자·장녕·황보숭 구행 궁병", concept: "[회피 및 스탯 강탈]", formation: "구행진", unitType: "궁병", officers: [ {name:"좌자", chosenTactics:["화겁생기", "유비무환", "안영찰채"]}, {name:"장녕", chosenTactics:["천의난위", "양의화생", "명찰추호"]}, {name:"황보숭", chosenTactics:["강직불아", "진퇴유도", "간담상조"]} ] },
@@ -108,33 +108,33 @@ var internalBondRules = [
 var DYNAMIC_TACTIC_POOLS = {
     "PC": ["만부막적", "질풍노도", "용왕직전", "용맹무쌍", "일고작기", "병량촌단", "비사주석", "축세대발", "암전난방", "횡소천군"],
     "PCm": ["반객위주", "승승장구", "천리추격", "교취호탈", "출수법", "강동패주"],
-    "SC": ["수상개화", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "반객위주", "요사여신", "후적박발", "열화장천"], 
-    "TC": ["불노자위", "토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
+    "SC": ["후적박발", "반객위주", "사면초가", "심모원려", "양의화생", "낙정하석", "명찰추호", "화소적벽", "지변규려", "이간계", "동촉기선", "원성재도", "지인선임", "열화장천"], 
+    "TC": ["심구고루", "불노자위", "토적격문", "동구적개", "선등함진", "이아환아", "순수견양", "진화타겁", "견불가최", "이퇴위진", "부동여산"],
     "SH": ["불노자위", "포전인옥", "격안관화", "유비무환", "안영찰채", "동장철벽", "간담상조", "횡징폭렴", "휴양생식", "제곤부위", "미우주무", "홍수첨향", "여자동포", "중정기고", "현호제세"],
     "SS": ["불노자위", "포전인옥", "격안관화", "금창신", "애자필보", "태청단경", "심구고루", "기문둔갑", "만천과해", "수상개화", "이일대로", "천시지리", "진퇴유도", "유좌유용"]
 };
 
-// [수정됨] 조조 피감기 교정을 위해 심구고루 대체 풀 수정
 var tacticAlternativesMap = {
-    "간담상조":["강유겸제","불노자위","안영찰채"], 
-    "강유겸제":["간담상조","불노자위","안영찰채"],
+    "간담상조":["강유겸제","불노자위","안영찰채", "심구고루"], 
+    "강유겸제":["간담상조","불노자위","안영찰채", "심구고루"],
     "진퇴유도":["불노자위","간담상조","동구적개","유좌유용"],
-    "후적박발":["수상개화","요사여신","반객위주"],
+    "수상개화":["후적박발","반객위주"], // [수정됨] 허세 전법 대체제로 실전성 전법 유도
+    "요사여신":["후적박발","반객위주"], // [수정됨] 허세 전법 대체제로 실전성 전법 유도
     "열화장천":["천리추격","사면초가","심모원려"] 
 };
 
 var internalTacticStatMap = {
     "격안관화":{healGiven:8,damageTakenRed:8,comboRate:10}, "간담상조":{damageTakenRed:18,healGiven:6}, "진퇴유도":{damageTakenRed:4,damageDealtInc:4},
-    "안영찰채":{damageTakenRed:8,healGiven:4}, "후적박발":{strategyDmg:15,leech:5}, "수상개화":{activeRate:12,damageDealtInc:8},
+    "안영찰채":{damageTakenRed:8,healGiven:4}, "후적박발":{strategyDmg:25,leech:5}, "반객위주":{strategyDmg:20}, "수상개화":{activeRate:12,damageDealtInc:8},
     "포전인옥":{healGiven:15, activeRate:10, strategyDmg:10}, "불노자위":{damageTakenRed:20, healGiven:14, damageDealtInc:12},
     "열화장천":{strategyDmg:20, damageDealtInc:10, activeRate:5},
-    "요사여신":{strategyDmg:22}, "강유겸제":{damageTakenRed:25}
+    "요사여신":{strategyDmg:15}, "강유겸제":{damageTakenRed:25}, "심구고루":{damageTakenRed:25, healGiven:10}
 };
 
 var defaultHawkAttr = { attr1: { rank1: "[20Lv] 속도/모략 보정" }, attr2: { rank1: "[30Lv] 전투 속성 보정" }, attr3: { rank1: "[40Lv] 행동 시 디버프 해제" } };
 
 const rawHawkMeta = [
-    ["meta_rank1_wududu", "능소-진시", "전서버 1위 덱: 물리 피격 저항 및 육손SP 방원진 연격 폭격", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|연격률 +10%", "피격 시 50% 확률 저항|행동 시 디버프 1개 해제|저항 획득률 +6%"],
+    ["meta_rank1_wududu", "능소-진시", "전서버 1위 기병: 물리 피격 저항 및 연격 폭격", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|연격률 +10%", "피격 시 50% 확률 저항|행동 시 디버프 1개 해제|저항 획득률 +6%"],
     ["meta_sima_true_endgame", "능소-진시", "사마의 구행진 종결: 물리 피격 저항 및 1턴 폭사 방지", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "피격 시 50% 확률 저항|아군 전체에게 [축예] 부여 확정화|저항 획득률 +6%"],
     ["meta_rank6_macho", "열공-전광", "마초 안행진 확산 폭딜", "무용 +12%|속도 +20|전능 +6%", "연격률 +10%|확산 피해 +12%|무용 피해 가함 +10%", "추격(돌격) 전법 피해 +15%|첫 턴 선공 부여|피해 가한 후 병력 10% 흡혈"],
     ["meta_rank7_beopjeong", "결운-감로", "강유 예열을 위한 버퍼진 극강 생존", "모략 +12%|통솔 +10%|전능 +6%", "모략 피해 가함 +10%|피해 감소 +8%|치유 효과 부여 +10%", "행동 시 디버프 1개 해제|피격 시 50% 확률 저항 1중첩|피해 가한 후 병력 10% 흡혈"],
@@ -321,7 +321,7 @@ function evaluateDeckPerfection(deck, metaId, hMap, tMap) {
         }
     }
     if (hasOfficer && isPerfect) {
-        return `<div class="feedback-item success" style="border:1px solid var(--success-text);background:var(--success-bg);padding:8px;margin-top:10px;">✨ <strong>[최종 검증 완료: Perfect Synergy]</strong> 전서버 랭커 수준의 공방 밸런스를 달성했습니다.</div>`;
+        return `<div class="feedback-item success" style="border:1px solid var(--success-text);background:var(--success-bg);padding:8px;margin-top:10px;">✨ <strong>[최종 검증 완료: 실전 압축]</strong> 조건부 허세를 배제하고 어떤 악조건 속에서도 가장 완벽하게 작동하는 실전 공방 밸런스를 달성했습니다.</div>`;
     }
     return "";
 }
@@ -360,7 +360,7 @@ function getOwnedAlternativeTactic(missingTacName, allEquipTacs, tacticDataMap, 
     let results = [];
     const addResult = (t) => { if (!results.includes(t)) results.push(t); };
     
-    const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채", "심구고루"];
+    const excludeForDealers = ["가정지전", "동장철벽", "동구적개", "미우주무", "현호제세", "태청단경", "휴양생식", "제곤부위", "홍수첨향", "위위구조", "안영찰채"];
     const isInvalidForRole = (tStr) => {
         const cleanT = cStr(tStr);
         const isTacSC = DYNAMIC_TACTIC_POOLS["SC"].includes(cleanT);
@@ -452,7 +452,7 @@ function calculateStrictDeckScore(deck) {
     return Math.max(score, 0);
 }
 
-// 👉 [수정됨] 랭커 타협 전법 '심구고루'를 함정 세팅으로 분류하여 사마의 덱 피드백 고도화
+// 👉 [수정됨] 랭커 허세 전법('수상개화/요사여신') 배제 및 실전성('후적박발/반객위주') 피드백 교정 로직 전면 재작성
 function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTierUsedTacs = []) {
     const fb = { insight: "", logs: [] };
     const curNames = deck?.officers?.map(o => cStr(o?.name)).filter(Boolean) || [];
@@ -483,18 +483,30 @@ function generateStructuredFeedback(deck, heroDataMap, tacticDataMap, higherTier
     }
 
     if (curNames.includes("사마의") && curNames.includes("조조") && curNames.includes("가후")) {
+        const simaTacs = deck.officers.find(o => cStr(o.name) === "사마의")?.chosenTactics.map(cStr) || [];
+        
+        // 🚨 랭커의 허세 전법 채용 시 강력한 에러 반환
+        if (simaTacs.includes("수상개화") || simaTacs.includes("요사여신")) {
+            fb.logs.push({ type: 'error', text: `🚨 <strong>[랭커 세팅의 함정]</strong> 사마의에게 '수상개화'나 '요사여신'이 장착되었습니다. 이는 초고스펙 랭커 전용 곱연산(허세) 세팅입니다. 적의 회피나 스탯 강탈(장녕 등)에 취약하여 딜이 0에 수렴할 수 있으니 무조건 '후적박발/반객위주'로 교체하십시오.` });
+        }
+        
+        // ✨ 진정한 실전 확정깡딜 칭찬
+        if (simaTacs.includes("후적박발") && simaTacs.includes("반객위주")) {
+            fb.logs.push({ type: 'success', text: `✨ <strong>[실전 압축 딜링 완성]</strong> 어떠한 악조건(침묵/회피/스탯강탈) 속에서도 매 턴 확정 깡딜을 박아넣는 '후적박발 + 반객위주' 실전 최고점 세팅이 적용되었습니다.` });
+        }
+
         if (cForm === "구행진") {
             const caoCaoTacs = deck.officers.find(o => cStr(o.name) === "조조" || cStr(o.name) === "조조(제왕)")?.chosenTactics.map(cStr) || [];
             
             if (caoCaoTacs.includes("심구고루")) {
-                fb.logs.push({ type: 'error', text: `🚨 <strong>[랭커 덱의 함정]</strong> 조조에게 '심구고루'가 장착되었습니다. 심구고루는 '모략' 비례 스킬이므로 통솔(방어력) 1툴인 조조와는 역시너지가 납니다. 랭커가 남는 전법으로 타협한 것을 정답으로 오인하면 안 됩니다. 통솔 비례 피감기(간담상조/강유겸제/안영찰채)로 교체하십시오.` });
-            }
-
-            const hasMitigation = caoCaoTacs.includes("강유겸제") || caoCaoTacs.includes("간담상조") || caoCaoTacs.includes("안영찰채");
-            if (hasMitigation && !caoCaoTacs.includes("심구고루")) {
-                fb.logs.push({ type: 'success', text: `✨ <strong>[사마의 구행진 진(眞) 종결]</strong> 조조에게 0티어 통솔 비례 피감기를 주어 가후의 전열 객사 리스크를 지운 가장 완벽한 형태의 종결 덱입니다.` });
-            } else if (!hasMitigation && !caoCaoTacs.includes("심구고루")) {
-                fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 구행진 전열에 가후를 세웠지만, 조조에게 0티어 확정 피감기(강유겸제, 간담상조 등)가 없어 1턴 폭딜에 가후가 객사할 확률이 높습니다.` });
+                fb.logs.push({ type: 'success', text: `✨ <strong>[구행진의 완성: 확정 도발]</strong> 조조에게 '심구고루'가 장착되었습니다. 스탯 손해(모략 비례)를 감수하더라도, 1~2턴 확정 광역 도발을 통해 구행진 전열에 선 가후를 완벽하게 보호하는 0티어 생존 전략입니다.` });
+            } else {
+                const hasMitigation = caoCaoTacs.includes("강유겸제") || caoCaoTacs.includes("간담상조") || caoCaoTacs.includes("안영찰채");
+                if (hasMitigation) {
+                    fb.logs.push({ type: 'warning', text: `⚠️ <strong>[도발 부재 경고]</strong> 조조에게 피감기는 있으나 '도발(심구고루)'이 없습니다. 적의 무작위 공격이 전열의 가후에게 집중될 경우 1턴 객사의 위험이 존재합니다.` });
+                } else {
+                    fb.logs.push({ type: 'error', text: `🚨 <strong>[구행진 전열의 함정]</strong> 구행진 전열에 가후를 세웠지만, 조조에게 0티어 확정 피감기나 도발기가 없어 1턴 폭딜에 가후가 객사할 확률이 매우 높습니다.` });
+                }
             }
             
             const jiaXuTacs = deck.officers.find(o => cStr(o.name) === "가후")?.chosenTactics.map(cStr) || [];
@@ -724,7 +736,7 @@ function updateDeckState(oIdx, prop, val, offIdx=null, slotIdx=null) {
     localStorage.setItem('samguk_deck_text', JSON.stringify(dynamicPresetDecks)); renderDeckBuilder();
 }
 
-// 👉 [수정됨] 랭커 타협 덱 대신, 진(眞) 종결덱 강제 매칭을 위한 로직 최적화
+// 👉 [수정됨] 랭커 허세 전법 점수 보정을 없애고, 실전성 강제 락온을 위한 스코어링 고도화
 window.autoFixDeck = oIdx => {
     const targetDeck = dynamicPresetDecks.find(x => x.originIdx === oIdx);
     const saved = JSON.parse(localStorage.getItem('samguk_hobby_data') || '{}');
@@ -832,9 +844,10 @@ window.autoFixDeck = oIdx => {
 
                 if (cTac === "열화장천" && ["육손SP", "육손", "주유", "황개"].includes(o.name)) score += 600; 
                 if (cTac === "포전인옥" && ["가후"].includes(o.name)) score += 600; 
-                if (cTac === "수상개화" && ["사마의", "장각", "장녕"].includes(o.name)) score += 400; 
-                if (cTac === "요사여신" && ["사마의"].includes(o.name)) score += 400; 
-                if (cTac === "반객위주" && ["사마의", "마초"].includes(o.name)) score += 400; 
+                
+                // 👉 [수정됨] 사마의 전법 점수 수정 (허세 전법 배제, 실전 깡딜 극우대)
+                if (cTac === "후적박발" && ["사마의"].includes(o.name)) score += 800; 
+                if (cTac === "반객위주" && ["사마의", "마초"].includes(o.name)) score += 600; 
 
                 if (targetMetaTacs.includes(tac)) score += 1500;
                 if (score > highestScore) { highestScore = score; bestFallback = tac; }
